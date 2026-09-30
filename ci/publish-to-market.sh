@@ -75,6 +75,7 @@ fi
 MARKET_HOST=$(printf '%s' "${YUDREAM_MARKET_URL:-https://yudream.example.com}" | sed 's#[/[:space:]]*$##')
 PUBLISH_URL="$MARKET_HOST/api/platform/plugin-market-source/publications"
 published=0
+already_published=0
 
 while IFS= read -r jar_path; do
   [ -n "$jar_path" ] || continue
@@ -185,6 +186,7 @@ raise SystemExit(0 if payload.get("code") in (1000, "1000") and "版本已存在
 PY
     then
       echo "[publish-to-market] $plugin_code@$plugin_version already exists in market, skipping (bump plugin.yml version to publish changes)"
+      already_published=$((already_published + 1))
       continue
     fi
     echo "[publish-to-market] upload failed for $plugin_code@$plugin_version" >&2
@@ -218,5 +220,7 @@ PY
   published=$((published + 1))
 done < "$JAR_LIST"
 
-[ "$published" -gt 0 ] || fail "no plugin jars were published"
-echo "[publish-to-market] published $published plugin(s) to $MARKET_HOST"
+# 全部已存在（同版本重发 tag）是正常幂等情形：只有发布+已存在都为零
+# 才说明制品清单选择出了问题。
+[ "$published" -gt 0 ] || [ "$already_published" -gt 0 ] || fail "no plugin jars were published"
+echo "[publish-to-market] published $published plugin(s), $already_published already existed"
