@@ -38,7 +38,11 @@ public final class UpdateHttpSupport {
         for (Map.Entry<String, List<String>> entry : request.headers().entrySet()) {
             if (entry.getKey() != null && entry.getKey().equalsIgnoreCase(name)) {
                 List<String> values = entry.getValue();
-                return values == null || values.isEmpty() ? blankToNull(values.get(0)) : null;
+                // 三元条件曾被写反（values 非空时返回 null），X-YMCL-* 头
+                // 因此恒读不到、/manifest 恒按 release 渠道 204。
+                return values == null || values.isEmpty()
+                        ? null
+                        : blankToNull(values.get(0));
             }
         }
         return null;
