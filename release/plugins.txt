@@ -1,9 +1,1 @@
-yudream-plugin-edu-verify
-yudream-plugin-forum
-yudream-plugin-mc-news
-yudream-plugin-mcpanel
-yudream-plugin-project-progress
-yudream-plugin-questionbank
-yudream-plugin-shop
 yudream-plugin-wallet
-yudream-plugin-yudream-skin
