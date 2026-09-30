@@ -186,6 +186,11 @@ async function saveMapLink() {
           <FaSwitch v-model="model.bridgeForm[toggle.key]" />
         </label>
       </div>
+      <label class="grid gap-2">
+        <span class="text-sm font-medium">聊天合并窗口（秒）</span>
+        <FaInput v-model="model.bridgeForm.forwardMergeSeconds" type="number" :min="0" :max="60" placeholder="0-60，0=不合并" class="w-full" />
+        <span class="text-xs text-muted-foreground">窗口内多条游戏聊天合并为一条 QQ 消息发送（官方机器人频限友好），0=不合并。</span>
+      </label>
       <div>
         <FaButton type="button" :loading="model.bridgeSaving" @click="model.saveBridgeSettings"><FaIcon name="i-ri:save-3-line" />保存群服互联设置</FaButton>
       </div>
