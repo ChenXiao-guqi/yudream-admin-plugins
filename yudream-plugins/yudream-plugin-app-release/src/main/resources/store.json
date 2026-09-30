@@ -1,0 +1,11 @@
+{
+  "license": "MIT",
+  "category": "效率工具",
+  "tags": [
+    "app",
+    "release",
+    "update",
+    "ydam"
+  ],
+  "releaseNotes": "1.0.2：\n- 首次上架：YDAM 移动应用更新发布管理。\n- 新增：更新包上传、发布、下架与删除，匿名更新检查与 APK 下载直链。\n- 新增：强制更新线设置——低于该版本的客户端将被强制升级。\n- 新增：Web 发布管理页与 YDAM 移动端管理页（需 plugin:app-release:manage 权限）。"
+}
