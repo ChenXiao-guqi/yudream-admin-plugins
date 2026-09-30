@@ -155,7 +155,8 @@ else
 fi
 
 for entry in yudream-frontend/packages/plugin-*/src/index.ts; do
-  if [ -f "$entry" ] && ! grep -q 'virtual:uno\.css' "$entry"; then
+  # 纯类型 SDK 包没有 vite 构建（如 plugin-sdk-mobile），不存在 utilities 打包需求
+  if [ -f "$entry" ] && [ -f "${entry%/src/index.ts}/vite.config.ts" ] && ! grep -q 'virtual:uno\.css' "$entry"; then
     fail "plugin entry $entry must import virtual:uno.css so utilities are bundled"
   fi
 done
