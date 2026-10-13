@@ -3,14 +3,14 @@ import type { FileItem, FileUploadRequestOptions, TableColumn } from '@yudream/c
 import type { SkinTexture } from '../types'
 import type { SkinPluginModel } from '../composables/useSkinPlugin'
 import { computed, reactive, ref, watch } from 'vue'
-import { FaButton, FaCard, FaFileUpload, FaIcon, FaInput, FaModal, FaPageMain, FaPagination, FaResponsiveTable, FaSearchBar, FaSelect, FaSwitch, FaTag, useFaModal } from '@yudream/components'
+import { YdLabel, YdButton, YdCard, YdFileUpload, YdIcon, YdInput, YdModal, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdSelect, YdSwitch, YdTag, useYdModal } from '@yudream/components'
 import SkinTexturePreview from '../components/SkinTexturePreview.vue'
 
 const props = defineProps<{
   model: SkinPluginModel
 }>()
 
-const modal = useFaModal()
+const modal = useYdModal()
 const uploadVisible = ref(false)
 const editVisible = ref(false)
 const textureFiles = ref<FileItem[]>([])
@@ -199,8 +199,8 @@ function formatSize(size?: number) {
 </script>
 
 <template>
-  <FaPageMain><div class="skin-admin-table-page">
-    <FaResponsiveTable
+  <YdPageMain><div class="skin-admin-table-page">
+    <YdResponsiveTable
       row-key="hash"
       table-root-class="skin-admin-texture-table-root rounded-lg overflow-hidden"
       table-class="skin-admin-texture-table"
@@ -211,26 +211,26 @@ function formatSize(size?: number) {
       :data="pagedRows"
     >
       <template #toolbar>
-        <FaSearchBar class="w-full">
+        <YdSearchBar class="w-full">
           <div class="skin-admin-filter-grid">
-            <FaInput v-model="search.keyword" clearable placeholder="名称 / Hash / 上传人" class="skin-admin-filter-grid__keyword" @keydown.enter="pagination.page = 1" @clear="pagination.page = 1" />
-            <FaSelect v-model="search.type" :options="typeOptions" class="skin-admin-filter-grid__select" />
-            <FaSelect v-model="search.visibility" :options="visibilityOptions" class="skin-admin-filter-grid__select" />
+            <YdInput v-model="search.keyword" clearable placeholder="名称 / Hash / 上传人" class="skin-admin-filter-grid__keyword" @keydown.enter="pagination.page = 1" @clear="pagination.page = 1" />
+            <YdSelect v-model="search.type" :options="typeOptions" class="skin-admin-filter-grid__select" />
+            <YdSelect v-model="search.visibility" :options="visibilityOptions" class="skin-admin-filter-grid__select" />
             <div class="skin-admin-filter-grid__actions">
-              <FaButton @click="openUpload">
-                <FaIcon name="i-ri:upload-cloud-2-line" />
+              <YdButton @click="openUpload">
+                <YdIcon name="i-ri:upload-cloud-2-line" />
                 上传材质
-              </FaButton>
-              <FaButton variant="outline" @click="resetSearch">
+              </YdButton>
+              <YdButton variant="outline" @click="resetSearch">
                 重置
-              </FaButton>
-              <FaButton @click="pagination.page = 1">
-                <FaIcon name="i-ri:search-line" />
+              </YdButton>
+              <YdButton @click="pagination.page = 1">
+                <YdIcon name="i-ri:search-line" />
                 筛选
-              </FaButton>
+              </YdButton>
             </div>
           </div>
-        </FaSearchBar>
+        </YdSearchBar>
       </template>
       <template #cell-preview="{ row }">
         <div class="skin-admin-texture-preview" aria-hidden="true">
@@ -248,9 +248,9 @@ function formatSize(size?: number) {
         {{ textureKind(row.original) }}
       </template>
       <template #cell-publicAccess="{ row }">
-        <FaTag :variant="row.original.publicAccess ? 'default' : 'secondary'">
+        <YdTag :variant="row.original.publicAccess ? 'default' : 'secondary'">
           {{ row.original.publicAccess ? '公开' : '私有' }}
-        </FaTag>
+        </YdTag>
       </template>
       <template #cell-uploaderId="{ row }">
         {{ model.userName(row.original.uploaderId) }}
@@ -266,19 +266,19 @@ function formatSize(size?: number) {
       </template>
       <template #cell-operation="{ row }">
         <div class="flex-center gap-2">
-          <FaButton variant="outline" size="sm" :loading="model.saving === `admin-texture:${row.original.hash}`" @click="openEdit(row.original)">编辑</FaButton>
-          <FaButton variant="destructive" size="sm" :loading="model.saving === `admin-texture:${row.original.hash}`" @click="confirmDelete(row.original)">删除</FaButton>
+          <YdButton variant="outline" size="sm" :loading="model.saving === `admin-texture:${row.original.hash}`" @click="openEdit(row.original)">编辑</YdButton>
+          <YdButton variant="destructive" size="sm" :loading="model.saving === `admin-texture:${row.original.hash}`" @click="confirmDelete(row.original)">删除</YdButton>
         </div>
       </template>
       <template #card="{ row }">
-        <FaCard class="w-full">
+        <YdCard class="w-full">
           <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between gap-2">
               <span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span>
               <div class="flex gap-1">
-                <FaTag :variant="row.publicAccess ? 'default' : 'secondary'">
+                <YdTag :variant="row.publicAccess ? 'default' : 'secondary'">
                   {{ row.publicAccess ? '公开' : '私有' }}
-                </FaTag>
+                </YdTag>
               </div>
             </div>
             <div class="flex flex-col gap-1 text-sm">
@@ -300,15 +300,15 @@ function formatSize(size?: number) {
               </div>
             </div>
             <div class="flex flex-wrap gap-2 border-t pt-3">
-              <FaButton variant="outline" size="sm" :loading="model.saving === `admin-texture:${row.hash}`" @click="openEdit(row)">编辑</FaButton>
-              <FaButton variant="destructive" size="sm" :loading="model.saving === `admin-texture:${row.hash}`" @click="confirmDelete(row)">删除</FaButton>
+              <YdButton variant="outline" size="sm" :loading="model.saving === `admin-texture:${row.hash}`" @click="openEdit(row)">编辑</YdButton>
+              <YdButton variant="destructive" size="sm" :loading="model.saving === `admin-texture:${row.hash}`" @click="confirmDelete(row)">删除</YdButton>
             </div>
           </div>
-        </FaCard>
+        </YdCard>
       </template>
-    </FaResponsiveTable>
+    </YdResponsiveTable>
 
-    <FaPagination
+    <YdPagination
       v-model:page="pagination.page"
       v-model:size="pagination.size"
       :total="filteredRows.length"
@@ -317,7 +317,7 @@ function formatSize(size?: number) {
       @size-change="onSizeChange"
     />
 
-    <FaModal
+    <YdModal
       v-model="editVisible"
       title="编辑材质信息"
       description="名称和公开状态可修改；PNG 内容与类型保持不变，以避免破坏已绑定的角色和衣柜项。"
@@ -327,12 +327,12 @@ function formatSize(size?: number) {
       @confirm="saveEdit"
     >
       <div class="skin-admin-form">
-        <label><span>名称</span><FaInput v-model="editForm.name" /></label>
-        <label class="switch-row"><span>公开到皮肤库</span><FaSwitch v-model="editForm.publicAccess" /></label>
+        <YdLabel><span>名称</span><YdInput v-model="editForm.name" /></YdLabel>
+        <YdLabel class="switch-row"><span>公开到皮肤库</span><YdSwitch v-model="editForm.publicAccess" /></YdLabel>
       </div>
-    </FaModal>
+    </YdModal>
 
-    <FaModal
+    <YdModal
       v-model="uploadVisible"
       title="上传材质"
       description="上传 PNG 皮肤或披风，并设置全站可见性。"
@@ -342,28 +342,28 @@ function formatSize(size?: number) {
       @confirm="submitUpload"
     >
       <div class="skin-admin-form">
-        <label>
+        <YdLabel>
           <span>名称</span>
-          <FaInput v-model="model.textureForm.name" placeholder="例如：冬季外套 Steve" />
-        </label>
-        <label>
+          <YdInput v-model="model.textureForm.name" placeholder="例如：冬季外套 Steve" />
+        </YdLabel>
+        <YdLabel>
           <span>类型</span>
-          <FaSelect v-model="model.textureForm.type" :options="uploadTypeOptions" />
-        </label>
-        <label>
+          <YdSelect v-model="model.textureForm.type" :options="uploadTypeOptions" />
+        </YdLabel>
+        <YdLabel>
           <span>PNG 文件</span>
-          <FaFileUpload
+          <YdFileUpload
             v-model="textureFiles"
             :max="1"
             :http-request="selectTextureFile"
             description="拖放或点击选择 PNG 材质"
           />
-        </label>
-        <label class="switch-row">
+        </YdLabel>
+        <YdLabel class="switch-row">
           <span>公开到皮肤库</span>
-          <FaSwitch v-model="model.textureForm.publicAccess" />
-        </label>
+          <YdSwitch v-model="model.textureForm.publicAccess" />
+        </YdLabel>
       </div>
-    </FaModal>
-  </div></FaPageMain>
+    </YdModal>
+  </div></YdPageMain>
 </template>

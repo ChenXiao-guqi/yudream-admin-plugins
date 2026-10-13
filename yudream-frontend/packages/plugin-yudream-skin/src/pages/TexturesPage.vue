@@ -6,21 +6,21 @@
         <p>{{ isManagement ? '维护皮肤、披风材质与公开状态，上传后的材质可用于角色外观。' : '选择一个材质查看 3D 效果，保存到衣柜后即可给默认角色或当前角色换装。' }}</p>
       </div>
       <div class="skin-command-actions">
-        <FaButton v-if="model.canUse" @click="uploadVisible = true">
-          <FaIcon name="i-ri:upload-cloud-2-line" />
+        <YdButton v-if="model.canUse" @click="uploadVisible = true">
+          <YdIcon name="i-ri:upload-cloud-2-line" />
           上传材质
-        </FaButton>
+        </YdButton>
       </div>
     </div>
 
     <div class="skin-library-layout">
       <SkinPanel :title="isManagement ? '材质管理' : '材质'">
         <template #header>
-          <FaTag variant="secondary">{{ filteredTextures.length }}/{{ model.textures.length }}</FaTag>
+          <YdTag variant="secondary">{{ filteredTextures.length }}/{{ model.textures.length }}</YdTag>
         </template>
 
         <div class="skin-filter-bar">
-          <FaInput
+          <YdInput
             v-model="keyword"
             type="search"
             clearable
@@ -29,22 +29,24 @@
             placeholder="搜索名称、Hash 或上传人"
             @clear="keyword = ''"
           />
-          <FaSelect v-model="typeFilter" class="skin-filter-select" data-testid="skin-texture-type" :options="typeFilterOptions" />
-          <FaSelect v-model="ownerFilter" class="skin-filter-select" data-testid="skin-texture-source" :options="ownerFilterOptions" />
-          <FaSelect v-model="sortType" class="skin-filter-select" data-testid="skin-texture-sort" :options="sortOptions" />
-          <FaButton v-if="activeFilterCount" variant="outline" class="skin-filter-reset" @click="resetFilters">
-            <FaIcon name="i-ri:filter-off-line" />
+          <YdSelect v-model="typeFilter" class="skin-filter-select" data-testid="skin-texture-type" :options="typeFilterOptions" />
+          <YdSelect v-model="ownerFilter" class="skin-filter-select" data-testid="skin-texture-source" :options="ownerFilterOptions" />
+          <YdSelect v-model="sortType" class="skin-filter-select" data-testid="skin-texture-sort" :options="sortOptions" />
+          <YdButton v-if="activeFilterCount" variant="outline" class="skin-filter-reset" @click="resetFilters">
+            <YdIcon name="i-ri:filter-off-line" />
             清空
-          </FaButton>
+          </YdButton>
         </div>
 
         <div class="skin-card-grid">
-          <button
+          <YdButton
             v-for="texture in pagedTextures"
             :key="texture.hash"
             type="button"
-            class="skin-texture-card"
-            :class="{ active: model.selectedTextureHash === texture.hash }"
+            class="skin-texture-card h-auto whitespace-normal"
+            :variant="model.selectedTextureHash === texture.hash ? 'secondary' : 'ghost'"
+            :aria-pressed="model.selectedTextureHash === texture.hash"
+            :aria-label="`${texture.name}，${textureKind(texture)}`"
             @click="model.selectTexture(texture)"
           >
             <span class="skin-texture-card__image render">
@@ -56,22 +58,23 @@
             </span>
             <span class="skin-texture-card__body">
               <strong>{{ texture.name }}</strong>
+              <YdTag v-if="model.selectedTextureHash === texture.hash" variant="secondary" icon="morph:circle-check">已选中</YdTag>
               <small>{{ textureKind(texture) }} / {{ texture.publicAccess ? '公开' : '私有' }}</small>
               <span class="skin-texture-card__meta">
                 <span>
-                  <FaIcon name="i-ri:user-3-line" />
+                  <YdIcon name="i-ri:user-3-line" />
                   {{ model.userName(texture.uploaderId) }}
                 </span>
                 <span>
-                  <FaIcon name="i-ri:hashtag" />
+                  <YdIcon name="i-ri:hashtag" />
                   {{ shortHash(texture.hash) }}
                 </span>
               </span>
             </span>
-          </button>
+          </YdButton>
           <div v-if="!filteredTextures.length" class="empty-state">没有匹配的材质</div>
         </div>
-        <FaPagination
+        <YdPagination
           v-if="filteredTextures.length"
           v-model:page="texturePagination.page"
           v-model:size="texturePagination.size"
@@ -104,9 +107,9 @@
             </div>
             <div v-if="model.canUse" class="skin-detail-actions">
               <template v-if="isSelectedTextureOwner">
-                <FaTooltip text="编辑材质信息" side="top">
+                <YdTooltip text="编辑材质信息" side="top">
                   <span class="skin-action-tooltip">
-                    <FaButton
+                    <YdButton
                       variant="outline"
                       size="icon-sm"
                       class="skin-action-icon"
@@ -114,13 +117,13 @@
                       aria-label="编辑材质信息"
                       @click="openEdit"
                     >
-                      <FaIcon name="i-ri:edit-line" />
-                    </FaButton>
+                      <YdIcon name="i-ri:edit-line" />
+                    </YdButton>
                   </span>
-                </FaTooltip>
-                <FaTooltip text="删除我上传的材质" side="top">
+                </YdTooltip>
+                <YdTooltip text="删除我上传的材质" side="top">
                   <span class="skin-action-tooltip">
-                    <FaButton
+                    <YdButton
                       variant="destructive"
                       size="icon-sm"
                       class="skin-action-icon"
@@ -128,14 +131,14 @@
                       aria-label="删除我上传的材质"
                       @click="confirmDeleteOwn"
                     >
-                      <FaIcon name="i-ri:delete-bin-line" />
-                    </FaButton>
+                      <YdIcon name="i-ri:delete-bin-line" />
+                    </YdButton>
                   </span>
-                </FaTooltip>
+                </YdTooltip>
               </template>
-              <FaTooltip text="加入衣柜" side="top">
+              <YdTooltip text="加入衣柜" side="top">
                 <span class="skin-action-tooltip">
-                  <FaButton
+                  <YdButton
                     variant="outline"
                     size="icon-sm"
                     class="skin-action-icon"
@@ -144,13 +147,13 @@
                     aria-label="加入衣柜"
                     @click="model.selectedTexture && model.addTextureToCloset(model.selectedTexture)"
                   >
-                    <FaIcon name="i-ri:archive-drawer-line" />
-                  </FaButton>
+                    <YdIcon name="i-ri:archive-drawer-line" />
+                  </YdButton>
                 </span>
-              </FaTooltip>
-              <FaTooltip text="应用到当前角色" side="top">
+              </YdTooltip>
+              <YdTooltip text="应用到当前角色" side="top">
                 <span class="skin-action-tooltip">
-                  <FaButton
+                  <YdButton
                     size="icon-sm"
                     class="skin-action-icon"
                     :disabled="!model.selectedTexture || !model.selectedPlayer"
@@ -158,10 +161,10 @@
                     aria-label="应用到当前角色"
                     @click="model.useTextureOnSelectedPlayer()"
                   >
-                    <FaIcon name="i-ri:t-shirt-2-line" />
-                  </FaButton>
+                    <YdIcon name="i-ri:t-shirt-2-line" />
+                  </YdButton>
                 </span>
-              </FaTooltip>
+              </YdTooltip>
             </div>
           </div>
 
@@ -197,7 +200,7 @@
       </aside>
     </div>
 
-    <FaModal
+    <YdModal
       v-model="uploadVisible"
       title="上传材质"
       :description="isManagement ? '上传 PNG 皮肤或披风，并设置是否公开到皮肤库。' : '上传 PNG 皮肤或披风，普通用户会自动保存到自己的衣柜。'"
@@ -207,31 +210,31 @@
       @confirm="submitUpload"
     >
       <div class="skin-upload-form">
-        <label>
+        <YdLabel>
           <span>名称</span>
-          <FaInput v-model="model.textureForm.name" placeholder="例如：冬季外套 Steve" />
-        </label>
-        <label>
+          <YdInput v-model="model.textureForm.name" placeholder="例如：冬季外套 Steve" />
+        </YdLabel>
+        <YdLabel>
           <span>类型</span>
-          <FaSelect v-model="model.textureForm.type" :options="textureTypeOptions" />
-        </label>
-        <label>
+          <YdSelect v-model="model.textureForm.type" :options="textureTypeOptions" />
+        </YdLabel>
+        <YdLabel>
           <span>PNG 文件</span>
-          <FaFileUpload
+          <YdFileUpload
             v-model="textureFiles"
             :max="1"
             :http-request="selectTextureFile"
             description="拖放或点击选择 PNG 材质"
           />
-        </label>
-        <label class="switch-row">
+        </YdLabel>
+        <YdLabel class="switch-row">
           <span>公开到皮肤库</span>
-          <FaSwitch v-model="model.textureForm.publicAccess" :disabled="!model.settings.allowPublicUpload" />
-        </label>
+          <YdSwitch v-model="model.textureForm.publicAccess" :disabled="!model.settings.allowPublicUpload" />
+        </YdLabel>
       </div>
-    </FaModal>
+    </YdModal>
 
-    <FaModal
+    <YdModal
       v-model="editVisible"
       title="编辑我的材质"
       description="可修改名称和公开状态；PNG 内容与类型保持不变，以避免破坏已绑定的角色和衣柜项。"
@@ -241,10 +244,10 @@
       @confirm="saveEdit"
     >
       <div class="skin-upload-form">
-        <label><span>名称</span><FaInput v-model="editForm.name" /></label>
-        <label class="switch-row"><span>公开到皮肤库</span><FaSwitch v-model="editForm.publicAccess" :disabled="!model.settings.allowPublicUpload" /></label>
+        <YdLabel><span>名称</span><YdInput v-model="editForm.name" /></YdLabel>
+        <YdLabel class="switch-row"><span>公开到皮肤库</span><YdSwitch v-model="editForm.publicAccess" :disabled="!model.settings.allowPublicUpload" /></YdLabel>
       </div>
-    </FaModal>
+    </YdModal>
   </section>
 </template>
 
@@ -253,7 +256,7 @@ import type { FileItem, FileUploadRequestOptions } from '@yudream/components'
 import type { SkinPluginModel } from '../composables/useSkinPlugin'
 import type { SkinTexture } from '../types'
 import { computed, reactive, ref, watch } from 'vue'
-import { FaButton, FaFileUpload, FaIcon, FaInput, FaModal, FaPagination, FaSelect, FaSwitch, FaTag, FaTooltip, useFaModal } from '@yudream/components'
+import { YdLabel, YdButton, YdFileUpload, YdIcon, YdInput, YdModal, YdPagination, YdSelect, YdSwitch, YdTag, YdTooltip, useYdModal } from '@yudream/components'
 import SkinPanel from '../components/SkinPanel.vue'
 import SkinPreview from '../components/SkinPreview.vue'
 import SkinTexturePreview from '../components/SkinTexturePreview.vue'
@@ -267,7 +270,7 @@ const uploadVisible = ref(false)
 const editVisible = ref(false)
 const textureFiles = ref<FileItem[]>([])
 const editForm = reactive({ name: '', publicAccess: true })
-const modal = useFaModal()
+const modal = useYdModal()
 const isManagement = computed(() => props.mode === 'management')
 const keyword = ref('')
 const typeFilter = ref('all')

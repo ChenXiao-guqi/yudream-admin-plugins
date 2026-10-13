@@ -35,7 +35,7 @@ import java.util.concurrent.CompletionStage;
 @PluginSpec(
         code = YuDreamSkinPlugin.CODE,
         name = "yudream-skin",
-        version = "1.5.0",
+        version = "1.5.2",
         description = "基于 YuDream 插件运行时实现的 Minecraft 皮肤站，支持角色、材质、衣柜、CustomSkinAPI 与 Blessing Skin 数据迁移。"
 )
 @PluginPermissions({

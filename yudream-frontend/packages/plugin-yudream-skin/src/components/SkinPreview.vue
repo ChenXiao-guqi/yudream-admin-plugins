@@ -3,21 +3,21 @@
     <div v-if="title || controls" class="skin-preview__toolbar">
       <strong>{{ title }}</strong>
       <div v-if="controls" class="skin-preview__actions">
-        <FaButton size="icon-sm" :variant="rotateEnabled ? 'default' : 'outline'" title="旋转" @click="rotateEnabled = !rotateEnabled">
-          <span class="i-ri:anticlockwise-2-line" />
-        </FaButton>
-        <FaButton size="sm" variant="outline" title="切换动作" @click="nextAnimation">
+        <YdButton size="icon-sm" :variant="rotateEnabled ? 'secondary' : 'outline'" aria-label="旋转" :aria-pressed="rotateEnabled" @click="rotateEnabled = !rotateEnabled">
+          <YdIcon name="i-ri:anticlockwise-2-line" />
+        </YdButton>
+        <YdButton size="sm" variant="outline" @click="nextAnimation">
           {{ animationLabel }}
-        </FaButton>
-        <FaButton
+        </YdButton>
+        <YdButton
           v-for="item in backgrounds"
           :key="item.label"
           size="icon-sm"
-          variant="outline"
-          :class="{ 'ring-2 ring-primary': backgroundValue === item.value }"
+          :variant="backgroundLabel === item.label ? 'secondary' : 'outline'"
           :style="{ backgroundColor: item.color }"
-          :title="item.label"
-          @click="backgroundValue = item.value"
+          :aria-label="item.label"
+          :aria-pressed="backgroundLabel === item.label"
+          @click="backgroundLabel = item.label; backgroundValue = item.value"
         />
       </div>
     </div>
@@ -43,7 +43,7 @@
       />
     </div>
     <div v-else class="skin-preview__empty">
-      <span class="i-ri:t-shirt-2-line" />
+      <YdIcon name="i-ri:t-shirt-2-line" class="skin-preview__empty-icon" />
       <strong>还没有外观</strong>
       <small>选择皮肤后会在这里预览</small>
     </div>
@@ -56,7 +56,7 @@
 <script setup lang="ts">
 import type { SkinViewer } from 'skinview3d'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { FaButton } from '@yudream/components'
+import { YdButton, YdIcon } from '@yudream/components'
 import { SkinView3d, type CapeOptions, type SkinOptions } from 'vue-skinview3d'
 import { IdleAnimation, RunningAnimation, WalkingAnimation } from 'vue-skinview3d/animations'
 
@@ -97,10 +97,11 @@ interface RgbColor {
 const fallbackBackgrounds: PreviewBackground[] = [
   { label: '表面', color: '#f7f7f8', value: 0xf7f7f8 },
   { label: '柔和', color: '#fbfbfc', value: 0xfbfbfc },
-  { label: '主题', color: '#ececef', value: 0xececef },
+  { label: '柔暗', color: '#ececef', value: 0xececef },
 ]
 const backgrounds = ref<PreviewBackground[]>(fallbackBackgrounds)
 const backgroundValue = ref(fallbackBackgrounds[0].value)
+const backgroundLabel = ref(fallbackBackgrounds[0].label)
 const rotateEnabled = ref(props.autoRotate)
 const animationIndex = ref(0)
 const viewerRef = ref<InstanceType<typeof SkinView3d> | null>(null)
@@ -166,6 +167,9 @@ watch([viewRotation, rotateEnabled, backgroundValue, () => props.skin, () => pro
 watch(() => props.autoRotate, (value) => {
   rotateEnabled.value = value
 })
+
+// 明确切换视角时暂停自动旋转，保证按钮所选视角可见。
+watch(() => props.view, () => { rotateEnabled.value = false })
 
 async function applyView() {
   await nextTick()
@@ -252,14 +256,14 @@ function syncThemeBackgrounds() {
   const styles = getComputedStyle(document.body)
   const surface = readThemeColor(styles, '--color-bg-1', { r: 247, g: 247, b: 248 })
   const panel = readThemeColor(styles, '--color-bg-2', surface)
-  const primary = readThemeColor(styles, '--primary-6', { r: 22, g: 93, b: 255 })
-  const currentIndex = backgrounds.value.findIndex(item => item.value === backgroundValue.value)
+  const fill = readThemeColor(styles, '--color-fill-2', panel)
+  const currentIndex = backgrounds.value.findIndex(item => item.label === backgroundLabel.value)
   const brightenRatio = colorLuminance(surface) < 96 ? 0.1 : 0.72
   const base = props.compact ? panel : mixColor(surface, { r: 255, g: 255, b: 255 }, brightenRatio)
   const nextBackgrounds = [
     toPreviewBackground('表面', base),
     toPreviewBackground('柔和', mixColor(base, panel, 0.35)),
-    toPreviewBackground('主题', mixColor(base, primary, 0.04)),
+    toPreviewBackground('柔暗', mixColor(base, fill, 0.6)),
   ]
   backgrounds.value = nextBackgrounds
   if (currentIndex >= 0) {

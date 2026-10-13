@@ -1,14 +1,15 @@
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { useFaToast } from '@yudream/components'
+import { useYdToast } from '@yudream/components'
 import { computed, reactive, ref } from 'vue'
 import { createSkinApi } from '../api/skin-api'
 import type { MigrationLogEntry, MigrationReport, MigrationStatus, SkinClosetItem, SkinMe, SkinPlayer, SkinSettings, SkinSummary, SkinTexture, SkinUser } from '../types'
 
 export function useSkinPlugin(sdk: YuDreamPluginSdk) {
   const api = createSkinApi(sdk)
-  const toast = useFaToast()
+  const toast = useYdToast()
   const loading = ref(false)
   const saving = ref('')
+  const refreshError = ref('')
 
   const me = ref<SkinMe | null>(null)
   const summary = ref<SkinSummary>({ users: 0, players: 0, textures: 0, closetItems: 0, options: 0 })
@@ -166,6 +167,7 @@ export function useSkinPlugin(sdk: YuDreamPluginSdk) {
       if (currentLoadVersion !== loadVersion || scope.value !== nextScope) {
         return
       }
+      refreshError.value = ''
       me.value = current
       summary.value = status
       users.value = userList
@@ -394,6 +396,20 @@ export function useSkinPlugin(sdk: YuDreamPluginSdk) {
     }
   }
 
+  // 服务端变更已完成时，刷新失败不能触发重复写入或删除。
+  async function refreshAfterMutation() {
+    refreshError.value = ''
+    try { await load() }
+    catch (error) {
+      refreshError.value = `操作已保存，但数据刷新失败：${error instanceof Error ? error.message : '请重新加载。'}`
+    }
+  }
+
+  async function retryRefresh() {
+    if (loading.value || saving.value) return
+    await refreshAfterMutation()
+  }
+
   async function setDefaultPlayer(player = selectedPlayer.value) {
     if (!player) {
       toast.error('请先选择角色')
@@ -407,7 +423,7 @@ export function useSkinPlugin(sdk: YuDreamPluginSdk) {
       }
       selectPlayer(saved)
       toast.success('默认角色已切换')
-      await load()
+      await refreshAfterMutation()
     }
     finally {
       saving.value = ''
@@ -573,14 +589,14 @@ export function useSkinPlugin(sdk: YuDreamPluginSdk) {
           itemName: texture.name,
         })
       }
-      if (targetScope === 'admin') {
-        await api.assignAdminTextures(player.name, outfit)
-      }
-      else {
-        await api.assignTextures(player.name, outfit)
+      const saved = targetScope === 'admin'
+        ? await api.assignAdminTextures(player.name, outfit)
+        : await api.assignTextures(player.name, outfit)
+      if (scope.value === targetScope) {
+        players.value = players.value.map(item => item.uuid === player.uuid ? saved : item)
       }
       toast.success(collect ? '已保存到衣柜并应用到当前角色' : `外观已应用到 ${player.name}`)
-      await load()
+      await refreshAfterMutation()
     }
     finally {
       saving.value = ''
@@ -614,9 +630,10 @@ export function useSkinPlugin(sdk: YuDreamPluginSdk) {
       const saved = scope.value === 'admin'
         ? await api.renameAdminClosetItem(item.id, { ...closetRenameForm })
         : await api.renameClosetItem(item.id, { ...closetRenameForm })
-      toast.success('衣柜显示名称已更新')
-      await load()
+      closetItems.value = closetItems.value.map(current => current.id === item.id ? saved : current)
       selectClosetItem(saved)
+      toast.success('衣柜显示名称已更新')
+      await refreshAfterMutation()
     }
     finally {
       saving.value = ''
@@ -635,8 +652,10 @@ export function useSkinPlugin(sdk: YuDreamPluginSdk) {
       if (selectedClosetId.value === item.id) {
         selectedClosetId.value = ''
       }
+      closetItems.value = closetItems.value.filter(current => current.id !== item.id)
+      if (!selectedClosetId.value && closetItems.value[0]) selectClosetItem(closetItems.value[0])
       toast.success('衣柜项已删除')
-      await load()
+      await refreshAfterMutation()
     }
     finally {
       saving.value = ''
@@ -867,6 +886,8 @@ export function useSkinPlugin(sdk: YuDreamPluginSdk) {
   return reactive({
     loading,
     saving,
+    refreshError,
+    retryRefresh,
     me,
     summary,
     settings,

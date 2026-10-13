@@ -34,6 +34,7 @@ import online.yudream.base.plugin.spi.http.PluginSseStream;
 import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 
 public class YuDreamSkinAppService implements PluginSkinService {
@@ -150,10 +151,10 @@ public class YuDreamSkinAppService implements PluginSkinService {
         }
         String skinHash = blankToNull(cmd.skinHash());
         String capeHash = blankToNull(cmd.capeHash());
-        if (skinHash != null) {
+        if (skinHash != null && !Objects.equals(skinHash, player.skinHash())) {
             requireOwnTexture(userId, skinHash, "skin");
         }
-        if (capeHash != null) {
+        if (capeHash != null && !Objects.equals(capeHash, player.capeHash())) {
             requireOwnTexture(userId, capeHash, "cape");
         }
         return repository.savePlayer(player.withTextures(skinHash, capeHash));

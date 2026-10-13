@@ -2,7 +2,7 @@
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { SkinMe, SkinPlayer, SkinTexture } from '../types'
 import { computed, onMounted, ref } from 'vue'
-import { FaButton, FaIcon } from '@yudream/components'
+import { YdAlert, YdButton, YdIcon } from '@yudream/components'
 import { createSkinApi } from '../api/skin-api'
 
 interface DashboardCardLike {
@@ -73,12 +73,16 @@ function openCard() {
 <template>
   <div class="dashboard-card__content skin-dashboard-card skin-player-card">
     <div v-if="loading" class="skin-dashboard-card__state">
-      <FaIcon name="i-ri:loader-4-line" class="animate-spin" />
+      <YdIcon name="i-ri:loader-4-line" class="animate-spin" />
       正在读取角色
     </div>
-    <div v-else-if="error" class="skin-dashboard-card__state error">
-      <FaIcon name="i-ri:error-warning-line" />
-      {{ error }}
+    <div v-else-if="error" class="skin-dashboard-card__state col-span-full">
+      <YdAlert variant="destructive" icon="i-ri:error-warning-line" title="角色数据加载失败" class="w-full min-w-0">
+        <template #description>
+          <p>{{ error }}</p>
+          <YdButton variant="outline" size="sm" class="mt-2" :loading="loading" @click="load">重试</YdButton>
+        </template>
+      </YdAlert>
     </div>
     <template v-else>
       <div class="skin-player-card__hero">
@@ -87,16 +91,16 @@ function openCard() {
           <h3 :title="defaultPlayer?.name">{{ defaultPlayer?.name || '还没有角色' }}</h3>
           <p>{{ defaultPlayer ? `默认角色 · 共 ${players.length} 个角色` : '创建角色，开始定制你的外观' }}</p>
         </div>
-        <FaButton v-if="card?.actionPath" size="icon-sm" variant="ghost" aria-label="管理角色" title="管理角色" @click="openCard"><FaIcon name="i-ri:arrow-right-up-line" /></FaButton>
+        <YdButton v-if="card?.actionPath" size="icon-sm" variant="ghost" aria-label="管理角色" title="管理角色" @click="openCard"><YdIcon name="i-ri:arrow-right-up-line" /></YdButton>
       </div>
 
       <div class="skin-player-card__stats">
         <div>
-          <FaIcon name="i-ri:t-shirt-2-line" /><span>皮肤</span>
+          <YdIcon name="i-ri:t-shirt-2-line" /><span>皮肤</span>
           <strong :title="skin?.name || shortHash(defaultPlayer?.skinHash)">{{ skin?.name || shortHash(defaultPlayer?.skinHash) }}</strong>
         </div>
         <div>
-          <FaIcon name="i-ri:flag-2-line" /><span>披风</span>
+          <YdIcon name="i-ri:flag-2-line" /><span>披风</span>
           <strong :title="cape?.name || shortHash(defaultPlayer?.capeHash)">{{ cape?.name || shortHash(defaultPlayer?.capeHash) }}</strong>
         </div>
       </div>
@@ -123,10 +127,6 @@ function openCard() {
   min-height: 0;
   color: var(--color-text-3);
   font-size: 13px;
-}
-
-.skin-dashboard-card__state.error {
-  color: rgb(var(--danger-6));
 }
 
 .skin-player-card__hero {

@@ -1,471 +1,603 @@
 <script setup lang="ts">
 import type { SkinPluginModel } from '../composables/useSkinPlugin'
-import type { SkinClosetItem } from '../types'
-import { computed, ref, watch } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { FaButton, FaIcon, FaInput, FaModal, FaPagination, FaSelect, FaTag, useFaModal } from '@yudream/components'
-import SkinPanel from './SkinPanel.vue'
+import { YdLabel,
+  YdAlert, YdButton, YdCard, YdEmpty, YdIcon, YdInput, YdLoading,
+  YdModal, YdPagination, YdSelect, YdSpotlightCard, YdTabs, YdTag,
+} from '@yudream/components'
+import { useClosetWorkbench } from '../composables/useClosetWorkbench'
 import SkinPreview from './SkinPreview.vue'
 import SkinTexturePreview from './SkinTexturePreview.vue'
 
 const props = defineProps<{ model: SkinPluginModel }>()
 const router = useRouter()
-const modal = useFaModal()
-const keyword = ref('')
-const typeFilter = ref('all')
-const page = ref(1)
-const size = ref(12)
-const pageSizes = [12, 24, 48, 96]
-const typeOptions = [
-  { label: '全部外观', value: 'all' },
-  { label: '皮肤', value: 'skin' },
-  { label: '披风', value: 'cape' },
-]
-const actionPending = ref(false)
-const actionError = ref('')
-const removeConfirmOpen = ref(false)
-const renameVisible = ref(false)
-const renameItemId = ref('')
-const renameName = ref('')
-const renameError = ref('')
-const renamePending = ref(false)
-
-const texturesByHash = computed(() => new Map(props.model.textures.map(texture => [texture.hash, texture])))
-const filteredItems = computed(() => {
-  const search = keyword.value.trim().toLocaleLowerCase()
-  return props.model.closetItems.filter((item) => {
-    const texture = texturesByHash.value.get(item.textureHash)
-    if (typeFilter.value === 'cape' && texture?.type !== 'cape') return false
-    if (typeFilter.value === 'skin' && (!texture || texture.type === 'cape')) return false
-    return !search || [item.itemName, texture?.name, item.textureHash]
-      .some(value => value?.toLocaleLowerCase().includes(search))
-  })
-})
-const totalPages = computed(() => Math.max(1, Math.ceil(filteredItems.value.length / size.value)))
-const pagedItems = computed(() => filteredItems.value.slice((page.value - 1) * size.value, page.value * size.value))
-const busy = computed(() => props.model.loading || Boolean(props.model.saving) || actionPending.value || renamePending.value)
-const interactionLocked = computed(() => busy.value || renameVisible.value || removeConfirmOpen.value)
-const playerOptions = computed(() => props.model.players.map(player => ({
-  label: `${player.name}${player.name === props.model.defaultPlayerName ? '（默认角色）' : ''}`,
-  value: player.name,
-})))
-const playerName = computed({
-  get: () => props.model.selectedPlayerName,
-  set: (name: string) => {
-    const player = props.model.players.find(player => player.name === name)
-    if (player && !interactionLocked.value) props.model.selectPlayer(player)
-  },
-})
-const selectedTitle = computed(() => props.model.selectedClosetItem ? itemName(props.model.selectedClosetItem) : '选择一件外观')
-const selectedTexture = computed(() => props.model.selectedClosetTexture)
-const previewSkin = computed(() => selectedTexture.value && selectedTexture.value.type !== 'cape'
-  ? props.model.selectedClosetSkin
-  : props.model.selectedPlayerSkin)
-const previewCape = computed(() => selectedTexture.value?.type === 'cape'
-  ? props.model.selectedClosetCape
-  : props.model.selectedPlayerCape)
-const previewSlim = computed(() => selectedTexture.value && selectedTexture.value.type !== 'cape'
-  ? props.model.selectedClosetSlim
-  : props.model.selectedPlayerSlim)
-const selectedEquipped = computed(() => Boolean(props.model.selectedClosetItem && props.model.selectedPlayer && selectedTexture.value
-  && (selectedTexture.value.type === 'cape' ? props.model.selectedPlayer.capeHash : props.model.selectedPlayer.skinHash) === props.model.selectedClosetItem.textureHash))
-const canApply = computed(() => Boolean(props.model.selectedClosetItem && selectedTexture.value && props.model.selectedPlayer && !selectedEquipped.value))
-const useLoading = computed(() => actionPending.value && Boolean(props.model.saving.startsWith('use-texture:')))
-const removeLoading = computed(() => actionPending.value && Boolean(props.model.saving.startsWith('closet:')))
-
-watch([keyword, typeFilter, size], () => { page.value = 1 })
-watch(totalPages, (lastPage) => { page.value = Math.min(page.value, lastPage) })
-watch([() => props.model.selectedClosetId, () => props.model.selectedPlayerName], () => { actionError.value = '' })
-watch(renameVisible, (visible) => {
-  if (!visible) {
-    renameItemId.value = ''
-    renameName.value = ''
-    renameError.value = ''
-    props.model.closetRenameForm.itemName = props.model.selectedClosetItem ? itemName(props.model.selectedClosetItem) : ''
-  }
-})
-
-function itemName(item: SkinClosetItem) {
-  return item.itemName || props.model.textureName(item.textureHash)
-}
-
-function itemKind(item: SkinClosetItem) {
-  const texture = texturesByHash.value.get(item.textureHash)
-  if (!texture) return '材质信息暂不可用'
-  return texture.type === 'cape' ? '披风' : texture.model === 'slim' ? 'Alex 皮肤' : 'Steve 皮肤'
-}
-
-function isEquipped(item: SkinClosetItem) {
-  const player = props.model.selectedPlayer
-  const texture = texturesByHash.value.get(item.textureHash)
-  return Boolean(player && texture && (texture.type === 'cape' ? player.capeHash : player.skinHash) === item.textureHash)
-}
-
-function selectItem(item: SkinClosetItem) {
-  if (!interactionLocked.value) props.model.selectClosetItem(item)
-}
-
-function resetFilters() {
-  keyword.value = ''
-  typeFilter.value = 'all'
-  page.value = 1
-}
-
-function errorText(error: unknown, fallback: string) {
-  return error instanceof Error && error.message ? error.message : fallback
-}
-
-async function applyToPlayer() {
-  if (interactionLocked.value || !canApply.value) return
-  actionPending.value = true
-  actionError.value = ''
-  try {
-    await props.model.useClosetItemOnSelectedPlayer()
-  }
-  catch (error) {
-    actionError.value = errorText(error, '应用失败，请稍后重试。')
-  }
-  finally {
-    actionPending.value = false
-  }
-}
-
-function openRename() {
-  const item = props.model.selectedClosetItem
-  if (!item || interactionLocked.value) return
-  renameItemId.value = item.id
-  renameName.value = itemName(item)
-  renameError.value = ''
-  renameVisible.value = true
-}
-
-async function beforeRenameClose(action: 'confirm' | 'cancel' | 'close', done: () => void) {
-  if (renamePending.value) return
-  if (action !== 'confirm') {
-    done()
-    return
-  }
-  const item = props.model.closetItems.find(item => item.id === renameItemId.value)
-  const name = renameName.value.trim()
-  if (!item) {
-    renameError.value = '这件外观已不在衣柜中，请关闭后重新选择。'
-    return
-  }
-  if (!name) {
-    renameError.value = '请填写显示名称。'
-    return
-  }
-  if (busy.value) return
-  renamePending.value = true
-  renameError.value = ''
-  props.model.closetRenameForm.itemName = name
-  try {
-    await props.model.renameClosetItem(item)
-    done()
-  }
-  catch (error) {
-    renameError.value = errorText(error, '重命名失败，请稍后重试。')
-  }
-  finally {
-    renamePending.value = false
-  }
-}
-
-function confirmRemove() {
-  const item = props.model.selectedClosetItem
-  if (!item || interactionLocked.value) return
-  removeConfirmOpen.value = true
-  actionError.value = ''
-  const content = `确认将“${itemName(item)}”移出衣柜吗？这只会移除收藏，不会删除原始材质或更改角色已装备的外观。`
-  const confirmation = modal.confirm({
-    title: '移出衣柜',
-    content,
-    confirmButtonText: '移出衣柜',
-    closeOnPressEscape: false,
-    beforeClose: async (action, done) => {
-      if (busy.value) return
-      if (action !== 'confirm') {
-        removeConfirmOpen.value = false
-        done()
-        return
-      }
-      actionPending.value = true
-      try {
-        await props.model.deleteClosetItem(item)
-        removeConfirmOpen.value = false
-        done()
-      }
-      catch (error) {
-        actionError.value = errorText(error, '移出失败，请稍后重试。')
-        confirmation.update({ content: `${content}\n${actionError.value}` })
-      }
-      finally {
-        actionPending.value = false
-      }
-    },
-  })
-}
+const previewBack = ref(false)
+const {
+  keyword, typeFilter, page, size, pageSizes, typeOptions, actionError,
+  renameVisible, renameName, renameError, renamePending, texturesByHash,
+  filteredItems, pagedItems, busy, interactionLocked, playerOptions, playerName,
+  selectedTitle, selectedTexture, previewSkin, previewCape, previewSlim,
+  selectedEquipped, canApply, useLoading, removeLoading, isDefaultPlayer,
+  itemName, itemKind, isEquipped, selectItem, resetFilters, applyToPlayer,
+  openRename, beforeRenameClose, confirmRemove, setDefaultPlayer,
+} = useClosetWorkbench(props.model)
 </script>
 
 <template>
-  <section class="skin-library-layout skin-closet-workbench" aria-label="我的衣柜与换装">
-    <SkinPanel title="我的衣柜">
+  <section class="studio-workspace" aria-label="衣柜与换装工作区">
+    <YdCard class="studio-library gap-0 py-0" v-bind="{ headerClass: 'studio-library__header', contentClass: 'studio-library__content' }">
       <template #header>
-        <div class="skin-closet-workbench__header-actions">
-          <FaTag variant="secondary">{{ model.closetItems.length }} 件</FaTag>
-          <FaButton size="sm" variant="outline" @click="router.push('/platform/plugins/yudream-skin/textures')">
-            <FaIcon name="i-ri:add-line" />
-            去皮肤库收藏
-          </FaButton>
+        <div class="studio-heading">
+          <div class="studio-title-line">
+            <YdIcon name="morph:archive" class="studio-section-icon" />
+            <h2>我的衣柜</h2>
+            <YdTag variant="secondary">{{ model.closetItems.length }} 件收藏</YdTag>
+          </div>
+          <p>把喜欢的外观留在这里，点选整张卡片即可试穿。</p>
         </div>
       </template>
-
-      <p class="skin-help-text">点击整张卡片试穿，在右侧选择目标角色并确认应用。</p>
-      <div class="skin-filter-bar">
-        <FaInput v-model="keyword" clearable class="skin-filter-keyword" placeholder="搜索衣柜名称、材质名称" aria-label="搜索衣柜" :disabled="model.loading">
-          <template #start><FaIcon name="i-ri:search-line" /></template>
-        </FaInput>
-        <FaSelect v-model="typeFilter" class="skin-filter-select" :options="typeOptions" aria-label="外观类型" :disabled="model.loading" />
-        <FaButton variant="outline" class="skin-filter-reset" :disabled="model.loading" @click="resetFilters">重置</FaButton>
+      <div class="studio-toolbar">
+        <YdTabs v-model="typeFilter" :list="typeOptions" class="studio-type-tabs" content-class="hidden" />
+        <YdInput v-model="keyword" class="studio-search" clearable type="search" placeholder="搜索收藏名称…" aria-label="搜索衣柜" :disabled="model.loading">
+          <template #start><YdIcon name="morph:search" /></template>
+        </YdInput>
       </div>
-
-      <div v-if="model.loading && !model.closetItems.length" class="empty-state" role="status">正在加载衣柜…</div>
-      <div v-else-if="!model.closetItems.length" class="empty-state skin-closet-workbench__empty">
-        <FaIcon name="i-ri:archive-line" />
-        <strong>衣柜还是空的</strong>
-        <span>先去皮肤库收藏皮肤或披风，再回到这里为角色换装。</span>
-        <FaButton @click="router.push('/platform/plugins/yudream-skin/textures')">浏览皮肤库</FaButton>
-      </div>
-      <div v-else-if="!filteredItems.length" class="empty-state skin-closet-workbench__empty">
-        <strong>没有找到匹配的外观</strong>
-        <span>可以换一个关键词，或重置类型筛选。</span>
-        <FaButton variant="outline" @click="resetFilters">重置筛选</FaButton>
-      </div>
-      <div v-else class="skin-card-grid closet" :aria-busy="model.loading">
-        <button
-          v-for="item in pagedItems"
-          :key="item.id"
-          type="button"
-          class="skin-texture-card skin-closet-workbench__card"
-          :class="{ active: model.selectedClosetId === item.id }"
+      <YdLoading v-if="model.loading && !model.closetItems.length" text="正在加载衣柜…" class="studio-empty" />
+      <div v-else-if="pagedItems.length" class="studio-item-grid" aria-label="收藏的外观" :aria-busy="model.loading">
+        <YdButton
+          v-for="item in pagedItems" :key="item.id"
+          :variant="model.selectedClosetId === item.id ? 'secondary' : 'ghost'"
+          class="studio-item h-auto w-full whitespace-normal"
           :aria-pressed="model.selectedClosetId === item.id"
-          :aria-label="`${itemName(item)}，${itemKind(item)}${isEquipped(item) ? '，当前角色已装备' : ''}`"
-          :disabled="interactionLocked"
-          @click="selectItem(item)"
+          :aria-label="`${itemName(item)}，${itemKind(item)}${isEquipped(item) ? '，已装备' : ''}`"
+          :disabled="interactionLocked" @click="selectItem(item)"
         >
-          <span v-if="model.selectedClosetId === item.id" class="skin-closet-workbench__selected">
-            <FaTag variant="secondary"><FaIcon name="i-ri:checkbox-circle-fill" />已选中</FaTag>
+          <span class="studio-item__image">
+            <SkinTexturePreview :texture-url="model.textureUrl(item.textureHash)" :type="texturesByHash.get(item.textureHash)?.type" :model="texturesByHash.get(item.textureHash)?.model" />
+            <YdTag v-if="model.selectedClosetId === item.id" class="studio-item__selected" variant="secondary" icon="morph:circle-check">已选中</YdTag>
+            <YdTag v-if="isEquipped(item)" class="studio-item__equipped" variant="secondary" icon="morph:check">已装备</YdTag>
           </span>
-          <span class="skin-texture-card__image render">
-            <SkinTexturePreview
-              :texture-url="model.textureUrl(item.textureHash)"
-              :type="texturesByHash.get(item.textureHash)?.type"
-              :model="texturesByHash.get(item.textureHash)?.model"
-            />
-          </span>
-          <span class="skin-texture-card__body">
-            <strong :title="itemName(item)">{{ itemName(item) }}</strong>
-            <small :title="model.textureName(item.textureHash)">{{ model.textureName(item.textureHash) }}</small>
-          </span>
-          <span class="skin-closet-workbench__card-meta">
-            <span>{{ itemKind(item) }}</span>
-            <FaTag v-if="isEquipped(item)" variant="secondary">已装备</FaTag>
-          </span>
-        </button>
+          <span class="studio-item__name" :title="itemName(item)">{{ itemName(item) }}</span>
+          <span class="studio-item__description" :title="model.textureName(item.textureHash)">{{ itemKind(item) }} · {{ model.textureName(item.textureHash) }}</span>
+        </YdButton>
       </div>
-      <FaPagination
-        v-if="filteredItems.length"
-        v-model:page="page"
-        v-model:size="size"
-        :total="filteredItems.length"
-        :sizes="pageSizes"
-        class="skin-list-pagination mt-3"
-        layout="total, sizes, ->, pager"
-      />
-    </SkinPanel>
-
-    <aside class="skin-inspector skin-closet-workbench__inspector" aria-label="换装预览与操作">
-      <div class="skin-closet-workbench__target">
-        <label for="skin-closet-target-player">目标角色</label>
-        <FaSelect
-          id="skin-closet-target-player"
-          v-model="playerName"
-          :options="playerOptions"
-          :disabled="interactionLocked || !model.players.length"
-          placeholder="请选择目标角色"
-          class="skin-closet-workbench__player-select"
-        />
-        <div class="skin-closet-workbench__status" aria-live="polite">
-          <strong>{{ model.selectedPlayer?.name || '还没有目标角色' }}</strong>
-          <FaTag v-if="selectedEquipped" variant="secondary">当前角色已装备</FaTag>
-          <FaTag v-else-if="model.selectedClosetItem && selectedTexture" variant="secondary">仅预览 · 尚未应用</FaTag>
-        </div>
+      <YdEmpty v-else class="studio-empty" icon="morph:archive" :title="model.closetItems.length ? '没有找到这件外观' : '衣柜还是空的'" :description="model.closetItems.length ? '换个关键词，或看看其他外观类型。' : '去皮肤库收藏皮肤和披风，就能在这里试穿。'">
+        <YdButton v-if="model.closetItems.length" variant="outline" @click="resetFilters">清除筛选</YdButton>
+        <YdButton v-else @click="router.push('/platform/plugins/yudream-skin/textures')">浏览皮肤库</YdButton>
+      </YdEmpty>
+      <div v-if="filteredItems.length" class="studio-library__footer">
+        <YdPagination v-model:page="page" v-model:size="size" :total="filteredItems.length" :sizes="pageSizes" layout="total, sizes, ->, pager" />
       </div>
+    </YdCard>
 
-      <SkinPreview title="换装预览" :skin="previewSkin" :cape="previewCape" :slim="previewSlim" controls>
-        <div class="preview-meta">
-          <span :title="selectedTitle">{{ selectedTitle }}</span>
-          <span>{{ model.selectedClosetItem ? itemKind(model.selectedClosetItem) : '当前角色外观' }}</span>
+    <aside class="studio-fitting" aria-label="角色试衣间">
+      <YdCard class="studio-fitting-card gap-0 py-0" v-bind="{ headerClass: 'studio-fitting-card__header', contentClass: 'studio-fitting-card__content' }">
+        <template #header>
+          <div class="studio-title-line"><YdIcon name="morph:person-standing" class="studio-section-icon" /><h2>角色试衣间</h2></div>
+          <YdTag v-if="isDefaultPlayer" variant="secondary" icon="morph:star">默认角色</YdTag>
+          <YdButton v-else-if="model.selectedPlayer" variant="ghost" size="sm" :disabled="interactionLocked" :loading="model.saving.startsWith('default-player:')" @click="setDefaultPlayer">设为默认</YdButton>
+        </template>
+        <div class="studio-target">
+          <YdLabel id="studio-player-label">换装目标</YdLabel>
+          <YdSelect v-model="playerName" :options="playerOptions" :disabled="interactionLocked || !model.players.length" placeholder="选择角色" class="w-full" aria-labelledby="studio-player-label" />
         </div>
-      </SkinPreview>
-
-      <div class="skin-closet-workbench__details">
-        <div class="skin-detail-title">
-          <strong :title="selectedTitle">{{ selectedTitle }}</strong>
-          <span :title="selectedTexture?.name">{{ selectedTexture?.name || '从衣柜选择一件外观后再操作' }}</span>
+        <YdSpotlightCard class="studio-stage border-0 shadow-none" :gradient-opacity="0.1">
+          <div class="studio-stage__state" aria-live="polite">
+            <YdTag v-if="selectedEquipped" variant="secondary" icon="morph:circle-check">当前角色已装备</YdTag>
+            <YdTag v-else-if="model.selectedClosetItem && selectedTexture" variant="outline">仅试穿 · 尚未应用</YdTag>
+            <YdTag v-else variant="outline">当前角色外观</YdTag>
+          </div>
+          <SkinPreview class="studio-renderer" :skin="previewSkin" :cape="previewCape" :slim="previewSlim" :frame-width="300" :frame-height="240" :auto-rotate="false" :view="previewBack ? 'back' : 'front'" controls />
+          <div class="studio-stage__controls">
+            <YdButton variant="ghost" size="sm" @click="previewBack = !previewBack"><YdIcon name="morph:flip-horizontal-2" />{{ previewBack ? '查看正面' : '查看背面' }}</YdButton>
+          </div>
+        </YdSpotlightCard>
+        <div class="studio-selection">
+          <div class="studio-selection__title">
+            <h3 :title="selectedTitle">{{ selectedTitle }}</h3>
+            <span class="studio-selection__kind">{{ model.selectedClosetItem ? itemKind(model.selectedClosetItem) : '' }}</span>
+          </div>
+          <div v-if="model.selectedPlayer" class="studio-equipment" aria-label="角色当前装备">
+            <div><span><YdIcon name="morph:shirt" />当前皮肤</span><strong :title="model.textureName(model.selectedPlayer.skinHash)">{{ model.selectedPlayer.skinHash ? model.textureName(model.selectedPlayer.skinHash) : '默认皮肤' }}</strong></div>
+            <div><span><YdIcon name="morph:flag" />当前披风</span><strong :title="model.textureName(model.selectedPlayer.capeHash)">{{ model.selectedPlayer.capeHash ? model.textureName(model.selectedPlayer.capeHash) : '未装备' }}</strong></div>
+          </div>
+          <YdButton class="w-full" :disabled="interactionLocked || !canApply" :loading="useLoading" @click="applyToPlayer">
+            <YdIcon :name="selectedEquipped ? 'morph:circle-check' : 'morph:shirt'" />{{ selectedEquipped ? '已装备这件外观' : '应用到角色' }}
+          </YdButton>
+          <p class="studio-apply-note">{{ model.selectedPlayer ? '应用后保存到当前角色，另一件装备会保留。' : '先创建一个角色，再为它应用外观。' }}</p>
+          <YdButton v-if="!model.players.length" class="mt-3 w-full" variant="outline" @click="router.push('/platform/plugins/yudream-skin/players')">创建角色</YdButton>
+          <div class="studio-selection__actions">
+            <YdButton variant="ghost" size="sm" :disabled="interactionLocked || !model.selectedClosetItem" @click="openRename"><YdIcon name="morph:pencil" />重命名</YdButton>
+            <YdButton variant="outline" size="sm" :disabled="interactionLocked || !model.selectedClosetItem" :loading="removeLoading" @click="confirmRemove"><YdIcon name="morph:archive-x" />移出衣柜</YdButton>
+          </div>
+          <YdAlert v-if="actionError" class="mt-3" title="操作未完成" :description="actionError" />
+          <div v-if="model.refreshError" class="mt-3 grid gap-3">
+            <YdAlert title="已保存，刷新未完成" :description="model.refreshError" />
+            <YdButton variant="outline" :disabled="busy" @click="model.retryRefresh">重新加载</YdButton>
+          </div>
+          <YdAlert v-if="model.selectedClosetItem && !selectedTexture" class="mt-3" title="材质暂不可用" description="这件收藏的材质信息暂不可用，请刷新页面后重试。" />
         </div>
-        <p class="skin-help-text">试穿会保留角色另一栏已装备的外观，点击“应用到角色”后才会保存。</p>
-        <div v-if="model.selectedPlayer" class="skin-detail-meta">
-          <div><span>已装备皮肤</span><strong :title="model.textureName(model.selectedPlayer.skinHash)">{{ model.textureName(model.selectedPlayer.skinHash) }}</strong></div>
-          <div><span>已装备披风</span><strong :title="model.textureName(model.selectedPlayer.capeHash)">{{ model.textureName(model.selectedPlayer.capeHash) }}</strong></div>
-        </div>
-        <FaButton :disabled="interactionLocked || !canApply" :loading="useLoading" @click="applyToPlayer">
-          <FaIcon name="i-ri:t-shirt-2-line" />
-          {{ selectedEquipped ? '当前角色已装备' : '应用到角色' }}
-        </FaButton>
-        <div class="skin-closet-workbench__item-actions">
-          <FaButton variant="outline" :disabled="interactionLocked || !model.selectedClosetItem" @click="openRename">
-            <FaIcon name="i-ri:edit-2-line" />重命名
-          </FaButton>
-          <FaButton variant="destructive" :disabled="interactionLocked || !model.selectedClosetItem" :loading="removeLoading" @click="confirmRemove">
-            <FaIcon name="i-ri:delete-bin-6-line" />移出衣柜
-          </FaButton>
-        </div>
-        <p v-if="actionError" class="skin-help-text" role="alert">{{ actionError }}</p>
-        <p v-if="model.selectedClosetItem && !selectedTexture" class="skin-help-text">这件外观的材质信息暂不可用，可以刷新页面后重试。</p>
-        <div v-if="!model.players.length" class="skin-closet-workbench__no-player">
-          <p class="skin-help-text">先创建一个角色，就可以应用试穿的外观。</p>
-          <FaButton variant="outline" @click="router.push('/platform/plugins/yudream-skin/players')">创建角色</FaButton>
-        </div>
-      </div>
+      </YdCard>
     </aside>
 
-    <FaModal
-      v-model="renameVisible"
-      title="重命名衣柜外观"
-      description="只修改衣柜中的显示名称，原始材质名称保持不变。"
-      show-cancel-button
-      confirm-button-text="保存名称"
-      :confirm-button-loading="renamePending"
-      :confirm-button-disabled="busy || !renameName.trim()"
-      :closable="!renamePending"
-      :close-on-click-overlay="!renamePending"
-      :close-on-press-escape="!renamePending"
-      :before-close="beforeRenameClose"
-      class="sm:max-w-md"
-    >
-      <div class="skin-rename-form">
-        <label>
-          <span>显示名称</span>
-          <FaInput v-model="renameName" :disabled="renamePending" placeholder="例如：夏日 Steve" :aria-invalid="Boolean(renameError)" @input="renameError = ''" />
-        </label>
-        <p v-if="renameError" class="skin-help-text" role="alert">{{ renameError }}</p>
+    <YdModal v-model="renameVisible" title="重命名收藏" description="只修改衣柜中的显示名称，原始材质保持不变。" show-cancel-button confirm-button-text="保存名称" :confirm-button-loading="renamePending" :confirm-button-disabled="busy || !renameName.trim()" :closable="!renamePending" :close-on-click-overlay="!renamePending" :close-on-press-escape="!renamePending" :before-close="beforeRenameClose" class="sm:max-w-md">
+      <div class="studio-rename">
+        <YdLabel for="studio-rename-name">收藏名称</YdLabel>
+        <YdInput id="studio-rename-name" v-model="renameName" :disabled="renamePending" placeholder="输入收藏名称" :aria-invalid="Boolean(renameError)" @input="renameError = ''" />
+        <YdAlert v-if="renameError" title="名称未保存" :description="renameError" />
       </div>
-    </FaModal>
+    </YdModal>
   </section>
 </template>
 
 <style scoped>
-.skin-closet-workbench__header-actions,
-.skin-closet-workbench__card-meta,
-.skin-closet-workbench__status {
+.studio-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  align-items: start;
+  gap: var(--yd-workspace-gap, 24px);
+  min-width: 0;
+}
+
+.studio-workspace > *,
+.studio-heading,
+.studio-fitting-card {
+  min-width: 0;
+}
+
+.studio-library :deep(.studio-library__header),
+.studio-fitting-card :deep(.studio-fitting-card__header) {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-block: 16px;
+}
+
+.studio-title-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.studio-title-line h2 {
+  margin: 0;
+  color: var(--color-text-1);
+  font-size: 17px;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.studio-section-icon {
+  width: 19px;
+  height: 19px;
+  color: var(--color-text-2);
+}
+
+.studio-heading p,
+.studio-stage__hint,
+.studio-apply-note {
+  margin: 7px 0 0;
+  color: var(--color-text-3);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.studio-toolbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 2px 0 16px;
 }
 
-.skin-closet-workbench__card-meta {
+.studio-type-tabs {
+  min-width: 278px;
+}
+
+.studio-search {
+  flex: 0 1 240px;
+  width: 240px;
+  min-width: 200px;
+}
+
+.studio-item-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.studio-item {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: start;
+  gap: 0;
+  min-width: 0;
+  padding: 10px;
+  height: auto;
+  text-align: left;
+}
+
+.studio-item__image {
+  position: relative;
+  display: grid;
+  min-height: 120px;
+  overflow: hidden;
+  place-items: center;
+  border-radius: var(--yd-surface-radius, 10px);
+  background: var(--color-fill-1);
+}
+
+.studio-item__image :deep(.skin-texture-preview) {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: center;
+  gap: 12px;
+  padding: 8px 20px 6px;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+}
+
+.studio-item__image :deep(.skin-texture-preview.cape) {
+  grid-template-columns: 1fr;
+  justify-items: center;
+}
+
+.studio-item__image :deep(.skin-texture-preview__pane) {
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.studio-item__image :deep(.skin-texture-preview__label) {
+  color: var(--color-text-4);
+  font-size: 9px;
+  line-height: 1;
+  font-weight: 400;
+}
+
+.studio-item__image :deep(.skin-texture-preview__canvas) {
+  display: block;
+  max-width: 100%;
+  height: 90px;
+  width: auto;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.studio-item__selected {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+}
+
+.studio-item__name {
+  margin-top: 10px;
+  overflow: hidden;
+  color: var(--color-text-1);
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.studio-item__description {
+  overflow: hidden;
+  margin-top: 3px;
+  color: var(--color-text-3);
+  font-size: 11px;
+  line-height: 1.5;
+  font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.studio-item__equipped {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+}
+
+.studio-library__footer {
+  padding-top: 18px;
+  margin-top: 14px;
+  border-top: 1px solid var(--color-border-1);
+}
+
+.studio-library__footer :deep([data-slot="pagination-content"]) {
+  flex-wrap: wrap;
+}
+
+.studio-fitting {
+  position: sticky;
+  top: 20px;
+}
+
+.studio-target {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 14px;
+}
+
+.studio-target > label,
+.studio-rename > label {
+  color: var(--color-text-3);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.studio-stage {
+  background: var(--color-fill-1);
+  overflow: hidden;
+}
+
+.studio-stage :deep(.yd-spotlight-content) {
+  padding: 8px 0;
+}
+
+.studio-stage__state {
+  display: flex;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  min-height: 26px;
+}
+
+.studio-stage :deep(.skin-preview__toolbar) {
+  justify-content: center;
+  padding: 8px 0;
+}
+
+.studio-renderer {
+  display: grid;
+  justify-content: center;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.studio-renderer :deep(.skin-preview__stage) {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 240px;
+  background: transparent;
+}
+
+.studio-renderer :deep(canvas) {
+  display: block;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.studio-renderer :deep(.skin-preview__empty) {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  min-height: 240px;
+  gap: 8px;
+  color: var(--color-text-3);
+  text-align: center;
+}
+
+.studio-stage__controls {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+}
+
+.studio-stage__hint {
+  margin: 6px 0 0;
+  text-align: center;
+  font-size: 10px;
+}
+
+.studio-selection {
+  padding-top: 12px;
+}
+
+.studio-selection__title {
+  display: flex;
+  align-items: baseline;
   justify-content: space-between;
+  gap: 12px;
+}
+
+.studio-selection__title > span,
+.studio-selection__kind {
   color: var(--color-text-3);
   font-size: 12px;
 }
 
-.skin-closet-workbench__card {
-  position: relative;
-}
-
-.skin-closet-workbench__card.active {
-  border-color: var(--color-text-2);
-  background: var(--color-fill-2);
-  box-shadow: inset 0 0 0 1px var(--color-text-2);
-}
-
-.skin-closet-workbench__card:focus-visible {
-  outline: 2px solid var(--color-text-2);
-  outline-offset: 3px;
-}
-
-.skin-closet-workbench__card:disabled {
-  cursor: default;
-}
-
-.skin-closet-workbench__selected {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  z-index: 1;
-}
-
-.skin-closet-workbench__target,
-.skin-closet-workbench__details,
-.skin-closet-workbench__no-player {
-  display: grid;
-  min-width: 0;
-  gap: 12px;
-}
-
-.skin-closet-workbench__target > label {
-  color: var(--color-text-2);
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.skin-closet-workbench__player-select {
-  width: 100%;
-}
-
-.skin-closet-workbench__status strong {
-  min-width: 0;
-  overflow-wrap: anywhere;
+.studio-selection__title h3 {
+  margin: 5px 0 3px;
   color: var(--color-text-1);
-  font-size: 14px;
+  font-size: 19px;
+  line-height: 1.45;
+  font-weight: 650;
+  overflow-wrap: anywhere;
 }
 
-.skin-closet-workbench__item-actions {
+.studio-equipment {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 12px 0 14px;
+  padding: 10px 0;
+  border-top: 1px solid var(--color-border-1);
+  border-bottom: 1px solid var(--color-border-1);
+}
+
+.studio-equipment > div {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  gap: 5px;
+  font-size: 12px;
+}
+
+.studio-equipment > div > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  color: var(--color-text-3);
+}
+
+.studio-equipment svg {
+  width: 14px;
+  height: 14px;
+}
+
+.studio-equipment strong {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--color-text-2);
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.studio-apply-note {
+  text-align: center;
+  font-size: 10px;
+}
+
+.studio-selection__actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.studio-empty {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  min-height: 420px;
+  gap: 10px;
+  color: var(--color-text-3);
+}
+
+.studio-empty > svg {
+  width: 36px;
+  height: 36px;
+  margin-bottom: 5px;
+}
+
+.studio-empty > strong {
+  color: var(--color-text-2);
+  font-size: 16px;
+}
+
+.studio-empty p {
+  margin: 0 0 5px;
+  font-size: 12px;
+  text-align: center;
+}
+
+.studio-rename {
+  display: grid;
   gap: 8px;
 }
 
-.skin-closet-workbench__empty {
-  display: grid;
-  grid-column: 1 / -1;
-  justify-items: center;
-  gap: 12px;
+.studio-rename p {
+  margin: 0;
+  color: var(--color-text-2);
+  font-size: 12px;
 }
 
-.skin-closet-workbench__empty strong {
-  color: var(--color-text-1);
-}
-
-@container (max-width: 960px) {
-  .skin-closet-workbench {
-    grid-template-columns: 1fr;
+@container (max-width: 960px) and (min-width: 769px) {
+  .studio-workspace {
+    gap: 16px;
+    grid-template-columns: minmax(0, 1fr) 330px;
   }
 
-  .skin-closet-workbench__inspector {
+  .studio-item-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .studio-search {
+    flex: 1 1 200px;
+    width: 100%;
+  }
+
+}
+
+@container (max-width: 768px) {
+  .studio-workspace {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 20px;
+  }
+
+  .studio-workspace > * {
+    width: 100%;
+  }
+
+  .studio-fitting {
     position: static;
   }
-}
 
-@media (max-width: 640px) {
-  .skin-closet-workbench__header-actions {
-    justify-content: flex-end;
+  .studio-toolbar {
+    align-items: stretch;
+    flex-direction: column;
   }
 
-  .skin-closet-workbench__item-actions {
-    grid-template-columns: 1fr;
+  .studio-search {
+    width: 100%;
+    flex: auto;
+    min-width: 0;
+  }
+
+  .studio-type-tabs {
+    min-width: 0;
+  }
+
+  .studio-item-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .studio-item__image :deep(.skin-texture-preview) {
+    padding-inline: 12px;
+    gap: 8px;
+  }
+
+}
+
+@container (max-width: 400px) {
+  .studio-item-grid {
+    gap: 8px;
+  }
+
+  .studio-item {
+    padding: 6px;
+  }
+
+  .studio-item__image {
+    min-height: 120px;
+  }
+
+  .studio-item__image :deep(.skin-texture-preview__canvas) {
+    height: 90px;
   }
 }
 </style>

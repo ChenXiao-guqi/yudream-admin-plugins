@@ -2,7 +2,7 @@
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { SkinSummary } from '../types'
 import { onMounted, ref } from 'vue'
-import { FaIcon } from '@yudream/components'
+import { YdAlert, YdButton, YdIcon } from '@yudream/components'
 import { createSkinApi } from '../api/skin-api'
 
 const props = defineProps<{
@@ -34,12 +34,16 @@ async function load() {
 <template>
   <div class="dashboard-card__content skin-stats-card">
     <div v-if="loading" class="skin-stats-card__state">
-      <FaIcon name="i-ri:loader-4-line" class="animate-spin" />
+      <YdIcon name="i-ri:loader-4-line" class="animate-spin" />
       正在读取统计
     </div>
-    <div v-else-if="error" class="skin-stats-card__state error">
-      <FaIcon name="i-ri:error-warning-line" />
-      {{ error }}
+    <div v-else-if="error" class="skin-stats-card__state">
+      <YdAlert variant="destructive" icon="i-ri:error-warning-line" title="统计数据加载失败" class="w-full min-w-0">
+        <template #description>
+          <p>{{ error }}</p>
+          <YdButton variant="outline" size="sm" class="mt-2" :loading="loading" @click="load">重试</YdButton>
+        </template>
+      </YdAlert>
     </div>
     <template v-else>
       <div class="skin-stats-card__grid">
@@ -81,10 +85,6 @@ async function load() {
   min-height: 0;
   color: var(--color-text-3);
   font-size: 13px;
-}
-
-.skin-stats-card__state.error {
-  color: rgb(var(--danger-6));
 }
 
 .skin-stats-card__grid {

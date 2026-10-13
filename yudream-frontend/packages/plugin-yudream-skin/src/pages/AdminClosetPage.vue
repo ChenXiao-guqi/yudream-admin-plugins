@@ -3,10 +3,10 @@ import type { TableColumn } from '@yudream/components'
 import type { SkinPluginModel } from '../composables/useSkinPlugin'
 import type { SkinClosetItem } from '../types'
 import { computed, reactive, ref, watch } from 'vue'
-import { FaButton, FaCard, FaIcon, FaInput, FaModal, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable, FaSearchBar, FaSelect, useFaModal } from '@yudream/components'
+import { YdLabel, YdButton, YdCard, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdSelect, useYdModal } from '@yudream/components'
 
 const props = defineProps<{ model: SkinPluginModel }>()
-const modal = useFaModal()
+const modal = useYdModal()
 const search = reactive({ keyword: '', userId: '' })
 const pagination = reactive({ page: 1, size: 10 })
 const formVisible = ref(false)
@@ -96,11 +96,11 @@ function confirmDelete(item: SkinClosetItem) {
 </script>
 
 <template>
-  <FaPageHeader title="衣柜管理" class="mb-0">
-    <FaButton @click="openCreate"><FaIcon name="i-ri:add-line" />新增衣柜项</FaButton>
-  </FaPageHeader>
-  <FaPageMain><div class="skin-admin-table-page">
-    <FaResponsiveTable
+  <YdPageHeader title="衣柜管理" class="mb-0">
+    <YdButton @click="openCreate"><YdIcon name="i-ri:add-line" />新增衣柜项</YdButton>
+  </YdPageHeader>
+  <YdPageMain><div class="skin-admin-table-page">
+    <YdResponsiveTable
       row-key="id"
       table-root-class="max-w-full overflow-x-auto rounded-lg"
       table-class="min-w-[920px]"
@@ -112,15 +112,15 @@ function confirmDelete(item: SkinClosetItem) {
       empty-text="暂无衣柜数据"
     >
       <template #toolbar>
-        <FaSearchBar class="w-full">
+        <YdSearchBar class="w-full">
           <div class="skin-admin-filter-grid">
-            <FaInput v-model="search.keyword" clearable placeholder="衣柜名称 / 材质" />
-            <FaInput v-model="search.userId" clearable placeholder="用户 ID" />
+            <YdInput v-model="search.keyword" clearable placeholder="衣柜名称 / 材质" />
+            <YdInput v-model="search.userId" clearable placeholder="用户 ID" />
             <div class="skin-admin-filter-grid__actions">
-              <FaButton variant="outline" @click="resetSearch">重置</FaButton>
+              <YdButton variant="outline" @click="resetSearch">重置</YdButton>
             </div>
           </div>
-        </FaSearchBar>
+        </YdSearchBar>
       </template>
       <template #cell-userId="{ row }">
         {{ model.userName(row.original.userId) }}
@@ -133,12 +133,12 @@ function confirmDelete(item: SkinClosetItem) {
       <template #cell-createdAt="{ row }">{{ model.dateText(row.original.createdAt) }}</template>
       <template #cell-operation="{ row }">
         <div class="flex-center gap-2">
-          <FaButton size="sm" variant="outline" @click="openEdit(row.original)">重命名</FaButton>
-          <FaButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</FaButton>
+          <YdButton size="sm" variant="outline" @click="openEdit(row.original)">重命名</YdButton>
+          <YdButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</YdButton>
         </div>
       </template>
       <template #card="{ row }">
-        <FaCard class="w-full">
+        <YdCard class="w-full">
           <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between gap-2">
               <span class="min-w-0 break-words text-base font-semibold">{{ row.itemName || model.textureName(row.textureHash) }}</span>
@@ -158,15 +158,15 @@ function confirmDelete(item: SkinClosetItem) {
               </div>
             </div>
             <div class="flex flex-wrap gap-2 border-t pt-3">
-              <FaButton size="sm" variant="outline" @click="openEdit(row)">重命名</FaButton>
-              <FaButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</FaButton>
+              <YdButton size="sm" variant="outline" @click="openEdit(row)">重命名</YdButton>
+              <YdButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</YdButton>
             </div>
           </div>
-        </FaCard>
+        </YdCard>
       </template>
-    </FaResponsiveTable>
+    </YdResponsiveTable>
 
-    <FaPagination
+    <YdPagination
       v-model:page="pagination.page"
       v-model:size="pagination.size"
       :total="filteredRows.length"
@@ -174,15 +174,15 @@ function confirmDelete(item: SkinClosetItem) {
       @size-change="pagination.page = 1"
     />
 
-    <FaModal v-model="formVisible" :title="editing ? '重命名衣柜项' : '新增衣柜项'" show-cancel-button @confirm="submit">
+    <YdModal v-model="formVisible" :title="editing ? '重命名衣柜项' : '新增衣柜项'" show-cancel-button @confirm="submit">
       <div class="skin-admin-form">
         <template v-if="!editing">
-          <label><span>用户 ID</span><FaInput v-model="model.closetForm.userId" /></label>
-          <label><span>材质</span><FaSelect v-model="model.closetForm.textureHash" :options="textureOptions" /></label>
-          <label><span>衣柜名称</span><FaInput v-model="model.closetForm.itemName" /></label>
+          <YdLabel><span>用户 ID</span><YdInput v-model="model.closetForm.userId" /></YdLabel>
+          <YdLabel><span>材质</span><YdSelect v-model="model.closetForm.textureHash" :options="textureOptions" /></YdLabel>
+          <YdLabel><span>衣柜名称</span><YdInput v-model="model.closetForm.itemName" /></YdLabel>
         </template>
-        <label v-else><span>衣柜名称</span><FaInput v-model="model.closetRenameForm.itemName" /></label>
+        <YdLabel v-else><span>衣柜名称</span><YdInput v-model="model.closetRenameForm.itemName" /></YdLabel>
       </div>
-    </FaModal>
-  </div></FaPageMain>
+    </YdModal>
+  </div></YdPageMain>
 </template>

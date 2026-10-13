@@ -3,13 +3,13 @@ import type { TableColumn } from '@yudream/components'
 import type { SkinPlayer } from '../types'
 import type { SkinPluginModel } from '../composables/useSkinPlugin'
 import { computed, reactive, ref, watch } from 'vue'
-import { FaButton, FaCard, FaIcon, FaInput, FaModal, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable, FaSearchBar, FaSelect, FaTag, useFaModal } from '@yudream/components'
+import { YdLabel, YdButton, YdCard, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdSelect, YdTag, useYdModal } from '@yudream/components'
 
 const props = defineProps<{
   model: SkinPluginModel
 }>()
 
-const modal = useFaModal()
+const modal = useYdModal()
 const search = reactive({
   keyword: '',
   ownerId: '',
@@ -199,11 +199,11 @@ function shortHash(hash?: string) {
 </script>
 
 <template>
-  <FaPageHeader title="角色管理" class="mb-0">
-    <FaButton @click="openCreate"><FaIcon name="i-ri:add-line" />新增角色</FaButton>
-  </FaPageHeader>
-  <FaPageMain><div class="skin-admin-table-page">
-    <FaResponsiveTable
+  <YdPageHeader title="角色管理" class="mb-0">
+    <YdButton @click="openCreate"><YdIcon name="i-ri:add-line" />新增角色</YdButton>
+  </YdPageHeader>
+  <YdPageMain><div class="skin-admin-table-page">
+    <YdResponsiveTable
       row-key="uuid"
       table-root-class="skin-admin-player-table-root rounded-lg overflow-hidden"
       table-class="skin-admin-player-table"
@@ -214,22 +214,22 @@ function shortHash(hash?: string) {
       :data="pagedRows"
     >
       <template #toolbar>
-        <FaSearchBar class="w-full">
+        <YdSearchBar class="w-full">
           <div class="skin-admin-filter-grid">
-            <FaInput v-model="search.keyword" clearable placeholder="角色名 / UUID / 材质 / 用户" class="skin-admin-filter-grid__keyword" @keydown.enter="pagination.page = 1" @clear="pagination.page = 1" />
-            <FaInput v-model="search.ownerId" clearable placeholder="系统用户 ID / 昵称 / 用户名" class="skin-admin-filter-grid__select" @keydown.enter="pagination.page = 1" @clear="pagination.page = 1" />
-            <FaSelect v-model="search.status" :options="statusOptions" class="skin-admin-filter-grid__select" />
+            <YdInput v-model="search.keyword" clearable placeholder="角色名 / UUID / 材质 / 用户" class="skin-admin-filter-grid__keyword" @keydown.enter="pagination.page = 1" @clear="pagination.page = 1" />
+            <YdInput v-model="search.ownerId" clearable placeholder="系统用户 ID / 昵称 / 用户名" class="skin-admin-filter-grid__select" @keydown.enter="pagination.page = 1" @clear="pagination.page = 1" />
+            <YdSelect v-model="search.status" :options="statusOptions" class="skin-admin-filter-grid__select" />
             <div class="skin-admin-filter-grid__actions">
-              <FaButton variant="outline" @click="resetSearch">
+              <YdButton variant="outline" @click="resetSearch">
                 重置
-              </FaButton>
-              <FaButton @click="pagination.page = 1">
-                <FaIcon name="i-ri:search-line" />
+              </YdButton>
+              <YdButton @click="pagination.page = 1">
+                <YdIcon name="i-ri:search-line" />
                 筛选
-              </FaButton>
+              </YdButton>
             </div>
           </div>
-        </FaSearchBar>
+        </YdSearchBar>
       </template>
       <template #cell-name="{ row }">
         <span class="skin-admin-texture-name" :title="row.original.name">{{ row.original.name }}</span>
@@ -247,9 +247,9 @@ function shortHash(hash?: string) {
         <span class="skin-admin-texture-name" :title="model.textureName(row.original.capeHash)">{{ model.textureName(row.original.capeHash) }}</span>
       </template>
       <template #cell-status="{ row }">
-        <FaTag :variant="row.original.skinHash || row.original.capeHash ? 'default' : 'secondary'">
+        <YdTag :variant="row.original.skinHash || row.original.capeHash ? 'default' : 'secondary'">
           {{ row.original.skinHash || row.original.capeHash ? '已配置' : '待换装' }}
-        </FaTag>
+        </YdTag>
       </template>
       <template #cell-lastModified="{ row }">
         {{ model.dateText(row.original.lastModified) }}
@@ -259,23 +259,23 @@ function shortHash(hash?: string) {
       </template>
       <template #cell-operation="{ row }">
         <div class="flex-center gap-2">
-          <FaButton variant="outline" size="sm" @click="openEdit(row.original)">
+          <YdButton variant="outline" size="sm" @click="openEdit(row.original)">
             编辑
-          </FaButton>
-          <FaButton variant="destructive" size="sm" @click="confirmDelete(row.original)">
+          </YdButton>
+          <YdButton variant="destructive" size="sm" @click="confirmDelete(row.original)">
             删除
-          </FaButton>
+          </YdButton>
         </div>
       </template>
       <template #card="{ row }">
-        <FaCard class="w-full">
+        <YdCard class="w-full">
           <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between gap-2">
               <span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span>
               <div class="flex gap-1">
-                <FaTag :variant="row.skinHash || row.capeHash ? 'default' : 'secondary'">
+                <YdTag :variant="row.skinHash || row.capeHash ? 'default' : 'secondary'">
                   {{ row.skinHash || row.capeHash ? '已配置' : '待换装' }}
-                </FaTag>
+                </YdTag>
               </div>
             </div>
             <div class="flex flex-col gap-1 text-sm">
@@ -297,19 +297,19 @@ function shortHash(hash?: string) {
               </div>
             </div>
             <div class="flex flex-wrap gap-2 border-t pt-3">
-              <FaButton variant="outline" size="sm" @click="openEdit(row)">
+              <YdButton variant="outline" size="sm" @click="openEdit(row)">
                 编辑
-              </FaButton>
-              <FaButton variant="destructive" size="sm" @click="confirmDelete(row)">
+              </YdButton>
+              <YdButton variant="destructive" size="sm" @click="confirmDelete(row)">
                 删除
-              </FaButton>
+              </YdButton>
             </div>
           </div>
-        </FaCard>
+        </YdCard>
       </template>
-    </FaResponsiveTable>
+    </YdResponsiveTable>
 
-    <FaPagination
+    <YdPagination
       v-model:page="pagination.page"
       v-model:size="pagination.size"
       :total="filteredRows.length"
@@ -318,25 +318,25 @@ function shortHash(hash?: string) {
       @size-change="onSizeChange"
     />
 
-    <FaModal v-model="formVisible" :title="editing ? '编辑角色' : '新增角色'" show-cancel-button class="sm:max-w-2xl" @confirm="saveForm">
+    <YdModal v-model="formVisible" :title="editing ? '编辑角色' : '新增角色'" show-cancel-button class="sm:max-w-2xl" @confirm="saveForm">
       <div class="skin-admin-form">
-        <label>
+        <YdLabel>
           <span>角色名</span>
-          <FaInput v-model="form.name" class="w-full" />
-        </label>
-        <label>
+          <YdInput v-model="form.name" class="w-full" />
+        </YdLabel>
+        <YdLabel>
           <span>系统用户 ID</span>
-          <FaInput v-model="form.ownerId" :disabled="!!editing" class="w-full" />
-        </label>
-        <label>
+          <YdInput v-model="form.ownerId" :disabled="!!editing" class="w-full" />
+        </YdLabel>
+        <YdLabel>
           <span>皮肤</span>
-          <FaSelect v-model="form.skinHash" clearable :options="skinOptions" class="w-full" />
-        </label>
-        <label>
+          <YdSelect v-model="form.skinHash" clearable :options="skinOptions" class="w-full" />
+        </YdLabel>
+        <YdLabel>
           <span>披风</span>
-          <FaSelect v-model="form.capeHash" clearable :options="capeOptions" class="w-full" />
-        </label>
+          <YdSelect v-model="form.capeHash" clearable :options="capeOptions" class="w-full" />
+        </YdLabel>
       </div>
-    </FaModal>
-  </div></FaPageMain>
+    </YdModal>
+  </div></YdPageMain>
 </template>

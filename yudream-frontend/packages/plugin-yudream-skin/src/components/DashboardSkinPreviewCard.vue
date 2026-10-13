@@ -2,7 +2,7 @@
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { SkinMe, SkinPlayer, SkinTexture } from '../types'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { FaButton, FaIcon } from '@yudream/components'
+import { YdAlert, YdButton, YdIcon } from '@yudream/components'
 import { createSkinApi } from '../api/skin-api'
 import SkinPreview from './SkinPreview.vue'
 
@@ -101,12 +101,16 @@ function openCard() {
 <template>
   <div class="dashboard-card__content skin-dashboard-card skin-preview-card">
     <div v-if="loading" class="skin-dashboard-card__state">
-      <FaIcon name="i-ri:loader-4-line" class="animate-spin" />
+      <YdIcon name="i-ri:loader-4-line" class="animate-spin" />
       正在生成预览
     </div>
-    <div v-else-if="error" class="skin-dashboard-card__state error">
-      <FaIcon name="i-ri:error-warning-line" />
-      {{ error }}
+    <div v-else-if="error" class="skin-dashboard-card__state col-span-full">
+      <YdAlert variant="destructive" icon="i-ri:error-warning-line" title="皮肤预览加载失败" class="w-full min-w-0">
+        <template #description>
+          <p>{{ error }}</p>
+          <YdButton variant="outline" size="sm" class="mt-2" :loading="loading" @click="load">重试</YdButton>
+        </template>
+      </YdAlert>
     </div>
     <template v-else>
       <div ref="previewArea" class="skin-preview-card__viewer" :aria-label="`${defaultPlayer?.name || '角色'}的三维外观预览`">
@@ -128,10 +132,10 @@ function openCard() {
             <div><dt>披风</dt><dd :title="equippedCape">{{ equippedCape }}</dd></div>
           </dl>
         </div>
-        <FaButton v-if="card?.actionPath" size="sm" variant="ghost" class="skin-preview-card__change" @click="openCard">
+        <YdButton v-if="card?.actionPath" size="sm" variant="ghost" class="skin-preview-card__change" @click="openCard">
           换装
-          <FaIcon name="i-ri:arrow-right-line" />
-        </FaButton>
+          <YdIcon name="i-ri:arrow-right-line" />
+        </YdButton>
       </div>
     </template>
   </div>
@@ -161,10 +165,6 @@ function openCard() {
   min-height: 0;
   color: var(--color-text-3);
   font-size: 13px;
-}
-
-.skin-dashboard-card__state.error {
-  color: rgb(var(--danger-6));
 }
 
 .skin-preview-card :deep(.skin-preview) {

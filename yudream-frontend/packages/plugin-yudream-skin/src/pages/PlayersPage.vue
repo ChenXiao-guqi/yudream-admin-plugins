@@ -24,25 +24,25 @@
         <div class="skin-character-card__meta">
           <strong>{{ model.selectedPlayerName || '未选择角色' }}</strong>
           <span>{{ model.selectedPlayer?.uuid || '创建或选择一个角色后开始换装' }}</span>
-          <FaTag v-if="model.selectedPlayerName && model.defaultPlayerName === model.selectedPlayerName" variant="secondary">
+          <YdTag v-if="model.selectedPlayerName && model.defaultPlayerName === model.selectedPlayerName" variant="secondary">
             默认角色
-          </FaTag>
-          <FaButton
+          </YdTag>
+          <YdButton
             v-else-if="model.selectedPlayer"
             variant="outline"
             :loading="model.saving === `default-player:${model.selectedPlayer.name}`"
             @click="model.setDefaultPlayer(model.selectedPlayer)"
           >
-            <FaIcon name="i-ri:star-line" />
+            <YdIcon name="i-ri:star-line" />
             设为默认角色
-          </FaButton>
+          </YdButton>
         </div>
       </aside>
 
       <main class="skin-flow">
         <SkinPanel :title="isManagement ? '全部角色' : '角色'">
           <template #header>
-            <FaTag variant="secondary">{{ model.players.length }}</FaTag>
+            <YdTag variant="secondary">{{ model.players.length }}</YdTag>
           </template>
           <div class="skin-role-list">
             <div
@@ -51,19 +51,20 @@
               class="skin-role-item"
               :class="{ active: model.selectedPlayerName === player.name, 'is-default': model.defaultPlayerName === player.name }"
             >
-              <button type="button" class="skin-role-select" @click="model.selectPlayer(player)">
+              <YdButton :variant="model.selectedPlayerName === player.name ? 'secondary' : 'ghost'" class="skin-role-select h-auto whitespace-normal" :aria-pressed="model.selectedPlayerName === player.name" @click="model.selectPlayer(player)">
                 <span class="skin-role-meta">
                   <strong>{{ player.name }}</strong>
+                  <YdTag v-if="model.selectedPlayerName === player.name" variant="secondary" icon="morph:circle-check">已选中</YdTag>
                   <small>{{ isManagement ? `归属 ${model.userName(player.ownerId)}` : (player.skinHash ? '已配置外观' : '待换装') }}</small>
                 </span>
                 <span class="skin-role-badges">
-                  <FaTag v-if="model.defaultPlayerName === player.name" variant="secondary">默认</FaTag>
-                  <FaIcon name="i-ri:arrow-right-s-line" />
+                  <YdTag v-if="model.defaultPlayerName === player.name" variant="secondary">默认</YdTag>
+                  <YdIcon name="i-ri:arrow-right-s-line" />
                 </span>
-              </button>
-              <FaTooltip :text="model.defaultPlayerName === player.name ? '当前默认角色' : '设为默认角色'" side="top">
+              </YdButton>
+              <YdTooltip :text="model.defaultPlayerName === player.name ? '当前默认角色' : '设为默认角色'" side="top">
                 <span class="skin-action-tooltip">
-                  <FaButton
+                  <YdButton
                     variant="ghost"
                     size="icon-sm"
                     class="skin-role-default"
@@ -72,40 +73,40 @@
                     aria-label="设为默认角色"
                     @click="model.setDefaultPlayer(player)"
                   >
-                    <FaIcon :name="model.defaultPlayerName === player.name ? 'i-ri:star-fill' : 'i-ri:star-line'" />
-                  </FaButton>
+                    <YdIcon :name="model.defaultPlayerName === player.name ? 'i-ri:star-fill' : 'i-ri:star-line'" />
+                  </YdButton>
                 </span>
-              </FaTooltip>
+              </YdTooltip>
             </div>
             <div v-if="!model.players.length" class="empty-state">还没有角色，先创建一个 Minecraft ID。</div>
           </div>
 
           <div class="skin-inline-form">
-            <FaInput v-model="model.playerForm.name" placeholder="输入角色名，例如 Steve" />
-            <FaButton :loading="model.saving === 'player'" @click="model.createPlayer">
-              <FaIcon name="i-ri:add-line" />
+            <YdInput v-model="model.playerForm.name" placeholder="输入角色名，例如 Steve" />
+            <YdButton :loading="model.saving === 'player'" @click="model.createPlayer">
+              <YdIcon name="i-ri:add-line" />
               创建角色
-            </FaButton>
+            </YdButton>
           </div>
         </SkinPanel>
 
         <SkinPanel title="从衣柜换装">
           <template #header>
-            <FaTag variant="secondary">{{ model.closetItems.length }}</FaTag>
+            <YdTag variant="secondary">{{ model.closetItems.length }}</YdTag>
           </template>
           <div class="skin-dress-form">
-            <label>
+            <YdLabel>
               <span>皮肤</span>
-              <FaSelect v-model="model.assignForm.skinHash" clearable :options="model.skinTextureOptions" />
-            </label>
-            <label>
+              <YdSelect v-model="model.assignForm.skinHash" clearable :options="model.skinTextureOptions" />
+            </YdLabel>
+            <YdLabel>
               <span>披风</span>
-              <FaSelect v-model="model.assignForm.capeHash" clearable :options="model.capeTextureOptions" />
-            </label>
-            <FaButton :disabled="!model.selectedPlayer" :loading="model.saving === 'assign'" @click="model.assignTextures">
-              <FaIcon name="i-ri:save-3-line" />
+              <YdSelect v-model="model.assignForm.capeHash" clearable :options="model.capeTextureOptions" />
+            </YdLabel>
+            <YdButton :disabled="!model.selectedPlayer" :loading="model.saving === 'assign'" @click="model.assignTextures">
+              <YdIcon name="i-ri:save-3-line" />
               保存外观
-            </FaButton>
+            </YdButton>
           </div>
           <p v-if="!model.closetItems.length" class="skin-help-text">衣柜是换装来源，可以先在皮肤库收藏材质，或上传自己的 PNG 材质。</p>
         </SkinPanel>
@@ -113,18 +114,18 @@
         <details class="skin-collapse" :open="false">
           <summary>
             <span>角色设置</span>
-            <FaIcon name="i-ri:arrow-down-s-line" />
+            <YdIcon name="i-ri:arrow-down-s-line" />
           </summary>
           <div class="skin-inline-form">
-            <FaInput v-model="model.playerRenameForm.name" placeholder="新的角色名" />
-            <FaButton variant="outline" :loading="model.saving === 'player-rename'" @click="model.renamePlayer">
-              <FaIcon name="i-ri:edit-2-line" />
+            <YdInput v-model="model.playerRenameForm.name" placeholder="新的角色名" />
+            <YdButton variant="outline" :loading="model.saving === 'player-rename'" @click="model.renamePlayer">
+              <YdIcon name="i-ri:edit-2-line" />
               重命名
-            </FaButton>
-            <FaButton variant="outline" :loading="model.saving === 'player-delete'" @click="model.deletePlayer">
-              <FaIcon name="i-ri:delete-bin-6-line" />
+            </YdButton>
+            <YdButton variant="outline" :loading="model.saving === 'player-delete'" @click="model.deletePlayer">
+              <YdIcon name="i-ri:delete-bin-6-line" />
               删除
-            </FaButton>
+            </YdButton>
           </div>
         </details>
       </main>
@@ -135,7 +136,7 @@
 <script setup lang="ts">
 import type { SkinPluginModel } from '../composables/useSkinPlugin'
 import { computed } from 'vue'
-import { FaButton, FaIcon, FaInput, FaSelect, FaTag, FaTooltip } from '@yudream/components'
+import { YdLabel, YdButton, YdIcon, YdInput, YdSelect, YdTag, YdTooltip } from '@yudream/components'
 import SkinPanel from '../components/SkinPanel.vue'
 import SkinPreview from '../components/SkinPreview.vue'
 
