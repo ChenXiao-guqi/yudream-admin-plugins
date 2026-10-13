@@ -1,24 +1,29 @@
 <template>
-  <div class="skin-preview" :class="{ compact }">
+  <div ref="previewRootRef" class="skin-preview" :class="{ compact }">
     <div v-if="title || controls" class="skin-preview__toolbar">
       <strong>{{ title }}</strong>
       <div v-if="controls" class="skin-preview__actions">
-        <YdButton size="icon-sm" :variant="rotateEnabled ? 'secondary' : 'outline'" aria-label="旋转" :aria-pressed="rotateEnabled" @click="rotateEnabled = !rotateEnabled">
-          <YdIcon name="i-ri:anticlockwise-2-line" />
+        <YdButton size="icon-sm" :variant="rotateEnabled ? 'secondary' : 'outline'" aria-label="旋转" title="自动旋转" :aria-pressed="rotateEnabled" @click="rotateEnabled = !rotateEnabled">
+          <YdIcon name="morph:rotate-ccw" class="size-4" />
         </YdButton>
         <YdButton size="sm" variant="outline" @click="nextAnimation">
           {{ animationLabel }}
         </YdButton>
-        <YdButton
+        <YdTooltip
           v-for="item in backgrounds"
           :key="item.label"
-          size="icon-sm"
-          :variant="backgroundLabel === item.label ? 'secondary' : 'outline'"
-          :style="{ backgroundColor: item.color }"
-          :aria-label="item.label"
-          :aria-pressed="backgroundLabel === item.label"
-          @click="backgroundLabel = item.label; backgroundValue = item.value"
-        />
+          :text="`${item.label}背景`"
+        >
+          <YdButton
+            size="icon-sm"
+            :variant="backgroundLabel === item.label ? 'secondary' : 'outline'"
+            :aria-label="`${item.label}背景`"
+            :aria-pressed="backgroundLabel === item.label"
+            @click="backgroundLabel = item.label; backgroundValue = item.value"
+          >
+            <YdIcon :name="item.icon" class="size-4" />
+          </YdButton>
+        </YdTooltip>
       </div>
     </div>
     <div v-if="hasPreview" class="skin-preview__stage">
@@ -39,11 +44,11 @@
         :global-light="1.7"
         :camera-light="1.35"
         :zoom="zoom"
-        :background="{ type: 'color', value: backgroundValue }"
+        :background="previewBackground"
       />
     </div>
     <div v-else class="skin-preview__empty">
-      <YdIcon name="i-ri:t-shirt-2-line" class="skin-preview__empty-icon" />
+      <YdIcon name="morph:shirt" class="skin-preview__empty-icon" />
       <strong>还没有外观</strong>
       <small>选择皮肤后会在这里预览</small>
     </div>
@@ -56,8 +61,8 @@
 <script setup lang="ts">
 import type { SkinViewer } from 'skinview3d'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { YdButton, YdIcon } from '@yudream/components'
-import { SkinView3d, type CapeOptions, type SkinOptions } from 'vue-skinview3d'
+import { YdButton, YdIcon, YdTooltip } from '@yudream/components'
+import { SkinView3d, type Background, type CapeOptions, type SkinOptions } from 'vue-skinview3d'
 import { IdleAnimation, RunningAnimation, WalkingAnimation } from 'vue-skinview3d/animations'
 
 const props = withDefaults(defineProps<{
@@ -84,7 +89,7 @@ const props = withDefaults(defineProps<{
 
 interface PreviewBackground {
   label: string
-  color: string
+  icon: string
   value: number
 }
 
@@ -95,13 +100,15 @@ interface RgbColor {
 }
 
 const fallbackBackgrounds: PreviewBackground[] = [
-  { label: '表面', color: '#f7f7f8', value: 0xf7f7f8 },
-  { label: '柔和', color: '#fbfbfc', value: 0xfbfbfc },
-  { label: '柔暗', color: '#ececef', value: 0xececef },
+  { label: '表面', icon: 'morph:layers', value: 0xf7f7f8 },
+  { label: '柔和', icon: 'morph:sun', value: 0xf7f7f8 },
+  { label: '柔暗', icon: 'morph:moon', value: 0xececef },
 ]
 const backgrounds = ref<PreviewBackground[]>(fallbackBackgrounds)
 const backgroundValue = ref(fallbackBackgrounds[0].value)
 const backgroundLabel = ref(fallbackBackgrounds[0].label)
+const previewBackground = computed<Background>(() => ({ type: 'color', value: backgroundValue.value }))
+const previewRootRef = ref<HTMLElement | null>(null)
 const rotateEnabled = ref(props.autoRotate)
 const animationIndex = ref(0)
 const viewerRef = ref<InstanceType<typeof SkinView3d> | null>(null)
@@ -145,7 +152,7 @@ const viewRotation = computed(() => {
 onMounted(() => {
   syncThemeBackgrounds()
   themeObserver = new MutationObserver(syncThemeBackgrounds)
-  themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'style'] })
+  themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'style', 'data-admin-style'] })
   if (document.body) {
     themeObserver.observe(document.body, { attributes: true, attributeFilter: ['class', 'style', 'arco-theme'] })
   }
@@ -258,12 +265,12 @@ function syncThemeBackgrounds() {
   const panel = readThemeColor(styles, '--color-bg-2', surface)
   const fill = readThemeColor(styles, '--color-fill-2', panel)
   const currentIndex = backgrounds.value.findIndex(item => item.label === backgroundLabel.value)
-  const brightenRatio = colorLuminance(surface) < 96 ? 0.1 : 0.72
-  const base = props.compact ? panel : mixColor(surface, { r: 255, g: 255, b: 255 }, brightenRatio)
+  // skinview3d creates an opaque WebGL context. Match the actual enclosing
+  // surface instead of brightening it into a white rectangle.
   const nextBackgrounds = [
-    toPreviewBackground('表面', base),
-    toPreviewBackground('柔和', mixColor(base, panel, 0.35)),
-    toPreviewBackground('柔暗', mixColor(base, fill, 0.6)),
+    toPreviewBackground('表面', 'morph:layers', enclosingSurfaceColor() || panel),
+    toPreviewBackground('柔和', 'morph:sun', panel),
+    toPreviewBackground('柔暗', 'morph:moon', fill),
   ]
   backgrounds.value = nextBackgrounds
   if (currentIndex >= 0) {
@@ -271,8 +278,20 @@ function syncThemeBackgrounds() {
   }
 }
 
-function colorLuminance(color: RgbColor): number {
-  return color.r * 0.299 + color.g * 0.587 + color.b * 0.114
+function enclosingSurfaceColor(): RgbColor | null {
+  for (let element = previewRootRef.value; element; element = element.parentElement) {
+    const value = getComputedStyle(element).backgroundColor
+    if (value === 'transparent'
+      || /^rgba\([^)]*,\s*0(?:\.0+)?\s*\)$/.test(value)
+      || /^rgba?\([^)]*\/\s*0(?:\.0+)?\s*\)$/.test(value)) {
+      continue
+    }
+    const color = parseCssColor(value)
+    if (color) {
+      return color
+    }
+  }
+  return null
 }
 
 function readThemeColor(styles: CSSStyleDeclaration, name: string, fallback: RgbColor): RgbColor {
@@ -303,18 +322,10 @@ function parseCssColor(value: string): RgbColor | null {
   }
 }
 
-function mixColor(base: RgbColor, overlay: RgbColor, ratio: number): RgbColor {
-  return {
-    r: Math.round(base.r * (1 - ratio) + overlay.r * ratio),
-    g: Math.round(base.g * (1 - ratio) + overlay.g * ratio),
-    b: Math.round(base.b * (1 - ratio) + overlay.b * ratio),
-  }
-}
-
-function toPreviewBackground(label: string, color: RgbColor): PreviewBackground {
+function toPreviewBackground(label: string, icon: string, color: RgbColor): PreviewBackground {
   return {
     label,
-    color: `rgb(${color.r}, ${color.g}, ${color.b})`,
+    icon,
     value: (color.r << 16) + (color.g << 8) + color.b,
   }
 }

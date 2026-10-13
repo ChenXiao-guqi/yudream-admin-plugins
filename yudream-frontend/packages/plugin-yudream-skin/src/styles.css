@@ -825,14 +825,13 @@
   min-height: 260px;
   place-items: center;
   border-radius: 6px;
-  background: var(--color-bg-1);
+  background: transparent;
 }
 
 
 .skin-preview__stage canvas {
   display: block;
   max-width: 100%;
-  filter: brightness(1.14) saturate(1.06);
   image-rendering: auto;
 }
 

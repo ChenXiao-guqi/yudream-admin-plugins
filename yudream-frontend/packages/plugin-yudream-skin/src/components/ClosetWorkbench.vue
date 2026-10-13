@@ -208,7 +208,8 @@ const {
 
 .studio-item-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 160px), 1fr));
+  justify-items: start;
   gap: 16px;
 }
 
@@ -219,6 +220,7 @@ const {
   justify-content: start;
   gap: 0;
   min-width: 0;
+  max-width: 240px;
   padding: 10px;
   height: auto;
   text-align: left;
@@ -227,6 +229,8 @@ const {
 .studio-item__image {
   position: relative;
   display: grid;
+  width: 100%;
+  aspect-ratio: 4 / 3;
   min-height: 120px;
   overflow: hidden;
   place-items: center;
@@ -267,11 +271,16 @@ const {
 
 .studio-item__image :deep(.skin-texture-preview__canvas) {
   display: block;
-  max-width: 100%;
-  height: 90px;
-  width: auto;
+  max-width: 49px;
+  max-height: 90px;
+  height: auto;
+  width: 100%;
   object-fit: contain;
   image-rendering: pixelated;
+}
+
+.studio-item__image :deep(.skin-texture-preview.cape .skin-texture-preview__canvas) {
+  max-width: 60px;
 }
 
 .studio-item__selected {
@@ -597,7 +606,7 @@ const {
   }
 
   .studio-item__image :deep(.skin-texture-preview__canvas) {
-    height: 90px;
+    max-height: 90px;
   }
 }
 </style>
