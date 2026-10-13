@@ -23,6 +23,7 @@ const balances = ref<WalletBalance[]>([])
 
 const primaryAsset = computed(() => assets.value.find(asset => asset.code === 'CNY') || assets.value[0])
 const primaryBalance = computed(() => balanceOf(primaryAsset.value?.code))
+const primaryAmount = computed(() => formatAmount(primaryBalance.value, primaryAsset.value?.code))
 const otherBalances = computed(() => balances.value
   .filter(balance => balance.assetCode !== primaryAsset.value?.code)
   .slice(0, 3))
@@ -99,9 +100,9 @@ function openCard() {
             <span>{{ readableLabel(primaryAsset?.name, primaryAsset?.code || '钱包余额') }}</span>
             <FaButton v-if="card?.actionPath" size="sm" variant="ghost" aria-label="打开钱包" @click="openCard">钱包明细<FaIcon name="i-ri:arrow-right-up-line" /></FaButton>
           </div>
-          <strong>
+          <strong :title="primaryAmount" :style="{ '--wallet-amount-length': Math.max(primaryAmount.length, 8) }">
             <small>{{ readableLabel(primaryAsset?.symbol) }}</small>
-            {{ formatAmount(primaryBalance, primaryAsset?.code) }}
+            <span>{{ primaryAmount }}</span>
           </strong>
         </div>
 
