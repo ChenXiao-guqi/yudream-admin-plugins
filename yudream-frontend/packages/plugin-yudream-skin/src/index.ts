@@ -1,4 +1,8 @@
 import { defineYuDreamPlugin } from '@yudream/plugin-sdk'
+import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
+import type { PropType } from 'vue'
+import type { RouteLocationNormalizedLoaded } from 'vue-router'
+import { defineComponent, h } from 'vue'
 import 'virtual:uno.css'
 import './styles.css'
 import DashboardCurrentPlayerCard from './components/DashboardCurrentPlayerCard.vue'
@@ -6,16 +10,30 @@ import DashboardLegacyActionCard from './components/DashboardLegacyActionCard.vu
 import DashboardSkinPreviewCard from './components/DashboardSkinPreviewCard.vue'
 import DashboardStatsCard from './components/DashboardStatsCard.vue'
 import SkinPlugin from './SkinPlugin.vue'
+import type { SkinPage } from './types'
 
-export const Dashboard = SkinPlugin
-export const Closet = SkinPlugin
-export const Settings = SkinPlugin
-export const Migration = SkinPlugin
-export const Players = SkinPlugin
-export const Textures = SkinPlugin
-export const PlayerManagement = SkinPlugin
-export const TextureManagement = SkinPlugin
-export const ClosetManagement = SkinPlugin
+function skinRoutePage(name: string, page: SkinPage, scope: 'user' | 'admin') {
+  return defineComponent({
+    name,
+    props: {
+      sdk: { type: Object as PropType<YuDreamPluginSdk>, required: true },
+      route: { type: Object as PropType<RouteLocationNormalizedLoaded> },
+    },
+    setup(props) {
+      return () => h(SkinPlugin, { sdk: props.sdk, page, scope })
+    },
+  })
+}
+
+export const Dashboard = skinRoutePage('SkinDashboardRoute', 'dashboard', 'user')
+export const Closet = skinRoutePage('SkinClosetRoute', 'closet', 'user')
+export const Settings = skinRoutePage('SkinSettingsRoute', 'settings', 'admin')
+export const Migration = skinRoutePage('SkinMigrationRoute', 'migration', 'admin')
+export const Players = skinRoutePage('SkinPlayersRoute', 'players', 'user')
+export const Textures = skinRoutePage('SkinTexturesRoute', 'textures', 'user')
+export const PlayerManagement = skinRoutePage('SkinPlayerManagementRoute', 'playerManagement', 'admin')
+export const TextureManagement = skinRoutePage('SkinTextureManagementRoute', 'textureManagement', 'admin')
+export const ClosetManagement = skinRoutePage('SkinClosetManagementRoute', 'closetManagement', 'admin')
 export const ACTION_CARD = DashboardLegacyActionCard
 
 export const routes = {

@@ -21,7 +21,7 @@ const filteredRows = computed(() => {
   const keyword = search.keyword.trim().toLowerCase()
   const userId = search.userId.trim()
   return props.model.closetItems.filter((item) => {
-    if (userId && !item.userId.includes(userId)) {
+    if (userId && !item.userId?.includes(userId)) {
       return false
     }
     if (!keyword) {

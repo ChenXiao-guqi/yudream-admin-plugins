@@ -63,7 +63,7 @@ export interface SkinTexture {
 
 export interface SkinClosetItem {
   id: string
-  userId: string
+  userId?: string
   textureHash: string
   itemName?: string
   createdAt?: number

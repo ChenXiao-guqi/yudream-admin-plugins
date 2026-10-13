@@ -143,19 +143,21 @@ export function useSkinPlugin(sdk: YuDreamPluginSdk) {
     try {
       const [status, current, textureList, currentMigration] = await Promise.all([
         api.status(),
-        api.me(),
+        canUse.value ? api.me() : Promise.resolve<SkinMe>({
+          userId: sdk.account.userId || '',
+          permissions: sdk.account.permissions,
+        }),
         includeTextures
           ? (nextScope === 'admin' ? api.adminTextures() : api.textures())
           : Promise.resolve(textures.value),
         options.includeMigration ? api.migrationStatus().catch(() => migrationStatus.value) : Promise.resolve(migrationStatus.value),
       ])
-      me.value = current
       const [playerList, closetList] = await Promise.all([
         includePlayers
-          ? (nextScope === 'admin' ? api.adminPlayers() : api.players())
+          ? (nextScope === 'admin' ? api.adminPlayers() : canUse.value ? api.players() : Promise.resolve([]))
           : Promise.resolve(players.value),
         includeCloset
-          ? (nextScope === 'admin' ? api.adminCloset() : api.closet())
+          ? (nextScope === 'admin' ? api.adminCloset() : canUse.value ? api.closet() : Promise.resolve([]))
           : Promise.resolve(closetItems.value),
       ])
       const [userList, savedSettings] = nextScope === 'admin' && canManage.value
@@ -164,6 +166,7 @@ export function useSkinPlugin(sdk: YuDreamPluginSdk) {
       if (currentLoadVersion !== loadVersion || scope.value !== nextScope) {
         return
       }
+      me.value = current
       summary.value = status
       users.value = userList
       players.value = playerList
@@ -540,41 +543,52 @@ export function useSkinPlugin(sdk: YuDreamPluginSdk) {
     await saveClosetItem()
   }
 
-  async function useTextureOnSelectedPlayer(texture = selectedTexture.value) {
+  async function applyTextureToSelectedPlayer(texture: SkinTexture | undefined, collect: boolean) {
     if (!texture) {
       toast.error('请先选择材质')
       return
     }
-    if (!selectedPlayerName.value) {
+    const player = selectedPlayer.value
+    if (!player) {
       toast.error('请先选择角色')
       return
     }
+    if (saving.value) {
+      return
+    }
+    const targetScope = scope.value
+    const outfit = {
+      skinHash: texture.type === 'cape' ? player.skinHash || '' : texture.hash,
+      capeHash: texture.type === 'cape' ? texture.hash : player.capeHash || '',
+    }
     saving.value = `use-texture:${texture.hash}`
     try {
-      const saveItem = scope.value === 'admin' ? api.saveAdminClosetItem : api.saveClosetItem
-      await saveItem({
-        userId: currentUserId.value,
-        textureHash: texture.hash,
-        itemName: texture.name,
-      })
-      if (texture.type === 'cape') {
-        assignForm.capeHash = texture.hash
+      const alreadyCollected = closetItems.value.some(item => item.textureHash === texture.hash
+        && (targetScope === 'user' || item.userId === currentUserId.value))
+      if (collect && !alreadyCollected) {
+        const saveItem = targetScope === 'admin' ? api.saveAdminClosetItem : api.saveClosetItem
+        await saveItem({
+          ...(targetScope === 'admin' ? { userId: currentUserId.value } : {}),
+          textureHash: texture.hash,
+          itemName: texture.name,
+        })
+      }
+      if (targetScope === 'admin') {
+        await api.assignAdminTextures(player.name, outfit)
       }
       else {
-        assignForm.skinHash = texture.hash
+        await api.assignTextures(player.name, outfit)
       }
-      if (scope.value === 'admin') {
-        await api.assignAdminTextures(selectedPlayerName.value, { ...assignForm })
-      }
-      else {
-        await api.assignTextures(selectedPlayerName.value, { ...assignForm })
-      }
-      toast.success('已保存到衣柜并应用到当前角色')
+      toast.success(collect ? '已保存到衣柜并应用到当前角色' : `外观已应用到 ${player.name}`)
       await load()
     }
     finally {
       saving.value = ''
     }
+  }
+
+  async function useTextureOnSelectedPlayer(texture = selectedTexture.value) {
+    await applyTextureToSelectedPlayer(texture, true)
   }
 
   async function useClosetItemOnSelectedPlayer(item = selectedClosetItem.value) {
@@ -587,7 +601,7 @@ export function useSkinPlugin(sdk: YuDreamPluginSdk) {
       toast.error('材质信息不存在')
       return
     }
-    await useTextureOnSelectedPlayer(texture)
+    await applyTextureToSelectedPlayer(texture, false)
   }
 
   async function renameClosetItem(item = selectedClosetItem.value) {
