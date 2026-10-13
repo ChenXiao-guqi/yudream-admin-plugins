@@ -87,19 +87,26 @@ async function load() {
 
 .skin-stats-card__grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0 20px;
 }
 
 .skin-stats-card__grid div {
-  display: grid;
-  gap: 5px;
-  min-height: 72px;
-  padding: 12px;
-  background: var(--color-fill-2);
-  border: 1px solid var(--color-border-1);
-  border-radius: 7px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  padding: 8px 0;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--color-border-1);
+  border-radius: 0;
 }
+
+.skin-stats-card__grid > div:first-child { grid-row: span 3; flex-direction: column-reverse; justify-content: center; align-items: flex-start; border-bottom: 0; border-right: 1px solid var(--color-border-1); }
+.skin-stats-card__grid > div:first-child strong { font-size: clamp(40px, 15cqi, 64px); line-height: 1; font-weight: 600; letter-spacing: -0.05em; }
+.skin-stats-card__grid > div:last-child { border-bottom: 0; }
 
 .skin-stats-card__grid span {
   color: var(--color-text-3);
@@ -108,7 +115,8 @@ async function load() {
 
 .skin-stats-card__grid strong {
   color: var(--color-text-1);
-  font-size: 24px;
-  font-weight: 800;
+  font-size: 20px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 </style>

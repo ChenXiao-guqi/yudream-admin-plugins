@@ -82,9 +82,9 @@ function openCard() {
     </div>
     <template v-else>
       <div class="skin-player-card__hero">
-        <span>{{ accountName }}</span>
+        <span v-if="accountName !== defaultPlayer?.name">{{ accountName }}</span>
         <h3>{{ defaultPlayer?.name || '还没有角色' }}</h3>
-        <p>{{ defaultPlayer ? '当前默认角色与外观绑定状态' : '创建角色后可以在首页快速查看外观状态' }}</p>
+        <p>{{ defaultPlayer ? '你的默认游戏角色' : '创建角色，开始定制你的外观' }}</p>
       </div>
 
       <div class="skin-player-card__stats">
@@ -104,8 +104,8 @@ function openCard() {
 
       <div class="skin-dashboard-card__actions">
         <FaButton v-if="card?.actionPath" size="sm" variant="ghost" @click="openCard">
-          <FaIcon name="i-ri:arrow-right-line" />
           管理角色
+          <FaIcon name="i-ri:arrow-right-up-line" />
         </FaButton>
       </div>
     </template>

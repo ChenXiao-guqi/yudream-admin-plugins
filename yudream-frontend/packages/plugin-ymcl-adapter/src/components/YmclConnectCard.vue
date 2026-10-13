@@ -29,7 +29,7 @@ async function copyOrigin() {
 function openYmcl() {
   const ok = openYmclProtocol(origin.value)
   if (ok) {
-    toast.info('已尝试唤起 YMCL；若拉起的是旧启动器，请重新构建并安装 YMCL-Axolotl（登记 ymcl://）')
+    toast.info('已尝试打开 YMCL；若没有响应，请确认已安装 YMCL-Axolotl')
   }
 }
 
@@ -41,8 +41,9 @@ function openPage() {
 <template>
   <div class="dashboard-card__content ymcl-connect-card">
     <div class="ymcl-connect-card__body">
+      <div class="ymcl-connect-card__intro"><FaIcon name="i-ri:gamepad-line" /><strong>连接你的启动器</strong></div>
       <p class="ymcl-connect-card__desc">
-        {{ card?.description || '一键唤起 YMCL-Axolotl 启动器并弹出添加域确认；也可以复制基址到启动器的添加域输入框。' }}
+        将本站添加到 YMCL，继续你的游戏旅程。
       </p>
       <button
         type="button"
@@ -57,17 +58,26 @@ function openPage() {
       </button>
       <p class="ymcl-connect-card__hint">
         <FaIcon name="i-ri:information-line" />
-        <span>点击地址复制基址；「打开 YMCL」走 ymcl:// 深链，需已安装 YMCL-Axolotl 并登记该协议。</span>
+        <span>需安装 YMCL-Axolotl；也可点击地址手动添加。</span>
       </p>
     </div>
     <div class="ymcl-connect-card__actions">
-      <FaButton size="sm" @click="openYmcl">
+      <FaButton v-if="card?.actionPath" size="sm" variant="ghost" @click="openPage">
+        域概览
+        <FaIcon name="i-ri:arrow-right-up-line" />
+      </FaButton>
+      <FaButton size="sm" variant="secondary" @click="openYmcl">
         <FaIcon name="i-ri:external-link-line" />
         打开 YMCL
-      </FaButton>
-      <FaButton v-if="card?.actionPath" size="sm" variant="outline" @click="openPage">
-        打开域概览
       </FaButton>
     </div>
   </div>
 </template>
+
+<style scoped>
+.ymcl-connect-card__intro { display: flex; align-items: center; gap: 10px; color: var(--color-text-1); }
+.ymcl-connect-card__intro > :first-child { font-size: 26px; }
+.ymcl-connect-card__intro strong { font-size: 17px; font-weight: 600; }
+.ymcl-connect-card__actions { justify-content: space-between; border-top: 0; padding-top: 0; }
+.ymcl-connect-card__hint { font-size: 10px; }
+</style>
