@@ -178,6 +178,28 @@
   pointer-events: none;
 }
 
+.mc-pet-global__toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+  border-radius: 50%;
+}
+
+.mc-pet-global.mc-pet-global--collapsed {
+  inset: auto 0 calc(12px + env(safe-area-inset-bottom)) auto;
+  cursor: default;
+}
+
+.mc-pet-global--collapsed .mc-pet-global__toggle {
+  position: static;
+  width: 28px;
+  height: 44px;
+  padding: 0;
+  border-radius: 14px 0 0 14px;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-text-1) 10%, transparent);
+}
+
 .mc-pet-global__bubble {
   position: absolute;
   right: 0;

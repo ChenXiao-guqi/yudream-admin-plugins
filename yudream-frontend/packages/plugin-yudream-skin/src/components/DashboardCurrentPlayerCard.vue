@@ -94,16 +94,16 @@ function openCard() {
         </div>
         <div>
           <span>皮肤</span>
-          <strong>{{ skin?.name || shortHash(defaultPlayer?.skinHash) }}</strong>
+          <strong :title="skin?.name || shortHash(defaultPlayer?.skinHash)">{{ skin?.name || shortHash(defaultPlayer?.skinHash) }}</strong>
         </div>
         <div>
           <span>披风</span>
-          <strong>{{ cape?.name || shortHash(defaultPlayer?.capeHash) }}</strong>
+          <strong :title="cape?.name || shortHash(defaultPlayer?.capeHash)">{{ cape?.name || shortHash(defaultPlayer?.capeHash) }}</strong>
         </div>
       </div>
 
       <div class="skin-dashboard-card__actions">
-        <FaButton v-if="card?.actionPath" size="sm" @click="openCard">
+        <FaButton v-if="card?.actionPath" size="sm" variant="ghost" @click="openCard">
           <FaIcon name="i-ri:arrow-right-line" />
           管理角色
         </FaButton>
@@ -172,10 +172,11 @@ function openCard() {
   display: grid;
   min-width: 0;
   gap: 4px;
-  padding: 9px 10px;
-  background: var(--color-fill-2);
-  border: 1px solid var(--color-border-1);
-  border-radius: 7px;
+  padding: 10px 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  border-top: 1px solid var(--color-border-2);
 }
 
 .skin-player-card__stats span {
@@ -200,7 +201,7 @@ function openCard() {
 
 @container (max-width: 360px) {
   .skin-player-card__stats {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 0.5fr) repeat(2, minmax(0, 1fr));
   }
 }
 </style>

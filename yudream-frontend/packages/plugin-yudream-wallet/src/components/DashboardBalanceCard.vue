@@ -52,6 +52,11 @@ function assetByCode(assetCode?: string) {
   return assets.value.find(asset => asset.code === assetCode)
 }
 
+// A damaged configured label must not obscure the asset identity or amount.
+function readableLabel(value?: string, fallback = '') {
+  return value && !Array.from(value).some(char => char.codePointAt(0) === 0xFFFD) ? value : fallback
+}
+
 function balanceOf(assetCode?: string) {
   if (!assetCode) {
     return '0'
@@ -90,17 +95,17 @@ function openCard() {
     <template v-else>
       <div class="wallet-dashboard-card__body">
         <div class="wallet-dashboard-card__main">
-          <span>{{ primaryAsset?.name || '钱包余额' }}</span>
+          <span>{{ readableLabel(primaryAsset?.name, primaryAsset?.code || '钱包余额') }}</span>
           <strong>
-            <small>{{ primaryAsset?.symbol }}</small>
+            <small>{{ readableLabel(primaryAsset?.symbol) }}</small>
             {{ formatAmount(primaryBalance, primaryAsset?.code) }}
           </strong>
         </div>
 
         <div class="wallet-dashboard-card__assets">
           <div v-for="balance in otherBalances" :key="balance.assetCode">
-            <span>{{ assetByCode(balance.assetCode)?.name || balance.assetCode }}</span>
-            <strong>{{ assetByCode(balance.assetCode)?.symbol }}{{ formatAmount(balance.balance, balance.assetCode) }}</strong>
+            <span :title="readableLabel(assetByCode(balance.assetCode)?.name) ? undefined : '资产名称配置异常，当前显示资产编码'">{{ readableLabel(assetByCode(balance.assetCode)?.name, balance.assetCode) }}</span>
+            <strong>{{ readableLabel(assetByCode(balance.assetCode)?.symbol) }}{{ formatAmount(balance.balance, balance.assetCode) }}</strong>
           </div>
           <div v-if="!otherBalances.length">
             <span>其他资产</span>
@@ -110,7 +115,7 @@ function openCard() {
       </div>
 
       <div class="wallet-dashboard-card__actions">
-        <FaButton v-if="card?.actionPath" size="sm" @click="openCard">
+        <FaButton v-if="card?.actionPath" size="sm" variant="ghost" @click="openCard">
           <FaIcon name="i-ri:wallet-3-line" />
           打开钱包
         </FaButton>

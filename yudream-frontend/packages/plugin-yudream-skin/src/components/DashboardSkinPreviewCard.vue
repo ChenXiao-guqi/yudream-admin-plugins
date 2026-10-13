@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { SkinMe, SkinPlayer, SkinTexture } from '../types'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { FaButton, FaIcon } from '@yudream/components'
 import { createSkinApi } from '../api/skin-api'
 import SkinPreview from './SkinPreview.vue'
@@ -36,6 +36,33 @@ const capeTexture = computed(() => textureByHash(defaultPlayer.value?.capeHash))
 const skinUrl = computed(() => api.textureUrl(defaultPlayer.value?.skinHash))
 const capeUrl = computed(() => api.textureUrl(defaultPlayer.value?.capeHash))
 const slim = computed(() => skinTexture.value?.model === 'slim')
+const appearanceSummary = computed(() => {
+  if (skinUrl.value && capeUrl.value) return '皮肤与披风已装备'
+  if (skinUrl.value) return '皮肤已装备'
+  if (capeUrl.value) return '披风已装备'
+  return '选择一套喜欢的外观'
+})
+const appearanceDetails = computed(() => [
+  skinTexture.value?.name && `皮肤：${skinTexture.value.name}`,
+  capeTexture.value?.name && `披风：${capeTexture.value.name}`,
+].filter(Boolean).join('\n'))
+const previewArea = ref<HTMLElement | null>(null)
+const frame = ref({ width: 220, height: 210 })
+let observer: ResizeObserver | undefined
+watch(previewArea, (element) => {
+  observer?.disconnect()
+  if (!element) {
+    return
+  }
+  observer = new ResizeObserver(([entry]) => {
+    frame.value = {
+      width: Math.max(100, Math.floor(entry.contentRect.width)),
+      height: Math.max(100, Math.floor(entry.contentRect.height)),
+    }
+  })
+  observer.observe(element)
+})
+onBeforeUnmount(() => observer?.disconnect())
 
 onMounted(load)
 
@@ -80,21 +107,24 @@ function openCard() {
       {{ error }}
     </div>
     <template v-else>
-      <SkinPreview
-        compact
-        :skin="skinUrl"
-        :cape="capeUrl"
-        :slim="slim"
-      >
-        <div class="skin-preview-card__meta">
+      <div ref="previewArea" class="skin-preview-card__viewer">
+        <SkinPreview
+          compact
+          :frame-width="frame.width"
+          :frame-height="frame.height"
+          :skin="skinUrl"
+          :cape="capeUrl"
+          :slim="slim"
+        />
+      </div>
+      <div class="skin-preview-card__footer">
+        <div class="skin-preview-card__meta" :title="appearanceDetails">
           <strong>{{ defaultPlayer?.name || '还没有角色' }}</strong>
-          <span>{{ skinTexture?.name || '未绑定皮肤' }} · {{ capeTexture?.name || '未绑定披风' }}</span>
+          <span>{{ appearanceSummary }}</span>
         </div>
-      </SkinPreview>
-      <div class="skin-dashboard-card__actions">
-        <FaButton v-if="card?.actionPath" size="sm" variant="outline" @click="openCard">
-          <FaIcon name="i-ri:t-shirt-2-line" />
+        <FaButton v-if="card?.actionPath" size="sm" variant="ghost" class="skin-preview-card__change" @click="openCard">
           换装
+          <FaIcon name="i-ri:arrow-right-line" />
         </FaButton>
       </div>
     </template>
@@ -103,17 +133,24 @@ function openCard() {
 
 <style scoped>
 .skin-dashboard-card {
-  display: grid;
-  gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
   min-width: 0;
   overflow: hidden;
+}
+
+.skin-preview-card__viewer {
+  flex: 1;
+  min-height: 100px;
+  min-width: 0;
 }
 
 .skin-dashboard-card__state {
   display: flex;
   gap: 8px;
   align-items: center;
-  min-height: 220px;
+  min-height: 100px;
   color: var(--color-text-3);
   font-size: 13px;
 }
@@ -126,16 +163,21 @@ function openCard() {
   min-width: 0;
   padding: 0;
   border: 0;
+  border-radius: 0;
   background: transparent;
 }
 
 .skin-preview-card :deep(.skin-preview__stage) {
   width: 100%;
-  min-height: 220px;
+  min-height: 100px;
+}
+
+.skin-preview-card :deep(canvas) {
+  filter: none;
 }
 
 .skin-preview-card :deep(.skin-preview__empty) {
-  min-height: 190px;
+  min-height: 100px;
 }
 
 .skin-preview-card__meta {
@@ -153,7 +195,8 @@ function openCard() {
 
 .skin-preview-card__meta strong {
   color: var(--color-text-1);
-  font-size: 13px;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .skin-preview-card__meta span {
@@ -161,8 +204,18 @@ function openCard() {
   font-size: 12px;
 }
 
-.skin-dashboard-card__actions {
+.skin-preview-card__footer {
   display: flex;
-  justify-content: flex-end;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-border-1);
+}
+
+.skin-preview-card__change {
+  flex: 0 0 auto;
 }
 </style>

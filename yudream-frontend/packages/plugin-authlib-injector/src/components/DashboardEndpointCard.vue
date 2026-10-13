@@ -44,7 +44,6 @@ function absoluteUrl(url: string) {
 <template>
   <div class="dashboard-card__content authlib-dashboard-card">
     <div class="authlib-dashboard-card__body">
-      <p v-if="card.description" class="authlib-dashboard-card__desc">{{ card.description }}</p>
       <button
         type="button"
         class="authlib-dashboard-card__endpoint"
@@ -58,13 +57,11 @@ function absoluteUrl(url: string) {
           <FaIcon name="i-ri:file-copy-line" />
         </span>
       </button>
-      <p class="authlib-dashboard-card__hint">
-        <FaIcon name="i-ri:information-line" />
-        <span>点击复制地址，也可拖到支持导入配置的客户端</span>
-      </p>
+
     </div>
     <div class="authlib-dashboard-card__actions">
-      <FaButton v-if="card.actionPath" size="sm" variant="outline" @click="onOpen?.(card)">打开管理</FaButton>
+      <span class="authlib-dashboard-card__hint">点击复制，或拖入启动器</span>
+      <FaButton v-if="card.actionPath" size="sm" variant="ghost" @click="onOpen?.(card)">打开管理</FaButton>
     </div>
   </div>
 </template>

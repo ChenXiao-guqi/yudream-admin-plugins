@@ -66,6 +66,8 @@ const props = withDefaults(defineProps<{
   cape?: string
   slim?: boolean
   compact?: boolean
+  frameWidth?: number
+  frameHeight?: number
   autoRotate?: boolean
   controls?: boolean
   view?: 'front' | 'back' | 'left' | 'right'
@@ -110,8 +112,8 @@ const animations = [
   { label: '行走', create: () => new WalkingAnimation() },
   { label: '奔跑', create: () => new RunningAnimation() },
 ]
-const width = computed(() => props.compact ? 220 : 320)
-const height = computed(() => props.compact ? 270 : 390)
+const width = computed(() => props.frameWidth ?? (props.compact ? 220 : 320))
+const height = computed(() => props.frameHeight ?? (props.compact ? 270 : 390))
 const fov = computed(() => props.compact ? 48 : 46)
 const zoom = computed(() => props.compact ? 0.86 : 0.84)
 const rotateSpeed = computed(() => props.compact ? 0.55 : 0.42)
@@ -144,7 +146,7 @@ onMounted(() => {
   themeObserver = new MutationObserver(syncThemeBackgrounds)
   themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'style'] })
   if (document.body) {
-    themeObserver.observe(document.body, { attributes: true, attributeFilter: ['class', 'style'] })
+    themeObserver.observe(document.body, { attributes: true, attributeFilter: ['class', 'style', 'arco-theme'] })
   }
   void applyView()
   syncRotationLoop()
@@ -156,7 +158,7 @@ onBeforeUnmount(() => {
   stopRotationLoop()
 })
 
-watch([viewRotation, rotateEnabled, () => props.skin, () => props.cape], () => {
+watch([viewRotation, rotateEnabled, backgroundValue, () => props.skin, () => props.cape], () => {
   void applyView()
   syncRotationLoop()
 }, { flush: 'post' })
@@ -223,6 +225,14 @@ function stopRotationLoop() {
 
 function configureViewerFrame(viewer: SkinViewer) {
   viewer.playerWrapper.position.y = verticalOffset.value
+  // The embedded viewer's FXAA pass outputs raw color channels. Set them
+  // explicitly so shared Three.js color-management state cannot darken the
+  // theme surface a second time. Other plugins' renderers are left untouched.
+  const background = viewer.background
+  if (background && 'isColor' in background) {
+    const value = backgroundValue.value
+    background.setRGB(((value >> 16) & 255) / 255, ((value >> 8) & 255) / 255, (value & 255) / 255)
+  }
 }
 
 function resolveViewer(): SkinViewer | null {
@@ -237,13 +247,15 @@ function resolveViewer(): SkinViewer | null {
 }
 
 function syncThemeBackgrounds() {
-  const styles = getComputedStyle(document.documentElement)
+  // Arco's surface tokens live on body and change with arco-theme. Reading the
+  // root misses them and leaves a white WebGL canvas in dark mode.
+  const styles = getComputedStyle(document.body)
   const surface = readThemeColor(styles, '--color-bg-1', { r: 247, g: 247, b: 248 })
   const panel = readThemeColor(styles, '--color-bg-2', surface)
   const primary = readThemeColor(styles, '--primary-6', { r: 22, g: 93, b: 255 })
   const currentIndex = backgrounds.value.findIndex(item => item.value === backgroundValue.value)
   const brightenRatio = colorLuminance(surface) < 96 ? 0.1 : 0.72
-  const base = mixColor(surface, { r: 255, g: 255, b: 255 }, brightenRatio)
+  const base = props.compact ? panel : mixColor(surface, { r: 255, g: 255, b: 255 }, brightenRatio)
   const nextBackgrounds = [
     toPreviewBackground('表面', base),
     toPreviewBackground('柔和', mixColor(base, panel, 0.35)),
@@ -276,14 +288,14 @@ function parseCssColor(value: string): RgbColor | null {
       b: Number.parseInt(full.slice(4, 6), 16),
     }
   }
-  const rgb = text.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/i) || text.match(/^(\d+),\s*(\d+),\s*(\d+)$/)
-  if (!rgb) {
+  const rgb = text.replace(/^rgba?\(|\)$/gi, '').split(/[,\s/]+/).filter(Boolean).map(Number)
+  if (rgb.length < 3 || !rgb.slice(0, 3).every(value => Number.isFinite(value) && value >= 0 && value <= 255)) {
     return null
   }
   return {
-    r: Number(rgb[1]),
-    g: Number(rgb[2]),
-    b: Number(rgb[3]),
+    r: rgb[0],
+    g: rgb[1],
+    b: rgb[2],
   }
 }
 

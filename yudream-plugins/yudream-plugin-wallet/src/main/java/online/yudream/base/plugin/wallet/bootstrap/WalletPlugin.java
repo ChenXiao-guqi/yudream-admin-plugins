@@ -53,9 +53,9 @@ import java.util.Map;
         actionPath = "/platform/plugins/yudream-wallet",
         tone = "green",
         defaultW = 4,
-        defaultH = 2,
+        defaultH = 3,
         minW = 3,
-        minH = 2,
+        minH = 3,
         sort = 40
 )
 @PluginFrontend(

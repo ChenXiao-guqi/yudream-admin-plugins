@@ -3,16 +3,19 @@
     v-if="pet && !pet.hidden"
     ref="rootRef"
     class="mc-pet-global"
-    :class="[`mc-pet-global--${pet.corner}`, { 'mc-pet-global--dragging': dragging }]"
+    :class="[`mc-pet-global--${pet.corner}`, { 'mc-pet-global--dragging': dragging, 'mc-pet-global--collapsed': collapsed }]"
     :style="positionStyle"
     @pointerdown="onPointerDown"
   >
+    <FaButton class="mc-pet-global__toggle" variant="outline" size="icon-sm" :aria-label="collapsed ? '展开网页宠物' : '收起网页宠物'" :title="collapsed ? '展开网页宠物' : '收起网页宠物'" @pointerdown.stop @click.stop="toggleCollapsed">
+      <FaIcon :name="collapsed ? 'morph:ghost' : 'morph:minus'" />
+    </FaButton>
     <transition name="mc-pet-speech">
-      <div v-if="speech" class="mc-pet-global__speech" @pointerdown.stop>
+      <div v-if="speech && !collapsed" class="mc-pet-global__speech" @pointerdown.stop>
         {{ speech }}
       </div>
     </transition>
-    <div class="mc-pet-global__stage" :style="{ width: `${pet.size}px`, height: `${Math.round(pet.size * 1.2)}px` }">
+    <div v-if="!collapsed" class="mc-pet-global__stage" :style="{ width: `${pet.size}px`, height: `${Math.round(pet.size * 1.2)}px` }">
       <PetStage
         :skin="skinUrl"
         :slim="pet.model === 'slim'"
@@ -43,6 +46,7 @@
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { MyPet, PetAnimation } from '../types'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { FaButton, FaIcon } from '@yudream/components'
 import { useRouter } from 'vue-router'
 import { createMcPetApi } from '../api/mc-pet-api'
 import { getPetAction, registerPetAction } from '../pet/actions'
@@ -63,6 +67,21 @@ const speech = ref<string | null>(null)
 const burst = ref<PetAnimation | null>(null)
 const rootRef = ref<HTMLElement | null>(null)
 const dragOffset = ref<{ x: number, y: number } | null>(null)
+const mobileQuery = window.matchMedia('(max-width: 768px)')
+const collapsed = ref(mobileQuery.matches)
+
+function toggleCollapsed() {
+  collapsed.value = !collapsed.value
+  menuOpen.value = false
+  speech.value = null
+}
+
+function onViewportChange(event: MediaQueryListEvent) {
+  if (event.matches) {
+    collapsed.value = true
+    menuOpen.value = false
+  }
+}
 
 const DRAG_THRESHOLD = 4
 /** 各类短动画的时长（毫秒），结束后回到 idle。 */
@@ -128,6 +147,7 @@ const currentAnimation = computed<PetAnimation>(() => {
 })
 
 const positionStyle = computed(() => {
+  if (collapsed.value) return {}
   if (dragOffset.value) {
     return { left: `${dragOffset.value.x}px`, top: `${dragOffset.value.y}px`, right: 'auto', bottom: 'auto' }
   }
@@ -183,12 +203,14 @@ const menuItems = computed<MenuItem[]>(() => [
 ])
 
 onMounted(() => {
+  mobileQuery.addEventListener('change', onViewportChange)
   registerLocalActions()
   void load()
   document.addEventListener('pointerdown', onDocumentPointerDown, true)
 })
 
 onBeforeUnmount(() => {
+  mobileQuery.removeEventListener('change', onViewportChange)
   document.removeEventListener('pointerdown', onDocumentPointerDown, true)
   clearTimer('burst')
   clearTimer('speech')
@@ -267,7 +289,7 @@ function scheduleAmbient() {
     ambientTimer = null
     const current = pet.value
     if (current && !current.hidden && !dragging.value && !document.hidden) {
-      if (current.animation) {
+      if (current.animation && !collapsed.value) {
         const roll = Math.random()
         if (roll < 0.4) {
           say(pick(CHATTER_LINES))
@@ -307,7 +329,7 @@ function clearTimer(kind: 'burst' | 'speech' | 'ambient') {
 }
 
 function onPointerDown(event: PointerEvent) {
-  if (event.button !== 0 || !pet.value) {
+  if (event.button !== 0 || !pet.value || collapsed.value) {
     return
   }
   pointerStart = { x: event.clientX, y: event.clientY }
