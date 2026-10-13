@@ -46,6 +46,8 @@ const appearanceDetails = computed(() => [
   skinTexture.value?.name && `皮肤：${skinTexture.value.name}`,
   capeTexture.value?.name && `披风：${capeTexture.value.name}`,
 ].filter(Boolean).join('\n'))
+const equippedSkin = computed(() => skinTexture.value?.name || (skinUrl.value ? '已装备皮肤' : '未装备皮肤'))
+const equippedCape = computed(() => capeTexture.value?.name || (capeUrl.value ? '已装备披风' : '未装备披风'))
 const previewArea = ref<HTMLElement | null>(null)
 const frame = ref({ width: 220, height: 210 })
 let observer: ResizeObserver | undefined
@@ -56,8 +58,8 @@ watch(previewArea, (element) => {
   }
   observer = new ResizeObserver(([entry]) => {
     frame.value = {
-      width: Math.max(100, Math.floor(entry.contentRect.width)),
-      height: Math.max(100, Math.floor(entry.contentRect.height)),
+      width: Math.max(1, Math.floor(entry.contentRect.width)),
+      height: Math.max(1, Math.floor(entry.contentRect.height)),
     }
   })
   observer.observe(element)
@@ -107,7 +109,7 @@ function openCard() {
       {{ error }}
     </div>
     <template v-else>
-      <div ref="previewArea" class="skin-preview-card__viewer">
+      <div ref="previewArea" class="skin-preview-card__viewer" :aria-label="`${defaultPlayer?.name || '角色'}的三维外观预览`">
         <SkinPreview
           compact
           :frame-width="frame.width"
@@ -121,6 +123,10 @@ function openCard() {
         <div class="skin-preview-card__meta" :title="appearanceDetails">
           <strong>{{ defaultPlayer?.name || '还没有角色' }}</strong>
           <span>{{ appearanceSummary }}</span>
+          <dl class="skin-preview-card__equipment">
+            <div><dt>皮肤</dt><dd :title="equippedSkin">{{ equippedSkin }}</dd></div>
+            <div><dt>披风</dt><dd :title="equippedCape">{{ equippedCape }}</dd></div>
+          </dl>
         </div>
         <FaButton v-if="card?.actionPath" size="sm" variant="ghost" class="skin-preview-card__change" @click="openCard">
           换装
@@ -142,15 +148,17 @@ function openCard() {
 
 .skin-preview-card__viewer {
   flex: 1;
-  min-height: 100px;
+  min-height: 0;
   min-width: 0;
+  overflow: hidden;
 }
 
 .skin-dashboard-card__state {
   display: flex;
   gap: 8px;
   align-items: center;
-  min-height: 100px;
+  flex: 1;
+  min-height: 0;
   color: var(--color-text-3);
   font-size: 13px;
 }
@@ -160,6 +168,10 @@ function openCard() {
 }
 
 .skin-preview-card :deep(.skin-preview) {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  gap: 0;
   min-width: 0;
   padding: 0;
   border: 0;
@@ -169,7 +181,9 @@ function openCard() {
 
 .skin-preview-card :deep(.skin-preview__stage) {
   width: 100%;
-  min-height: 100px;
+  height: 100%;
+  min-height: 0;
+  background: transparent;
 }
 
 .skin-preview-card :deep(canvas) {
@@ -177,7 +191,7 @@ function openCard() {
 }
 
 .skin-preview-card :deep(.skin-preview__empty) {
-  min-height: 100px;
+  min-height: 0;
 }
 
 .skin-preview-card__meta {
@@ -211,11 +225,72 @@ function openCard() {
   justify-content: space-between;
   gap: 12px;
   min-width: 0;
-  padding-top: 14px;
+  padding-top: 10px;
   border-top: 1px solid var(--color-border-1);
 }
 
 .skin-preview-card__change {
   flex: 0 0 auto;
+}
+
+.skin-preview-card__equipment {
+  display: none;
+  margin: 0;
+}
+
+@container dashboard-card (min-width: 560px) {
+  .skin-preview-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr);
+    gap: 24px;
+  }
+
+  .skin-preview-card__footer {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: 14px;
+    padding-top: 0;
+    padding-left: 24px;
+    border-top: 0;
+    border-left: 1px solid var(--color-border-1);
+  }
+
+  .skin-preview-card__meta {
+    gap: 7px;
+  }
+
+  .skin-preview-card__meta strong {
+    font-size: 19px;
+  }
+
+  .skin-preview-card__equipment {
+    display: grid;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .skin-preview-card__equipment > div {
+    display: grid;
+    grid-template-columns: 30px minmax(0, 1fr);
+    gap: 10px;
+    font-size: 12px;
+  }
+
+  .skin-preview-card__equipment dt {
+    color: var(--color-text-3);
+  }
+
+  .skin-preview-card__equipment dd {
+    overflow: hidden;
+    margin: 0;
+    color: var(--color-text-2);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .skin-preview-card__change {
+    align-self: flex-start;
+  }
 }
 </style>

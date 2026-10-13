@@ -44,12 +44,12 @@ async function load() {
     <template v-else>
       <div class="skin-stats-card__grid">
         <div>
-          <span>用户</span>
-          <strong>{{ summary?.users ?? 0 }}</strong>
-        </div>
-        <div>
           <span>角色</span>
           <strong>{{ summary?.players ?? 0 }}</strong>
+        </div>
+        <div>
+          <span>用户</span>
+          <strong>{{ summary?.users ?? 0 }}</strong>
         </div>
         <div>
           <span>材质</span>
@@ -70,13 +70,15 @@ async function load() {
   gap: 12px;
   align-content: center;
   min-width: 0;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .skin-stats-card__state {
   display: flex;
   gap: 8px;
   align-items: center;
-  min-height: 92px;
+  min-height: 0;
   color: var(--color-text-3);
   font-size: 13px;
 }
@@ -89,6 +91,8 @@ async function load() {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 0 20px;
+  width: 100%;
+  min-width: 0;
 }
 
 .skin-stats-card__grid div {
@@ -96,17 +100,34 @@ async function load() {
   gap: 8px;
   align-items: center;
   justify-content: space-between;
-  min-height: 44px;
-  padding: 8px 0;
+  min-width: 0;
+  min-height: 38px;
+  padding: 7px 0;
   background: transparent;
   border: 0;
   border-bottom: 1px solid var(--color-border-1);
   border-radius: 0;
 }
 
-.skin-stats-card__grid > div:first-child { grid-row: span 3; flex-direction: column-reverse; justify-content: center; align-items: flex-start; border-bottom: 0; border-right: 1px solid var(--color-border-1); }
-.skin-stats-card__grid > div:first-child strong { font-size: clamp(40px, 15cqi, 64px); line-height: 1; font-weight: 600; letter-spacing: -0.05em; }
-.skin-stats-card__grid > div:last-child { border-bottom: 0; }
+.skin-stats-card__grid > div:first-child {
+  grid-row: span 3;
+  flex-direction: column-reverse;
+  justify-content: center;
+  align-items: flex-start;
+  border-bottom: 0;
+  border-right: 1px solid var(--color-border-1);
+}
+
+.skin-stats-card__grid > div:first-child strong {
+  font-size: clamp(36px, 13cqi, 60px);
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: -0.05em;
+}
+
+.skin-stats-card__grid > div:last-child {
+  border-bottom: 0;
+}
 
 .skin-stats-card__grid span {
   color: var(--color-text-3);
@@ -118,5 +139,47 @@ async function load() {
   font-size: 20px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
+}
+
+@container dashboard-card (max-height: 240px) {
+  .skin-stats-card__grid div {
+    min-height: 28px;
+    padding-block: 4px;
+  }
+
+  .skin-stats-card__grid > div:first-child strong {
+    font-size: 36px;
+  }
+
+  .skin-stats-card__grid strong {
+    font-size: 17px;
+  }
+}
+
+@container dashboard-card (min-width: 560px) {
+  .skin-stats-card__grid {
+    grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    align-items: center;
+  }
+
+  .skin-stats-card__grid > div,
+  .skin-stats-card__grid > div:first-child {
+    grid-row: auto;
+    flex-direction: column-reverse;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 8px;
+    border: 0;
+  }
+
+  .skin-stats-card__grid > div + div {
+    padding-left: 20px;
+    border-left: 1px solid var(--color-border-1);
+  }
+
+  .skin-stats-card__grid strong {
+    font-size: clamp(23px, 4cqi, 36px);
+  }
 }
 </style>

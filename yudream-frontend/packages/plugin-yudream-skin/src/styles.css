@@ -384,210 +384,15 @@
   font-size: 24px;
 }
 
+/* Workbench card details live with their Vue components, so older page
+   layouts cannot override the card's container-dependent arrangement. */
 .skin-dashboard-card,
 .skin-stats-card {
-  display: flex;
   flex: 1;
-  flex-direction: column;
-  gap: 14px;
   min-width: 0;
   min-height: 0;
   margin: 2px 16px 16px;
   overflow: hidden;
-}
-
-.skin-dashboard-card {
-  justify-content: space-between;
-}
-
-.skin-stats-card {
-  justify-content: center;
-}
-
-.skin-dashboard-card__state,
-.skin-stats-card__state {
-  display: flex;
-  flex: 1;
-  gap: 8px;
-  align-items: center;
-  justify-content: center;
-  min-height: 120px;
-  color: var(--color-text-3);
-  font-size: 13px;
-}
-
-.skin-preview-card .skin-dashboard-card__state {
-  min-height: 220px;
-}
-
-.skin-dashboard-card__state.error,
-.skin-stats-card__state.error {
-  color: rgb(var(--danger-6));
-}
-
-.skin-player-card__hero {
-  display: grid;
-  gap: 5px;
-  min-width: 0;
-}
-
-.skin-player-card__hero span {
-  min-width: 0;
-  overflow: hidden;
-  color: var(--color-text-3);
-  font-size: 12px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.skin-player-card__hero h3 {
-  margin: 0;
-  overflow: hidden;
-  color: var(--color-text-1);
-  font-size: 22px;
-  font-weight: 800;
-  line-height: 1.2;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.skin-player-card__hero p {
-  display: -webkit-box;
-  margin: 0;
-  overflow: hidden;
-  -webkit-line-clamp: 2;
-  color: var(--color-text-3);
-  font-size: 12px;
-  line-height: 1.5;
-  overflow-wrap: anywhere;
-  -webkit-box-orient: vertical;
-}
-
-.skin-player-card__stats {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  min-width: 0;
-}
-
-.skin-player-card__stats div,
-.skin-stats-card__grid div {
-  display: grid;
-  min-width: 0;
-  background: var(--color-fill-1);
-  border: 1px solid var(--color-border-1);
-  border-radius: 6px;
-}
-
-.skin-player-card__stats div {
-  gap: 4px;
-  padding: 9px 10px;
-}
-
-.skin-player-card__stats span,
-.skin-stats-card__grid span {
-  min-width: 0;
-  overflow: hidden;
-  color: var(--color-text-3);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.skin-player-card__stats span {
-  font-size: 11px;
-}
-
-.skin-player-card__stats strong,
-.skin-stats-card__grid strong {
-  min-width: 0;
-  overflow: hidden;
-  color: var(--color-text-1);
-  font-weight: 800;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.skin-player-card__stats strong {
-  font-size: 13px;
-}
-
-.skin-preview-card {
-  justify-content: flex-start;
-}
-
-.skin-preview-card .skin-preview {
-  min-width: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
-}
-
-.skin-preview-card .skin-preview__stage {
-  width: 100%;
-  min-height: 220px;
-}
-
-.skin-preview-card .skin-preview__empty {
-  min-height: 190px;
-}
-
-.skin-preview-card__meta {
-  display: grid;
-  min-width: 0;
-  gap: 3px;
-}
-
-.skin-preview-card__meta strong,
-.skin-preview-card__meta span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.skin-preview-card__meta strong {
-  color: var(--color-text-1);
-  font-size: 13px;
-}
-
-.skin-preview-card__meta span {
-  color: var(--color-text-3);
-  font-size: 12px;
-}
-
-.skin-stats-card__grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  min-width: 0;
-}
-
-.skin-stats-card__grid div {
-  gap: 5px;
-  min-height: 72px;
-  padding: 12px;
-}
-
-.skin-stats-card__grid span {
-  font-size: 12px;
-}
-
-.skin-stats-card__grid strong {
-  font-size: 24px;
-  line-height: 1.1;
-}
-
-.skin-dashboard-card__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-  justify-content: flex-start;
-  min-width: 0;
-  padding-top: 2px;
-}
-
-.skin-preview-card .skin-dashboard-card__actions {
-  justify-content: flex-end;
 }
 
 .skin-dashboard-layout {
@@ -1789,8 +1594,6 @@
     margin-inline: 14px;
   }
 
-  .skin-player-card__stats,
-  .skin-stats-card__grid,
   .skin-detail-meta {
     grid-template-columns: 1fr;
   }

@@ -83,7 +83,7 @@ function openCard() {
     <template v-else>
       <div class="skin-player-card__hero">
         <div>
-          <span v-if="accountName !== defaultPlayer?.name">{{ accountName }}</span>
+          <span v-if="accountName !== defaultPlayer?.name" class="skin-player-card__account">{{ accountName }}</span>
           <h3 :title="defaultPlayer?.name">{{ defaultPlayer?.name || '还没有角色' }}</h3>
           <p>{{ defaultPlayer ? `默认角色 · 共 ${players.length} 个角色` : '创建角色，开始定制你的外观' }}</p>
         </div>
@@ -109,15 +109,18 @@ function openCard() {
 .skin-dashboard-card {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 12px;
   min-width: 0;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .skin-dashboard-card__state {
   display: flex;
   gap: 8px;
   align-items: center;
-  min-height: 92px;
+  flex: 1;
+  min-height: 0;
   color: var(--color-text-3);
   font-size: 13px;
 }
@@ -136,13 +139,16 @@ function openCard() {
 
 .skin-player-card__hero > div {
   display: grid;
-  gap: 8px;
+  gap: 5px;
   min-width: 0;
 }
 
 .skin-player-card__hero span {
+  overflow: hidden;
   color: var(--color-text-3);
   font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .skin-player-card__hero h3 {
@@ -166,7 +172,10 @@ function openCard() {
 .skin-player-card__stats {
   display: grid;
   flex: 1;
+  grid-template-columns: minmax(0, 1fr);
   align-content: center;
+  min-width: 0;
+  gap: 0;
 }
 
 .skin-player-card__stats div {
@@ -175,7 +184,7 @@ function openCard() {
   align-items: center;
   min-width: 0;
   gap: 8px;
-  padding: 14px 0;
+  padding: 11px 0;
   background: transparent;
   border: 0;
   border-radius: 0;
@@ -192,6 +201,7 @@ function openCard() {
   color: var(--color-text-1);
   font-size: 13px;
   font-weight: 500;
+  line-height: 1.4;
   text-align: right;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -200,5 +210,50 @@ function openCard() {
 .skin-player-card__stats :deep(.fa-icon) {
   font-size: 16px;
   color: var(--color-text-3);
+}
+
+@container dashboard-card (max-height: 240px) {
+  .skin-dashboard-card {
+    gap: 6px;
+  }
+
+  .skin-player-card__hero > div {
+    gap: 3px;
+  }
+
+  .skin-player-card__account {
+    display: none;
+  }
+
+  .skin-player-card__hero h3 {
+    font-size: 18px;
+  }
+
+  .skin-player-card__hero p {
+    font-size: 11px;
+    line-height: 1.3;
+  }
+
+  .skin-player-card__stats div {
+    padding-block: 5px;
+  }
+}
+
+@container dashboard-card (min-width: 560px) {
+  .skin-player-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    align-items: center;
+    gap: 28px;
+  }
+
+  .skin-player-card__stats {
+    padding-left: 24px;
+    border-left: 1px solid var(--color-border-1);
+  }
+
+  .skin-player-card__stats div:first-child {
+    border-top: 0;
+  }
 }
 </style>
