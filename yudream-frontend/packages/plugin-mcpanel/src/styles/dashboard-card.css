@@ -1,15 +1,14 @@
-.mcp-dash-card { display: flex; flex: 1 1 auto; flex-direction: column; gap: 12px; min-width: 0; min-height: 0; margin: 2px 16px 16px; overflow: auto; }
+.mcp-dash-card { display: flex; flex: 1 1 auto; flex-direction: column; gap: 8px; min-width: 0; min-height: 0; margin: 2px 16px 16px; overflow: auto; }
 .mcp-dash-card__state { display: flex; flex: 1; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; color: var(--color-text-3); font-size: 12px; }
 .mcp-dash-card__readout { display: flex; flex: 1; gap: 12px; align-items: center; justify-content: space-between; min-height: 0; }
-.mcp-dash-card__figure strong { color: var(--color-text-1); font-size: clamp(32px, 12cqi, 52px); font-weight: 650; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -0.05em; }
+.mcp-dash-card__figure strong { color: var(--color-text-1); font-size: clamp(32px, 10cqi, 46px); font-weight: 650; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -0.05em; }
 .mcp-dash-card__figure > span { margin-left: 8px; color: var(--color-text-3); font-size: 17px; }
-.mcp-dash-card__figure p { margin: 8px 0 0; color: var(--color-text-3); font-size: 12px; }
-.mcp-dash-card__gauge { flex-shrink: 0; width: 95px; height: 100%; max-height: 116px; min-height: 70px; }
+.mcp-dash-card__figure p { margin: 4px 0 0; color: var(--color-text-3); font-size: 12px; }
+.mcp-dash-card__gauge { flex-shrink: 0; width: 95px; height: 100%; max-height: 116px; min-height: 64px; }
 .mcp-dash-card__gauge circle { fill: none; stroke-width: 5; }
 .mcp-dash-card__track { stroke: var(--color-fill-2); }
 .mcp-dash-card__arc { stroke: var(--yd-dashboard-info, var(--color-text-2)); stroke-linecap: round; transform: rotate(-90deg); transform-origin: center; animation: mcp-gauge-reveal var(--yd-motion-duration-slow, 440ms) var(--yd-motion-ease, ease) both; }
-.mcp-dash-card__gauge text { fill: var(--color-text-1); font-size: 20px; font-weight: 600; text-anchor: middle; }
-.mcp-dash-card__gauge .mcp-dash-card__gauge-label { fill: var(--color-text-3); font-size: 9px; font-weight: 400; }
+.mcp-dash-card__gauge text { fill: var(--color-text-1); font-size: 24px; font-weight: 600; text-anchor: middle; }
 .mcp-dash-card__actions { display: flex; gap: 8px; align-items: center; justify-content: space-between; margin-top: auto; min-width: 0; }
 .mcp-dash-card__actions > span, .mcp-dash-card__note { color: var(--color-text-3); font-size: 11px; line-height: 1.6; margin: 0; }
 .mcp-dash-card--link { justify-content: center; gap: 18px; }
@@ -20,9 +19,9 @@
 .mcp-dash-card__entry-copy > span { color: var(--color-text-3); font-size: 11px; line-height: 1.6; font-weight: 400; }
 .mcp-dash-card__entry-arrow { margin-left: auto; flex-shrink: 0; transition: transform var(--yd-motion-duration-fast, 140ms) ease; }
 .mcp-dash-card__entry:hover .mcp-dash-card__entry-arrow { transform: translate(2px, -2px); }
-.mcp-dash-card__steps { display: flex; gap: 8px; align-items: center; justify-content: space-between; font-size: 10px; color: var(--color-text-3); }
+.mcp-dash-card__steps { display: flex; gap: 8px; align-items: center; justify-content: space-between; font-size: 11px; color: var(--color-text-3); }
 .mcp-dash-card__steps span { display: flex; gap: 5px; align-items: center; white-space: nowrap; }
-.mcp-dash-card__steps b { color: var(--color-text-2); font-size: 10px; font-weight: 500; }
+.mcp-dash-card__steps b { color: var(--color-text-2); font-size: 11px; font-weight: 500; }
 .mcp-dash-card__steps i { flex: 1; height: 1px; background: var(--color-border-2); }
 @keyframes mcp-gauge-reveal { from { stroke-dasharray: 0 100; } }
 @media (prefers-reduced-motion: reduce) { .mcp-dash-card__arc { animation: none; } .mcp-dash-card__entry-arrow { transition: none; } }

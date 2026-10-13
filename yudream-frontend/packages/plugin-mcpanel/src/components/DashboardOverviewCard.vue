@@ -39,9 +39,8 @@ async function load() {
         <div class="mcp-dash-card__figure"><strong>{{ current }}</strong><span>/ {{ total }}</span><p>{{ instanceMode ? '运行中的实例' : '在线节点' }}</p></div>
         <svg class="mcp-dash-card__gauge" viewBox="0 0 100 100" role="img" :aria-label="`${instanceMode ? '运行' : '在线'}比例 ${percent}%`">
           <circle cx="50" cy="50" r="40" class="mcp-dash-card__track" />
-          <circle cx="50" cy="50" r="40" pathLength="100" :stroke-dasharray="`${percent} 100`" class="mcp-dash-card__arc" />
-          <text x="50" y="53">{{ total ? `${percent}%` : '—' }}</text>
-          <text x="50" y="69" class="mcp-dash-card__gauge-label">{{ instanceMode ? '运行率' : '在线率' }}</text>
+          <circle v-if="percent > 0" cx="50" cy="50" r="40" pathLength="100" :stroke-dasharray="`${percent} 100`" class="mcp-dash-card__arc" />
+          <text x="50" y="58">{{ total ? `${percent}%` : '—' }}</text>
         </svg>
       </div>
       <div class="mcp-dash-card__actions">

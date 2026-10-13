@@ -82,41 +82,34 @@ function openCard() {
     </div>
     <template v-else>
       <div class="skin-player-card__hero">
-        <span v-if="accountName !== defaultPlayer?.name">{{ accountName }}</span>
-        <h3>{{ defaultPlayer?.name || '还没有角色' }}</h3>
-        <p>{{ defaultPlayer ? '你的默认游戏角色' : '创建角色，开始定制你的外观' }}</p>
+        <div>
+          <span v-if="accountName !== defaultPlayer?.name">{{ accountName }}</span>
+          <h3 :title="defaultPlayer?.name">{{ defaultPlayer?.name || '还没有角色' }}</h3>
+          <p>{{ defaultPlayer ? `默认角色 · 共 ${players.length} 个角色` : '创建角色，开始定制你的外观' }}</p>
+        </div>
+        <FaButton v-if="card?.actionPath" size="icon-sm" variant="ghost" aria-label="管理角色" title="管理角色" @click="openCard"><FaIcon name="i-ri:arrow-right-up-line" /></FaButton>
       </div>
 
       <div class="skin-player-card__stats">
         <div>
-          <span>角色</span>
-          <strong>{{ players.length }}</strong>
-        </div>
-        <div>
-          <span>皮肤</span>
+          <FaIcon name="i-ri:t-shirt-2-line" /><span>皮肤</span>
           <strong :title="skin?.name || shortHash(defaultPlayer?.skinHash)">{{ skin?.name || shortHash(defaultPlayer?.skinHash) }}</strong>
         </div>
         <div>
-          <span>披风</span>
+          <FaIcon name="i-ri:flag-2-line" /><span>披风</span>
           <strong :title="cape?.name || shortHash(defaultPlayer?.capeHash)">{{ cape?.name || shortHash(defaultPlayer?.capeHash) }}</strong>
         </div>
       </div>
 
-      <div class="skin-dashboard-card__actions">
-        <FaButton v-if="card?.actionPath" size="sm" variant="ghost" @click="openCard">
-          管理角色
-          <FaIcon name="i-ri:arrow-right-up-line" />
-        </FaButton>
-      </div>
     </template>
   </div>
 </template>
 
 <style scoped>
 .skin-dashboard-card {
-  display: grid;
-  gap: 12px;
-  align-content: space-between;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
   min-width: 0;
 }
 
@@ -134,8 +127,16 @@ function openCard() {
 }
 
 .skin-player-card__hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.skin-player-card__hero > div {
   display: grid;
-  gap: 5px;
+  gap: 8px;
   min-width: 0;
 }
 
@@ -148,8 +149,8 @@ function openCard() {
   margin: 0;
   overflow: hidden;
   color: var(--color-text-1);
-  font-size: 22px;
-  font-weight: 800;
+  font-size: clamp(20px, 6.5cqi, 26px);
+  font-weight: 650;
   line-height: 1.2;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -164,15 +165,17 @@ function openCard() {
 
 .skin-player-card__stats {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
+  flex: 1;
+  align-content: center;
 }
 
 .skin-player-card__stats div {
   display: grid;
+  grid-template-columns: 20px 36px minmax(0, 1fr);
+  align-items: center;
   min-width: 0;
-  gap: 4px;
-  padding: 10px 0;
+  gap: 8px;
+  padding: 14px 0;
   background: transparent;
   border: 0;
   border-radius: 0;
@@ -181,27 +184,21 @@ function openCard() {
 
 .skin-player-card__stats span {
   color: var(--color-text-3);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .skin-player-card__stats strong {
   overflow: hidden;
   color: var(--color-text-1);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 500;
+  text-align: right;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.skin-dashboard-card__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-@container (max-width: 360px) {
-  .skin-player-card__stats {
-    grid-template-columns: minmax(0, 0.5fr) repeat(2, minmax(0, 1fr));
-  }
+.skin-player-card__stats :deep(.fa-icon) {
+  font-size: 16px;
+  color: var(--color-text-3);
 }
 </style>

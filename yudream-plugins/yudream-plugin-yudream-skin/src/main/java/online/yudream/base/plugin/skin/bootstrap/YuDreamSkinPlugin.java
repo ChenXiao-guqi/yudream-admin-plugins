@@ -70,7 +70,7 @@ import java.util.concurrent.CompletionStage;
         actionPath = "/platform/plugins/yudream-skin/players",
         tone = "cyan",
         defaultW = 4,
-        defaultH = 4,
+        defaultH = 3,
         minW = 3,
         minH = 3,
         sort = 20

@@ -68,10 +68,23 @@ const burst = ref<PetAnimation | null>(null)
 const rootRef = ref<HTMLElement | null>(null)
 const dragOffset = ref<{ x: number, y: number } | null>(null)
 const mobileQuery = window.matchMedia('(max-width: 768px)')
-const collapsed = ref(mobileQuery.matches)
+const collapsePreferenceKey = 'yudream:mc-pet:collapsed'
+function initiallyCollapsed() {
+  if (mobileQuery.matches) return true
+  try {
+    const saved = localStorage.getItem(collapsePreferenceKey)
+    if (saved !== null) return saved === 'true'
+  }
+  catch { /* Browser storage can be unavailable in private sessions. */ }
+  // Keep the workbench's charts and actions clear until the user opens the pet.
+  return router.currentRoute.value.path === '/'
+}
+const collapsed = ref(initiallyCollapsed())
 
 function toggleCollapsed() {
   collapsed.value = !collapsed.value
+  try { localStorage.setItem(collapsePreferenceKey, String(collapsed.value)) }
+  catch { /* The control still works without persistence. */ }
   menuOpen.value = false
   speech.value = null
 }

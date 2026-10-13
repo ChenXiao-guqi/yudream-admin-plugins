@@ -264,9 +264,9 @@
 .wallet-dashboard-card__body {
   display: grid;
   flex: 1 1 auto;
-  grid-template-rows: auto auto;
-  align-content: start;
-  gap: 12px;
+  grid-template-rows: auto minmax(0, 1fr);
+  align-content: center;
+  gap: 22px;
   min-width: 0;
   min-height: 0;
   overflow-y: auto;
@@ -274,16 +274,23 @@
 
 .wallet-dashboard-card__main {
   display: grid;
-  gap: 8px;
+  gap: 10px;
   align-content: center;
   min-width: 0;
 }
 
-.wallet-dashboard-card__main span {
+.wallet-dashboard-card__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.wallet-dashboard-card__heading span {
   min-width: 0;
   overflow: hidden;
   color: var(--color-text-3);
-  font-size: 12px;
+  font-size: 13px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -295,9 +302,10 @@
   min-width: 0;
   overflow: hidden;
   color: var(--color-text-1);
-  font-size: clamp(28px, 8cqi, 38px);
+  font-size: clamp(38px, 12cqi, 56px);
   font-variant-numeric: tabular-nums;
-  font-weight: 800;
+  font-weight: 600;
+  letter-spacing: -0.04em;
   line-height: 1.05;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -311,6 +319,7 @@
 
 .wallet-dashboard-card__assets {
   display: grid;
+  align-content: center;
   gap: 8px;
   min-width: 0;
 }
@@ -322,7 +331,7 @@
   justify-content: space-between;
   min-width: 0;
   padding: 10px 0;
-  border-bottom: 1px solid var(--color-border-1);
+  border-top: 1px solid var(--color-border-1);
 }
 
 .wallet-dashboard-card__assets span,
@@ -335,26 +344,16 @@
 
 .wallet-dashboard-card__assets span {
   color: var(--color-text-3);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .wallet-dashboard-card__assets strong {
   color: var(--color-text-1);
-  font-size: 13px;
+  font-size: 23px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
 }
 
-.wallet-dashboard-card__actions {
-  display: flex;
-  flex: 0 0 auto;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-  justify-content: flex-start;
-  min-width: 0;
-  margin-top: auto;
-  padding-top: 10px;
-  border-top: 1px solid var(--color-border-1);
-}
 
 @media (max-width: 1180px) {
   .wallet-layout {

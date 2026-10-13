@@ -54,35 +54,36 @@ function dateParts(value: TimeValue) {
       <div class="activity-agenda-tabs" role="group" aria-label="活动范围">
         <FaButton size="sm" :variant="tab === 'latest' ? 'secondary' : 'ghost'" :aria-pressed="tab === 'latest'" @click="tab = 'latest'">最新活动</FaButton>
         <FaButton size="sm" :variant="tab === 'mine' ? 'secondary' : 'ghost'" :aria-pressed="tab === 'mine'" @click="tab = 'mine'">我的参与 <span>{{ participationTotal }}</span></FaButton>
+        <FaButton v-if="card?.actionPath" size="icon-sm" variant="ghost" class="activity-agenda-open" aria-label="活动广场" title="活动广场" @click="onOpen?.(card)"><FaIcon name="i-ri:arrow-right-up-line" /></FaButton>
       </div>
       <div class="activity-agenda">
-        <div v-for="entry in entries" :key="entry.id" class="activity-agenda-row">
+        <div v-for="entry in entries" :key="`${tab}-${entry.id}`" class="activity-agenda-row">
           <div class="activity-agenda-date"><strong>{{ dateParts(entry.date).day }}</strong><span>{{ dateParts(entry.date).month }}</span></div>
           <div class="activity-agenda-copy"><strong :title="entry.title">{{ entry.title }}</strong><span>{{ entry.state }}<i />{{ entry.detail }}</span></div>
         </div>
         <div v-if="!entries.length" class="activity-agenda-empty"><FaIcon name="i-ri:calendar-event-line" /><strong>{{ tab === 'mine' ? '你的下一次相聚，从这里开始' : '好活动，值得期待' }}</strong><span>{{ tab === 'mine' ? '去活动广场发现感兴趣的活动' : '发布新活动后，会在这里显示' }}</span></div>
       </div>
-      <div class="activity-agenda-footer"><span>{{ entries.length ? '最近 3 条活动记录' : '活动日程' }}</span><FaButton v-if="card?.actionPath" size="sm" variant="ghost" @click="onOpen?.(card)">活动广场<FaIcon name="i-ri:arrow-right-up-line" /></FaButton></div>
     </template>
   </div>
 </template>
 
 <style scoped>
 .activity-agenda-tabs { display: flex; gap: 4px; flex-shrink: 0; }
+.activity-agenda-open { margin-left: auto; }
 .activity-agenda-tabs span { margin-left: 3px; opacity: 0.65; font-variant-numeric: tabular-nums; }
 .activity-agenda { flex: 1; min-height: 0; overflow: auto; }
-.activity-agenda-row { display: flex; gap: 13px; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--color-border-1); }
+.activity-agenda-row { display: flex; gap: 14px; align-items: center; min-height: 50px; padding: 6px 0; border-bottom: 1px solid var(--color-border-1); animation: agenda-reveal var(--yd-motion-duration-normal, 180ms) ease-out both; }
 .activity-agenda-row:last-child { border-bottom: 0; }
 .activity-agenda-date { display: flex; flex: 0 0 35px; flex-direction: column; align-items: center; color: var(--color-text-3); line-height: 1.2; }
 .activity-agenda-date strong { font-size: 23px; font-weight: 500; color: var(--color-text-1); font-variant-numeric: tabular-nums; letter-spacing: -0.04em; }
-.activity-agenda-date span { font-size: 10px; margin-top: 2px; }
-.activity-agenda-copy { min-width: 0; display: grid; gap: 6px; }
-.activity-agenda-copy strong { font-size: 12px; font-weight: 600; color: var(--color-text-1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.activity-agenda-copy span { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--color-text-3); }
+.activity-agenda-date span { font-size: 11px; margin-top: 2px; }
+.activity-agenda-copy { min-width: 0; display: grid; gap: 4px; }
+.activity-agenda-copy strong { font-size: 13px; font-weight: 600; color: var(--color-text-1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.activity-agenda-copy span { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--color-text-3); }
 .activity-agenda-copy i { width: 2px; height: 2px; background: currentcolor; border-radius: 50%; }
 .activity-agenda-empty { display: flex; flex-direction: column; justify-content: center; gap: 7px; height: 100%; min-height: 80px; color: var(--color-text-3); font-size: 11px; }
 .activity-agenda-empty > :first-child { font-size: 26px; margin-bottom: 2px; }
 .activity-agenda-empty strong { color: var(--color-text-2); font-size: 13px; font-weight: 500; }
-.activity-agenda-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-shrink: 0; }
-.activity-agenda-footer > span { font-size: 10px; color: var(--color-text-3); }
+@keyframes agenda-reveal { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .activity-agenda-row { animation: none; } }
 </style>

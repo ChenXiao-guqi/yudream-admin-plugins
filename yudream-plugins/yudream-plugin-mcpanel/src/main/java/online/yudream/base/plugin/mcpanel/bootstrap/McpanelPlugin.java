@@ -74,7 +74,7 @@ import java.util.List;
         actionPath = "/platform/plugins/mcpanel/admin/overview",
         tone = "blue",
         defaultW = 4,
-        defaultH = 3,
+        defaultH = 2,
         minW = 3,
         minH = 2,
         sort = 80,

@@ -95,7 +95,10 @@ function openCard() {
     <template v-else>
       <div class="wallet-dashboard-card__body">
         <div class="wallet-dashboard-card__main">
-          <span>{{ readableLabel(primaryAsset?.name, primaryAsset?.code || '钱包余额') }}</span>
+          <div class="wallet-dashboard-card__heading">
+            <span>{{ readableLabel(primaryAsset?.name, primaryAsset?.code || '钱包余额') }}</span>
+            <FaButton v-if="card?.actionPath" size="sm" variant="ghost" aria-label="打开钱包" @click="openCard">钱包明细<FaIcon name="i-ri:arrow-right-up-line" /></FaButton>
+          </div>
           <strong>
             <small>{{ readableLabel(primaryAsset?.symbol) }}</small>
             {{ formatAmount(primaryBalance, primaryAsset?.code) }}
@@ -114,12 +117,6 @@ function openCard() {
         </div>
       </div>
 
-      <div class="wallet-dashboard-card__actions">
-        <FaButton v-if="card?.actionPath" size="sm" variant="ghost" @click="openCard">
-          <FaIcon name="i-ri:wallet-3-line" />
-          打开钱包
-        </FaButton>
-      </div>
     </template>
   </div>
 </template>
