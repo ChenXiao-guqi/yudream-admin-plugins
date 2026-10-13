@@ -1127,21 +1127,21 @@ html[data-theme='light'][data-accent='cyan'] :is(.site-chrome, .site-page, .neco
 }
 
 /* ========== 登录 / 注册页（公开路由，SITE 主题生效） ========== */
-@keyframes neco-login-pan {
-  0% { background-position: 18% 28%; }
-  50% { background-position: 82% 72%; }
-  100% { background-position: 18% 28%; }
-}
-
 .login-page {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  min-height: 100vh;
-  background: #0f0e0d;
-  color: var(--neco-text, #ffffff);
-  font-family: 'Ark Latin', 'Cubic 11', 'Microsoft YaHei', 'PingFang SC', sans-serif !important;
-  --background: 0.42 0.01 80;
+  --color-bg-1: var(--neco-bg-page);
+  --color-bg-2: var(--neco-bg-card);
+  --color-bg-3: var(--neco-bg-elevated);
+  --color-text-1: var(--neco-text);
+  --color-text-2: var(--neco-text-dim);
+  --color-text-3: var(--neco-text-muted);
+  --color-text-4: var(--neco-text-disabled);
+  --color-border-1: var(--neco-border-soft);
+  --color-border-2: var(--neco-border-light);
+  --color-border-3: var(--neco-border-strong);
+  --color-fill-1: var(--neco-bg-surface);
+  --color-fill-2: var(--neco-bg-elevated);
+  --color-fill-3: var(--neco-bg-hover);
+  --background: 0.28 0.008 80;
   --foreground: 0.97 0.01 95;
   --card: 0.28 0.008 80;
   --card-foreground: 0.97 0.01 95;
@@ -1149,199 +1149,91 @@ html[data-theme='light'][data-accent='cyan'] :is(.site-chrome, .site-page, .neco
   --popover-foreground: 0.97 0.01 95;
   --primary: 0.72 0.17 142;
   --primary-foreground: 0.18 0.04 140;
-  --secondary: 0.28 0.01 80;
+  --secondary: 0.32 0.01 80;
   --secondary-foreground: 0.92 0.01 95;
   --muted: 0.26 0.01 80;
   --muted-foreground: 0.78 0.02 95;
   --accent: 0.32 0.05 142;
   --accent-foreground: 0.97 0.01 95;
   --destructive: 0.65 0.18 25;
-  --border: 0.32 0.01 80;
-  --input: 0.42 0.01 80;
+  --border: 0.48 0.01 80;
+  --input: 0.48 0.01 80;
   --ring: 0.72 0.17 142;
-}
-
-.login-page::before {
-  content: '';
-  position: fixed;
-  inset: -10%;
-  z-index: 0;
-  pointer-events: none;
-  image-rendering: auto;
-  background:
-    linear-gradient(180deg, rgba(15, 14, 13, 0.38), rgba(15, 14, 13, 0.78)),
-    url('background/bg.jpg') 18% 28% / cover no-repeat;
-  animation: neco-login-pan 42s ease-in-out infinite;
-}
-
-.login-page > * {
-  z-index: 1;
-}
-
-html[data-theme='light'] .login-page {
-  background: #eceae2;
-}
-
-html[data-theme='light'] .login-page::before {
-  background:
-    linear-gradient(180deg, rgba(247, 245, 238, 0.48), rgba(236, 234, 226, 0.78)),
-    url('background/bg.jpg') 18% 28% / cover no-repeat;
+  font-family: 'Ark Latin', 'Cubic 11', 'Microsoft YaHei', 'PingFang SC', sans-serif;
 }
 
 .login-page :is(input, textarea, select, button, label, h1, h2, h3, h4, p, span, a, [role='tab']) {
-  font-family: 'Ark Latin', 'Cubic 11', 'Microsoft YaHei', 'PingFang SC', sans-serif !important;
+  font-family: inherit;
 }
 
-.login-page h3,
-.login-page .login-form h3 {
-  font-family: 'Minecraft-Tenv2', 'Ark Latin', 'Cubic 11', 'Microsoft YaHei', 'PingFang SC', sans-serif !important;
-  color: var(--neco-text, #ffffff);
-  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.45);
-}
-
-.login-page .bg-banner {
-  display: none;
-}
-
-.login-page .login-box {
-  background: var(--neco-bg-card, #313131) !important;
-  border: 16px solid;
-  border-image: url('ui/neco-dialog.png') 16 fill / 16px;
-  box-shadow: 6px 6px 0 var(--neco-hard-shadow, rgba(0, 0, 0, 0.6));
-  color: var(--neco-text, #ffffff);
-}
-
-.login-page .login-banner {
-  image-rendering: auto;
-  background:
-    linear-gradient(135deg, var(--neco-bg-overlay-strong, rgba(0, 0, 0, 0.55)), var(--neco-bg-overlay, rgba(0, 0, 0, 0.28))),
-    url('background/bg.jpg') center / cover no-repeat !important;
+.login-page .banner-heading h1,
+.login-page .login-form :is(h2, h3) {
+  font-family: 'Minecraft-Tenv2', 'Ark Latin', 'Cubic 11', 'Microsoft YaHei', 'PingFang SC', sans-serif;
 }
 
 .login-page .login-banner::before {
-  display: none;
+  position: absolute;
+  inset: 0;
+  content: '';
+  background: rgba(15, 14, 13, 0.72);
+  pointer-events: none;
 }
 
-.login-page .login-form p,
-.login-page .login-form span,
-.login-page .login-form label {
-  color: var(--neco-text-dim, rgba(255, 255, 255, 0.8));
+.login-page .login-banner {
+  background: var(--neco-bg-sunken) url('background/bg.jpg') center / cover no-repeat !important;
 }
 
-.login-page :is(input, textarea, select, button) {
-  border-radius: 0 !important;
+/* 背景图片始终有深色遮罩，品牌文字不跟随后台的浅色模式变暗。 */
+.login-page .banner-heading {
+  --color-text-1: #ffffff;
+  --color-text-2: #e0ded8;
+}
+
+.login-page .banner-artwork {
+  position: relative;
+}
+
+.login-page [data-slot='input'] {
+  color: var(--neco-text);
+  background: var(--neco-bg-sunken);
+  border-color: var(--neco-border-light);
 }
 
 .login-page input::placeholder,
 .login-page textarea::placeholder {
-  font-family: inherit !important;
-  color: var(--neco-text-disabled, rgba(255, 255, 255, 0.45)) !important;
+  color: var(--neco-text-muted);
 }
 
-.login-page [data-slot='input-group'] {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
-  background: var(--neco-bg-input, #616161) !important;
-  box-shadow:
-    inset 2px 2px 0 var(--neco-bevel-dark, rgba(0, 0, 0, 0.55)),
-    inset -2px -2px 0 var(--neco-bevel-light, rgba(255, 255, 255, 0.18)) !important;
-  outline: none !important;
-  --tw-ring-shadow: 0 0 #0000 !important;
-  --tw-ring-offset-shadow: 0 0 #0000 !important;
-  --tw-ring-color: transparent !important;
-  --un-ring-shadow: 0 0 #0000 !important;
-  --un-ring-offset-shadow: 0 0 #0000 !important;
-  --un-ring-width: 0px !important;
+.login-page .login-form button[type='submit'] {
+  color: var(--yb-site-primary-btn-text);
+  background: var(--yb-site-primary-btn-bg);
+  border: 2px solid var(--neco-border-dark);
+  box-shadow: inset -2px -2px 0 var(--neco-bevel-dark), inset 2px 2px 0 var(--neco-bevel-light);
 }
 
-.login-page [data-slot='input-group']:has([data-slot='input-group-control']:focus-visible),
-.login-page [data-slot='input-group']:focus-within {
-  border-color: var(--neco-accent, #3c8527) !important;
-  outline: none !important;
-  box-shadow:
-    inset 2px 2px 0 var(--neco-bevel-dark, rgba(0, 0, 0, 0.55)),
-    inset -2px -2px 0 var(--neco-bevel-light, rgba(255, 255, 255, 0.18)) !important;
-}
-
-.login-page [data-slot='input-group'] :is(input, textarea),
-.login-page [data-slot='input-group'] :is(input, textarea):focus,
-.login-page [data-slot='input-group'] :is(input, textarea):focus-visible {
-  border: 0 !important;
-  outline: none !important;
-  box-shadow: none !important;
-  background: transparent !important;
-  --tw-ring-shadow: 0 0 #0000 !important;
-  --tw-ring-offset-shadow: 0 0 #0000 !important;
-}
-
-.login-page [data-slot='input-group'] :focus-visible {
-  outline: none !important;
-  outline-offset: 0 !important;
-}
-
-.login-page input:is(:autofill, :-webkit-autofill),
-.login-page input:is(:autofill, :-webkit-autofill):hover,
-.login-page input:is(:autofill, :-webkit-autofill):focus {
-  caret-color: #ffffff;
-  -webkit-text-fill-color: #ffffff !important;
-  box-shadow: 0 0 0 1000px #616161 inset !important;
-  -webkit-box-shadow: 0 0 0 1000px #616161 inset !important;
-  background-color: #616161 !important;
-}
-
-.login-page button[type='submit'] {
-  background: var(--neco-accent, #3c8527) !important;
-  color: var(--neco-accent-contrast, #101010) !important;
-  border: 2px solid #000 !important;
-  box-shadow: inset -2px -2px 0 var(--neco-bevel-dark, rgba(0, 0, 0, 0.55)), inset 2px 2px 0 var(--neco-bevel-light, rgba(255, 255, 255, 0.22));
-}
-
-.login-page .copyright {
-  color: var(--neco-text-disabled, rgba(255, 255, 255, 0.45));
+.login-page .login-form button[type='submit']:active {
+  box-shadow: inset 2px 2px 0 var(--neco-bevel-dark);
 }
 
 .login-page [data-slot='tabs-trigger'] {
-  color: var(--neco-text-dim, rgba(255, 255, 255, 0.8)) !important;
-  background: transparent !important;
-  box-shadow: none !important;
+  color: var(--neco-text-dim);
+  border: 0;
+  box-shadow: none;
 }
 
 .login-page [data-slot='tabs-trigger'][data-state='active'] {
-  color: #ffffff !important;
-  background: var(--neco-bg-sunken, #111111) !important;
-  border-color: #000 !important;
+  color: var(--neco-text);
+  background: var(--neco-bg-elevated);
 }
 
-.login-page [data-slot='input-group'] :is(input, textarea) {
-  color: #ffffff !important;
-  caret-color: #ffffff;
+.login-page .login-form [data-slot='button'].text-primary {
+  color: var(--neco-text-dim);
+  background: transparent;
+  border: 0;
+  box-shadow: none;
 }
 
-.login-page [data-slot='input-group'] :is(svg, button) {
-  color: #ffffff !important;
-}
-
-.login-page .login-form button[class*='underline-offset'] {
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  color: var(--neco-accent-light, #6cc349) !important;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.login-page .qq-login-entry button {
-  background: var(--neco-bg-elevated, #4a4a4a) !important;
-  border: 2px solid #000 !important;
-  color: #ffffff !important;
-}
-
-.login-page > .flex-center {
+/* NECO 提供完整登录构图，不展示宿主的布局切换浮层。 */
+.login-page .login-toolbar {
   display: none !important;
-}
-
-.login-page .login-form button[class*='border']:not([type='submit']) {
-  background: var(--neco-bg-elevated, #4a4a4a) !important;
-  border: 2px solid #000 !important;
-  color: #ffffff !important;
 }
