@@ -49,8 +49,9 @@ Add folders only when they carry a clear responsibility. Do not place a complete
 ## Migrated Framework Conventions
 
 - Prefer Composition API with `<script setup lang="ts">`.
-- Reuse `@yudream/components` before raw form controls, hand-built modals, pagination, loading overlays, or toast systems.
-- Use Arco as the approved second-level UI library where the YuDream package lacks a control.
+- Vue Web generic controls, forms, overlays, pagination, loading and notifications must come from public `Yd*` / `useYd*` entries in `@yudream/components`; business pages must not hand-build equivalents.
+- Use only released public YD components and composables for Vue Web business UI. Direct Fa/Arco/TDesign/Reka and raw generic interactive controls are forbidden, including aliases. Missing capabilities must be encapsulated in the host YD package, exported through the SDK bridge, published and verified before this repository consumes them; do not fall back in the page.
+- Read repository `docs/yd-ui-guidelines.md` for visual schemes, neutral theme tokens, component selection, motion, states and ongoing maintenance. Specialized editors/engines require typed YD adapters. React Native uses the independent `@yudream/plugin-mobile-ui` adapter rather than importing Vue YD.
 - Keep forms typed, validate before submit, disable duplicate submissions, surface backend errors, and reset transient state when dialogs close.
 - Keep list queries, page/size, filters, sorting, selection, and refresh behavior explicit and testable.
 - Use a composable for shared state before introducing Pinia. Add a package-local store only when state must span unrelated routes or survive component lifecycles.
@@ -62,7 +63,7 @@ Add folders only when they carry a clear responsibility. Do not place a complete
 Read `management-pages.md` whenever a page displays repeated business records.
 
 - If a collection is user-managed and can contain more than 5 records, provide pagination plus every applicable management action, such as view, create, edit, enable/disable, or delete.
-- Use a `FaTable` management page when records have obvious repeated fields suitable for columns and comparison.
+- Use a `YdResponsiveTable` management page with a narrow-screen `#card` view when records have repeated comparable fields; use `YdTable` only for desktop-only internal tables.
 - Do not use cards merely to avoid implementing a table, pagination, filtering, or row actions.
 - Back pagination with the API for remotely stored or potentially growing data. Client-side slicing is acceptable only for an already bounded, fully loaded collection.
 - Treat destructive removal as a full-stack capability: permission, endpoint, API wrapper, confirmation, feedback, refresh, and empty-page correction must all work.
@@ -74,13 +75,15 @@ Read `management-pages.md` whenever a page displays repeated business records.
 - Confirm destructive actions.
 - Keep buttons, inputs, tables, pagination, and dialogs consistent with the host.
 - Ensure narrow viewport behavior does not overlap or truncate critical controls.
-- Use icons through `FaIcon` or the established library rather than hand-written SVGs.
+- Use public `YdIcon` for icons and `YdIconPicker` for icon selection; do not create page-local icon controls.
 - Keep page components small enough that API calls, reusable panels, and route-specific logic can be tested independently.
 - Give each route one primary business workflow. Split unrelated management domains, settings, statistics, and editors into separate routes instead of accumulating them in one page.
 - Use a modal or drawer only when the task is focused and temporary; use a full route page for deep, multi-section, linkable, or long-running work.
 - Keep deliberate vertical and horizontal spacing between independent sections, fields, filters, and actions. Do not accept edge-to-edge controls or visually merged blocks merely because they compile.
 
 ## Frontend Validation
+
+Maintain the host-authoritative UI guideline and plugin copy together when component contracts or selection rules change. Verify published components and SDK bridge exports before migration. Check all three visual schemes, dark/light themes, narrow screens, keyboard/focus, loading/error/empty/disabled states and functional motion.
 
 Run the scripts declared by the target package. Typical commands:
 

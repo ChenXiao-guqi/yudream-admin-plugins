@@ -1,6 +1,6 @@
 ---
 name: yudream-plugin-development
-description: Enforce YuDream Admin standalone plugin development conventions. Use when creating, modifying, reviewing, migrating, or debugging a plugin in yudream-admin-plugins, including separate user/admin surfaces, personal-data scoping, permissions and authorization, Vue remote frontend packages, management pages, tables, pagination, CRUD or delete flows, @yudream/components or Arco UI work, @yudream/plugin-sdk API usage, Java plugin backends, SPI annotations and lifecycle, DDD layering, plugin routes/menus/permissions, remoteEntry packaging, contract dependency updates, or full-stack plugin features.
+description: Enforce YuDream Admin standalone plugin development conventions. Use when creating, modifying, reviewing, migrating, or debugging a plugin in yudream-admin-plugins, including separate user/admin surfaces, personal-data scoping, permissions and authorization, Vue remote frontend packages, management pages, tables, pagination, CRUD or delete flows, @yudream/components YD UI work, @yudream/plugin-sdk API usage, Java plugin backends, SPI annotations and lifecycle, DDD layering, plugin routes/menus/permissions, remoteEntry packaging, contract dependency updates, or full-stack plugin features.
 ---
 
 # YuDream Plugin Development
@@ -14,7 +14,7 @@ Develop official YuDream plugins as independently buildable frontend remote modu
    - frontend: `yudream-frontend/packages/plugin-{code}`.
 2. Inspect the nearest existing plugin with similar behavior before inventing a new structure. Prefer `plugin-project-progress` for a full DDD example and a smaller plugin for simple features.
 3. Read the relevant references before editing:
-   - frontend or UI work: `references/frontend-guidelines.md`, `references/ui-library.md`, and `references/page-composition.md`;
+   - frontend or UI work: repository `docs/yd-ui-guidelines.md`, `yudream-frontend/AGENTS.md`, `references/frontend-guidelines.md`, `references/ui-library.md`, and `references/page-composition.md`;
    - list, CRUD, table, pagination, or data-management work: `references/management-pages.md`;
    - user/admin routes, permissions, ownership, or personal data: `references/access-boundaries.md`;
    - backend work: `references/backend-guidelines.md`;
@@ -84,17 +84,17 @@ softdepend:
 
 - Build route pages under `src/pages`, reusable UI under `src/components`, stateful workflows under `src/composables`, SDK-backed calls under `src/api`, and shared view models in `src/types.ts`. Export each `@PluginRoute.component` as that page from `src/index.ts`; do not share one shell across routes and guess the page from path or `meta.plugin`.
 - Use the host-injected `@yudream/plugin-sdk` client. Do not create a private axios/fetch abstraction for normal plugin APIs.
-- Follow this UI priority:
-  1. `@yudream/components` (`Fa*` components and `useFa*` composables);
-  2. `@arco-design/web-vue` when no suitable YuDream component exists;
-  3. a plugin-local component composed from those libraries;
-  4. a new third-party UI dependency only with a concrete capability gap.
+- Vue Web business UI must use only public `Yd*` components and `useYd*` composables from released `@yudream/components`, provided by the SDK host shared bridge. Do not use Fa, Arco, TDesign, Reka, other generic UI controls, aliases, or raw interactive controls directly in business code. Semantic content and pure layout elements remain allowed.
+- If a capability is missing, implement and verify a typed YD adapter in the host shared component package first, update exports/resolver/SDK bridge/preview, release and verify the affected contracts, then upgrade the plugin catalog and lockfile. Do not vendor host code, add host-local workspace aliases, or claim an unpublished version is available. Preserve models, events, slots, exposed methods, theme, overlays, keyboard and focus behavior.
+- Specialized editors, chart engines, workflow canvases and builders also require YD adapters; display-only YdCode or relation-only YdGraphCanvas are not equivalent replacements.
+- React Native packages consume the separate `@yudream/plugin-mobile-ui` adapter and mobile theme tokens, not Vue YD components. Extend the shared mobile adapter before duplicating generic business controls.
+- Maintain repository `docs/yd-ui-guidelines.md` as a synchronized copy of the host authority. Update affected AGENTS, this skill and references within the same work item whenever a component contract or selection rule changes. Follow the order: rules/docs, verified contract release, published dependency synchronization, then global migration.
 - Import shared components explicitly from `@yudream/components`; remote plugin packages do not inherit the host app's auto-import setup.
 - Expose real route-level pages through the remote entry. Do not hide unrelated management surfaces in one giant tabbed page.
 - Split distinct business workflows into distinct route pages. Use a modal or drawer only for a focused, temporary task with a clear completion or cancellation point. Follow `references/page-composition.md`; never pack unrelated lists, settings, forms, statistics, and operations into one dense page.
 - Preserve visible hierarchy and breathing room between page headers, filters, tables, forms, action groups, and independent sections. A technically functional page with collapsed or missing spacing is incomplete UI work.
 - Treat a collection as a management surface when users must create, inspect, edit, enable/disable, delete, filter, or otherwise maintain individual records. If such a collection can contain more than 5 records, implement pagination and the applicable row management actions instead of rendering an unbounded list.
-- Use the framework-standard management table style whenever records have clear, repeated fields that are naturally compared by columns. Do not replace tabular management data with decorative cards.
+- Use `YdResponsiveTable` with an explicit narrow-screen `#card` view whenever management records have comparable fields; reserve `YdTable` for desktop-only internal tables. Do not replace tabular management data with decorative cards or duplicate desktop/mobile pagination and selection logic.
 
 ### 4. Integrate And Package
 
@@ -116,7 +116,8 @@ Report the affected plugin modules, UI library choices, contract changes, valida
 
 ## References
 
-- `references/ui-library.md`: component priority, available exports, and Arco fallback rules.
+- Repository `docs/yd-ui-guidelines.md`: synchronized visual, selection, motion, state and maintenance rules.
+- `references/ui-library.md`: strict YD public entry, published contract gate and component capability boundaries.
 - `references/frontend-guidelines.md`: remote frontend architecture and migrated frontend conventions.
 - `references/page-composition.md`: route-page boundaries, modal/drawer selection, information density, spacing, and responsive composition.
 - `references/management-pages.md`: mandatory table selection, pagination threshold, CRUD behavior, and framework management-page style.

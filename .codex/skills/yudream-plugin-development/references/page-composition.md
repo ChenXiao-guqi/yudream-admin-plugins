@@ -1,6 +1,6 @@
 # Page Composition And Spacing
 
-Treat information architecture, spacing, and workflow separation as functional UI requirements. A page is not complete when all controls merely fit into one component.
+Treat information architecture, spacing, and workflow separation as functional UI requirements. A page is not complete when all controls merely fit into one component. Read repository `docs/yd-ui-guidelines.md` for authoritative component selection and maintenance. These examples apply to Vue Web and require verified published YD entries; React Native uses its separate shared mobile adapter.
 
 ## Choose The Correct Surface
 
@@ -12,14 +12,16 @@ Use an independent route page when the capability:
 - needs its own loading, empty, error, permission, or unsaved-change state;
 - is user-side or admin-side and therefore must remain visibly separate from the other surface.
 
-Use `FaModal` when the task is focused, temporary, and normally completed without losing the current page context, for example:
+Use `YdModal` when the task is focused, temporary, and normally completed without losing the current page context, for example:
 
 - confirming a destructive action;
 - creating or editing a small record with a short form;
 - renaming, assigning, changing status, or entering one reason;
 - showing a compact detail that does not need a permanent URL.
 
-Use `FaDrawer` when users must keep the list or current record visible while inspecting or editing a moderate amount of contextual detail. Do not use a drawer as a hidden full application.
+Use `YdDrawer` when users must keep the list or current record visible while inspecting or editing a moderate amount of contextual detail. Do not use a drawer as a hidden full application.
+
+Use `YdPopover` for a small anchored interaction and `YdTablePicker` for remote paginated selection. Do not build a private selection modal or treat Tooltip/Dropdown as a general data picker.
 
 Use an inline section only when it directly supports the page's primary workflow and is needed repeatedly. Do not append unrelated settings, global statistics, import/export tools, and secondary CRUD forms below a list simply to avoid creating routes.
 
@@ -45,10 +47,10 @@ Use an inline section only when it directly supports the page's primary workflow
 
 Follow the host's spacing rhythm and existing utility conventions:
 
-- Use `FaPageHeader` followed by `FaPageMain`; do not let page content touch the viewport or host shell edges.
-- Separate independent page sections with at least the established `mt-4`, `gap-4`, or equivalent spacing. Use more separation when section ownership changes.
+- Use `YdPageHeader` followed by `YdPageMain`; do not let page content touch the viewport or host shell edges.
+- Follow shared YD spacing variables such as `--yd-content-gap` and `--yd-workspace-gap`; retain the established `mt-4`/`gap-4` rhythm where no specialized token applies. Use more separation when section ownership changes and inherit all three appearance schemes instead of cloning templates.
 - Use `gap-3` or `gap-4` for form grids and filter groups. Use `gap-2` only for compact, closely related row actions or icon controls.
-- Put `FaPagination class="mt-3"` below its table.
+- Put `YdPagination class="mt-3"` below its table.
 - Keep labels visibly separated from controls and keep validation/help text attached to its field rather than the next field.
 - Keep page-level actions grouped and separated from titles; keep destructive actions visually distinct from ordinary actions.
 - Use responsive grids that collapse to one column on narrow screens. Never rely on controls touching each other to fit a desktop layout onto mobile.
@@ -57,21 +59,21 @@ Follow the host's spacing rhythm and existing utility conventions:
 Avoid consecutive unwrapped controls such as:
 
 ```vue
-<FaInput />
-<FaSelect />
-<FaButton />
-<FaTable />
+<YdInput />
+<YdSelect />
+<YdButton />
+<YdResponsiveTable />
 ```
 
 Group them by responsibility and provide explicit layout spacing:
 
 ```vue
 <div class="grid grid-cols-1 gap-3 md:grid-cols-[minmax(220px,1fr)_220px_auto]">
-  <FaInput />
-  <FaSelect />
+  <YdInput />
+  <YdSelect />
   <div class="flex flex-wrap justify-end gap-2">
-    <FaButton variant="outline">重置</FaButton>
-    <FaButton>查询</FaButton>
+    <YdButton variant="outline">重置</YdButton>
+    <YdButton>查询</YdButton>
   </div>
 </div>
 ```

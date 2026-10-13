@@ -2,7 +2,7 @@
 
 本文件适用于 `D:/code/yudream-admin-plugins` 下的全部工作。详细参考资料位于 `.codex/skills/yudream-plugin-development/`；进行特定类型工作前必须读取对应 reference：
 
-- 前端/UI：`references/frontend-guidelines.md`、`ui-library.md`、`page-composition.md`
+- 前端/UI：`docs/yd-ui-guidelines.md`（宿主规范的同步副本）、`yudream-frontend/AGENTS.md`，以及 `references/frontend-guidelines.md`、`ui-library.md`、`page-composition.md`
 - 列表、CRUD、表格、分页：`references/management-pages.md`
 - 用户/管理员权限、归属、个人数据：`references/access-boundaries.md`
 - Java 后端：`references/backend-guidelines.md`
@@ -101,11 +101,15 @@ yudream-frontend/packages/plugin-{code}/
 - 普通插件 API 只能使用宿主注入的 `@yudream/plugin-sdk`；禁止新建私有 axios/fetch 客户端或硬编码宿主 origin。
 - 用户 API wrapper 仅调用 `/me/**`，管理员 wrapper 仅调用 `/admin/**`；两者不得共享可混合个人/管理数据的 store/composable cache。
 - 远程包不继承宿主 auto-import。`@yudream/components` 必须显式导入。
-- UI 优先级：1) `@yudream/components` 的 `Fa*` / `useFa*`；2) 无对应能力时 `@arco-design/web-vue`；3) 两者组合的本地组件；4) 有明确能力缺口才新增第三方 UI 依赖。
+- Vue Web 业务 UI 只使用 `@yudream/components` 公开的 `Yd*` / `useYd*` 入口，经 SDK 宿主共享桥加载。禁止直接使用 `Fa*` / `useFa*`、Arco/TDesign/Reka 等通用 UI 控件或别名，也禁止业务手写通用按钮、输入、选择器、弹层、表格、加载与通知。原生语义内容和纯布局可以保留；代码/Markdown 编辑器、图表、流程画布和可视化构建器必须经有类型的 YD 适配器承载。
+- 缺少能力时先在宿主共享组件库封装、公开导出、补齐 SDK 共享桥、主题与预览，发布并验签 components/SDK 后再升级本仓 catalog 与 lockfile 消费；不复制宿主源码，不提交本地宿主路径，不伪升未发布版本。禁止只改标签而丢失模型、属性、插槽、事件、实例方法与键盘/焦点能力。
+- 组件选型、三套外观、全状态、动效与维护流程遵循 `docs/yd-ui-guidelines.md`。普通管理使用基础 YD；阶段用 `YdSteps`、顺序异步任务用 `YdMultiStepLoader`、历史用 `YdTimeline`；层级用 `YdTree`、逐级单值用 `YdCascader`、远程分页资源选择用 `YdTablePicker`。少量枚举用 `YdSelect`/`YdRadioGroup`，搜索单选用 `YdCombobox`；多选、异步树与拖拽等需先核对公开契约，缺失就先封装。
+- React Native 移动插件由独立的 `@yudream/plugin-mobile-ui` 适配器承载同类视觉与交互原则，不导入 Vue YD。通用移动能力缺失先扩展共享 mobile UI adapter，不在各页面重复手写。不得以移动适配边界作为 Web 页面继续裸用控件的例外。
+- 本仓 `docs/yd-ui-guidelines.md` 以宿主仓同名文档为权威；组件与规则改变的同一工作项必须同步规范、副本、根/前端 AGENTS 和相关 skill/reference。先完成规范与契约发布验签，再实施插件全局迁移。
 - 一个 route page 只服务一个主要业务工作流。独立列表、设置、统计、导入导出、迁移、审计、诊断、复杂编辑器必须拆独立路由；禁止巨型 tabs 页面混装无关管理中心。
-- `FaModal` 仅适合短小、聚焦、可完成/取消的任务；中等上下文查看/编辑可用 `FaDrawer`；深度、多段、可链接或长流程必须使用 route page。
+- `YdModal` 仅适合短小、聚焦、可完成/取消的任务；中等上下文查看/编辑用 `YdDrawer`，锚点轻量交互用 `YdPopover`，远程分页选择用 `YdTablePicker`；深度、多段、可链接或长流程使用 route page。
 - 表单要显式类型和校验，防重复提交，展示后端错误，关闭后清理临时状态。页面必须考虑 loading、empty、error、disabled、success 与窄屏布局。
-- 管理表格使用项目标准 `FaTable` 风格；破坏性操作必须确认，并完成权限、端点、反馈、刷新与分页空页回退。
+- 管理列表使用 `YdResponsiveTable` 与 `#card` 窄屏视图，分页使用 `YdPagination`；桌面专属内部小表格才用 `YdTable`。破坏性操作使用 `useYdModal` 确认，并完成权限、端点、反馈、刷新与分页空页回退。
 - 中文文案必须为正常 UTF-8，禁止 Unicode 转义和乱码。
 
 ## 7. 前端样式、JS 与静态资源
@@ -119,7 +123,8 @@ META-INF/yudream-plugin/frontend/{pluginCode}/assets/*
 ```
 
 - Vite remote 必须产出 ESM `dist/remoteEntry.js`。资源引用应保持相对路径/相对 `base`，让 JS chunk、CSS、图片、字体从插件 assets 地址正确解析。
-- 默认样式兼容模式是：`import styles from './styles.css?inline'`；在 `install()` 创建或复用稳定 ID 的 `<style>`，并**每次更新**已有元素的 `textContent`。不得在发现标签已存在时直接 return。
+- Web 插件样式统一使用声明式 `style.css`：Vite 挂 `@yudream/plugin-sdk/uno-config` 的 `yuDreamPluginUnoCss()`，入口 `import 'virtual:uno.css'`，lib 设置 `cssFileName: 'style'`，Java 以 `@PluginFrontend(styles = {"style.css"})` 声明。禁止 `styles.css?inline` + `install()` 手写 `<style>` 注入。
+- SDK 1.6.0 起插件 CSS 进入 `@layer yudream-plugin`；层序为 `yudream-base < yudream-plugin < 宿主未分层工具类`。仅使用宿主主题语义变量，禁止全局 reset、固定品牌色与覆盖宿主同名工具类。ADMIN 主题可按契约覆盖根变量，SITE 主题只消费 SITE 作用域与变量，不污染 ADMIN；三套外观的功能动画均须保持运行，雅致/紧凑只柔化速度、幅度与装饰密度。
 - 支持独立 CSS、JS 和资源时，优先使用 Vite `manifest.json` 自动发现入口依赖；插件代码不应手写带 hash 的 `List.of("assets/*.css")` 或 `List.of("assets/*.js")`。
 - **禁止**对 `assets/**` 做浏览器端或宿主端目录扫描/通配盲加载。该目录同时包含 dynamic-import chunks、CSS、字体、图片、媒体等；把全部文件当 `<link>`/`<script>` 会造成错误执行、重复请求和不可控顺序。
 - 动态 import 的 JS chunk 由 ESM 按需加载，不能因为目录扫描而提前作为 script 执行。
@@ -179,5 +184,5 @@ mvn -pl yudream-plugins/yudream-plugin-{code} -am package -DskipTests
 - 前后端 plugin code、入口、菜单、路由、权限、HTTP path、资源路径是否一致？
 - 是否引入了宿主内部依赖、重复共享包、私有 API client、数值型长 ID 或未授权端点？
 - user/admin 是否完全分离，且个人端没有管理员越权分支？
-- 是否满足表格、分页、管理操作、状态反馈与响应式布局要求？
+- 是否使用已发布且宿主共享桥实际提供的 YD 入口，且缺失能力先封装发布？是否满足响应式表格、分页、管理操作、全状态、主题、键盘与动效要求，并同步规范副本和相关 skill/reference？
 - 是否完成目标构建/测试，检查了最终 JAR，并同步了受影响文档？
