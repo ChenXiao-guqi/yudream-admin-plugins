@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import { FaButton, FaIcon, useFaToast } from '@yudream/components'
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { openYmcl as openYmclProtocol, siteOrigin } from '../composables/ymcl-protocol'
 
 interface DashboardCardLike {
@@ -20,10 +20,29 @@ const props = defineProps<{
 const toast = useFaToast()
 void props.sdk
 const origin = computed(() => siteOrigin())
+const cardElement = ref<HTMLElement>()
+const compact = ref(false)
+let resizeObserver: ResizeObserver | undefined
+
+onMounted(() => {
+  if (!cardElement.value) {
+    return
+  }
+  resizeObserver = new ResizeObserver(([entry]) => {
+    if (entry) {
+      compact.value = entry.contentRect.height < 150
+    }
+  })
+  resizeObserver.observe(cardElement.value)
+})
+onBeforeUnmount(() => resizeObserver?.disconnect())
 
 async function copyOrigin() {
-  await navigator.clipboard.writeText(origin.value)
-  toast.success('域站基址已复制')
+  try {
+    await navigator.clipboard.writeText(origin.value)
+    toast.success('域站基址已复制')
+  }
+  catch { toast.error('复制失败，请在域概览中复制地址') }
 }
 
 function openYmcl() {
@@ -39,45 +58,21 @@ function openPage() {
 </script>
 
 <template>
-  <div class="dashboard-card__content ymcl-connect-card">
-    <div class="ymcl-connect-card__body">
-      <div class="ymcl-connect-card__intro"><FaIcon name="i-ri:gamepad-line" /><strong>连接你的启动器</strong></div>
-      <p class="ymcl-connect-card__desc">
-        将本站添加到 YMCL，继续你的游戏旅程。
-      </p>
-      <button
-        type="button"
-        class="ymcl-connect-card__endpoint"
-        title="复制域站基址"
-        @click="copyOrigin"
-      >
-        <code>{{ origin }}</code>
-        <span class="ymcl-connect-card__copy">
-          <FaIcon name="i-ri:file-copy-line" />
-        </span>
-      </button>
-      <p class="ymcl-connect-card__hint">
-        <FaIcon name="i-ri:information-line" />
-        <span>需安装 YMCL-Axolotl；也可点击地址手动添加。</span>
-      </p>
-    </div>
-    <div class="ymcl-connect-card__actions">
-      <FaButton v-if="card?.actionPath" size="sm" variant="ghost" @click="openPage">
-        域概览
-        <FaIcon name="i-ri:arrow-right-up-line" />
-      </FaButton>
-      <FaButton size="sm" variant="secondary" @click="openYmcl">
-        <FaIcon name="i-ri:external-link-line" />
-        打开 YMCL
+  <div ref="cardElement" class="dashboard-card__content ymcl-connect-card" :class="{ 'ymcl-connect-card--compact': compact }">
+    <FaButton variant="secondary" class="ymcl-connect-card__launch h-auto w-full justify-start whitespace-normal gap-3 px-3" :class="compact ? 'py-2' : 'py-3'" @click="openYmcl">
+      <span class="ymcl-connect-card__launch-icon"><FaIcon name="i-ri:gamepad-line" /></span>
+      <span class="ymcl-connect-card__launch-copy"><strong>打开 YMCL</strong><span>将本站加入你的启动器</span></span>
+      <FaIcon name="i-ri:arrow-right-up-line" class="ymcl-connect-card__launch-arrow" />
+    </FaButton>
+    <FaButton variant="ghost" class="ymcl-connect-card__endpoint h-auto w-full min-w-0 justify-start px-1 py-1 gap-2" :title="`复制域站基址：${origin}`" aria-label="复制域站基址" @click="copyOrigin">
+      <span class="ymcl-connect-card__endpoint-copy"><span>手动添加地址</span><code>{{ origin }}</code></span>
+      <FaIcon name="i-ri:file-copy-line" class="ymcl-connect-card__copy" />
+    </FaButton>
+    <div class="ymcl-connect-card__support">
+      <span>需安装 YMCL-Axolotl</span>
+      <FaButton v-if="card?.actionPath" size="sm" variant="ghost" class="min-w-0 h-7 px-2 text-xs" @click="openPage">
+        域概览<FaIcon name="i-ri:arrow-right-up-line" />
       </FaButton>
     </div>
   </div>
 </template>
-
-<style scoped>
-.ymcl-connect-card__intro { display: flex; align-items: center; gap: 10px; color: var(--color-text-1); }
-.ymcl-connect-card__intro > :first-child { font-size: 26px; }
-.ymcl-connect-card__intro strong { font-size: 17px; font-weight: 600; }
-.ymcl-connect-card__actions { justify-content: space-between; border-top: 0; padding-top: 0; }
-.ymcl-connect-card__hint { font-size: 10px; }
-</style>

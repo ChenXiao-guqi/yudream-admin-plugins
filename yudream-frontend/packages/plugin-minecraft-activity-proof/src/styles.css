@@ -412,11 +412,12 @@
      再写 width/height:100% 会叠加 margin 使内容溢出被裁切。 */
   flex: 1 1 auto;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   min-width: 0;
   min-height: 0;
   margin: 2px 16px 16px;
   overflow: hidden;
+  container: activity-workbench / inline-size;
 }
 
 .activity-dashboard-card__state {
@@ -425,7 +426,7 @@
   gap: 8px;
   align-items: center;
   justify-content: center;
-  min-height: 120px;
+  min-height: 0;
   color: var(--color-text-3);
   font-size: 13px;
 }

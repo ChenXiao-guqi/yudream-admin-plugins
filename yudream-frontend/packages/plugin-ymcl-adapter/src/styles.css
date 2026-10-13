@@ -26,111 +26,160 @@
 
 .ymcl-connect-card {
   display: flex;
-  /* 卡片根是宿主外包层的 flex 子项：stretch + flex:1 已占满宽度和剩余高度，
-     再写 width/height:100% 会叠加 margin 使内容溢出被裁切。 */
   flex: 1 1 auto;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   min-width: 0;
   min-height: 0;
   margin: 2px 16px 16px;
-  overflow: hidden;
+  container: ymcl-workbench / inline-size;
 }
 
-.ymcl-connect-card__body {
-  display: flex;
+.ymcl-connect-card__launch {
   flex: 1 1 auto;
-  flex-direction: column;
-  gap: 10px;
-  justify-content: center;
   min-width: 0;
-  min-height: 0;
-  overflow: auto;
+  min-height: 48px;
+  text-align: left;
 }
 
-.ymcl-connect-card__desc {
-  display: -webkit-box;
+.ymcl-connect-card__launch-icon {
+  display: grid;
   flex: 0 0 auto;
-  margin: 0;
-  overflow: hidden;
-  -webkit-line-clamp: 2;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  font-size: 24px;
+}
+
+.ymcl-connect-card__launch-copy {
+  display: grid;
+  flex: 1;
+  gap: 4px;
+  min-width: 0;
+}
+
+.ymcl-connect-card__launch-copy strong {
+  color: var(--color-text-1);
+  font-size: clamp(14px, 5cqw, 18px);
+  font-weight: 600;
+}
+
+.ymcl-connect-card__launch-copy > span {
   color: var(--color-text-3);
   font-size: 12px;
   line-height: 1.5;
-  overflow-wrap: anywhere;
-  -webkit-box-orient: vertical;
+}
+
+.ymcl-connect-card__launch-arrow {
+  flex-shrink: 0;
+  transition: transform var(--yd-motion-duration-normal, 180ms) ease;
+}
+
+.ymcl-connect-card__launch:is(:hover, :focus-visible) .ymcl-connect-card__launch-arrow {
+  transform: translate(2px, -2px);
 }
 
 .ymcl-connect-card__endpoint {
-  display: flex;
   flex: 0 0 auto;
-  gap: 10px;
-  align-items: center;
-  width: 100%;
-  min-width: 0;
-  min-height: 46px;
-  padding: 10px 12px;
-  color: var(--color-text-1);
   text-align: left;
   cursor: copy;
-  background: var(--color-fill-1);
-  border: 1px solid var(--color-border-2);
-  border-radius: 8px;
-  user-select: none;
 }
 
-.ymcl-connect-card__endpoint:hover {
-  background: var(--color-fill-2);
-  border-color: var(--color-border-3);
+.ymcl-connect-card__endpoint-copy {
+  display: grid;
+  flex: 1;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ymcl-connect-card__endpoint-copy > span {
+  color: var(--color-text-3);
+  font-size: 11px;
+  line-height: 1.4;
 }
 
 .ymcl-connect-card__endpoint code {
-  flex: 1 1 auto;
   min-width: 0;
   overflow: hidden;
-  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace);
+  color: var(--color-text-2);
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace);
   font-size: 12px;
+  line-height: 1.5;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .ymcl-connect-card__copy {
-  display: grid;
   flex: 0 0 auto;
-  place-items: center;
   color: var(--color-text-3);
-  font-size: 16px;
 }
 
-.ymcl-connect-card__hint {
+.ymcl-connect-card__support {
   display: flex;
   flex: 0 0 auto;
-  gap: 6px;
-  align-items: flex-start;
-  margin: 0;
+  gap: 4px;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
   color: var(--color-text-3);
-  font-size: 12px;
-  line-height: 1.5;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.ymcl-connect-card__support > span {
+  min-width: 0;
   overflow-wrap: anywhere;
 }
 
-.ymcl-connect-card__hint .fa-icon {
-  flex: 0 0 auto;
-  margin-top: 1px;
-  font-size: 13px;
+.ymcl-connect-card--compact {
+  gap: 4px;
 }
 
-.ymcl-connect-card__actions {
-  display: flex;
-  flex: 0 0 auto;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-  justify-content: flex-end;
-  min-width: 0;
-  margin-top: auto;
-  padding-top: 10px;
-  border-top: 1px solid var(--color-border-1);
+.ymcl-connect-card--compact .ymcl-connect-card__launch-icon {
+  width: 26px;
+  height: 26px;
+  font-size: 21px;
+}
+
+.ymcl-connect-card--compact .ymcl-connect-card__launch {
+  min-height: 42px;
+}
+
+.ymcl-connect-card--compact .ymcl-connect-card__launch-copy > span,
+.ymcl-connect-card--compact .ymcl-connect-card__endpoint-copy > span {
+  display: none;
+}
+
+@container ymcl-workbench (max-width: 235px) {
+  .ymcl-connect-card:not(.ymcl-connect-card--compact) .ymcl-connect-card__launch-icon {
+    width: 28px;
+    height: 32px;
+    font-size: 22px;
+  }
+
+  .ymcl-connect-card__launch-copy strong {
+    font-size: 14px;
+  }
+
+  .ymcl-connect-card__launch-copy > span {
+    font-size: 11px;
+  }
+
+  .ymcl-connect-card__support {
+    font-size: 10px;
+  }
+}
+
+@container ymcl-workbench (min-width: 440px) {
+  .ymcl-connect-card:not(.ymcl-connect-card--compact) .ymcl-connect-card__launch-icon {
+    width: 54px;
+    height: 54px;
+    font-size: 32px;
+  }
+
+  .ymcl-connect-card__launch-copy > span {
+    font-size: 13px;
+  }
 }
 
 .ymcl-card-content--wide {
