@@ -16,6 +16,9 @@ const instanceMode = computed(() => props.card?.actionPath?.includes('/instances
 const current = computed(() => instanceMode.value ? instances.value.running ?? 0 : nodes.value.online ?? 0)
 const total = computed(() => instanceMode.value ? instances.value.total ?? 0 : nodes.value.total ?? 0)
 const percent = computed(() => total.value ? Math.min(100, Math.round(current.value / total.value * 100)) : 0)
+const countFormatter = new Intl.NumberFormat('zh-CN', { notation: 'compact', maximumFractionDigits: 1 })
+const currentLabel = computed(() => current.value >= 10000 ? countFormatter.format(current.value) : current.value.toLocaleString('zh-CN'))
+const totalLabel = computed(() => total.value >= 10000 ? countFormatter.format(total.value) : total.value.toLocaleString('zh-CN'))
 onMounted(load)
 async function load() {
   loading.value = true
@@ -35,8 +38,8 @@ async function load() {
     <div v-if="loading" class="mcp-dash-card__state"><FaIcon name="i-ri:loader-4-line" class="animate-spin" />正在读取监控数据</div>
     <div v-else-if="error" class="mcp-dash-card__state"><span>{{ error }}</span><FaButton size="sm" variant="ghost" @click="load">重试</FaButton></div>
     <template v-else>
-      <div class="mcp-dash-card__readout">
-        <div class="mcp-dash-card__figure"><strong>{{ current }}</strong><span>/ {{ total }}</span><p>{{ instanceMode ? '运行中的实例' : '在线节点' }}</p></div>
+      <div class="mcp-dash-card__readout" :class="{ 'mcp-dash-card__readout--empty': total === 0 }">
+        <div class="mcp-dash-card__figure" :title="`${current} / ${total}`"><strong>{{ currentLabel }}</strong><span>/ {{ totalLabel }}</span><p>{{ instanceMode ? '运行中的实例' : '在线节点' }}</p></div>
         <svg class="mcp-dash-card__gauge" viewBox="0 0 100 100" role="img" :aria-label="`${instanceMode ? '运行' : '在线'}比例 ${percent}%`">
           <circle cx="50" cy="50" r="40" class="mcp-dash-card__track" />
           <circle v-if="percent > 0" cx="50" cy="50" r="40" pathLength="100" :stroke-dasharray="`${percent} 100`" class="mcp-dash-card__arc" />
@@ -45,7 +48,7 @@ async function load() {
       </div>
       <div class="mcp-dash-card__actions">
         <span>{{ total === 0 ? (instanceMode ? '还没有部署实例' : '还没有接入节点') : (instanceMode ? `${Math.max(0, total - current)} 个实例未运行` : `运行实例 ${instances.running ?? 0} / ${instances.total ?? 0}`) }}</span>
-        <FaButton v-if="card?.actionPath" size="sm" variant="ghost" @click="onOpen?.(card)">{{ instanceMode ? '实例管理' : '监控详情' }}<FaIcon name="i-ri:arrow-right-up-line" /></FaButton>
+        <FaButton v-if="card?.actionPath" size="sm" variant="ghost" class="mcp-dash-card__action shrink-0" @click="onOpen?.(card)">{{ instanceMode ? '实例管理' : '监控详情' }}<FaIcon name="i-ri:arrow-right-up-line" /></FaButton>
       </div>
     </template>
   </div>
