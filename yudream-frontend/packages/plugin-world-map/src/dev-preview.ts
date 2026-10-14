@@ -37,12 +37,12 @@ const previewGlobal = globalThis as typeof globalThis & {
 previewGlobal.__YUDREAM_PLUGIN_SHARED__ = {
   vue: Vue,
   components: {
-    FaButton: button,
-    FaCheckbox: checkbox,
-    FaIcon: icon,
-    FaInput: input,
-    FaSelect: select,
-    FaSlider: slider,
+    YdButton: button,
+    YdCheckbox: checkbox,
+    YdIcon: icon,
+    YdInput: input,
+    YdSelect: select,
+    YdSlider: slider,
   },
 }
 

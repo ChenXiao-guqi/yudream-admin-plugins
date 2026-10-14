@@ -2,7 +2,7 @@
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
 import { computed, ref } from 'vue'
-import { FaButton, FaCheckbox, FaIcon, FaInput, FaSelect, FaSlider } from '@yudream/components'
+import { YdButton, YdCheckbox, YdIcon, YdInput, YdSelect, YdSlider } from '@yudream/components'
 import { useWorldMapViewer } from '../composables/useWorldMapViewer'
 import { findMarkers } from '../map/markerSearch'
 
@@ -98,7 +98,7 @@ function toggleRenderSettings() {
     <div class="world-map-control-stack">
       <div class="world-map-toolbar">
       <div class="world-map-toolbar-map">
-        <FaSelect
+        <YdSelect
           v-if="mapOptions.length > 1"
           v-model="currentMapId"
           :options="mapOptions"
@@ -108,8 +108,8 @@ function toggleRenderSettings() {
       </div>
 
       <div class="world-map-toolbar-sun">
-        <FaIcon name="i-mdi:weather-night" />
-        <FaSlider
+        <YdIcon name="i-mdi:weather-night" />
+        <YdSlider
           v-model="timeOfDay"
           :min="0"
           :max="1000"
@@ -117,57 +117,57 @@ function toggleRenderSettings() {
           :tooltip="false"
           class="world-map-toolbar-slider"
         />
-        <FaIcon name="i-mdi:weather-sunny" />
+        <YdIcon name="i-mdi:weather-sunny" />
       </div>
 
       <div class="world-map-toolbar-actions">
-        <FaButton
+        <YdButton
           size="sm"
           variant="outline"
           :title="viewMode === 'perspective' ? '切换到俯视地图' : '切换到三维视图'"
           @click="toggleViewMode"
         >
-          <FaIcon :name="viewMode === 'perspective' ? 'i-mdi:map' : 'i-mdi:cube-outline'" />
-        </FaButton>
+          <YdIcon :name="viewMode === 'perspective' ? 'i-mdi:map' : 'i-mdi:cube-outline'" />
+        </YdButton>
 
-        <FaButton
+        <YdButton
           size="sm"
           variant="outline"
           :disabled="viewMode === 'flat'"
           :title="cameraMode === 'orbit' ? '切换到飞行模式' : '切换到轨道模式'"
           @click="toggleCameraMode"
         >
-          <FaIcon :name="cameraMode === 'orbit' ? 'i-mdi:airplane' : 'i-mdi:orbit'" />
+          <YdIcon :name="cameraMode === 'orbit' ? 'i-mdi:airplane' : 'i-mdi:orbit'" />
           <span class="world-map-toolbar-mode-label">{{ cameraMode === 'orbit' ? '飞行' : '轨道' }}</span>
-        </FaButton>
+        </YdButton>
 
-        <FaButton size="sm" variant="outline" title="重置到出生点" @click="resetToSpawn">
-          <FaIcon name="i-mdi:home-map-marker" />
-        </FaButton>
+        <YdButton size="sm" variant="outline" title="重置到出生点" @click="resetToSpawn">
+          <YdIcon name="i-mdi:home-map-marker" />
+        </YdButton>
 
-        <FaButton size="sm" variant="outline" title="截图下载" @click="screenshot">
-          <FaIcon name="i-mdi:camera" />
-        </FaButton>
+        <YdButton size="sm" variant="outline" title="截图下载" @click="screenshot">
+          <YdIcon name="i-mdi:camera" />
+        </YdButton>
 
-        <FaButton
+        <YdButton
           size="sm"
           variant="outline"
           :title="isFullscreen ? '退出地图全屏' : '地图全屏（会隐藏宿主侧栏）'"
           :aria-label="isFullscreen ? '退出地图全屏' : '地图全屏（会隐藏宿主侧栏）'"
           @click="toggleFullscreen"
         >
-          <FaIcon :name="isFullscreen ? 'i-mdi:fullscreen-exit' : 'i-mdi:fullscreen'" />
-        </FaButton>
-        <FaButton
+          <YdIcon :name="isFullscreen ? 'i-mdi:fullscreen-exit' : 'i-mdi:fullscreen'" />
+        </YdButton>
+        <YdButton
           size="sm"
           variant="outline"
           title="渲染距离"
           :aria-pressed="renderSettingsOpen"
           @click="toggleRenderSettings"
         >
-          <FaIcon name="i-mdi:tune-variant" />
-        </FaButton>
-        <FaButton
+          <YdIcon name="i-mdi:tune-variant" />
+        </YdButton>
+        <YdButton
           size="sm"
           variant="outline"
           class="world-map-toolbar-coordinate-action"
@@ -175,8 +175,8 @@ function toggleRenderSettings() {
           :aria-pressed="coordinatePanelOpen"
           @click="toggleCoordinatePanel"
         >
-          <FaIcon name="i-mdi:crosshairs-gps" />
-        </FaButton>
+          <YdIcon name="i-mdi:crosshairs-gps" />
+        </YdButton>
       </div>
 
       <div class="world-map-toolbar-status">
@@ -196,21 +196,21 @@ function toggleRenderSettings() {
         <div v-if="renderSettingsOpen" class="world-map-render-settings">
           <label>
             <span>地形细节 {{ hiresRadius[0] }}</span>
-            <FaSlider v-model="hiresRadius" :min="2" :max="6" :step="1" :tooltip="false" />
+            <YdSlider v-model="hiresRadius" :min="2" :max="6" :step="1" :tooltip="false" />
           </label>
           <label>
             <span>概览范围 {{ lowresCoverage[0]?.toFixed(1) }}x</span>
-            <FaSlider v-model="lowresCoverage" :min="1" :max="2.5" :step="0.25" :tooltip="false" />
+            <YdSlider v-model="lowresCoverage" :min="1" :max="2.5" :step="0.25" :tooltip="false" />
           </label>
         </div>
 
         <div v-else class="world-map-coordinate-panel">
           <form class="world-map-coordinate-form" @submit.prevent="focusCoordinateInput">
-            <FaInput v-model="coordinateX" aria-label="X coordinate" inputmode="decimal" placeholder="X" />
-            <FaInput v-model="coordinateZ" aria-label="Z coordinate" inputmode="decimal" placeholder="Z" />
-            <FaButton size="sm" variant="outline" title="定位到坐标" type="submit">
-              <FaIcon name="i-mdi:crosshairs-gps" />
-            </FaButton>
+            <YdInput v-model="coordinateX" aria-label="X coordinate" inputmode="decimal" placeholder="X" />
+            <YdInput v-model="coordinateZ" aria-label="Z coordinate" inputmode="decimal" placeholder="Z" />
+            <YdButton size="sm" variant="outline" title="定位到坐标" type="submit">
+              <YdIcon name="i-mdi:crosshairs-gps" />
+            </YdButton>
           </form>
         </div>
       </div>
@@ -218,10 +218,10 @@ function toggleRenderSettings() {
 
     <div v-if="markerSets.length" class="world-map-layers">
       <div class="world-map-layer-search">
-        <FaInput v-model="markerQuery" aria-label="搜索标注" placeholder="搜索标注" />
+        <YdInput v-model="markerQuery" aria-label="搜索标注" placeholder="搜索标注" />
       </div>
       <div v-if="markerMatches.length" class="world-map-marker-results">
-        <FaButton
+        <YdButton
           v-for="match in markerMatches"
           :key="`${match.setId}:${match.marker.id ?? match.label}`"
           size="sm"
@@ -232,24 +232,24 @@ function toggleRenderSettings() {
         >
           <span>{{ match.label }}</span>
           <small>{{ match.setLabel }}</small>
-        </FaButton>
+        </YdButton>
       </div>
-      <FaCheckbox
+      <YdCheckbox
         v-for="set in markerSets"
         :key="set.id"
         :model-value="layerVisibility[set.id ?? ''] ?? set.defaultVisible !== false"
         @update:model-value="value => setLayerVisible(set.id ?? '', Boolean(value))"
       >
         {{ set.label || set.id }}
-      </FaCheckbox>
+      </YdCheckbox>
     </div>
 
     <div v-if="selectedMarker" class="world-map-marker-popup">
       <div class="world-map-marker-popup-title">
         <strong>{{ selectedMarker.label || selectedMarker.id || '标注' }}</strong>
-        <FaButton size="sm" variant="outline" title="定位到标注" @click="focusSelectedMarker">
-          <FaIcon name="i-mdi:crosshairs-gps" />
-        </FaButton>
+        <YdButton size="sm" variant="outline" title="定位到标注" @click="focusSelectedMarker">
+          <YdIcon name="i-mdi:crosshairs-gps" />
+        </YdButton>
       </div>
       <span v-if="selectedMarker.position">
         {{ Math.round(selectedMarker.position.x) }} / {{ Math.round(selectedMarker.position.y) }} / {{ Math.round(selectedMarker.position.z) }}
@@ -259,7 +259,7 @@ function toggleRenderSettings() {
     <div v-if="loading" class="world-map-overlay">地图加载中……</div>
     <div v-else-if="error" class="world-map-overlay world-map-error">
       <span>{{ error }}</span>
-      <FaButton size="sm" variant="outline" @click="retryCurrentMap">重试</FaButton>
+      <YdButton size="sm" variant="outline" @click="retryCurrentMap">重试</YdButton>
     </div>
     <div v-else-if="viewMode === 'flat'" class="world-map-hint">
       拖拽平移，滚轮或双指缩放

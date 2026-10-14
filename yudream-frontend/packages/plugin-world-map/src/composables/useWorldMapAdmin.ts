@@ -1,6 +1,6 @@
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
-import { useFaToast } from '@yudream/components'
+import { useYdToast } from '@yudream/components'
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { createWorldMapAdminApi } from '../api/world-map-admin-api'
 import type { MapAdmin, MapAdminState, MapDimension, RenderPhase, RenderTask } from '../types'
@@ -67,7 +67,7 @@ export function formatError(e: unknown, fallback: string): string {
 /** 管理端地图列表：加载、2.5s 条件轮询（有 RENDERING 时）、新建（含文件上传）、渲染、删除 */
 export function useWorldMapAdmin(sdk: YuDreamPluginSdk) {
   const api = createWorldMapAdminApi(sdk)
-  const toast = useFaToast()
+  const toast = useYdToast()
 
   const maps = ref<MapAdmin[]>([])
   const tasks = ref<RenderTask[]>([])
@@ -246,7 +246,7 @@ export function useWorldMapAdmin(sdk: YuDreamPluginSdk) {
 /** 地图详情：地图信息 + 渲染任务历史（前端按 mapId 过滤），有活跃任务时 2.5s 轮询 */
 export function useWorldMapMapDetail(sdk: YuDreamPluginSdk, route?: RouteLocationNormalizedLoaded) {
   const api = createWorldMapAdminApi(sdk)
-  const toast = useFaToast()
+  const toast = useYdToast()
 
   const mapId = computed(() => String(route?.query?.id ?? ''))
   const map = ref<MapAdmin | null>(null)

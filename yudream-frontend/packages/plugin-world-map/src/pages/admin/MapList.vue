@@ -3,20 +3,20 @@ import type { FileItem, FileUploadRequestOptions, TableColumn } from '@yudream/c
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
 import {
-  FaButton,
-  FaCard,
-  FaFileUpload,
-  FaIcon,
-  FaInput,
-  FaModal,
-  FaPageHeader,
-  FaPageMain,
-  FaProgress,
-  FaResponsiveTable,
-  FaSelect,
-  FaSwitch,
-  FaTag,
-  useFaModal,
+  YdButton,
+  YdCard,
+  YdFileUpload,
+  YdIcon,
+  YdInput,
+  YdModal,
+  YdPageHeader,
+  YdPageMain,
+  YdProgress,
+  YdResponsiveTable,
+  YdSelect,
+  YdSwitch,
+  YdTag,
+  useYdModal,
 } from '@yudream/components'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -36,7 +36,7 @@ const props = defineProps<{
 }>()
 
 const router = useRouter()
-const modal = useFaModal()
+const modal = useYdModal()
 const model = useWorldMapAdmin(props.sdk)
 
 const columns: TableColumn<MapAdmin>[] = [
@@ -97,15 +97,15 @@ function mapStateTag(state: MapAdmin['state']) {
 </script>
 
 <template>
-  <FaPageHeader title="世界地图管理" class="mb-0">
-    <FaButton size="sm" @click="model.openCreate">
-      <FaIcon name="i-mdi:plus" />
+  <YdPageHeader title="世界地图管理" class="mb-0">
+    <YdButton size="sm" @click="model.openCreate">
+      <YdIcon name="i-mdi:plus" />
       新建地图
-    </FaButton>
-  </FaPageHeader>
+    </YdButton>
+  </YdPageHeader>
 
-  <FaPageMain>
-    <FaResponsiveTable
+  <YdPageMain>
+    <YdResponsiveTable
       row-key="id"
       table-root-class="max-w-full overflow-x-auto rounded-lg"
       table-class="min-w-[960px]"
@@ -115,9 +115,9 @@ function mapStateTag(state: MapAdmin['state']) {
       :data="model.maps.value"
     >
       <template #cell-name="{ row }">
-        <FaButton variant="link" class="h-auto px-0" @click="openDetail(row.original)">
+        <YdButton variant="link" class="h-auto px-0" @click="openDetail(row.original)">
           {{ row.original.name }}
-        </FaButton>
+        </YdButton>
       </template>
       <template #cell-dimension="{ row }">
         {{ dimensionLabel(row.original.dimension) }}
@@ -125,9 +125,9 @@ function mapStateTag(state: MapAdmin['state']) {
       <template #cell-state="{ row }">
         <div class="grid min-w-[180px] gap-1">
           <div class="flex items-center gap-2">
-            <FaTag :variant="mapStateTag(row.original.state).variant">
+            <YdTag :variant="mapStateTag(row.original.state).variant">
               {{ mapStateTag(row.original.state).label }}
-            </FaTag>
+            </YdTag>
             <span v-if="row.original.state === 'FAILED' && row.original.message" class="min-w-0 truncate text-xs text-muted-foreground" :title="row.original.message">
               {{ row.original.message }}
             </span>
@@ -137,7 +137,7 @@ function mapStateTag(state: MapAdmin['state']) {
               <span>{{ RENDER_PHASE_LABEL[activeTaskFor(row.original.id)!.phase || 'IMPORT'] }}</span>
               <span>{{ model.renderTaskProgress(activeTaskFor(row.original.id)!) }}%</span>
             </div>
-            <FaProgress :model-value="model.renderTaskProgress(activeTaskFor(row.original.id)!)" />
+            <YdProgress :model-value="model.renderTaskProgress(activeTaskFor(row.original.id)!)" />
             <span class="truncate text-xs text-muted-foreground" :title="activeTaskFor(row.original.id)!.message">
               {{ activeTaskFor(row.original.id)!.doneTiles }} / {{ activeTaskFor(row.original.id)!.totalTiles }}<template v-if="activeTaskFor(row.original.id)!.message"> · {{ activeTaskFor(row.original.id)!.message }}</template>
             </span>
@@ -154,7 +154,7 @@ function mapStateTag(state: MapAdmin['state']) {
       </template>
       <template #cell-operation="{ row }">
         <div class="flex items-center gap-2">
-          <FaButton
+          <YdButton
             size="sm"
             variant="outline"
             :disabled="row.original.state === 'RENDERING'"
@@ -162,23 +162,23 @@ function mapStateTag(state: MapAdmin['state']) {
             @click="model.triggerRender(row.original)"
           >
             渲染
-          </FaButton>
-          <FaButton
+          </YdButton>
+          <YdButton
             size="sm"
             variant="outline"
             :disabled="row.original.state !== 'READY'"
             @click="viewMap()"
           >
             查看
-          </FaButton>
-          <FaButton
+          </YdButton>
+          <YdButton
             size="sm"
             variant="destructive"
             :disabled="row.original.state === 'RENDERING'"
             @click="confirmDelete(row.original)"
           >
             删除
-          </FaButton>
+          </YdButton>
         </div>
       </template>
       <template #empty>
@@ -187,14 +187,14 @@ function mapStateTag(state: MapAdmin['state']) {
         </span>
       </template>
       <template #card="{ row }">
-        <FaCard class="w-full">
+        <YdCard class="w-full">
           <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between gap-2">
               <span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span>
               <div class="flex gap-1">
-                <FaTag :variant="mapStateTag(row.state).variant">
+                <YdTag :variant="mapStateTag(row.state).variant">
                   {{ mapStateTag(row.state).label }}
-                </FaTag>
+                </YdTag>
               </div>
             </div>
             <div class="flex flex-col gap-1 text-sm">
@@ -212,7 +212,7 @@ function mapStateTag(state: MapAdmin['state']) {
               </div>
             </div>
             <div class="flex flex-wrap gap-2 border-t pt-3">
-              <FaButton
+              <YdButton
                 size="sm"
                 variant="outline"
                 :disabled="row.state === 'RENDERING'"
@@ -220,44 +220,44 @@ function mapStateTag(state: MapAdmin['state']) {
                 @click="model.triggerRender(row)"
               >
                 渲染
-              </FaButton>
-              <FaButton
+              </YdButton>
+              <YdButton
                 size="sm"
                 variant="outline"
                 :disabled="row.state !== 'READY'"
                 @click="viewMap()"
               >
                 查看
-              </FaButton>
-              <FaButton
+              </YdButton>
+              <YdButton
                 size="sm"
                 variant="destructive"
                 :disabled="row.state === 'RENDERING'"
                 @click="confirmDelete(row)"
               >
                 删除
-              </FaButton>
+              </YdButton>
             </div>
           </div>
-        </FaCard>
+        </YdCard>
       </template>
-    </FaResponsiveTable>
+    </YdResponsiveTable>
 
-    <FaModal v-model="model.createOpen.value" title="新建地图">
+    <YdModal v-model="model.createOpen.value" title="新建地图">
       <div class="grid gap-4">
         <label class="grid gap-1.5">
           <span class="text-sm">地图名称</span>
-          <FaInput v-model="model.createForm.name" placeholder="例如：生存世界" />
+          <YdInput v-model="model.createForm.name" placeholder="例如：生存世界" />
         </label>
 
         <label class="grid gap-1.5">
           <span class="text-sm">维度</span>
-          <FaSelect v-model="model.createForm.dimension" :options="DIMENSION_OPTIONS" />
+          <YdSelect v-model="model.createForm.dimension" :options="DIMENSION_OPTIONS" />
         </label>
 
         <div class="grid gap-1.5">
           <span class="text-sm">存档 zip</span>
-          <FaFileUpload
+          <YdFileUpload
             v-model="worldFiles"
             :max="1"
             :disabled="model.creating.value"
@@ -269,7 +269,7 @@ function mapStateTag(state: MapAdmin['state']) {
 
         <div class="grid gap-1.5">
           <span class="text-sm">客户端 jar（可选，留空则从镜像下载）</span>
-          <FaFileUpload
+          <YdFileUpload
             v-model="clientJarFiles"
             :max="1"
             :disabled="model.creating.value"
@@ -280,7 +280,7 @@ function mapStateTag(state: MapAdmin['state']) {
         </div>
 
         <label class="flex items-center gap-2">
-          <FaSwitch v-model="model.createForm.stripNetherCeiling" :disabled="model.creating.value" />
+          <YdSwitch v-model="model.createForm.stripNetherCeiling" :disabled="model.creating.value" />
           <span class="text-sm">剥离下界基岩顶（仅下界生效）</span>
         </label>
 
@@ -291,18 +291,18 @@ function mapStateTag(state: MapAdmin['state']) {
 
       <template #footer>
         <div class="flex justify-end gap-2">
-          <FaButton variant="outline" :disabled="model.creating.value" @click="model.createOpen.value = false">
+          <YdButton variant="outline" :disabled="model.creating.value" @click="model.createOpen.value = false">
             取消
-          </FaButton>
-          <FaButton
+          </YdButton>
+          <YdButton
             :disabled="!model.createValid.value"
             :loading="model.creating.value"
             @click="model.submitCreate"
           >
             创建
-          </FaButton>
+          </YdButton>
         </div>
       </template>
-    </FaModal>
-  </FaPageMain>
+    </YdModal>
+  </YdPageMain>
 </template>

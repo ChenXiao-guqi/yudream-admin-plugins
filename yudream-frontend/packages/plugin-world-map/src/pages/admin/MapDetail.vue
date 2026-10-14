@@ -3,15 +3,15 @@ import type { TableColumn } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
 import {
-  FaButton,
-  FaCard,
-  FaDrawer,
-  FaIcon,
-  FaPageHeader,
-  FaPageMain,
-  FaProgress,
-  FaResponsiveTable,
-  FaTag,
+  YdButton,
+  YdCard,
+  YdDrawer,
+  YdIcon,
+  YdPageHeader,
+  YdPageMain,
+  YdProgress,
+  YdResponsiveTable,
+  YdTag,
 } from '@yudream/components'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -72,34 +72,34 @@ function renderPhaseLabel(phase: NonNullable<RenderTask['phase']>) {
 </script>
 
 <template>
-  <FaPageHeader :title="model.map.value ? `地图详情：${model.map.value.name}` : '地图详情'" class="mb-0">
+  <YdPageHeader :title="model.map.value ? `地图详情：${model.map.value.name}` : '地图详情'" class="mb-0">
     <div class="flex items-center gap-2">
-      <FaButton size="sm" variant="outline" @click="backToList">
-        <FaIcon name="i-mdi:arrow-left" />
+      <YdButton size="sm" variant="outline" @click="backToList">
+        <YdIcon name="i-mdi:arrow-left" />
         返回列表
-      </FaButton>
-      <FaButton
+      </YdButton>
+      <YdButton
         v-if="model.map.value"
         size="sm"
         :disabled="model.map.value.state === 'RENDERING' || Boolean(model.activeTask.value)"
         @click="model.triggerRender"
       >
         触发渲染
-      </FaButton>
-      <FaButton
+      </YdButton>
+      <YdButton
         v-if="model.activeTask.value"
         size="sm"
         variant="destructive"
         :loading="model.cancellingTaskId.value === model.activeTask.value.id"
         @click="model.cancelActiveTask"
       >
-        <FaIcon name="i-mdi:stop" />
+        <YdIcon name="i-mdi:stop" />
         取消渲染
-      </FaButton>
+      </YdButton>
     </div>
-  </FaPageHeader>
+  </YdPageHeader>
 
-  <FaPageMain>
+  <YdPageMain>
     <div v-if="model.error.value" class="py-12 text-center text-muted-foreground">
       {{ model.error.value }}
     </div>
@@ -108,7 +108,7 @@ function renderPhaseLabel(phase: NonNullable<RenderTask['phase']>) {
     </div>
 
     <template v-else-if="model.map.value">
-      <FaCard class="mb-4 p-4">
+      <YdCard class="mb-4 p-4">
         <div class="grid grid-cols-2 gap-x-8 gap-y-2 text-sm md:grid-cols-4">
           <div>
             <span class="text-muted-foreground">地图 ID：</span>{{ model.map.value.id }}
@@ -118,9 +118,9 @@ function renderPhaseLabel(phase: NonNullable<RenderTask['phase']>) {
           </div>
           <div>
             <span class="text-muted-foreground">状态：</span>
-            <FaTag :variant="MAP_STATE_META[model.map.value.state].variant">
+            <YdTag :variant="MAP_STATE_META[model.map.value.state].variant">
               {{ MAP_STATE_META[model.map.value.state].label }}
-            </FaTag>
+            </YdTag>
           </div>
           <div>
             <span class="text-muted-foreground">Tile：</span>
@@ -136,12 +136,12 @@ function renderPhaseLabel(phase: NonNullable<RenderTask['phase']>) {
             <span class="text-muted-foreground">备注：</span>{{ model.map.value.message }}
           </div>
         </div>
-      </FaCard>
+      </YdCard>
 
       <h3 class="mb-2 text-base font-semibold">
         渲染任务历史
       </h3>
-      <FaResponsiveTable
+      <YdResponsiveTable
         row-key="id"
         table-root-class="max-w-full overflow-x-auto rounded-lg"
         table-class="min-w-[860px]"
@@ -154,9 +154,9 @@ function renderPhaseLabel(phase: NonNullable<RenderTask['phase']>) {
           <span class="font-mono text-xs">{{ row.original.id }}</span>
         </template>
         <template #cell-state="{ row }">
-          <FaTag :variant="taskStateTag(row.original.state).variant">
+          <YdTag :variant="taskStateTag(row.original.state).variant">
             {{ taskStateTag(row.original.state).label }}
-          </FaTag>
+          </YdTag>
         </template>
         <template #cell-phase="{ row }">
           <span v-if="row.original.phase" class="text-sm text-muted-foreground">
@@ -166,7 +166,7 @@ function renderPhaseLabel(phase: NonNullable<RenderTask['phase']>) {
         </template>
         <template #cell-progress="{ row }">
           <div v-if="row.original.state === 'RUNNING'" class="grid gap-1">
-            <FaProgress :model-value="model.taskProgress(row.original)" />
+            <YdProgress :model-value="model.taskProgress(row.original)" />
             <span class="text-xs text-muted-foreground">
               {{ model.taskProgress(row.original) }}% · {{ row.original.doneTiles }} / {{ row.original.totalTiles }}
               <template v-if="row.original.message">· {{ row.original.message }}</template>
@@ -176,15 +176,15 @@ function renderPhaseLabel(phase: NonNullable<RenderTask['phase']>) {
             <span class="min-w-0 flex-1 truncate" :title="taskError(row.original)">
               {{ errorSummary(row.original) }}
             </span>
-            <FaButton
+            <YdButton
               size="sm"
               variant="ghost"
               title="查看失败详情"
               aria-label="查看失败详情"
               @click="openErrorDetail(row.original)"
             >
-              <FaIcon name="i-mdi:text-box-search-outline" />
-            </FaButton>
+              <YdIcon name="i-mdi:text-box-search-outline" />
+            </YdButton>
           </div>
           <span v-else class="text-sm text-muted-foreground">
             {{ model.taskProgress(row.original) }}% · {{ row.original.doneTiles }} / {{ row.original.totalTiles }}
@@ -200,14 +200,14 @@ function renderPhaseLabel(phase: NonNullable<RenderTask['phase']>) {
           <span class="text-muted-foreground">暂无渲染任务，点击右上角「触发渲染」开始</span>
         </template>
         <template #card="{ row }">
-          <FaCard class="w-full">
+          <YdCard class="w-full">
             <div class="flex flex-col gap-3">
               <div class="flex items-center justify-between gap-2">
                 <span class="min-w-0 break-words text-base font-semibold">{{ row.id }}</span>
                 <div class="flex gap-1">
-                  <FaTag :variant="taskStateTag(row.state).variant">
+                  <YdTag :variant="taskStateTag(row.state).variant">
                     {{ taskStateTag(row.state).label }}
-                  </FaTag>
+                  </YdTag>
                 </div>
               </div>
               <div class="flex flex-col gap-1 text-sm">
@@ -229,11 +229,11 @@ function renderPhaseLabel(phase: NonNullable<RenderTask['phase']>) {
                 </div>
               </div>
             </div>
-          </FaCard>
+          </YdCard>
         </template>
-      </FaResponsiveTable>
+      </YdResponsiveTable>
 
-      <FaDrawer
+      <YdDrawer
         v-model="errorDrawerOpen"
         title="渲染失败详情"
         side="right"
@@ -247,7 +247,7 @@ function renderPhaseLabel(phase: NonNullable<RenderTask['phase']>) {
           </div>
           <pre class="max-h-[70vh] overflow-auto whitespace-pre-wrap break-words rounded-md border border-border bg-muted/40 p-3 font-mono text-xs leading-5 text-foreground">{{ selectedTaskError ? taskError(selectedTaskError) : '' }}</pre>
         </div>
-      </FaDrawer>
+      </YdDrawer>
     </template>
-  </FaPageMain>
+  </YdPageMain>
 </template>

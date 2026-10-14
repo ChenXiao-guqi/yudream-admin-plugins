@@ -97,7 +97,7 @@
 }
 
 .world-map-toolbar-pending {
-  color: rgb(var(--primary-6, 22 93 255));
+  color: var(--color-text-1, #1d2129);
   font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
