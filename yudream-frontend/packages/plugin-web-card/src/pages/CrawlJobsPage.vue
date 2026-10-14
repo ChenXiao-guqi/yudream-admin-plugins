@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import { onMounted, ref } from 'vue'
-import { FaAlert, FaButton, FaCard, FaIcon, FaInput, FaLabel, FaModal, FaNumberField, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable, FaSelect, FaSwitch, useFaModal, useFaToast, type TableColumn } from '@yudream/components'
+import { YdAlert, YdButton, YdCard, YdIcon, YdInput, YdLabel, YdModal, YdNumberField, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSelect, YdSwitch, useYdModal, useYdToast, type TableColumn } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import { createWebCardApi } from '../api/web-card-api'
 import type { CrawlJob, Site } from '../types'
@@ -8,8 +9,8 @@ import { dateTime, errorText, uid } from '../ui'
 
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 const api = createWebCardApi(props.sdk)
-const toast = useFaToast()
-const modal = useFaModal()
+const toast = useYdToast()
+const modal = useYdModal()
 const rows = ref<CrawlJob[]>([])
 const sites = ref<Site[]>([])
 const page = ref(1)
@@ -33,9 +34,9 @@ onMounted(load)
 </script>
 
 <template>
-  <section><FaPageHeader title="定时任务" description="仅在需要持续监控时启用。用户即时链接投递不依赖此处任务。"><FaButton @click="create"><FaIcon name="i-ri:add-line"/>新增任务</FaButton></FaPageHeader><FaPageMain class="space-y-4"><FaAlert v-if="error" variant="destructive" title="加载失败" :description="error"/><FaResponsiveTable v-loading="loading" row-key="id" table-root-class="rounded-lg overflow-hidden" table-class="min-w-[1080px]" border stripe :columns="columns" :data="rows"><template #cell-siteId="{row}">{{ sites.find(value => value.id === row.original.siteId)?.name || row.original.siteId }}</template><template #cell-nextRunAt="{row}">{{ dateTime(row.original.nextRunAt) }}</template><template #cell-enabled="{row}"><div class="status-toggle"><FaSwitch :model-value="row.original.enabled" :disabled="toggling===row.original.id" @update:model-value="toggle(row.original)"/><small>{{ row.original.enabled ? '已启用' : '已停用' }}</small></div></template><template #cell-operation="{row}"><div class="row-actions"><FaButton size="sm" variant="outline" @click="edit(row.original)">编辑</FaButton><FaButton size="sm" variant="destructive" @click="remove(row.original)">删除</FaButton></div></template>
+  <section><YdPageHeader title="定时任务" description="仅在需要持续监控时启用。用户即时链接投递不依赖此处任务。"><YdButton @click="create"><YdIcon name="i-ri:add-line"/>新增任务</YdButton></YdPageHeader><YdPageMain class="space-y-4"><YdAlert v-if="error" variant="destructive" title="加载失败" :description="error"/><YdLoadingOverlay :loading="loading"><YdResponsiveTable  row-key="id" table-root-class="rounded-lg overflow-hidden" table-class="min-w-[1080px]" border stripe :columns="columns" :data="rows"><template #cell-siteId="{row}">{{ sites.find(value => value.id === row.original.siteId)?.name || row.original.siteId }}</template><template #cell-nextRunAt="{row}">{{ dateTime(row.original.nextRunAt) }}</template><template #cell-enabled="{row}"><div class="status-toggle"><YdSwitch :model-value="row.original.enabled" :disabled="toggling===row.original.id" @update:model-value="toggle(row.original)"/><small>{{ row.original.enabled ? '已启用' : '已停用' }}</small></div></template><template #cell-operation="{row}"><div class="row-actions"><YdButton size="sm" variant="outline" @click="edit(row.original)">编辑</YdButton><YdButton size="sm" variant="destructive" @click="remove(row.original)">删除</YdButton></div></template>
 <template #card="{ row }">
-  <FaCard class="w-full">
+  <YdCard class="w-full">
     <div class="flex flex-col gap-3">
       <div class="flex items-center justify-between gap-2">
         <span class="min-w-0 break-words text-base font-semibold">{{ row.sourceUrl }}</span>
@@ -47,12 +48,12 @@ onMounted(load)
         <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">下次运行</span><span>{{ dateTime(row.nextRunAt) }}</span></div>
       </div>
       <div class="flex flex-wrap gap-2 border-t pt-3">
-        <FaButton size="sm" variant="outline" @click="edit(row)">编辑</FaButton>
-        <FaButton size="sm" variant="destructive" @click="remove(row)">删除</FaButton>
+        <YdButton size="sm" variant="outline" @click="edit(row)">编辑</YdButton>
+        <YdButton size="sm" variant="destructive" @click="remove(row)">删除</YdButton>
       </div>
     </div>
-  </FaCard>
-</template></FaResponsiveTable><FaPagination v-model:page="page" v-model:size="size" :total="total" class="mt-3" @page-change="load" @size-change="load"/></FaPageMain><FaModal v-model="open" title="定时采集任务" class="job-modal" :show-cancel-button="true" :confirm-button-loading="saving" @confirm="save"><div class="job-form"><div class="field"><FaLabel>站点</FaLabel><FaSelect v-model="form.siteId" :options="sites.map(value => ({ label: value.name, value: value.id }))" placeholder="选择站点"/></div><div class="field"><FaLabel>采集入口</FaLabel><FaInput v-model="form.sourceUrl" type="url" placeholder="RSS、Sitemap 或列表页 URL"/></div><div class="field"><FaLabel>入口类型</FaLabel><FaSelect v-model="form.sourceType" :options="['RSS','SITEMAP','HTML','JSON'].map(value => ({ label: value, value }))"/></div><div class="grid grid-cols-1 gap-3 sm:grid-cols-2"><div class="field"><FaLabel>周期（分钟）</FaLabel><FaNumberField v-model="form.intervalMinutes" :min="1" class="w-full"/></div><div class="field"><FaLabel>首次推送条数</FaLabel><FaNumberField v-model="form.initialItemCount" :min="1" :max="50" class="w-full"/></div></div><FaSwitch v-model="form.enabled">启用定时采集</FaSwitch></div></FaModal></section>
+  </YdCard>
+</template></YdResponsiveTable></YdLoadingOverlay><YdPagination v-model:page="page" v-model:size="size" :total="total" class="mt-3" @page-change="load" @size-change="load"/></YdPageMain><YdModal v-model="open" title="定时采集任务" class="job-modal" :show-cancel-button="true" :confirm-button-loading="saving" @confirm="save"><div class="job-form"><div class="field"><YdLabel>站点</YdLabel><YdSelect v-model="form.siteId" :options="sites.map(value => ({ label: value.name, value: value.id }))" placeholder="选择站点"/></div><div class="field"><YdLabel>采集入口</YdLabel><YdInput v-model="form.sourceUrl" type="url" placeholder="RSS、Sitemap 或列表页 URL"/></div><div class="field"><YdLabel>入口类型</YdLabel><YdSelect v-model="form.sourceType" :options="['RSS','SITEMAP','HTML','JSON'].map(value => ({ label: value, value }))"/></div><div class="grid grid-cols-1 gap-3 sm:grid-cols-2"><div class="field"><YdLabel>周期（分钟）</YdLabel><YdNumberField v-model="form.intervalMinutes" :min="1" class="w-full"/></div><div class="field"><YdLabel>首次推送条数</YdLabel><YdNumberField v-model="form.initialItemCount" :min="1" :max="50" class="w-full"/></div></div><YdSwitch v-model="form.enabled">启用定时采集</YdSwitch></div></YdModal></section>
 </template>
 
 <style scoped>.status-toggle{display:flex;align-items:center;gap:8px}.status-toggle small{color:var(--color-text-3)}.row-actions{display:flex;flex-wrap:wrap;gap:8px}.job-form{display:grid;gap:16px}.field{display:grid;gap:6px}.job-modal{width:min(560px,calc(100vw - 32px))}</style>

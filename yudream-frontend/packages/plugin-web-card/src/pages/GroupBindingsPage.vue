@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import { computed, onMounted, ref } from 'vue'
-import { FaAlert, FaButton, FaCard, FaIcon, FaInput, FaLabel, FaModal, FaNumberField, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable, FaSelect, FaSwitch, useFaModal, useFaToast, type TableColumn } from '@yudream/components'
+import { YdAlert, YdButton, YdCard, YdIcon, YdInput, YdLabel, YdModal, YdNumberField, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSelect, YdSwitch, useYdModal, useYdToast, type TableColumn } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import { createWebCardApi } from '../api/web-card-api'
 import type { GroupBinding, Option, Site } from '../types'
@@ -8,8 +9,8 @@ import { errorText, uid } from '../ui'
 
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 const api = createWebCardApi(props.sdk)
-const toast = useFaToast()
-const modal = useFaModal()
+const toast = useYdToast()
+const modal = useYdModal()
 const rows = ref<GroupBinding[]>([])
 const sites = ref<Site[]>([])
 const connections = ref<Option[]>([])
@@ -60,17 +61,17 @@ onMounted(load)
 
 <template>
   <section>
-    <FaPageHeader title="定时推送目标" description="仅供定时采集任务主动推送使用。即时链接始终回复到用户发送链接的原群。"><FaButton @click="create"><FaIcon name="i-ri:add-line"/>新增目标</FaButton></FaPageHeader>
-    <FaPageMain class="space-y-4">
-      <FaAlert v-if="error" variant="destructive" title="加载失败" :description="error"/>
-      <FaResponsiveTable v-loading="loading" row-key="id" table-root-class="rounded-lg overflow-hidden" table-class="min-w-[900px]" border stripe :columns="columns" :data="rows">
+    <YdPageHeader title="定时推送目标" description="仅供定时采集任务主动推送使用。即时链接始终回复到用户发送链接的原群。"><YdButton @click="create"><YdIcon name="i-ri:add-line"/>新增目标</YdButton></YdPageHeader>
+    <YdPageMain class="space-y-4">
+      <YdAlert v-if="error" variant="destructive" title="加载失败" :description="error"/>
+      <YdLoadingOverlay :loading="loading"><YdResponsiveTable  row-key="id" table-root-class="rounded-lg overflow-hidden" table-class="min-w-[900px]" border stripe :columns="columns" :data="rows">
         <template #cell-siteId="{row}">{{ sites.find(value => value.id === row.original.siteId)?.name || row.original.siteId }}</template>
         <template #cell-connectionId="{row}">{{ connections.find(value => value.id === row.original.connectionId)?.name || row.original.connectionId }}</template>
         <template #cell-channelId="{row}">{{ row.original.channelId }}</template>
-        <template #cell-enabled="{row}"><div class="status-toggle"><FaSwitch :model-value="row.original.enabled" :disabled="toggling===row.original.id" @update:model-value="toggle(row.original)"/><small>{{ row.original.enabled ? '已启用' : '已停用' }}</small></div></template>
-        <template #cell-operation="{row}"><div class="row-actions"><FaButton size="sm" variant="outline" @click="edit(row.original)">编辑</FaButton><FaButton size="sm" variant="destructive" @click="remove(row.original)">删除</FaButton></div></template>
+        <template #cell-enabled="{row}"><div class="status-toggle"><YdSwitch :model-value="row.original.enabled" :disabled="toggling===row.original.id" @update:model-value="toggle(row.original)"/><small>{{ row.original.enabled ? '已启用' : '已停用' }}</small></div></template>
+        <template #cell-operation="{row}"><div class="row-actions"><YdButton size="sm" variant="outline" @click="edit(row.original)">编辑</YdButton><YdButton size="sm" variant="destructive" @click="remove(row.original)">删除</YdButton></div></template>
         <template #card="{ row }">
-          <FaCard class="w-full">
+          <YdCard class="w-full">
             <div class="flex flex-col gap-3">
               <div class="flex items-center justify-between gap-2">
                 <span class="min-w-0 break-words text-base font-semibold">{{ sites.find(value => value.id === row.siteId)?.name || row.siteId }}</span>
@@ -82,25 +83,25 @@ onMounted(load)
                 <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">冷却/秒</span><span>{{ row.cooldownSeconds }}</span></div>
               </div>
               <div class="flex flex-wrap gap-2 border-t pt-3">
-                <FaButton size="sm" variant="outline" @click="edit(row)">编辑</FaButton>
-                <FaButton size="sm" variant="destructive" @click="remove(row)">删除</FaButton>
+                <YdButton size="sm" variant="outline" @click="edit(row)">编辑</YdButton>
+                <YdButton size="sm" variant="destructive" @click="remove(row)">删除</YdButton>
               </div>
             </div>
-          </FaCard>
+          </YdCard>
         </template>
-      </FaResponsiveTable>
-      <FaPagination v-model:page="page" v-model:size="size" :total="total" class="mt-3" @page-change="load" @size-change="load"/>
-    </FaPageMain>
-    <FaModal v-model="open" title="定时推送目标" class="binding-modal" :show-cancel-button="true" :confirm-button-loading="saving" @confirm="save">
+      </YdResponsiveTable></YdLoadingOverlay>
+      <YdPagination v-model:page="page" v-model:size="size" :total="total" class="mt-3" @page-change="load" @size-change="load"/>
+    </YdPageMain>
+    <YdModal v-model="open" title="定时推送目标" class="binding-modal" :show-cancel-button="true" :confirm-button-loading="saving" @confirm="save">
       <div class="binding-form">
-        <div class="field"><FaLabel>站点</FaLabel><FaSelect v-model="form.siteId" :options="sites.map(value => ({ label: value.name, value: value.id }))" placeholder="选择站点"/></div>
-        <div class="field"><FaLabel>连接</FaLabel><FaSelect v-model="form.connectionId" :options="connectionSelectOptions" placeholder="选择连接" @update:model-value="changeConnection"/></div>
-        <div class="field"><FaLabel>目标群</FaLabel><FaSelect v-model="form.channelId" :options="groupSelectOptions" placeholder="选择群"/><FaInput v-model="extraGroupId" class="mt-2" placeholder="官方群 openid，回车添加" @keydown.enter.prevent="addExtraGroup"/><small class="text-muted-foreground">官方 QQ 没有历史群列表，选项来自本进程收到过的群消息；已保存的群会保留。</small></div>
-        <div class="two-columns"><div class="field"><FaLabel>静默开始</FaLabel><FaInput v-model="form.quietStart" placeholder="23:00"/></div><div class="field"><FaLabel>静默结束</FaLabel><FaInput v-model="form.quietEnd" placeholder="07:00"/></div></div>
-        <div class="two-columns"><div class="field"><FaLabel>冷却秒数</FaLabel><FaNumberField v-model="form.cooldownSeconds" :min="0" class="w-full"/></div><div class="field"><FaLabel>每小时上限</FaLabel><FaNumberField v-model="form.hourlyLimit" :min="0" class="w-full"/></div></div>
-        <FaSwitch v-model="form.enabled">启用定时推送</FaSwitch>
+        <div class="field"><YdLabel>站点</YdLabel><YdSelect v-model="form.siteId" :options="sites.map(value => ({ label: value.name, value: value.id }))" placeholder="选择站点"/></div>
+        <div class="field"><YdLabel>连接</YdLabel><YdSelect v-model="form.connectionId" :options="connectionSelectOptions" placeholder="选择连接" @update:model-value="changeConnection"/></div>
+        <div class="field"><YdLabel>目标群</YdLabel><YdSelect v-model="form.channelId" :options="groupSelectOptions" placeholder="选择群"/><YdInput v-model="extraGroupId" class="mt-2" placeholder="官方群 openid，回车添加" @keydown.enter.prevent="addExtraGroup"/><small class="text-muted-foreground">官方 QQ 没有历史群列表，选项来自本进程收到过的群消息；已保存的群会保留。</small></div>
+        <div class="two-columns"><div class="field"><YdLabel>静默开始</YdLabel><YdInput v-model="form.quietStart" placeholder="23:00"/></div><div class="field"><YdLabel>静默结束</YdLabel><YdInput v-model="form.quietEnd" placeholder="07:00"/></div></div>
+        <div class="two-columns"><div class="field"><YdLabel>冷却秒数</YdLabel><YdNumberField v-model="form.cooldownSeconds" :min="0" class="w-full"/></div><div class="field"><YdLabel>每小时上限</YdLabel><YdNumberField v-model="form.hourlyLimit" :min="0" class="w-full"/></div></div>
+        <YdSwitch v-model="form.enabled">启用定时推送</YdSwitch>
       </div>
-    </FaModal>
+    </YdModal>
   </section>
 </template>
 

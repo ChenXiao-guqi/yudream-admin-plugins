@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import { FaAlert, FaButton, FaCard, FaIcon, FaInput, FaLabel, FaModal, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable, FaSelect, FaSwitch, FaTextarea, useFaModal, useFaToast, type TableColumn } from '@yudream/components'
+import { YdLoadingOverlay } from '@yudream/components'
+import {computed, onMounted, ref } from 'vue'
+import { YdAction, YdAlert, YdButton, YdCard, YdIcon, YdInput, YdLabel, YdModal, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSelect, YdSwitch, YdTextarea, useYdModal, useYdToast, type TableColumn } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import { createWebCardApi } from '../api/web-card-api'
 import type { CardTemplate, ParseRules, Site, SiteRouteRule } from '../types'
@@ -8,8 +9,8 @@ import { errorText, uid } from '../ui'
 
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 const api = createWebCardApi(props.sdk)
-const toast = useFaToast()
-const confirm = useFaModal()
+const toast = useYdToast()
+const confirm = useYdModal()
 const rows = ref<Site[]>([])
 const page = ref(1)
 const size = ref(10)
@@ -110,16 +111,16 @@ onMounted(load)
 
 <template>
   <section>
-    <FaPageHeader title="站点与子链接规则" description="一个域名可维护多套子链接匹配、字段解析和卡片模板。"><FaButton @click="create"><FaIcon name="i-ri:add-line"/>新增站点</FaButton></FaPageHeader>
-    <FaPageMain class="space-y-4">
-      <FaAlert v-if="error" variant="destructive" title="加载失败" :description="error"/>
-      <FaResponsiveTable v-loading="loading" row-key="id" table-root-class="rounded-lg overflow-hidden" table-class="min-w-[1040px]" border stripe :columns="columns" :data="rows">
+    <YdPageHeader title="站点与子链接规则" description="一个域名可维护多套子链接匹配、字段解析和卡片模板。"><YdButton @click="create"><YdIcon name="i-ri:add-line"/>新增站点</YdButton></YdPageHeader>
+    <YdPageMain class="space-y-4">
+      <YdAlert v-if="error" variant="destructive" title="加载失败" :description="error"/>
+      <YdLoadingOverlay :loading="loading"><YdResponsiveTable  row-key="id" table-root-class="rounded-lg overflow-hidden" table-class="min-w-[1040px]" border stripe :columns="columns" :data="rows">
         <template #cell-hosts="{row}">{{ row.original.hosts.join(', ') }}</template>
         <template #cell-pattern="{row}"><span class="pattern-cell">{{ patterns[row.original.id] || '加载中' }}</span></template>
-        <template #cell-enabled="{row}"><div class="status-toggle"><FaSwitch :model-value="row.original.enabled" :disabled="toggling===row.original.id" @update:model-value="toggle(row.original)"/><small>{{ row.original.enabled ? '已启用' : '已停用' }}</small></div></template>
-        <template #cell-operation="{row}"><div class="row-actions"><FaButton size="sm" variant="outline" @click="edit(row.original)">管理规则</FaButton><FaButton size="sm" variant="destructive" @click="remove(row.original)">删除</FaButton></div></template>
+        <template #cell-enabled="{row}"><div class="status-toggle"><YdSwitch :model-value="row.original.enabled" :disabled="toggling===row.original.id" @update:model-value="toggle(row.original)"/><small>{{ row.original.enabled ? '已启用' : '已停用' }}</small></div></template>
+        <template #cell-operation="{row}"><div class="row-actions"><YdButton size="sm" variant="outline" @click="edit(row.original)">管理规则</YdButton><YdButton size="sm" variant="destructive" @click="remove(row.original)">删除</YdButton></div></template>
         <template #card="{ row }">
-          <FaCard class="w-full">
+          <YdCard class="w-full">
             <div class="flex flex-col gap-3">
               <div class="flex items-center justify-between gap-2">
                 <span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span>
@@ -131,53 +132,53 @@ onMounted(load)
                 <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">状态</span><span>{{ row.enabled ? '已启用' : '已停用' }}</span></div>
               </div>
               <div class="flex flex-wrap gap-2 border-t pt-3">
-                <FaButton size="sm" variant="outline" @click="edit(row)">管理规则</FaButton>
-                <FaButton size="sm" variant="destructive" @click="remove(row)">删除</FaButton>
+                <YdButton size="sm" variant="outline" @click="edit(row)">管理规则</YdButton>
+                <YdButton size="sm" variant="destructive" @click="remove(row)">删除</YdButton>
               </div>
             </div>
-          </FaCard>
+          </YdCard>
         </template>
-      </FaResponsiveTable>
-      <FaPagination v-model:page="page" v-model:size="size" :total="total" class="mt-3" @page-change="load" @size-change="load"/>
-    </FaPageMain>
+      </YdResponsiveTable></YdLoadingOverlay>
+      <YdPagination v-model:page="page" v-model:size="size" :total="total" class="mt-3" @page-change="load" @size-change="load"/>
+    </YdPageMain>
 
-    <FaModal v-model="open" title="站点与子链接规则" description="同一域名下的不同页面格式可使用独立解析字段和卡片模板。" :maximize="true" :maximizable="false" content-class="overflow-hidden p-0" :show-cancel-button="true" :confirm-button-loading="saving" @confirm="save">
+    <YdModal v-model="open" title="站点与子链接规则" description="同一域名下的不同页面格式可使用独立解析字段和卡片模板。" :maximize="true" :maximizable="false" content-class="overflow-hidden p-0" :show-cancel-button="true" :confirm-button-loading="saving" @confirm="save">
       <div class="rule-workspace">
         <section class="workspace-column site-column">
           <div class="column-heading"><h3>站点访问</h3><small>域名、资源白名单和访问凭据只配置一次。</small></div>
-          <div class="field"><FaLabel>站点名称</FaLabel><FaInput v-model="form.name"/></div>
-          <div class="field"><FaLabel>允许域名</FaLabel><FaTextarea :model-value="form.hosts.join('\n')" :rows="3" placeholder="www.mcmod.cn" @update:model-value="value => form.hosts=String(value).split(/\r?\n/)"/></div>
-          <div class="field"><FaLabel>图片与跳转资源域名</FaLabel><FaTextarea :model-value="form.redirectHosts.join('\n')" :rows="4" placeholder="i.mcmod.cn&#10;link.mcmod.cn" @update:model-value="value => form.redirectHosts=String(value).split(/\r?\n/).map(item=>item.trim()).filter(Boolean)"/><small>每行一个精确域名。</small></div>
-          <div class="field"><FaLabel>页面类型</FaLabel><FaSelect v-model="form.responseType" :options="['HTML','JSON'].map(value => ({label:value,value}))"/></div>
-          <div class="field"><FaLabel>访问方式</FaLabel><FaSelect v-model="form.accessMode" :options="[{label:'公开访问',value:'PUBLIC_HTTP'},{label:'自定义 Headers',value:'CUSTOM_HEADERS'}]"/></div>
-          <div v-if="form.accessMode==='CUSTOM_HEADERS'" class="field"><FaLabel>自定义 Headers</FaLabel><FaTextarea v-model="headers" :rows="4" placeholder="Authorization: Bearer ...&#10;Cookie: ..."/></div>
-          <div class="switch-row"><FaSwitch v-model="form.enabled"/><div><strong>{{ form.enabled ? '站点已启用' : '站点已停用' }}</strong><small>停用后该域名下所有子规则都不会响应。</small></div></div>
+          <div class="field"><YdLabel>站点名称</YdLabel><YdInput v-model="form.name"/></div>
+          <div class="field"><YdLabel>允许域名</YdLabel><YdTextarea :model-value="form.hosts.join('\n')" :rows="3" placeholder="www.mcmod.cn" @update:model-value="value => form.hosts=String(value).split(/\r?\n/)"/></div>
+          <div class="field"><YdLabel>图片与跳转资源域名</YdLabel><YdTextarea :model-value="form.redirectHosts.join('\n')" :rows="4" placeholder="i.mcmod.cn&#10;link.mcmod.cn" @update:model-value="value => form.redirectHosts=String(value).split(/\r?\n/).map(item=>item.trim()).filter(Boolean)"/><small>每行一个精确域名。</small></div>
+          <div class="field"><YdLabel>页面类型</YdLabel><YdSelect v-model="form.responseType" :options="['HTML','JSON'].map(value => ({label:value,value}))"/></div>
+          <div class="field"><YdLabel>访问方式</YdLabel><YdSelect v-model="form.accessMode" :options="[{label:'公开访问',value:'PUBLIC_HTTP'},{label:'自定义 Headers',value:'CUSTOM_HEADERS'}]"/></div>
+          <div v-if="form.accessMode==='CUSTOM_HEADERS'" class="field"><YdLabel>自定义 Headers</YdLabel><YdTextarea v-model="headers" :rows="4" placeholder="Authorization: Bearer ...&#10;Cookie: ..."/></div>
+          <div class="switch-row"><YdSwitch v-model="form.enabled"/><div><strong>{{ form.enabled ? '站点已启用' : '站点已停用' }}</strong><small>停用后该域名下所有子规则都不会响应。</small></div></div>
         </section>
 
         <aside class="route-sidebar">
-          <div class="route-sidebar-head"><div class="column-heading"><h3>子链接规则</h3><small>{{ routeRules.length }} 条</small></div><FaButton size="sm" variant="outline" title="新增子链接规则" @click="addRouteRule"><FaIcon name="i-ri:add-line"/></FaButton></div>
+          <div class="route-sidebar-head"><div class="column-heading"><h3>子链接规则</h3><small>{{ routeRules.length }} 条</small></div><YdButton size="sm" variant="outline" title="新增子链接规则" @click="addRouteRule"><YdIcon name="i-ri:add-line"/></YdButton></div>
           <div class="route-list">
-            <button v-for="rule in routeRules" :key="rule.id" type="button" class="route-item" :class="{active:activeRuleId===rule.id}" @click="activeRuleId=rule.id;testResult=''">
+            <YdAction v-for="rule in routeRules" :key="rule.id" type="button" class="route-item" :class="{active:activeRuleId===rule.id}" @click="activeRuleId=rule.id;testResult=''">
               <span><strong>{{ rule.name }}</strong><small>{{ rule.rules.detailUrlPattern || '尚未填写匹配格式' }}</small></span><i :class="rule.enabled ? 'enabled' : ''"></i>
-            </button>
+            </YdAction>
           </div>
         </aside>
 
         <section v-if="activeRule" class="workspace-column editor-column">
-          <div class="editor-header"><div class="column-heading"><h3>规则配置</h3><small>越具体的路径规则优先级越高。</small></div><FaButton size="sm" variant="destructive" @click="removeRouteRule(activeRule)"><FaIcon name="i-ri:delete-bin-line"/>删除规则</FaButton></div>
+          <div class="editor-header"><div class="column-heading"><h3>规则配置</h3><small>越具体的路径规则优先级越高。</small></div><YdButton size="sm" variant="destructive" @click="removeRouteRule(activeRule)"><YdIcon name="i-ri:delete-bin-line"/>删除规则</YdButton></div>
           <div class="rule-basics">
-            <div class="field"><FaLabel>规则名称</FaLabel><FaInput v-model="activeRule.name" placeholder="例如：模组详情"/></div>
-            <div class="field"><FaLabel>子链接格式</FaLabel><FaInput v-model="activeRule.rules.detailUrlPattern" placeholder="/class/{id}.html"/></div>
-            <div class="field"><FaLabel>卡片模板</FaLabel><FaSelect v-model="activeRule.templateId" :options="templateOptions"/></div>
-            <div class="switch-row compact"><FaSwitch v-model="activeRule.enabled"/><strong>{{ activeRule.enabled ? '规则启用' : '规则停用' }}</strong></div>
+            <div class="field"><YdLabel>规则名称</YdLabel><YdInput v-model="activeRule.name" placeholder="例如：模组详情"/></div>
+            <div class="field"><YdLabel>子链接格式</YdLabel><YdInput v-model="activeRule.rules.detailUrlPattern" placeholder="/class/{id}.html"/></div>
+            <div class="field"><YdLabel>卡片模板</YdLabel><YdSelect v-model="activeRule.templateId" :options="templateOptions"/></div>
+            <div class="switch-row compact"><YdSwitch v-model="activeRule.enabled"/><strong>{{ activeRule.enabled ? '规则启用' : '规则停用' }}</strong></div>
           </div>
-          <div class="field-section-head"><div class="column-heading"><h3>字段解析</h3><small>列表、键值和表格会以结构化数据交给模板。</small></div><FaButton size="sm" variant="outline" @click="addField"><FaIcon name="i-ri:add-line"/>新增字段</FaButton></div>
+          <div class="field-section-head"><div class="column-heading"><h3>字段解析</h3><small>列表、键值和表格会以结构化数据交给模板。</small></div><YdButton size="sm" variant="outline" @click="addField"><YdIcon name="i-ri:add-line"/>新增字段</YdButton></div>
           <div class="parser-head"><span>字段名</span><span>CSS Selector / JSONPath</span><span>读取方式</span><span>属性</span><span></span></div>
-          <div class="parser-list"><div v-for="(field,index) in activeRule.rules.fields" :key="index" class="parser-row"><FaInput v-model="field.name" placeholder="如：支持版本"/><FaInput v-model="field.expression" placeholder="如：li.mcver a"/><FaSelect v-model="field.type" :options="fieldTypeOptions"/><FaInput v-model="field.attribute" :disabled="!['TEXT','URL','TEXT_LIST'].includes(field.type)" placeholder="text / href / src"/><FaButton size="sm" variant="destructive" title="删除字段" @click="removeField(index)"><FaIcon name="i-ri:delete-bin-line"/></FaButton></div></div>
-          <div class="test-panel"><div class="field test-url"><FaLabel>真实链接测试</FaLabel><FaInput v-model="testUrl" placeholder="https://www.mcmod.cn/class/17142.html"/></div><div class="test-actions"><FaButton variant="outline" @click="test('fetch')">测试抓取</FaButton><FaButton variant="outline" @click="test('parse')">测试当前规则</FaButton></div><pre v-if="testResult">{{ testResult }}</pre></div>
+          <div class="parser-list"><div v-for="(field,index) in activeRule.rules.fields" :key="index" class="parser-row"><YdInput v-model="field.name" placeholder="如：支持版本"/><YdInput v-model="field.expression" placeholder="如：li.mcver a"/><YdSelect v-model="field.type" :options="fieldTypeOptions"/><YdInput v-model="field.attribute" :disabled="!['TEXT','URL','TEXT_LIST'].includes(field.type)" placeholder="text / href / src"/><YdButton size="sm" variant="destructive" title="删除字段" @click="removeField(index)"><YdIcon name="i-ri:delete-bin-line"/></YdButton></div></div>
+          <div class="test-panel"><div class="field test-url"><YdLabel>真实链接测试</YdLabel><YdInput v-model="testUrl" placeholder="https://www.mcmod.cn/class/17142.html"/></div><div class="test-actions"><YdButton variant="outline" @click="test('fetch')">测试抓取</YdButton><YdButton variant="outline" @click="test('parse')">测试当前规则</YdButton></div><pre v-if="testResult">{{ testResult }}</pre></div>
         </section>
       </div>
-    </FaModal>
+    </YdModal>
   </section>
 </template>
 

@@ -1,22 +1,23 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
-import {
-  FaAlert,
-  FaButton,
-  FaButtonGroup,
-  FaCard,
-  FaIcon,
-  FaInput,
-  FaLabel,
-  FaModal,
-  FaPageHeader,
-  FaPageMain,
-  FaPagination,
-  FaResponsiveTable,
-  FaSelect,
-  FaTag,
-  useFaModal,
-  useFaToast,
+import { YdLoadingOverlay } from '@yudream/components'
+import {computed, onMounted, ref, watch } from 'vue'
+import { YdAction,
+  YdAlert,
+  YdButton,
+  YdButtonGroup,
+  YdCard,
+  YdIcon,
+  YdInput,
+  YdLabel,
+  YdModal,
+  YdPageHeader,
+  YdPageMain,
+  YdPagination,
+  YdResponsiveTable,
+  YdSelect,
+  YdTag,
+  useYdModal,
+  useYdToast,
   type TableColumn,
 } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
@@ -53,8 +54,8 @@ p { margin: 14px 0 0; color: #586674; font-size: 16px; line-height: 1.65; }
 
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 const api = createWebCardApi(props.sdk)
-const toast = useFaToast()
-const confirm = useFaModal()
+const toast = useYdToast()
+const confirm = useYdModal()
 
 const sites = ref<Site[]>([])
 const templates = ref<CardTemplate[]>([])
@@ -419,25 +420,25 @@ onMounted(load)
 
 <template>
   <section class="template-page">
-    <FaPageHeader title="卡片模板" description="用真实网页内容调试模板，确认效果后再保存或发布。">
+    <YdPageHeader title="卡片模板" description="用真实网页内容调试模板，确认效果后再保存或发布。">
       <div class="header-actions">
-        <FaButton variant="outline" @click="showTemplateList = !showTemplateList">
-          <FaIcon name="i-ri:list-check-2" />
+        <YdButton variant="outline" @click="showTemplateList = !showTemplateList">
+          <YdIcon name="i-ri:list-check-2" />
           {{ showTemplateList ? '收起列表' : '模板列表' }}
-        </FaButton>
-        <FaButton variant="outline" @click="createTemplate">
-          <FaIcon name="i-ri:add-line" />
+        </YdButton>
+        <YdButton variant="outline" @click="createTemplate">
+          <YdIcon name="i-ri:add-line" />
           新建模板
-        </FaButton>
-        <FaButton variant="outline" :disabled="!current" @click="versionOpen = true">
-          <FaIcon name="i-ri:history-line" />
+        </YdButton>
+        <YdButton variant="outline" :disabled="!current" @click="versionOpen = true">
+          <YdIcon name="i-ri:history-line" />
           版本历史
-        </FaButton>
+        </YdButton>
       </div>
-    </FaPageHeader>
+    </YdPageHeader>
 
-    <FaPageMain class="template-main">
-      <FaAlert v-if="error" variant="destructive" title="加载失败" :description="error" />
+    <YdPageMain class="template-main">
+      <YdAlert v-if="error" variant="destructive" title="加载失败" :description="error" />
 
       <section v-if="showTemplateList" class="template-list-section">
         <div class="section-heading">
@@ -445,10 +446,10 @@ onMounted(load)
             <h2>模板管理</h2>
             <p>选择一个模板进入编辑，或维护现有模板记录。</p>
           </div>
-          <FaTag>{{ templateTotal }} 个模板</FaTag>
+          <YdTag>{{ templateTotal }} 个模板</YdTag>
         </div>
-        <FaResponsiveTable
-          v-loading="loading"
+        <YdLoadingOverlay :loading="loading"><YdResponsiveTable
+
           row-key="id"
           table-root-class="rounded-lg overflow-hidden"
           table-class="min-w-[760px]"
@@ -461,14 +462,14 @@ onMounted(load)
           <template #cell-updatedAt="{ row }">{{ dateTime(row.original.updatedAt) }}</template>
           <template #cell-operation="{ row }">
             <div class="row-actions">
-              <FaButton size="sm" variant="outline" @click="editTemplate(row.original)">编辑</FaButton>
-              <FaButton size="sm" variant="destructive" title="删除模板" @click="removeTemplate(row.original)">
-                <FaIcon name="i-ri:delete-bin-line" />
-              </FaButton>
+              <YdButton size="sm" variant="outline" @click="editTemplate(row.original)">编辑</YdButton>
+              <YdButton size="sm" variant="destructive" title="删除模板" @click="removeTemplate(row.original)">
+                <YdIcon name="i-ri:delete-bin-line" />
+              </YdButton>
             </div>
           </template>
           <template #card="{ row }">
-            <FaCard class="w-full">
+            <YdCard class="w-full">
               <div class="flex flex-col gap-3">
                 <div class="flex items-center justify-between gap-2">
                   <span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span>
@@ -478,16 +479,16 @@ onMounted(load)
                   <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">更新时间</span><span>{{ dateTime(row.updatedAt) }}</span></div>
                 </div>
                 <div class="flex flex-wrap gap-2 border-t pt-3">
-                  <FaButton size="sm" variant="outline" @click="editTemplate(row)">编辑</FaButton>
-                  <FaButton size="sm" variant="destructive" title="删除模板" @click="removeTemplate(row)">
-                    <FaIcon name="i-ri:delete-bin-line" />
-                  </FaButton>
+                  <YdButton size="sm" variant="outline" @click="editTemplate(row)">编辑</YdButton>
+                  <YdButton size="sm" variant="destructive" title="删除模板" @click="removeTemplate(row)">
+                    <YdIcon name="i-ri:delete-bin-line" />
+                  </YdButton>
                 </div>
               </div>
-            </FaCard>
+            </YdCard>
           </template>
-        </FaResponsiveTable>
-        <FaPagination
+        </YdResponsiveTable></YdLoadingOverlay>
+        <YdPagination
           v-model:page="templatePage"
           v-model:size="templateSize"
           :total="templateTotal"
@@ -501,12 +502,12 @@ onMounted(load)
         <div class="editor-context">
           <div class="context-fields">
             <div class="field-group name-field">
-              <FaLabel>模板名称</FaLabel>
-              <FaInput v-model="name" placeholder="模板名称" />
+              <YdLabel>模板名称</YdLabel>
+              <YdInput v-model="name" placeholder="模板名称" />
             </div>
             <div class="field-group site-field">
-              <FaLabel>所属站点</FaLabel>
-              <FaSelect
+              <YdLabel>所属站点</YdLabel>
+              <YdSelect
                 :model-value="selectedSite"
                 :options="sites.map(value => ({ label: value.name, value: value.id }))"
                 placeholder="选择站点"
@@ -516,22 +517,22 @@ onMounted(load)
               />
             </div>
             <div class="field-group mode-field">
-              <FaLabel>模板模式</FaLabel>
-              <FaButtonGroup class="mode-switch">
-                <FaButton :variant="mode === 'STRUCTURED' ? 'default' : 'outline'" @click="mode = 'STRUCTURED'">结构化</FaButton>
-                <FaButton :variant="mode === 'ADVANCED' ? 'default' : 'outline'" @click="mode = 'ADVANCED'">HTML / CSS</FaButton>
-              </FaButtonGroup>
+              <YdLabel>模板模式</YdLabel>
+              <YdButtonGroup class="mode-switch">
+                <YdButton :variant="mode === 'STRUCTURED' ? 'default' : 'outline'" @click="mode = 'STRUCTURED'">结构化</YdButton>
+                <YdButton :variant="mode === 'ADVANCED' ? 'default' : 'outline'" @click="mode = 'ADVANCED'">HTML / CSS</YdButton>
+              </YdButtonGroup>
             </div>
           </div>
           <div class="context-actions">
-            <FaButton variant="outline" :loading="saving" :disabled="previewing || publishing" @click="saveDraft(false)">
-              <FaIcon name="i-ri:save-line" />
+            <YdButton variant="outline" :loading="saving" :disabled="previewing || publishing" @click="saveDraft(false)">
+              <YdIcon name="i-ri:save-line" />
               保存草稿
-            </FaButton>
-            <FaButton :loading="publishing" :disabled="saving || previewing || !previewIsCurrent" @click="publish">
-              <FaIcon name="i-ri:send-plane-line" />
+            </YdButton>
+            <YdButton :loading="publishing" :disabled="saving || previewing || !previewIsCurrent" @click="publish">
+              <YdIcon name="i-ri:send-plane-line" />
               发布当前版本
-            </FaButton>
+            </YdButton>
           </div>
         </div>
 
@@ -542,14 +543,14 @@ onMounted(load)
                 <h2>模板代码</h2>
                 <p>{{ mode === 'ADVANCED' ? 'Agent 生成的 HTML 与 CSS 可在此直接修改。' : '调整结构化布局配置，内容字段来自站点解析结果。' }}</p>
               </div>
-              <FaTag v-if="previewIsCurrent">已预览</FaTag>
-              <FaTag v-else variant="secondary">待预览</FaTag>
+              <YdTag v-if="previewIsCurrent">已预览</YdTag>
+              <YdTag v-else variant="secondary">待预览</YdTag>
             </header>
             <div class="editor-tabs" role="tablist" aria-label="模板代码类型">
-              <button v-if="mode === 'STRUCTURED'" class="active" type="button">布局 JSON</button>
+              <YdAction v-if="mode === 'STRUCTURED'" class="active" type="button">布局 JSON</YdAction>
               <template v-else>
-                <button type="button" :class="{ active: editorTab === 'html' }" @click="editorTab = 'html'">HTML</button>
-                <button type="button" :class="{ active: editorTab === 'css' }" @click="editorTab = 'css'">CSS</button>
+                <YdAction type="button" :class="{ active: editorTab === 'html' }" @click="editorTab = 'html'">HTML</YdAction>
+                <YdAction type="button" :class="{ active: editorTab === 'css' }" @click="editorTab = 'css'">CSS</YdAction>
               </template>
             </div>
             <TemplateCodeEditor v-model="editorValue" :language="editorLanguage" :min-height="540" />
@@ -561,25 +562,25 @@ onMounted(load)
                 <h2>链接预览</h2>
                 <p>按当前站点规则抓取图文，并使用尚未保存的代码渲染。</p>
               </div>
-              <FaTag v-if="previewFinalUrl">真实数据</FaTag>
+              <YdTag v-if="previewFinalUrl">真实数据</YdTag>
             </header>
             <div class="preview-toolbar">
-              <FaInput
+              <YdInput
                 v-model="previewUrl"
                 type="url"
                 placeholder="https://www.mcmod.cn/class/3376.html"
                 @keyup.enter="makePreview"
               />
-              <FaButton :loading="previewing" :disabled="saving || publishing" @click="makePreview">
-                <FaIcon name="i-ri:play-circle-line" />
+              <YdButton :loading="previewing" :disabled="saving || publishing" @click="makePreview">
+                <YdIcon name="i-ri:play-circle-line" />
                 生成预览
-              </FaButton>
+              </YdButton>
             </div>
-            <FaAlert v-if="previewError" variant="destructive" title="预览失败" :description="previewError" />
+            <YdAlert v-if="previewError" variant="destructive" title="预览失败" :description="previewError" />
             <div class="preview-canvas" :class="{ loading: previewing }">
               <img v-if="preview" :src="preview" alt="卡片渲染预览">
               <div v-else class="preview-empty">
-                <FaIcon name="i-ri:image-line" />
+                <YdIcon name="i-ri:image-line" />
                 <strong>输入一个匹配当前站点规则的链接</strong>
                 <span>解析到的标题、图片、摘要和其他字段会直接用于渲染。</span>
               </div>
@@ -593,22 +594,22 @@ onMounted(load)
       </section>
 
       <section v-else class="no-template">
-        <FaIcon name="i-ri:layout-2-line" />
+        <YdIcon name="i-ri:layout-2-line" />
         <h2>还没有可编辑的模板</h2>
         <p>新建模板后即可使用真实链接调试卡片效果。</p>
-        <FaButton @click="createTemplate"><FaIcon name="i-ri:add-line" />新建模板</FaButton>
+        <YdButton @click="createTemplate"><YdIcon name="i-ri:add-line" />新建模板</YdButton>
       </section>
-    </FaPageMain>
+    </YdPageMain>
 
-    <FaModal
+    <YdModal
       v-model="versionOpen"
       title="模板版本历史"
       description="已发布版本保持不可变，回滚会创建新的可编辑草稿。"
       class="version-modal"
       :footer="false"
     >
-      <FaResponsiveTable
-        v-loading="loading"
+      <YdLoadingOverlay :loading="loading"><YdResponsiveTable
+
         row-key="id"
         table-root-class="rounded-lg overflow-hidden"
         table-class="min-w-[860px]"
@@ -618,25 +619,25 @@ onMounted(load)
         :data="versions"
       >
         <template #cell-status="{ row }">
-          <FaTag v-if="row.original.id === current?.publishedVersionId">已发布</FaTag>
-          <FaTag v-else-if="row.original.id === current?.draftVersionId">当前草稿</FaTag>
+          <YdTag v-if="row.original.id === current?.publishedVersionId">已发布</YdTag>
+          <YdTag v-else-if="row.original.id === current?.draftVersionId">当前草稿</YdTag>
           <span v-else>历史版本</span>
         </template>
         <template #cell-createdAt="{ row }">{{ dateTime(row.original.createdAt) }}</template>
         <template #cell-operation="{ row }">
-          <FaButton size="sm" variant="outline" @click="rollback(row.original)">
-            <FaIcon name="i-ri:arrow-go-back-line" />
+          <YdButton size="sm" variant="outline" @click="rollback(row.original)">
+            <YdIcon name="i-ri:arrow-go-back-line" />
             回滚
-          </FaButton>
+          </YdButton>
         </template>
         <template #card="{ row }">
-          <FaCard class="w-full">
+          <YdCard class="w-full">
             <div class="flex flex-col gap-3">
               <div class="flex items-center justify-between gap-2">
                 <span class="min-w-0 break-words text-base font-semibold">版本 {{ row.version }}</span>
                 <div class="flex gap-1">
-                  <FaTag v-if="row.id === current?.publishedVersionId">已发布</FaTag>
-                  <FaTag v-else-if="row.id === current?.draftVersionId">当前草稿</FaTag>
+                  <YdTag v-if="row.id === current?.publishedVersionId">已发布</YdTag>
+                  <YdTag v-else-if="row.id === current?.draftVersionId">当前草稿</YdTag>
                   <span v-else>历史版本</span>
                 </div>
               </div>
@@ -646,16 +647,16 @@ onMounted(load)
                 <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">创建时间</span><span>{{ dateTime(row.createdAt) }}</span></div>
               </div>
               <div class="flex flex-wrap gap-2 border-t pt-3">
-                <FaButton size="sm" variant="outline" @click="rollback(row)">
-                  <FaIcon name="i-ri:arrow-go-back-line" />
+                <YdButton size="sm" variant="outline" @click="rollback(row)">
+                  <YdIcon name="i-ri:arrow-go-back-line" />
                   回滚
-                </FaButton>
+                </YdButton>
               </div>
             </div>
-          </FaCard>
+          </YdCard>
         </template>
-      </FaResponsiveTable>
-      <FaPagination
+      </YdResponsiveTable></YdLoadingOverlay>
+      <YdPagination
         v-model:page="versionPage"
         v-model:size="versionSize"
         :total="versionTotal"
@@ -663,7 +664,7 @@ onMounted(load)
         @page-change="loadVersionHistory"
         @size-change="changeVersionSize"
       />
-    </FaModal>
+    </YdModal>
   </section>
 </template>
 
@@ -687,7 +688,7 @@ onMounted(load)
 .pane-header { min-height: 54px; margin-bottom: 16px; }
 .editor-tabs { display: flex; gap: 4px; margin-bottom: 10px; padding: 4px; border: 1px solid var(--color-border-2); border-radius: 6px; background: var(--color-fill-1); }
 .editor-tabs button { min-width: 88px; height: 34px; padding: 0 14px; border: 0; border-radius: 4px; background: transparent; color: var(--color-text-3); font: inherit; font-size: 13px; font-weight: 650; cursor: pointer; }
-.editor-tabs button.active { background: var(--color-bg-2); color: rgb(var(--primary-6)); box-shadow: 0 1px 3px rgb(0 0 0 / 12%); }
+.editor-tabs button.active { background: var(--color-bg-2); color: var(--color-text-1); box-shadow: 0 1px 3px rgb(0 0 0 / 12%); }
 .preview-toolbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; margin-bottom: 14px; }
 .preview-canvas { display: flex; min-height: 584px; align-items: flex-start; justify-content: center; overflow: auto; border: 1px solid var(--color-border-2); border-radius: 6px; background: var(--color-fill-1); padding: 24px; }
 .preview-canvas.loading { opacity: .7; }
