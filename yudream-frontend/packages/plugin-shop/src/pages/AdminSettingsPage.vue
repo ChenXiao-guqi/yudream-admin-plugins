@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { ShopCurrency, ShopTradeFeePayee, ShopUserOption } from '../types'
 import type { TableColumn, YdTablePickerQuery, YdTablePickerResult } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
-import { FaAlert, FaButton, FaIcon, FaImageUpload, FaInput, FaNumberField, FaPageHeader, FaPageMain, FaSelect, FaSwitch, YdTablePicker, useFaToast } from '@yudream/components'
+import { YdAlert, YdButton, YdIcon, YdImageUpload, YdInput, YdNumberField, YdPageHeader, YdPageMain, YdSelect, YdSwitch, YdTablePicker, useYdToast, YdMultiSelect } from '@yudream/components'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { createShopApi } from '../api/shop-api'
 import { errorMessage, normalizeFileUrl } from '../composables/utils'
@@ -14,7 +15,7 @@ const props = defineProps<{
 }>()
 
 const api = createShopApi(props.sdk)
-const toast = useFaToast()
+const toast = useYdToast()
 
 const loading = ref(false)
 const saving = ref(false)
@@ -46,7 +47,7 @@ const tradableOptions = computed(() => assetOptions.value.map(item => ({
   value: item.code,
 })))
 const thresholdEnabled = computed(() => !!form.publishAssetCode)
-// FaImageUpload 原地改数组、不触发 update:modelValue，用独立 ref 承接展示地址再 watch 回落库相对路径
+// YdImageUpload 原地改数组、不触发 update:modelValue，用独立 ref 承接展示地址再 watch 回落库相对路径
 const avatarList = ref<string[]>([])
 const uploadingAvatar = ref(false)
 
@@ -185,18 +186,18 @@ onMounted(() => { void load() })
 
 <template>
   <section class="shop-page">
-    <FaPageHeader title="商店设置" class="mb-0">
-      <FaButton :loading="saving" @click="save">
-        <FaIcon name="i-ri:save-3-line" />
+    <YdPageHeader title="商店设置" class="mb-0">
+      <YdButton :loading="saving" @click="save">
+        <YdIcon name="i-ri:save-3-line" />
         保存设置
-      </FaButton>
-    </FaPageHeader>
-    <FaPageMain>
-      <div v-loading="loading" class="grid max-w-160 gap-5">
+      </YdButton>
+    </YdPageHeader>
+    <YdPageMain>
+      <YdLoadingOverlay :loading="loading"><div  class="grid max-w-160 gap-5">
         <div class="grid gap-3 rounded-lg border p-4">
           <h3 class="text-base font-semibold">用户上架</h3>
           <label class="flex items-center gap-3">
-            <FaSwitch v-model="form.allowUserPublish" />
+            <YdSwitch v-model="form.allowUserPublish" />
             <span>允许用户上架商品</span>
           </label>
           <p class="text-xs text-muted-foreground">
@@ -208,7 +209,7 @@ onMounted(() => { void load() })
           <h3 class="text-base font-semibold">官方商品展示名</h3>
           <label class="grid gap-2">
             <span>官方归属展示名</span>
-            <FaInput v-model="form.platformOwnerName" placeholder="官方" :maxlength="20" />
+            <YdInput v-model="form.platformOwnerName" placeholder="官方" :maxlength="20" />
             <span class="text-xs text-muted-foreground">
               积分兑换等官方商品的归属展示名（默认「官方」）：商品卡片、商品详情、订单与管理列表中显示该名称；
               留空则不显示归属信息。
@@ -216,7 +217,7 @@ onMounted(() => { void load() })
           </label>
           <div class="grid gap-2">
             <span>官方头像</span>
-            <FaImageUpload
+            <YdImageUpload
               :model-value="avatarList"
               :max="1"
               :width="96"
@@ -235,7 +236,7 @@ onMounted(() => { void load() })
         <div class="grid gap-3 rounded-lg border p-4">
           <h3 class="text-base font-semibold">玩家市场交易手续费</h3>
           <label class="flex items-center gap-3">
-            <FaSwitch v-model="form.tradeFeeEnabled" />
+            <YdSwitch v-model="form.tradeFeeEnabled" />
             <span>对玩家市场（付款转给卖家）的订单收取交易手续费</span>
           </label>
           <p class="text-xs text-muted-foreground">
@@ -245,7 +246,7 @@ onMounted(() => { void load() })
           <div class="shop-price-grid">
             <label class="grid gap-2">
               <span>费率（成交额百分比）</span>
-              <FaNumberField
+              <YdNumberField
                 v-model="form.tradeFeeRate"
                 :min="0"
                 :max="100"
@@ -259,7 +260,7 @@ onMounted(() => { void load() })
             </label>
             <label class="grid gap-2">
               <span>最低手续费</span>
-              <FaNumberField
+              <YdNumberField
                 v-model="form.tradeFeeMinAmount"
                 :min="0"
                 :step="0.01"
@@ -273,7 +274,7 @@ onMounted(() => { void load() })
           </div>
           <label class="grid gap-2">
             <span>收款方式</span>
-            <FaSelect
+            <YdSelect
               v-model="form.tradeFeePayee"
               class="shop-select"
               :options="payeeOptions"
@@ -310,10 +311,9 @@ onMounted(() => { void load() })
           <h3 class="text-base font-semibold">允许交易的币种</h3>
           <label class="grid gap-2">
             <span>币种白名单</span>
-            <FaSelect
+            <YdMultiSelect
               v-model="form.allowedAssetCodes"
               class="shop-select"
-              multiple
               :options="tradableOptions"
               placeholder="不限制（全部钱包资产可上架交易）"
             />
@@ -325,18 +325,18 @@ onMounted(() => { void load() })
 
         <div class="grid gap-3 rounded-lg border p-4">
           <h3 class="text-base font-semibold">上架积分门槛</h3>
-          <FaAlert v-if="!walletAvailable" title="钱包插件不可用">
+          <YdAlert v-if="!walletAvailable" title="钱包插件不可用">
             <template #description>
               未检测到钱包插件：仍可保存门槛配置，但用户上架会被拦截（无法校验余额）；启用钱包后自动恢复校验。
             </template>
-          </FaAlert>
+          </YdAlert>
           <label class="grid gap-2">
             <span>门槛货币</span>
-            <FaSelect v-model="form.publishAssetCode" class="shop-select" :options="currencyOptions" />
+            <YdSelect v-model="form.publishAssetCode" class="shop-select" :options="currencyOptions" />
           </label>
           <label class="grid gap-2">
             <span>最低余额要求</span>
-            <FaNumberField
+            <YdNumberField
               v-model="form.publishMinBalance"
               :min="0"
               :step="1"
@@ -350,10 +350,10 @@ onMounted(() => { void load() })
         </div>
 
         <div class="flex flex-wrap justify-end gap-2">
-          <FaButton variant="outline" :disabled="saving" @click="load">重置</FaButton>
-          <FaButton :loading="saving" @click="save">保存设置</FaButton>
+          <YdButton variant="outline" :disabled="saving" @click="load">重置</YdButton>
+          <YdButton :loading="saving" @click="save">保存设置</YdButton>
         </div>
-      </div>
-    </FaPageMain>
+      </div></YdLoadingOverlay>
+    </YdPageMain>
   </section>
 </template>

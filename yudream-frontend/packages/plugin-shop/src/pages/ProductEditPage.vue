@@ -1,9 +1,10 @@
 ﻿<script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { PublishQualification, ShopCurrency, ShopProductType, ShopVariantPayload } from '../types'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
 import { POINTS_REDEEM_TYPE } from '../types'
-import { FaAlert, FaButton, FaIcon, FaImageUpload, FaInput, FaNumberField, FaPageHeader, FaPageMain, FaSelect, FaTextarea, useFaToast } from '@yudream/components'
+import { YdAlert, YdButton, YdIcon, YdImageUpload, YdInput, YdNumberField, YdPageHeader, YdPageMain, YdSelect, YdTextarea, useYdToast } from '@yudream/components'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createShopApi } from '../api/shop-api'
@@ -19,7 +20,7 @@ const props = defineProps<{
 const router = useRouter()
 const route = useRoute()
 const api = createShopApi(props.sdk)
-const toast = useFaToast()
+const toast = useYdToast()
 
 const loading = ref(false)
 const saving = ref(false)
@@ -50,7 +51,7 @@ const form = reactive({
   extraConfigJson: '',
 })
 
-// FaImageUpload 内部通过 push/splice 原地改数组，不会触发 update:modelValue；
+// YdImageUpload 内部通过 push/splice 原地改数组，不会触发 update:modelValue；
 // 用独立 ref 承接展示用绝对地址，再 watch 同步回落库相对路径
 const imageList = ref<string[]>([])
 
@@ -270,33 +271,33 @@ onMounted(() => {
 
 <template>
   <section class="shop-page">
-    <FaPageHeader :title="isEdit ? '编辑商品' : '发布商品'" class="mb-0">
-      <FaButton variant="outline" @click="back">
-        <FaIcon name="i-ri:arrow-left-line" />
+    <YdPageHeader :title="isEdit ? '编辑商品' : '发布商品'" class="mb-0">
+      <YdButton variant="outline" @click="back">
+        <YdIcon name="i-ri:arrow-left-line" />
         返回我的商品
-      </FaButton>
-    </FaPageHeader>
-    <FaPageMain>
-      <div v-loading="loading">
-        <FaAlert v-if="publishBlocked" title="当前无法保存商品" class="mb-4">
+      </YdButton>
+    </YdPageHeader>
+    <YdPageMain>
+      <YdLoadingOverlay :loading="loading"><div >
+        <YdAlert v-if="publishBlocked" title="当前无法保存商品" class="mb-4">
           <template #description>
             {{ qualification?.reason || '管理员已关闭用户上架功能、积分门槛不足，或当前账号是管理员（只能投放官方积分商品）。' }}
           </template>
-        </FaAlert>
+        </YdAlert>
         <form class="grid gap-5" @submit.prevent="save">
           <div class="grid gap-3 rounded-lg border p-4">
             <h3 class="text-base font-semibold">基本信息</h3>
             <label class="grid gap-2">
               <span>商品标题 <em class="required-mark">*</em></span>
-              <FaInput v-model="form.title" placeholder="请输入商品标题（60 字以内）" />
+              <YdInput v-model="form.title" placeholder="请输入商品标题（60 字以内）" />
             </label>
             <label class="grid gap-2">
               <span>商品简介</span>
-              <FaInput v-model="form.summary" placeholder="一句话介绍，展示在商品卡片上（200 字以内）" />
+              <YdInput v-model="form.summary" placeholder="一句话介绍，展示在商品卡片上（200 字以内）" />
             </label>
             <div class="grid gap-2">
               <span>商品图片（最多 9 张，第一张为封面，可拖拽排序）</span>
-              <FaImageUpload
+              <YdImageUpload
                 :model-value="imageList"
                 :max="9"
                 :width="120"
@@ -319,22 +320,22 @@ onMounted(() => {
 
           <div class="grid gap-3 rounded-lg border p-4">
             <h3 class="text-base font-semibold">价格与库存</h3>
-            <FaAlert v-if="!walletAvailable">
+            <YdAlert v-if="!walletAvailable">
               <template #description>
                 钱包插件未启用：仍可上架商品，但买家暂时无法购买；货币代码需与钱包资产代码一致，钱包启用后才能正常收款。
               </template>
-            </FaAlert>
+            </YdAlert>
             <div class="shop-price-grid">
               <label class="grid gap-2">
                 <span>计价货币 <em class="required-mark">*</em></span>
-                <FaSelect
+                <YdSelect
                   v-if="currencyOptions.length"
                   v-model="form.assetCode"
                   class="shop-select"
                   :options="currencyOptions"
                   placeholder="选择钱包货币"
                 />
-                <FaInput
+                <YdInput
                   v-else
                   v-model="form.assetCode"
                   placeholder="钱包货币代码，如 CNY"
@@ -343,15 +344,15 @@ onMounted(() => {
               <label v-if="!hasVariants" class="grid gap-2">
                 <span>商品价格 <em class="required-mark">*</em></span>
                 <!-- 步进 0.01：reka-ui 提交时按 min 锚点吸附 step 网格，step=1 会把整数价格推成 .01 -->
-                <FaNumberField v-model="form.price" :min="0.01" :step="0.01" class="w-full" />
+                <YdNumberField v-model="form.price" :min="0.01" :step="0.01" class="w-full" />
               </label>
               <label v-if="!hasVariants" class="grid gap-2">
                 <span>库存（-1 表示不限）</span>
-                <FaNumberField v-model="form.stock" :min="-1" :step="1" class="w-full" />
+                <YdNumberField v-model="form.stock" :min="-1" :step="1" class="w-full" />
               </label>
               <label class="grid gap-2">
                 <span>{{ perUserLimitLabel }}</span>
-                <FaNumberField v-model="form.perUserLimit" :min="0" :step="1" class="w-full" />
+                <YdNumberField v-model="form.perUserLimit" :min="0" :step="1" class="w-full" />
               </label>
             </div>
             <VariantEditor v-model="form.variants" />
@@ -361,20 +362,20 @@ onMounted(() => {
             <h3 class="text-base font-semibold">商品类型与发货</h3>
             <label class="grid gap-2">
               <span>商品类型 <em class="required-mark">*</em></span>
-              <FaSelect v-model="form.type" class="shop-select" :options="typeOptions" placeholder="选择商品类型" />
+              <YdSelect v-model="form.type" class="shop-select" :options="typeOptions" placeholder="选择商品类型" />
             </label>
             <p v-if="currentType?.description" class="text-xs text-muted-foreground">
               {{ currentType.description }}
             </p>
-            <FaAlert v-if="isPointsRedeem" title="积分兑换商品流程">
+            <YdAlert v-if="isPointsRedeem" title="积分兑换商品流程">
               <template #description>
                 买家下单支付时立即扣减所选积分资产（消耗式结算，不转给卖家）；随后需要你在订单中提交发货凭证（文本说明与最多 6 张凭证图片至少一项），
                 买家核验无误后订单完成。买家在卖家提交发货凭证前可自行取消订单，扣减的积分原路退回。
               </template>
-            </FaAlert>
+            </YdAlert>
             <label v-if="usesDeliveryNote" class="grid gap-2">
               <span>发货说明（可选，买家支付成功后在订单中可见）</span>
-              <FaTextarea
+              <YdTextarea
                 v-model="form.deliveryNote"
                 placeholder="卡密、兑换链接、联系方式等，500 字以内"
                 :rows="3"
@@ -382,7 +383,7 @@ onMounted(() => {
             </label>
             <label v-else class="grid gap-2">
               <span>类型配置（JSON 对象，按上方类型说明填写）</span>
-              <FaTextarea
+              <YdTextarea
                 v-model="form.extraConfigJson"
                 placeholder='{"key": "value"}'
                 :rows="5"
@@ -392,13 +393,13 @@ onMounted(() => {
           </div>
 
           <div class="flex flex-wrap justify-end gap-2">
-            <FaButton variant="outline" type="button" @click="back">取消</FaButton>
-            <FaButton type="submit" :loading="saving" :disabled="publishBlocked">
+            <YdButton variant="outline" type="button" @click="back">取消</YdButton>
+            <YdButton type="submit" :loading="saving" :disabled="publishBlocked">
               {{ isEdit ? '保存修改' : '上架商品' }}
-            </FaButton>
+            </YdButton>
           </div>
         </form>
-      </div>
-    </FaPageMain>
+      </div></YdLoadingOverlay>
+    </YdPageMain>
   </section>
 </template>

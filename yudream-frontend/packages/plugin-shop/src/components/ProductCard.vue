@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ShopProductSummary } from '../types'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { FaIcon } from '@yudream/components'
+import { YdAction, YdIcon } from '@yudream/components'
 import { computed } from 'vue'
 import { displayProductOwner, formatAmount, isPointsRedeem } from '../composables/utils'
 
@@ -43,12 +43,9 @@ const soldOut = computed(() => props.product.stock === 0)
 </script>
 
 <template>
-  <article
+  <YdAction
     class="shop-product-card"
-    role="button"
-    tabindex="0"
     @click="emit('open', product)"
-    @keydown.enter="emit('open', product)"
   >
     <div class="shop-product-card-cover">
       <img
@@ -59,10 +56,10 @@ const soldOut = computed(() => props.product.stock === 0)
         @error="($event.target as HTMLImageElement).src = coverFull"
       >
       <div v-else class="shop-product-card-cover-placeholder">
-        <FaIcon name="i-ri:image-line" class="text-3xl" />
+        <YdIcon name="i-ri:image-line" class="text-3xl" />
       </div>
       <span v-if="pointsRedeem" class="shop-product-card-type">
-        <FaIcon name="i-ri:gift-2-line" />
+        <YdIcon name="i-ri:gift-2-line" />
         积分兑换
       </span>
       <span v-if="soldOut" class="shop-product-card-soldout">已售罄</span>
@@ -77,14 +74,14 @@ const soldOut = computed(() => props.product.stock === 0)
         <span class="shop-product-card-asset">{{ product.assetCode }}</span>
       </div>
       <div class="shop-product-card-meta">
-        <span v-if="ownerLabel"><FaIcon name="i-ri:user-line" />{{ ownerLabel }}</span>
-        <span v-if="variants.length"><FaIcon name="i-ri:apps-2-line" />{{ variants.length }} 种型号</span>
-        <span><FaIcon name="i-ri:shopping-bag-3-line" />已售 {{ soldCount }}</span>
+        <span v-if="ownerLabel"><YdIcon name="i-ri:user-line" />{{ ownerLabel }}</span>
+        <span v-if="variants.length"><YdIcon name="i-ri:apps-2-line" />{{ variants.length }} 种型号</span>
+        <span><YdIcon name="i-ri:shopping-bag-3-line" />已售 {{ soldCount }}</span>
         <span v-if="Number(product.perUserLimit) > 0">
-          <FaIcon name="i-ri:user-settings-line" />{{ pointsRedeem ? '每人限兑' : '每人限购' }} {{ Number(product.perUserLimit) }}
+          <YdIcon name="i-ri:user-settings-line" />{{ pointsRedeem ? '每人限兑' : '每人限购' }} {{ Number(product.perUserLimit) }}
         </span>
         <span class="shop-product-card-stock">{{ stockText }}</span>
       </div>
     </div>
-  </article>
+  </YdAction>
 </template>

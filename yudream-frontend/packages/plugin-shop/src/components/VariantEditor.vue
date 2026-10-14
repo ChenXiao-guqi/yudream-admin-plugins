@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ShopVariantPayload } from '../types'
-import { FaButton, FaIcon, FaInput, FaNumberField } from '@yudream/components'
+import { YdButton, YdIcon, YdInput, YdNumberField } from '@yudream/components'
 import { computed } from 'vue'
 
 /**
@@ -50,10 +50,10 @@ function remove(index: number) {
           不配置则按上面的商品价格与库存售卖。
         </span>
       </div>
-      <FaButton type="button" size="sm" variant="outline" :disabled="!canAdd" @click="add">
-        <FaIcon name="i-ri:add-line" />
+      <YdButton type="button" size="sm" variant="outline" :disabled="!canAdd" @click="add">
+        <YdIcon name="i-ri:add-line" />
         添加型号
-      </FaButton>
+      </YdButton>
     </div>
 
     <div v-if="!rows.length" class="shop-variant-empty">
@@ -64,20 +64,20 @@ function remove(index: number) {
       <div v-for="(row, index) in rows" :key="row.id || index" class="shop-variant-item">
         <div class="shop-variant-item-head">
           <span class="shop-variant-index">{{ index + 1 }}</span>
-          <FaInput
+          <YdInput
             :model-value="row.name"
             placeholder="型号名称，如：西瓜 / 钻石"
             @update:model-value="patch(index, { name: String($event) })"
           />
-          <FaButton type="button" size="sm" variant="outline" @click="remove(index)">
-            <FaIcon name="i-ri:delete-bin-4-line" />
+          <YdButton type="button" size="sm" variant="outline" @click="remove(index)">
+            <YdIcon name="i-ri:delete-bin-4-line" />
             删除
-          </FaButton>
+          </YdButton>
         </div>
         <div class="shop-variant-item-body">
           <label class="shop-variant-field">
             <span>价格</span>
-            <FaNumberField
+            <YdNumberField
               :model-value="Number(row.price)"
               :min="0.01"
               :step="0.01"
@@ -87,7 +87,7 @@ function remove(index: number) {
           </label>
           <label class="shop-variant-field">
             <span>库存（-1 表示不限）</span>
-            <FaNumberField
+            <YdNumberField
               :model-value="Number(row.stock)"
               :min="-1"
               :step="1"

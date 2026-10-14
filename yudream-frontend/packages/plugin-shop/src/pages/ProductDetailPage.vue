@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { ShopProductDetail, ShopVariant } from '../types'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
-import { POINTS_REDEEM_TYPE } from '../types'
-import { FaAlert, FaAvatar, FaButton, FaIcon, FaNumberField, FaPageHeader, FaPageMain, FaTag, useFaModal, useFaToast } from '@yudream/components'
+import {POINTS_REDEEM_TYPE } from '../types'
+import { YdAction, YdAlert, YdAvatar, YdButton, YdIcon, YdNumberField, YdPageHeader, YdPageMain, YdTag, useYdModal, useYdToast } from '@yudream/components'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createShopApi } from '../api/shop-api'
@@ -18,8 +19,8 @@ const props = defineProps<{
 const router = useRouter()
 const route = useRoute()
 const api = createShopApi(props.sdk)
-const toast = useFaToast()
-const confirm = useFaModal()
+const toast = useYdToast()
+const confirm = useYdModal()
 
 const loading = ref(false)
 const product = ref<ShopProductDetail | null>(null)
@@ -179,16 +180,16 @@ onMounted(() => { void load() })
 
 <template>
   <section class="shop-page">
-    <FaPageHeader title="商品详情" class="mb-0">
-      <FaButton variant="outline" @click="router.push(backTarget.path)">
-        <FaIcon name="i-ri:arrow-left-line" />
+    <YdPageHeader title="商品详情" class="mb-0">
+      <YdButton variant="outline" @click="router.push(backTarget.path)">
+        <YdIcon name="i-ri:arrow-left-line" />
         {{ backTarget.label }}
-      </FaButton>
-    </FaPageHeader>
-    <FaPageMain>
-      <div v-loading="loading">
+      </YdButton>
+    </YdPageHeader>
+    <YdPageMain>
+      <YdLoadingOverlay :loading="loading"><div >
         <div v-if="!loading && !product" class="shop-plaza-empty">
-          <FaIcon name="i-ri:store-2-line" class="text-4xl text-muted-foreground" />
+          <YdIcon name="i-ri:store-2-line" class="text-4xl text-muted-foreground" />
           <p>商品不存在或已下架</p>
         </div>
         <div v-else-if="product" class="grid gap-4">
@@ -201,7 +202,7 @@ onMounted(() => { void load() })
                   :alt="product.title"
                 >
                 <div v-else class="shop-product-card-cover-placeholder shop-detail-gallery-placeholder">
-                  <FaIcon name="i-ri:image-line" class="text-4xl" />
+                  <YdIcon name="i-ri:image-line" class="text-4xl" />
                 </div>
               </div>
               <div v-if="imageUrls.length > 1" class="shop-detail-gallery-thumbs">
@@ -221,7 +222,7 @@ onMounted(() => { void load() })
               <div class="grid gap-2">
                 <div class="flex flex-wrap items-center gap-2">
                   <h2 class="text-xl font-semibold">{{ product.title }}</h2>
-                  <FaTag variant="secondary">{{ productTypeLabel(product.type, product.typeDisplayName) }}</FaTag>
+                  <YdTag variant="secondary">{{ productTypeLabel(product.type, product.typeDisplayName) }}</YdTag>
                 </div>
                 <p v-if="product.summary" class="text-sm text-muted-foreground">{{ product.summary }}</p>
               </div>
@@ -237,35 +238,35 @@ onMounted(() => { void load() })
                 <span>上架时间：{{ formatTime(product.createdAt) }}</span>
               </div>
 
-              <FaAlert v-if="pointsRedeem" title="积分兑换说明">
+              <YdAlert v-if="pointsRedeem" title="积分兑换说明">
                 <template #description>
                   下单支付时立即扣减 {{ product.assetCode }}（消耗式结算，不转给卖家）；卖家提交发货凭证后请及时核验收货，
                   卖家提交凭证前你可以自行取消订单，扣减的积分将原路退回。
                 </template>
-              </FaAlert>
+              </YdAlert>
 
               <div v-if="ownerLabel" class="flex items-center gap-2">
-                <FaAvatar :src="ownerAvatar" :fallback="ownerLabel" class="size-8" />
+                <YdAvatar :src="ownerAvatar" :fallback="ownerLabel" class="size-8" />
                 <span class="text-sm">
                   {{ platformOwned ? '官方投放' : '卖家' }}：{{ ownerLabel }}
                 </span>
               </div>
 
-              <FaAlert v-if="buyDisabledReason">
+              <YdAlert v-if="buyDisabledReason">
                 <template #description>{{ buyDisabledReason }}</template>
-              </FaAlert>
-              <FaAlert v-else-if="balance !== null">
+              </YdAlert>
+              <YdAlert v-else-if="balance !== null">
                 <template #description>
                   当前钱包余额：{{ formatAmount(balance) }} {{ product.assetCode }}
                 </template>
-              </FaAlert>
+              </YdAlert>
 
               <div v-if="hasVariants" class="grid gap-2">
                 <span class="text-sm text-muted-foreground">
                   选择型号{{ selectedVariant ? `：${selectedVariant.name}` : '' }}
                 </span>
                 <div class="shop-variant-picker">
-                  <button
+                  <YdAction
                     v-for="variant in variants"
                     :key="variant.id"
                     type="button"
@@ -282,19 +283,19 @@ onMounted(() => { void load() })
                       {{ product.assetSymbol || '¥' }}{{ formatAmount(variant.price) }}
                       · {{ variant.stock < 0 ? '库存充足' : (variant.stock === 0 ? '已售罄' : `仅剩 ${variant.stock} 件`) }}
                     </span>
-                  </button>
+                  </YdAction>
                 </div>
               </div>
 
               <div class="flex flex-wrap items-center gap-3">
-                <FaNumberField v-model="quantity" :min="1" :max="maxQuantity" :step="1" :disabled="!!buyDisabledReason" />
+                <YdNumberField v-model="quantity" :min="1" :max="maxQuantity" :step="1" :disabled="!!buyDisabledReason" />
                 <span class="text-sm text-muted-foreground">
                   合计 {{ product.assetSymbol || '¥' }}{{ formatAmount(totalAmount) }} {{ product.assetCode }}
                 </span>
-                <FaButton :disabled="!!buyDisabledReason" :loading="purchasing" @click="confirmPurchase">
-                  <FaIcon name="i-ri:shopping-cart-2-line" />
+                <YdButton :disabled="!!buyDisabledReason" :loading="purchasing" @click="confirmPurchase">
+                  <YdIcon name="i-ri:shopping-cart-2-line" />
                   立即购买
-                </FaButton>
+                </YdButton>
               </div>
             </div>
           </div>
@@ -305,7 +306,7 @@ onMounted(() => { void load() })
             <p v-else class="text-sm text-muted-foreground">卖家没有填写详细介绍。</p>
           </div>
         </div>
-      </div>
-    </FaPageMain>
+      </div></YdLoadingOverlay>
+    </YdPageMain>
   </section>
 </template>

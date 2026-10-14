@@ -129,7 +129,7 @@
 }
 
 .shop-variant-option.is-active {
-  border-color: rgb(var(--primary-6));
+  border-color: var(--color-text-1);
 }
 
 .shop-variant-option.is-disabled {

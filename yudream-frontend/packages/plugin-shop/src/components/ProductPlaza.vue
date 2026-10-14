@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { ShopProductSummary, ShopCurrency, ShopSettlement } from '../types'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { FaButton, FaIcon, FaInput, FaPageHeader, FaPageMain, FaPagination, FaSelect, useFaToast } from '@yudream/components'
+import { YdButton, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdSelect, useYdToast } from '@yudream/components'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { createShopApi } from '../api/shop-api'
@@ -32,7 +33,7 @@ const props = withDefaults(defineProps<{
 
 const router = useRouter()
 const api = createShopApi(props.sdk)
-const toast = useFaToast()
+const toast = useYdToast()
 
 const loading = ref(false)
 const rows = ref<ShopProductSummary[]>([])
@@ -105,39 +106,39 @@ onMounted(() => {
 
 <template>
   <section class="shop-page">
-    <FaPageHeader :title="title" :description="description" class="mb-0">
-      <FaButton v-if="canPublish" @click="openCreate">
-        <FaIcon name="i-ri:add-line" />
+    <YdPageHeader :title="title" :description="description" class="mb-0">
+      <YdButton v-if="canPublish" @click="openCreate">
+        <YdIcon name="i-ri:add-line" />
         上架商品
-      </FaButton>
-      <FaButton variant="outline" :loading="loading" @click="load">
-        <FaIcon name="i-ri:refresh-line" />
+      </YdButton>
+      <YdButton variant="outline" :loading="loading" @click="load">
+        <YdIcon name="i-ri:refresh-line" />
         刷新
-      </FaButton>
-    </FaPageHeader>
-    <FaPageMain>
+      </YdButton>
+    </YdPageHeader>
+    <YdPageMain>
       <div class="grid gap-4">
         <div class="shop-filter-grid shop-plaza-filters">
-          <FaInput
+          <YdInput
             v-model="filters.keyword"
             placeholder="搜索商品标题或简介，回车查询"
             clearable
             @keyup.enter="applyFilters"
             @clear="applyFilters"
           />
-          <FaSelect v-model="filters.assetCode" class="shop-select" :options="currencyOptions" placeholder="全部货币" />
+          <YdSelect v-model="filters.assetCode" class="shop-select" :options="currencyOptions" placeholder="全部货币" />
           <div class="flex flex-wrap justify-end gap-2">
-            <FaButton variant="outline" @click="resetFilters">重置</FaButton>
-            <FaButton :loading="loading" @click="applyFilters">
-              <FaIcon name="i-ri:search-line" />
+            <YdButton variant="outline" @click="resetFilters">重置</YdButton>
+            <YdButton :loading="loading" @click="applyFilters">
+              <YdIcon name="i-ri:search-line" />
               查询
-            </FaButton>
+            </YdButton>
           </div>
         </div>
 
-        <div v-loading="loading" class="shop-plaza">
+        <YdLoadingOverlay :loading="loading"><div  class="shop-plaza">
           <div v-if="!loading && !rows.length" class="shop-plaza-empty">
-            <FaIcon :name="emptyIcon" class="text-4xl text-muted-foreground" />
+            <YdIcon :name="emptyIcon" class="text-4xl text-muted-foreground" />
             <p>{{ emptyHint }}</p>
           </div>
           <div v-else class="shop-plaza-grid">
@@ -149,9 +150,9 @@ onMounted(() => {
               @open="openDetail"
             />
           </div>
-        </div>
+        </div></YdLoadingOverlay>
 
-        <FaPagination
+        <YdPagination
           v-model:page="pager.page"
           v-model:size="pager.size"
           :total="pager.total"
@@ -160,6 +161,6 @@ onMounted(() => {
           @size-change="applyFilters"
         />
       </div>
-    </FaPageMain>
+    </YdPageMain>
   </section>
 </template>

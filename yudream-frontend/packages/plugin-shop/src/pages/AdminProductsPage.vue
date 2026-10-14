@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { ShopProductDetail, ShopProductSummary } from '../types'
 import type { TableColumn } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
-import { FaButton, FaCard, FaIcon, FaInput, FaModal, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable, FaSearchBar, FaSelect, FaTag, useFaModal, useFaToast } from '@yudream/components'
+import { YdButton, YdCard, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdSelect, YdTag, useYdModal, useYdToast } from '@yudream/components'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { createShopApi } from '../api/shop-api'
@@ -17,8 +18,8 @@ const props = defineProps<{
 
 const router = useRouter()
 const api = createShopApi(props.sdk)
-const toast = useFaToast()
-const confirm = useFaModal()
+const toast = useYdToast()
+const confirm = useYdModal()
 
 const loading = ref(false)
 const actingId = ref('')
@@ -166,21 +167,21 @@ onMounted(() => { void load() })
 
 <template>
   <section class="shop-page">
-    <FaPageHeader title="商品管理" class="mb-0">
+    <YdPageHeader title="商品管理" class="mb-0">
       <div class="flex flex-wrap justify-end gap-2">
-        <FaButton @click="openCreate">
-          <FaIcon name="i-ri:add-line" />
+        <YdButton @click="openCreate">
+          <YdIcon name="i-ri:add-line" />
           新增商品
-        </FaButton>
-        <FaButton variant="outline" :loading="loading" @click="load">
-          <FaIcon name="i-ri:refresh-line" />
+        </YdButton>
+        <YdButton variant="outline" :loading="loading" @click="load">
+          <YdIcon name="i-ri:refresh-line" />
           刷新
-        </FaButton>
+        </YdButton>
       </div>
-    </FaPageHeader>
-    <FaPageMain>
-      <FaResponsiveTable
-        v-loading="loading"
+    </YdPageHeader>
+    <YdPageMain>
+      <YdLoadingOverlay :loading="loading"><YdResponsiveTable
+
         row-key="id"
         table-root-class="rounded-lg overflow-hidden"
         table-class="min-w-[1100px]"
@@ -192,29 +193,29 @@ onMounted(() => { void load() })
         empty-text="暂无商品"
       >
         <template #toolbar>
-          <FaSearchBar class="w-full">
+          <YdSearchBar class="w-full">
             <div class="shop-filter-grid shop-product-filters">
-              <FaInput
+              <YdInput
                 v-model="filters.keyword"
                 placeholder="搜索商品标题或简介，回车查询"
                 clearable
                 @keyup.enter="applyFilters"
                 @clear="applyFilters"
               />
-              <FaInput
+              <YdInput
                 v-model="filters.ownerId"
                 placeholder="卖家用户 ID"
                 clearable
                 @keyup.enter="applyFilters"
                 @clear="applyFilters"
               />
-              <FaSelect v-model="filters.status" class="shop-select" :options="statusOptions" placeholder="全部状态" />
+              <YdSelect v-model="filters.status" class="shop-select" :options="statusOptions" placeholder="全部状态" />
               <div class="flex justify-end gap-2">
-                <FaButton variant="outline" @click="resetFilters">重置</FaButton>
-                <FaButton :loading="loading" @click="applyFilters">查询</FaButton>
+                <YdButton variant="outline" @click="resetFilters">重置</YdButton>
+                <YdButton :loading="loading" @click="applyFilters">查询</YdButton>
               </div>
             </div>
-          </FaSearchBar>
+          </YdSearchBar>
         </template>
         <template #cell-title="{ row }">
           <div class="flex items-center gap-2">
@@ -226,7 +227,7 @@ onMounted(() => { void load() })
               loading="lazy"
             >
             <div v-else class="shop-table-cover shop-table-cover-placeholder">
-              <FaIcon name="i-ri:image-line" />
+              <YdIcon name="i-ri:image-line" />
             </div>
             <span class="line-clamp-1 font-medium">{{ row.original.title }}</span>
           </div>
@@ -242,12 +243,12 @@ onMounted(() => { void load() })
           {{ row.original.stock < 0 ? '不限' : row.original.stock }} / {{ Number(row.original.soldCount) || 0 }}
         </template>
         <template #cell-type="{ row }">
-          <FaTag variant="secondary">{{ productTypeLabel(row.original.type, row.original.typeDisplayName) }}</FaTag>
+          <YdTag variant="secondary">{{ productTypeLabel(row.original.type, row.original.typeDisplayName) }}</YdTag>
         </template>
         <template #cell-status="{ row }">
-          <FaTag :variant="productStatusTag(row.original.status).variant">
+          <YdTag :variant="productStatusTag(row.original.status).variant">
             {{ row.original.statusText || productStatusTag(row.original.status).text }}
-          </FaTag>
+          </YdTag>
         </template>
         <template #cell-updatedAt="{ row }">
           {{ formatTime(row.original.updatedAt) }}
@@ -257,43 +258,43 @@ onMounted(() => { void load() })
         </template>
         <template #cell-operation="{ row }">
           <div class="flex-center gap-2">
-            <FaButton size="sm" variant="outline" :loading="actingId === row.original.id" @click="moveProduct(row.original, 'TOP')">
+            <YdButton size="sm" variant="outline" :loading="actingId === row.original.id" @click="moveProduct(row.original, 'TOP')">
               置顶
-            </FaButton>
-            <FaButton size="sm" variant="outline" :loading="actingId === row.original.id" @click="moveProduct(row.original, 'UP')">
+            </YdButton>
+            <YdButton size="sm" variant="outline" :loading="actingId === row.original.id" @click="moveProduct(row.original, 'UP')">
               上移
-            </FaButton>
-            <FaButton size="sm" variant="outline" :loading="actingId === row.original.id" @click="moveProduct(row.original, 'DOWN')">
+            </YdButton>
+            <YdButton size="sm" variant="outline" :loading="actingId === row.original.id" @click="moveProduct(row.original, 'DOWN')">
               下移
-            </FaButton>
-            <FaButton size="sm" variant="outline" @click="openDetail(row.original)">详情</FaButton>
-            <FaButton size="sm" variant="outline" @click="openEdit(row.original)">编辑</FaButton>
-            <FaButton
+            </YdButton>
+            <YdButton size="sm" variant="outline" @click="openDetail(row.original)">详情</YdButton>
+            <YdButton size="sm" variant="outline" @click="openEdit(row.original)">编辑</YdButton>
+            <YdButton
               size="sm"
               variant="outline"
               :loading="actingId === row.original.id"
               @click="toggleShelf(row.original)"
             >
               {{ row.original.status === 'ON_SHELF' ? '强制下架' : '恢复上架' }}
-            </FaButton>
-            <FaButton
+            </YdButton>
+            <YdButton
               size="sm"
               variant="destructive"
               :loading="actingId === row.original.id"
               @click="confirmDelete(row.original)"
             >
               删除
-            </FaButton>
+            </YdButton>
           </div>
         </template>
         <template #card="{ row }">
-          <FaCard class="w-full">
+          <YdCard class="w-full">
             <div class="flex flex-col gap-3">
               <div class="flex items-center justify-between gap-2">
                 <span class="min-w-0 break-words text-base font-semibold">{{ row.title }}</span>
-                <FaTag :variant="productStatusTag(row.status).variant">
+                <YdTag :variant="productStatusTag(row.status).variant">
                   {{ row.statusText || productStatusTag(row.status).text }}
-                </FaTag>
+                </YdTag>
               </div>
               <div class="flex flex-col gap-1 text-sm">
                 <div class="flex gap-2">
@@ -318,40 +319,40 @@ onMounted(() => { void load() })
                 </div>
               </div>
               <div class="flex flex-wrap gap-2 border-t pt-3">
-                <FaButton size="sm" variant="outline" :loading="actingId === row.id" @click="moveProduct(row, 'TOP')">
+                <YdButton size="sm" variant="outline" :loading="actingId === row.id" @click="moveProduct(row, 'TOP')">
                   置顶
-                </FaButton>
-                <FaButton size="sm" variant="outline" :loading="actingId === row.id" @click="moveProduct(row, 'UP')">
+                </YdButton>
+                <YdButton size="sm" variant="outline" :loading="actingId === row.id" @click="moveProduct(row, 'UP')">
                   上移
-                </FaButton>
-                <FaButton size="sm" variant="outline" :loading="actingId === row.id" @click="moveProduct(row, 'DOWN')">
+                </YdButton>
+                <YdButton size="sm" variant="outline" :loading="actingId === row.id" @click="moveProduct(row, 'DOWN')">
                   下移
-                </FaButton>
-                <FaButton size="sm" variant="outline" @click="openDetail(row)">详情</FaButton>
-                <FaButton size="sm" variant="outline" @click="openEdit(row)">编辑</FaButton>
-                <FaButton
+                </YdButton>
+                <YdButton size="sm" variant="outline" @click="openDetail(row)">详情</YdButton>
+                <YdButton size="sm" variant="outline" @click="openEdit(row)">编辑</YdButton>
+                <YdButton
                   size="sm"
                   variant="outline"
                   :loading="actingId === row.id"
                   @click="toggleShelf(row)"
                 >
                   {{ row.status === 'ON_SHELF' ? '强制下架' : '恢复上架' }}
-                </FaButton>
-                <FaButton
+                </YdButton>
+                <YdButton
                   size="sm"
                   variant="destructive"
                   :loading="actingId === row.id"
                   @click="confirmDelete(row)"
                 >
                   删除
-                </FaButton>
+                </YdButton>
               </div>
             </div>
-          </FaCard>
+          </YdCard>
         </template>
-      </FaResponsiveTable>
+      </YdResponsiveTable></YdLoadingOverlay>
 
-      <FaPagination
+      <YdPagination
         v-model:page="pager.page"
         v-model:size="pager.size"
         :total="pager.total"
@@ -360,15 +361,15 @@ onMounted(() => { void load() })
         @size-change="applyFilters"
       />
 
-      <FaModal v-model="detailOpen" title="商品详情" :show-confirm-button="false">
-        <div v-loading="detailLoading" class="grid max-h-[70vh] gap-3 overflow-y-auto">
+      <YdModal v-model="detailOpen" title="商品详情" :show-confirm-button="false">
+        <YdLoadingOverlay :loading="detailLoading"><div  class="grid max-h-[70vh] gap-3 overflow-y-auto">
           <template v-if="current">
             <div class="flex flex-wrap items-center gap-2">
               <span class="text-base font-semibold">{{ current.title }}</span>
-              <FaTag :variant="productStatusTag(current.status).variant">
+              <YdTag :variant="productStatusTag(current.status).variant">
                 {{ current.statusText || productStatusTag(current.status).text }}
-              </FaTag>
-              <FaTag variant="secondary">{{ productTypeLabel(current.type, current.typeDisplayName) }}</FaTag>
+              </YdTag>
+              <YdTag variant="secondary">{{ productTypeLabel(current.type, current.typeDisplayName) }}</YdTag>
             </div>
             <div class="shop-order-detail-grid">
               <span class="shop-order-detail-label">归属</span>
@@ -405,8 +406,8 @@ onMounted(() => { void load() })
           <div v-else-if="!detailLoading" class="py-6 text-center text-sm text-muted-foreground">
             商品不存在
           </div>
-        </div>
-      </FaModal>
-    </FaPageMain>
+        </div></YdLoadingOverlay>
+      </YdModal>
+    </YdPageMain>
   </section>
 </template>

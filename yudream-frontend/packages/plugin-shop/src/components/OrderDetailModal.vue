@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { ShopOrder } from '../types'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { FaButton, FaIcon, FaModal, FaTag, FaTextarea, useFaImagePreview, useFaToast } from '@yudream/components'
+import { YdAction, YdButton, YdIcon, YdModal, YdTag, YdTextarea, useYdImagePreview, useYdToast } from '@yudream/components'
 import { computed, ref, watch } from 'vue'
 import { createShopApi } from '../api/shop-api'
 import { displayOrderSeller, displayUserName, formatAmount, formatTime, hasDeliveryProof, hasOrderTradeFee, orderSellerAmount, orderStatusTag, settlementDescription, settlementTag } from '../composables/utils'
@@ -29,8 +30,8 @@ const modalOpen = computed({
 })
 
 const api = createShopApi(props.sdk)
-const toast = useFaToast()
-const imagePreview = useFaImagePreview()
+const toast = useYdToast()
+const imagePreview = useYdImagePreview()
 
 const copied = ref(false)
 const copiedVoucher = ref(false)
@@ -142,8 +143,8 @@ async function submitCancel() {
 </script>
 
 <template>
-  <FaModal v-model="modalOpen" title="订单详情" :show-confirm-button="false">
-    <div v-loading="loading" class="grid gap-3">
+  <YdModal v-model="modalOpen" title="订单详情" :show-confirm-button="false">
+    <YdLoadingOverlay :loading="loading"><div  class="grid gap-3">
       <template v-if="order">
         <div class="shop-order-detail-head">
           <img
@@ -156,9 +157,9 @@ async function submitCancel() {
           <div class="grid gap-1">
             <div class="flex flex-wrap items-center gap-2">
               <span class="text-base font-semibold">{{ order.productTitle }}</span>
-              <FaTag :variant="orderStatusTag(order.status).variant">
+              <YdTag :variant="orderStatusTag(order.status).variant">
                 {{ order.statusText || orderStatusTag(order.status).text }}
-              </FaTag>
+              </YdTag>
             </div>
             <span class="text-xs text-muted-foreground">订单号 {{ order.id }}</span>
           </div>
@@ -175,9 +176,9 @@ async function submitCancel() {
           </template>
           <span class="shop-order-detail-label">结算方式</span>
           <span class="flex flex-wrap items-center gap-2">
-            <FaTag :variant="settlementTag(order.settlement).variant">
+            <YdTag :variant="settlementTag(order.settlement).variant">
               {{ settlementTag(order.settlement).text }}
-            </FaTag>
+            </YdTag>
             <span class="text-xs text-muted-foreground">{{ settlementDescription(order.settlement) }}</span>
           </span>
           <span class="shop-order-detail-label">买家</span>
@@ -200,22 +201,22 @@ async function submitCancel() {
           <span v-if="order.refundTransactionId" class="break-all">{{ order.refundTransactionId }}</span>
         </div>
         <div v-if="order.deliveryMessage && order.status !== 'CANCELLED'" class="shop-order-delivery-message">
-          <FaIcon name="i-ri:truck-line" />
+          <YdIcon name="i-ri:truck-line" />
           <span>{{ order.deliveryMessage }}</span>
         </div>
         <div v-if="order.status === 'CANCELLED'" class="shop-order-delivery-message">
-          <FaIcon name="i-ri:close-circle-line" />
+          <YdIcon name="i-ri:close-circle-line" />
           <span>{{ cancelNotice }}</span>
         </div>
         <div v-if="hasVoucher" class="grid gap-2">
           <div class="flex items-center gap-2">
             <span class="text-sm font-semibold">发货凭证</span>
-            <FaTag v-if="order.voucherVerified" variant="secondary">买家已核验</FaTag>
-            <FaTag v-else-if="order.status === 'DELIVERING'" variant="outline">待买家核验</FaTag>
+            <YdTag v-if="order.voucherVerified" variant="secondary">买家已核验</YdTag>
+            <YdTag v-else-if="order.status === 'DELIVERING'" variant="outline">待买家核验</YdTag>
           </div>
           <pre v-if="order.deliveryVoucher" class="shop-order-delivery-content">{{ order.deliveryVoucher }}</pre>
           <div v-if="proofFullUrls.length" class="shop-proof-grid">
-            <button
+            <YdAction
               v-for="(url, index) in proofFullUrls"
               :key="url"
               type="button"
@@ -229,40 +230,40 @@ async function submitCancel() {
                 loading="lazy"
                 @error="($event.target as HTMLImageElement).src = url"
               >
-            </button>
+            </YdAction>
           </div>
           <div class="flex flex-wrap gap-2">
-            <FaButton
+            <YdButton
               v-if="order.deliveryVoucher"
               size="sm"
               variant="outline"
               @click="copyText(order.deliveryVoucher!, 'voucher')"
             >
-              <FaIcon :name="copiedVoucher ? 'i-ri:check-line' : 'i-ri:file-copy-line'" />
+              <YdIcon :name="copiedVoucher ? 'i-ri:check-line' : 'i-ri:file-copy-line'" />
               {{ copiedVoucher ? '已复制' : '复制凭证' }}
-            </FaButton>
-            <FaButton v-if="canVerify" size="sm" :loading="verifying" @click="verifyReceipt">
-              <FaIcon name="i-ri:shield-check-line" />
+            </YdButton>
+            <YdButton v-if="canVerify" size="sm" :loading="verifying" @click="verifyReceipt">
+              <YdIcon name="i-ri:shield-check-line" />
               核验收货
-            </FaButton>
+            </YdButton>
           </div>
         </div>
         <div v-if="showContent && order.deliveryContent" class="grid gap-2">
           <span class="text-sm font-semibold">发货内容</span>
           <pre class="shop-order-delivery-content">{{ order.deliveryContent }}</pre>
           <div>
-            <FaButton size="sm" variant="outline" @click="copyText(order.deliveryContent!, 'content')">
-              <FaIcon :name="copied ? 'i-ri:check-line' : 'i-ri:file-copy-line'" />
+            <YdButton size="sm" variant="outline" @click="copyText(order.deliveryContent!, 'content')">
+              <YdIcon :name="copied ? 'i-ri:check-line' : 'i-ri:file-copy-line'" />
               {{ copied ? '已复制' : '复制内容' }}
-            </FaButton>
+            </YdButton>
           </div>
         </div>
         <div v-if="canCancel" class="shop-order-cancel">
           <div class="flex flex-wrap items-center gap-2">
-            <FaButton size="sm" variant="destructive" :disabled="canceling" @click="cancelConfirming = true">
-              <FaIcon name="i-ri:close-circle-line" />
+            <YdButton size="sm" variant="destructive" :disabled="canceling" @click="cancelConfirming = true">
+              <YdIcon name="i-ri:close-circle-line" />
               取消订单
-            </FaButton>
+            </YdButton>
             <span class="text-xs text-muted-foreground">
               卖家提交发货凭证前可取消，已支付金额原路退回。
             </span>
@@ -270,18 +271,18 @@ async function submitCancel() {
           <div v-if="cancelConfirming" class="shop-order-cancel-confirm">
             <span class="text-sm font-medium">确认取消该订单吗？</span>
             <span class="text-xs text-muted-foreground">取消后已支付金额将原路退回，操作不可撤销。</span>
-            <FaTextarea
+            <YdTextarea
               v-model="cancelReason"
               placeholder="取消原因（可选，便于卖家与管理员了解情况）"
               :rows="2"
             />
             <div class="flex justify-end gap-2">
-              <FaButton size="sm" variant="outline" :disabled="canceling" @click="cancelConfirming = false">
+              <YdButton size="sm" variant="outline" :disabled="canceling" @click="cancelConfirming = false">
                 再想想
-              </FaButton>
-              <FaButton size="sm" variant="destructive" :loading="canceling" @click="submitCancel">
+              </YdButton>
+              <YdButton size="sm" variant="destructive" :loading="canceling" @click="submitCancel">
                 确认取消
-              </FaButton>
+              </YdButton>
             </div>
           </div>
         </div>
@@ -289,6 +290,6 @@ async function submitCancel() {
       <div v-else-if="!loading" class="py-6 text-center text-sm text-muted-foreground">
         订单不存在或无权查看
       </div>
-    </div>
-  </FaModal>
+    </div></YdLoadingOverlay>
+  </YdModal>
 </template>

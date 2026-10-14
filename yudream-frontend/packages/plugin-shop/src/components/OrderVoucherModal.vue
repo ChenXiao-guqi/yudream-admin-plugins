@@ -2,7 +2,7 @@
 import type { ShopOrder } from '../types'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import { MAX_DELIVERY_PROOFS, MAX_VOUCHER_LENGTH } from '../types'
-import { FaButton, FaIcon, FaImageUpload, FaModal, FaTextarea, useFaToast } from '@yudream/components'
+import { YdButton, YdIcon, YdImageUpload, YdModal, YdTextarea, useYdToast } from '@yudream/components'
 import { computed, ref, watch } from 'vue'
 import { createShopApi } from '../api/shop-api'
 import { displayUserName, errorMessage, normalizeFileUrl } from '../composables/utils'
@@ -30,14 +30,14 @@ const modalOpen = computed({
 })
 
 const api = createShopApi(props.sdk)
-const toast = useFaToast()
+const toast = useYdToast()
 
 const voucherText = ref('')
 const uploading = ref(false)
 const submitting = ref(false)
 const hasExistingVoucher = ref(false)
 
-// FaImageUpload 通过 push/splice 原地改数组，不触发 update:modelValue；
+// YdImageUpload 通过 push/splice 原地改数组，不触发 update:modelValue；
 // 用独立 ref 承接展示地址，再 watch 同步回落库相对路径（与商品图片同一套处理）
 const proofList = ref<string[]>([])
 const proofs = ref<string[]>([])
@@ -122,10 +122,10 @@ async function submit() {
 </script>
 
 <template>
-  <FaModal v-model="modalOpen" :title="title" class="sm:max-w-[560px]">
+  <YdModal v-model="modalOpen" :title="title" class="sm:max-w-[560px]">
     <div class="grid gap-3">
       <div v-if="order" class="shop-order-delivery-message">
-        <FaIcon name="i-ri:shopping-bag-3-line" />
+        <YdIcon name="i-ri:shopping-bag-3-line" />
         <span>
           {{ order.productTitle }} ×{{ order.quantity }}
           <template v-if="order.buyer">（买家：{{ displayUserName(order.buyer) }}）</template>
@@ -133,7 +133,7 @@ async function submit() {
       </div>
       <label class="grid gap-2">
         <span class="text-sm">凭证文本（可选）</span>
-        <FaTextarea
+        <YdTextarea
           v-model="voucherText"
           :maxlength="MAX_VOUCHER_LENGTH"
           placeholder="填写发货凭证：如兑换码、卡密、游戏内交易记录说明等（500 字以内）"
@@ -142,7 +142,7 @@ async function submit() {
       </label>
       <div class="grid gap-2">
         <span class="text-sm">凭证图片（可选，最多 {{ MAX_DELIVERY_PROOFS }} 张）</span>
-        <FaImageUpload
+        <YdImageUpload
           :model-value="proofList"
           :max="MAX_DELIVERY_PROOFS"
           :width="96"
@@ -160,11 +160,11 @@ async function submit() {
     </div>
     <template #footer>
       <div class="flex justify-end gap-2">
-        <FaButton variant="outline" :disabled="submitting" @click="modalOpen = false">取消</FaButton>
-        <FaButton :loading="submitting" :disabled="!canSubmit || uploading" @click="submit">
+        <YdButton variant="outline" :disabled="submitting" @click="modalOpen = false">取消</YdButton>
+        <YdButton :loading="submitting" :disabled="!canSubmit || uploading" @click="submit">
           提交凭证
-        </FaButton>
+        </YdButton>
       </div>
     </template>
-  </FaModal>
+  </YdModal>
 </template>

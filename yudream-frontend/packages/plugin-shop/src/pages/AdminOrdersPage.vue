@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { ShopOrder } from '../types'
 import type { TableColumn } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
-import { FaButton, FaCard, FaIcon, FaInput, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable, FaSearchBar, FaSelect, FaTag, useFaModal, useFaToast } from '@yudream/components'
+import { YdButton, YdCard, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdSelect, YdTag, useYdModal, useYdToast } from '@yudream/components'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { createShopApi } from '../api/shop-api'
 import OrderDetailModal from '../components/OrderDetailModal.vue'
@@ -16,8 +17,8 @@ const props = defineProps<{
 }>()
 
 const api = createShopApi(props.sdk)
-const toast = useFaToast()
-const confirm = useFaModal()
+const toast = useYdToast()
+const confirm = useYdModal()
 
 const loading = ref(false)
 const actingId = ref('')
@@ -202,15 +203,15 @@ onMounted(() => { void load() })
 
 <template>
   <section class="shop-page">
-    <FaPageHeader title="订单管理" class="mb-0">
-      <FaButton variant="outline" :loading="loading" @click="load">
-        <FaIcon name="i-ri:refresh-line" />
+    <YdPageHeader title="订单管理" class="mb-0">
+      <YdButton variant="outline" :loading="loading" @click="load">
+        <YdIcon name="i-ri:refresh-line" />
         刷新
-      </FaButton>
-    </FaPageHeader>
-    <FaPageMain>
-      <FaResponsiveTable
-        v-loading="loading"
+      </YdButton>
+    </YdPageHeader>
+    <YdPageMain>
+      <YdLoadingOverlay :loading="loading"><YdResponsiveTable
+
         row-key="id"
         table-root-class="rounded-lg overflow-hidden"
         table-class="min-w-[1100px]"
@@ -222,36 +223,36 @@ onMounted(() => { void load() })
         empty-text="暂无订单"
       >
         <template #toolbar>
-          <FaSearchBar class="w-full">
+          <YdSearchBar class="w-full">
             <div class="shop-filter-grid shop-order-filters">
-              <FaInput
+              <YdInput
                 v-model="filters.keyword"
                 placeholder="搜索商品标题或订单号前缀，回车查询"
                 clearable
                 @keyup.enter="applyFilters"
                 @clear="applyFilters"
               />
-              <FaInput
+              <YdInput
                 v-model="filters.buyerId"
                 placeholder="买家用户 ID"
                 clearable
                 @keyup.enter="applyFilters"
                 @clear="applyFilters"
               />
-              <FaInput
+              <YdInput
                 v-model="filters.sellerId"
                 placeholder="卖家用户 ID"
                 clearable
                 @keyup.enter="applyFilters"
                 @clear="applyFilters"
               />
-              <FaSelect v-model="filters.status" class="shop-select" :options="statusOptions" placeholder="全部状态" />
+              <YdSelect v-model="filters.status" class="shop-select" :options="statusOptions" placeholder="全部状态" />
               <div class="flex justify-end gap-2">
-                <FaButton variant="outline" @click="resetFilters">重置</FaButton>
-                <FaButton :loading="loading" @click="applyFilters">查询</FaButton>
+                <YdButton variant="outline" @click="resetFilters">重置</YdButton>
+                <YdButton :loading="loading" @click="applyFilters">查询</YdButton>
               </div>
             </div>
-          </FaSearchBar>
+          </YdSearchBar>
         </template>
         <template #cell-id="{ row }">
           <span class="font-mono text-xs">{{ row.original.id.slice(0, 8) }}</span>
@@ -266,7 +267,7 @@ onMounted(() => { void load() })
               loading="lazy"
             >
             <div v-else class="shop-table-cover shop-table-cover-placeholder">
-              <FaIcon name="i-ri:image-line" />
+              <YdIcon name="i-ri:image-line" />
             </div>
             <span class="line-clamp-1 font-medium">{{ row.original.productTitle }}</span>
             <span v-if="row.original.variantName" class="text-xs text-muted-foreground">{{ row.original.variantName }}</span>
@@ -287,25 +288,25 @@ onMounted(() => { void load() })
           {{ displayOrderSeller(row.original) }}
         </template>
         <template #cell-status="{ row }">
-          <FaTag :variant="orderStatusTag(row.original.status).variant">
+          <YdTag :variant="orderStatusTag(row.original.status).variant">
             {{ row.original.statusText || orderStatusTag(row.original.status).text }}
-          </FaTag>
+          </YdTag>
         </template>
         <template #cell-createdAt="{ row }">
           {{ formatTime(row.original.createdAt) }}
         </template>
         <template #cell-operation="{ row }">
           <div class="flex-center gap-2">
-            <FaButton size="sm" variant="outline" @click="openDetail(row.original)">详情</FaButton>
-            <FaButton
+            <YdButton size="sm" variant="outline" @click="openDetail(row.original)">详情</YdButton>
+            <YdButton
               v-if="canSubmitVoucher(row.original)"
               size="sm"
               :loading="voucherLoadingId === row.original.id"
               @click="openVoucher(row.original)"
             >
               {{ isOwnSale(row.original) ? '发货凭证' : '代发货' }}
-            </FaButton>
-            <FaButton
+            </YdButton>
+            <YdButton
               v-if="canRedeliver(row.original)"
               size="sm"
               variant="outline"
@@ -313,8 +314,8 @@ onMounted(() => { void load() })
               @click="confirmRedeliver(row.original)"
             >
               重新发货
-            </FaButton>
-            <FaButton
+            </YdButton>
+            <YdButton
               v-if="canRefund(row.original)"
               size="sm"
               variant="destructive"
@@ -322,17 +323,17 @@ onMounted(() => { void load() })
               @click="confirmRefund(row.original)"
             >
               退款
-            </FaButton>
+            </YdButton>
           </div>
         </template>
         <template #card="{ row }">
-          <FaCard class="w-full">
+          <YdCard class="w-full">
             <div class="flex flex-col gap-3">
               <div class="flex items-center justify-between gap-2">
                 <span class="min-w-0 break-words text-base font-semibold">{{ row.productTitle }}<template v-if="row.variantName">（{{ row.variantName }}）</template></span>
-                <FaTag :variant="orderStatusTag(row.status).variant">
+                <YdTag :variant="orderStatusTag(row.status).variant">
                   {{ row.statusText || orderStatusTag(row.status).text }}
-                </FaTag>
+                </YdTag>
               </div>
               <div class="flex flex-col gap-1 text-sm">
                 <div class="flex gap-2">
@@ -357,16 +358,16 @@ onMounted(() => { void load() })
                 </div>
               </div>
               <div class="flex flex-wrap gap-2 border-t pt-3">
-                <FaButton size="sm" variant="outline" @click="openDetail(row)">详情</FaButton>
-                <FaButton
+                <YdButton size="sm" variant="outline" @click="openDetail(row)">详情</YdButton>
+                <YdButton
                   v-if="canSubmitVoucher(row)"
                   size="sm"
                   :loading="voucherLoadingId === row.id"
                   @click="openVoucher(row)"
                 >
                   {{ isOwnSale(row) ? '发货凭证' : '代发货' }}
-                </FaButton>
-                <FaButton
+                </YdButton>
+                <YdButton
                   v-if="canRedeliver(row)"
                   size="sm"
                   variant="outline"
@@ -374,8 +375,8 @@ onMounted(() => { void load() })
                   @click="confirmRedeliver(row)"
                 >
                   重新发货
-                </FaButton>
-                <FaButton
+                </YdButton>
+                <YdButton
                   v-if="canRefund(row)"
                   size="sm"
                   variant="destructive"
@@ -383,14 +384,14 @@ onMounted(() => { void load() })
                   @click="confirmRefund(row)"
                 >
                   退款
-                </FaButton>
+                </YdButton>
               </div>
             </div>
-          </FaCard>
+          </YdCard>
         </template>
-      </FaResponsiveTable>
+      </YdResponsiveTable></YdLoadingOverlay>
 
-      <FaPagination
+      <YdPagination
         v-model:page="pager.page"
         v-model:size="pager.size"
         :total="pager.total"
@@ -414,6 +415,6 @@ onMounted(() => { void load() })
         :admin="voucherIsAdmin(voucherOrder)"
         @submitted="onVoucherSubmitted"
       />
-    </FaPageMain>
+    </YdPageMain>
   </section>
 </template>
