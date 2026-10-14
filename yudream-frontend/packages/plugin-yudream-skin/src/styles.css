@@ -647,7 +647,7 @@
 
 .skin-role-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
   gap: 10px;
 }
 
@@ -678,6 +678,16 @@
   display: grid;
   min-width: 0;
   gap: 4px;
+}
+
+/* 窄卡下禁止逐字竖排：名字/标签/状态行一律单行，超宽走省略号 */
+.skin-role-meta > * {
+  min-width: 0;
+  max-width: 100%;
+  justify-self: start;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .skin-role-badges {
