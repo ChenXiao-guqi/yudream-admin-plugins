@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { TableColumn } from '@yudream/components'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
 import type { ActivityParticipantAdmin } from '../types'
-import { FaButton, FaCard, FaDescriptions, FaIcon, FaInput, FaModal, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable, FaSwitch, FaTag, YdTablePicker } from '@yudream/components'
+import { YdButton, YdCard, YdDescriptions, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSwitch, YdTag, YdTablePicker } from '@yudream/components'
 import { computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAdminActivityDetail } from '../composables/useAdminActivityDetail'
@@ -90,57 +91,57 @@ function openEdit() {
 
 <template>
   <section class="proof-page">
-    <FaPageHeader :title="activity ? activity.title : '活动详情'" class="mb-0">
+    <YdPageHeader :title="activity ? activity.title : '活动详情'" class="mb-0">
       <div class="flex flex-wrap gap-2">
-        <FaButton variant="outline" @click="back">
-          <FaIcon name="i-ri:arrow-left-line" />返回列表
-        </FaButton>
-        <FaButton v-if="activity && activity.status !== 'CLOSED'" variant="outline" @click="openEdit">
-          <FaIcon name="i-ri:edit-2-line" />编辑
-        </FaButton>
-        <FaButton v-if="activity?.status === 'DRAFT'" :loading="acting" @click="model.publish">
-          <FaIcon name="i-ri:send-plane-line" />发布
-        </FaButton>
-        <FaButton v-if="activity?.status === 'PUBLISHED'" variant="outline" :loading="acting" @click="model.close">
-          <FaIcon name="i-ri:stop-circle-line" />结束活动
-        </FaButton>
-        <FaButton v-if="activity" variant="destructive" :loading="acting" @click="model.remove(back)">
-          <FaIcon name="i-ri:delete-bin-line" />删除
-        </FaButton>
-        <FaButton variant="outline" :loading="verifyingAll" :disabled="!participants.length" @click="model.verifyAll">
-          <FaIcon name="i-ri:checkbox-multiple-line" />批量核验
-        </FaButton>
-        <FaButton @click="model.openExport">
-          <FaIcon name="i-ri:file-word-2-line" />导出证明
-        </FaButton>
+        <YdButton variant="outline" @click="back">
+          <YdIcon name="i-ri:arrow-left-line" />返回列表
+        </YdButton>
+        <YdButton v-if="activity && activity.status !== 'CLOSED'" variant="outline" @click="openEdit">
+          <YdIcon name="i-ri:edit-2-line" />编辑
+        </YdButton>
+        <YdButton v-if="activity?.status === 'DRAFT'" :loading="acting" @click="model.publish">
+          <YdIcon name="i-ri:send-plane-line" />发布
+        </YdButton>
+        <YdButton v-if="activity?.status === 'PUBLISHED'" variant="outline" :loading="acting" @click="model.close">
+          <YdIcon name="i-ri:stop-circle-line" />结束活动
+        </YdButton>
+        <YdButton v-if="activity" variant="destructive" :loading="acting" @click="model.remove(back)">
+          <YdIcon name="i-ri:delete-bin-line" />删除
+        </YdButton>
+        <YdButton variant="outline" :loading="verifyingAll" :disabled="!participants.length" @click="model.verifyAll">
+          <YdIcon name="i-ri:checkbox-multiple-line" />批量核验
+        </YdButton>
+        <YdButton @click="model.openExport">
+          <YdIcon name="i-ri:file-word-2-line" />导出证明
+        </YdButton>
       </div>
-    </FaPageHeader>
-    <FaPageMain>
-      <div v-loading="loading" class="grid gap-4">
+    </YdPageHeader>
+    <YdPageMain>
+      <YdLoadingOverlay :loading="loading"><div  class="grid gap-4">
         <template v-if="activity">
           <div class="grid gap-4 rounded-lg border p-4" :class="coverUrl ? 'lg:grid-cols-[320px_minmax(0,1fr)]' : ''">
             <img v-if="coverUrl" :src="coverUrl" :alt="activity.title" class="activity-admin-cover" />
-            <FaDescriptions :items="infoItems" :column="2" border class="min-w-0" />
+            <YdDescriptions :items="infoItems" :column="2" border class="min-w-0" />
           </div>
 
           <div class="proof-min-w-0 grid gap-3">
             <div class="flex flex-wrap items-center justify-between gap-2">
               <h3 class="text-base font-semibold">参与名单（{{ pager.total }} 人，已通过 {{ model.passedCount }} 人）</h3>
               <div class="flex flex-wrap gap-2">
-                <FaButton v-if="hasAutoJoinBinding" size="sm" variant="outline" :loading="syncing" @click="model.syncServerParticipants">
-                  <FaIcon name="i-ri:server-line" />同步服务器玩家
-                </FaButton>
-                <FaButton size="sm" variant="outline" @click="model.openAddParticipant">
-                  <FaIcon name="i-ri:user-add-line" />添加人员
-                </FaButton>
-                <FaButton size="sm" variant="outline" :loading="loading" @click="model.refresh">
-                  <FaIcon name="i-ri:refresh-line" />刷新
-                </FaButton>
+                <YdButton v-if="hasAutoJoinBinding" size="sm" variant="outline" :loading="syncing" @click="model.syncServerParticipants">
+                  <YdIcon name="i-ri:server-line" />同步服务器玩家
+                </YdButton>
+                <YdButton size="sm" variant="outline" @click="model.openAddParticipant">
+                  <YdIcon name="i-ri:user-add-line" />添加人员
+                </YdButton>
+                <YdButton size="sm" variant="outline" :loading="loading" @click="model.refresh">
+                  <YdIcon name="i-ri:refresh-line" />刷新
+                </YdButton>
               </div>
             </div>
             <div class="proof-min-w-0">
-            <FaResponsiveTable
-              v-loading="loading"
+            <YdLoadingOverlay :loading="loading"><YdResponsiveTable
+
               row-key="userId"
               table-root-class="proof-table-scroll"
               table-class="proof-table-w1550"
@@ -163,19 +164,19 @@ function openEdit() {
                 <div>{{ row.original.playerId || '' }}</div>
               </template>
               <template #cell-source="{ row }">
-                <FaTag :variant="sourceTag(row.original.source).variant">{{ sourceTag(row.original.source).text }}</FaTag>
+                <YdTag :variant="sourceTag(row.original.source).variant">{{ sourceTag(row.original.source).text }}</YdTag>
               </template>
               <template #cell-status="{ row }">
-                <FaTag :variant="statusTag(row.original.status).variant">{{ statusTag(row.original.status).text }}</FaTag>
+                <YdTag :variant="statusTag(row.original.status).variant">{{ statusTag(row.original.status).text }}</YdTag>
               </template>
               <template #cell-joinedAt="{ row }">{{ formatTime(row.original.joinedAt) }}</template>
               <template #cell-verifyStatus="{ row }">
-                <FaTag :variant="verifyTag(row.original.verifyStatus).variant">{{ verifyTag(row.original.verifyStatus).text }}</FaTag>
+                <YdTag :variant="verifyTag(row.original.verifyStatus).variant">{{ verifyTag(row.original.verifyStatus).text }}</YdTag>
               </template>
               <template #cell-verifyNote="{ row }">{{ row.original.verifyNote || '-' }}</template>
               <template #cell-operation="{ row }">
                 <div class="flex-center gap-2">
-                  <FaButton
+                  <YdButton
                     v-if="row.original.status === 'JOINED' && row.original.verifyStatus !== 'PASSED'"
                     size="sm"
                     variant="outline"
@@ -183,18 +184,18 @@ function openEdit() {
                     @click="model.verify(row.original)"
                   >
                     核验
-                  </FaButton>
-                  <FaButton size="sm" variant="destructive" @click="model.removeParticipant(row.original)">
+                  </YdButton>
+                  <YdButton size="sm" variant="destructive" @click="model.removeParticipant(row.original)">
                     移除
-                  </FaButton>
+                  </YdButton>
                 </div>
               </template>
               <template #card="{ row }">
-                <FaCard class="w-full">
+                <YdCard class="w-full">
                   <div class="flex flex-col gap-3">
                     <div class="flex items-center justify-between gap-2">
                       <span class="min-w-0 break-words text-base font-semibold">{{ row.studentName || row.username || '-' }}</span>
-                      <FaTag :variant="verifyTag(row.verifyStatus).variant">{{ verifyTag(row.verifyStatus).text }}</FaTag>
+                      <YdTag :variant="verifyTag(row.verifyStatus).variant">{{ verifyTag(row.verifyStatus).text }}</YdTag>
                     </div>
                     <div class="flex flex-col gap-1 text-sm">
                       <div class="flex gap-2">
@@ -223,7 +224,7 @@ function openEdit() {
                       </div>
                     </div>
                     <div class="flex flex-wrap gap-2 border-t pt-3">
-                      <FaButton
+                      <YdButton
                         v-if="row.status === 'JOINED' && row.verifyStatus !== 'PASSED'"
                         size="sm"
                         variant="outline"
@@ -231,17 +232,17 @@ function openEdit() {
                         @click="model.verify(row)"
                       >
                         核验
-                      </FaButton>
-                      <FaButton size="sm" variant="destructive" @click="model.removeParticipant(row)">
+                      </YdButton>
+                      <YdButton size="sm" variant="destructive" @click="model.removeParticipant(row)">
                         移除
-                      </FaButton>
+                      </YdButton>
                     </div>
                   </div>
-                </FaCard>
+                </YdCard>
               </template>
-            </FaResponsiveTable>
+            </YdResponsiveTable></YdLoadingOverlay>
             </div>
-            <FaPagination
+            <YdPagination
               v-model:page="pager.page"
               v-model:size="pager.size"
               :total="pager.total"
@@ -251,9 +252,9 @@ function openEdit() {
             />
           </div>
         </template>
-      </div>
+      </div></YdLoadingOverlay>
 
-      <FaModal
+      <YdModal
         v-model="exportVisible"
         title="导出活动证明"
         :description="activity ? `为「${activity.title}」的已通过参与者生成活动证明 Word。` : '生成活动证明 Word。'"
@@ -266,24 +267,24 @@ function openEdit() {
         <div class="grid gap-3">
           <label class="grid gap-2">
             <span>证明编号</span>
-            <FaInput v-model="exportForm.proofNo" placeholder="如：2026-证明-001" />
+            <YdInput v-model="exportForm.proofNo" placeholder="如：2026-证明-001" />
           </label>
           <label class="grid gap-2">
             <span>学院</span>
-            <FaInput v-model="exportForm.college" placeholder="默认取全局配置" />
+            <YdInput v-model="exportForm.college" placeholder="默认取全局配置" />
           </label>
           <label class="grid gap-2">
             <span>落款单位</span>
-            <FaInput v-model="exportForm.issuer" placeholder="默认取全局配置" />
+            <YdInput v-model="exportForm.issuer" placeholder="默认取全局配置" />
           </label>
           <label class="grid gap-2">
             <span>开具日期</span>
-            <FaInput v-model="exportForm.issueDate" placeholder="如：2026年9月2日" />
+            <YdInput v-model="exportForm.issueDate" placeholder="如：2026年9月2日" />
           </label>
         </div>
-      </FaModal>
+      </YdModal>
 
-      <FaModal
+      <YdModal
         v-model="addVisible"
         title="添加参与人员"
         description="手动将系统用户绑定到本活动的参与名单，用于补录或活动证明记录绑定。"
@@ -313,15 +314,15 @@ function openEdit() {
             </YdTablePicker>
           </label>
           <label class="flex items-center gap-2">
-            <FaSwitch v-model="addForm.passed" />
+            <YdSwitch v-model="addForm.passed" />
             <span class="text-sm">直接标记为核验通过（不勾选则按活动核验方式立即核验）</span>
           </label>
           <label class="grid gap-2">
             <span>备注</span>
-            <FaInput v-model="addForm.note" placeholder="默认：管理员手动添加" />
+            <YdInput v-model="addForm.note" placeholder="默认：管理员手动添加" />
           </label>
         </div>
-      </FaModal>
-    </FaPageMain>
+      </YdModal>
+    </YdPageMain>
   </section>
 </template>

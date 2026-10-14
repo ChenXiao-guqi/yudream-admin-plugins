@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { ActivityBindingForm, ActivityParamForm } from '../types'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
-import { FaButton, FaCheckbox, FaCheckboxGroup, FaIcon, FaImageUpload, FaInput, FaNumberField, FaPageHeader, FaPageMain, FaSelect, FaSwitch, FaTag, YdRangePicker } from '@yudream/components'
+import { YdButton, YdCheckbox, YdCheckboxGroup, YdIcon, YdImageUpload, YdInput, YdNumberField, YdPageHeader, YdPageMain, YdSelect, YdSwitch, YdTag, YdRangePicker, YdMultiSelect } from '@yudream/components'
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import MarkdownEditor from '../components/MarkdownEditor.vue'
@@ -33,7 +34,7 @@ const serverSelectOptions = computed(() => servers.value.map(item => ({ label: i
 /**
  * 子服选项；默认入口与已装传感器的子服在标签里标出来。
  *
- * 首项是空值的「整服」：FaSelect 没有 clearable，如果把「整服」只写成 placeholder，一旦选了
+ * 首项是空值的「整服」：YdSelect 没有 clearable，如果把「整服」只写成 placeholder，一旦选了
  * 某台子服就再也回不到整服口径——placeholder 只在无值时显示，点不到。
  */
 const subServerOptions = (serverId: string) => [
@@ -47,7 +48,7 @@ const subServerOptions = (serverId: string) => [
 ]
 const formSelectOptions = computed(() => formOptions.value.map(item => ({ label: item.description ? `${item.name}（${item.description}）` : item.name, value: item.code })))
 
-// FaImageUpload 内部通过 push/splice 原地改数组，不会触发 update:modelValue；
+// YdImageUpload 内部通过 push/splice 原地改数组，不会触发 update:modelValue；
 // 用独立 ref 承接组件持有的数组引用，再用 watch 双向同步 form.coverUrl
 const coverList = ref<string[]>([])
 
@@ -196,20 +197,20 @@ async function save() {
 
 <template>
   <section class="proof-page">
-    <FaPageHeader :title="isEdit ? '编辑活动' : '发布活动'" class="mb-0">
+    <YdPageHeader :title="isEdit ? '编辑活动' : '发布活动'" class="mb-0">
       <div class="flex flex-wrap gap-2">
-        <FaButton variant="outline" @click="back">
-          <FaIcon name="i-ri:arrow-left-line" />返回列表
-        </FaButton>
-        <FaButton :loading="saving" :disabled="readonly" @click="save">
-          <FaIcon name="i-ri:save-3-line" />保存活动
-        </FaButton>
+        <YdButton variant="outline" @click="back">
+          <YdIcon name="i-ri:arrow-left-line" />返回列表
+        </YdButton>
+        <YdButton :loading="saving" :disabled="readonly" @click="save">
+          <YdIcon name="i-ri:save-3-line" />保存活动
+        </YdButton>
       </div>
-    </FaPageHeader>
-    <FaPageMain>
-      <div v-loading="loading">
+    </YdPageHeader>
+    <YdPageMain>
+      <YdLoadingOverlay :loading="loading"><div >
         <div v-if="readonly" class="activity-readonly-banner">
-          <FaIcon name="i-ri:lock-line" />该活动已结束，内容不可再编辑。
+          <YdIcon name="i-ri:lock-line" />该活动已结束，内容不可再编辑。
         </div>
         <form class="grid gap-5" @submit.prevent="save">
           <fieldset :disabled="readonly" class="grid gap-5">
@@ -217,15 +218,15 @@ async function save() {
               <h3 class="text-base font-semibold">基本信息</h3>
               <label class="grid gap-2">
                 <span>活动标题 <em class="required-mark">*</em></span>
-                <FaInput v-model="form.title" placeholder="请输入活动标题" />
+                <YdInput v-model="form.title" placeholder="请输入活动标题" />
               </label>
               <label class="grid gap-2">
                 <span>活动简介</span>
-                <FaInput v-model="form.summary" placeholder="一句话介绍，展示在活动广场卡片上" />
+                <YdInput v-model="form.summary" placeholder="一句话介绍，展示在活动广场卡片上" />
               </label>
               <div class="grid gap-2">
                 <span>活动封面</span>
-                <FaImageUpload
+                <YdImageUpload
                   :model-value="coverList"
                   :max="1"
                   :width="240"
@@ -275,11 +276,11 @@ async function save() {
               <h3 class="text-base font-semibold">参与范围</h3>
               <label class="grid max-w-md gap-2">
                 <span>参与限制</span>
-                <FaSelect v-model="form.deptMode" :options="deptModeOptions" />
+                <YdSelect v-model="form.deptMode" :options="deptModeOptions" />
               </label>
               <label v-if="form.deptMode === 'DEPTS'" class="grid gap-2">
                 <span>允许参与的部门 <em class="required-mark">*</em></span>
-                <FaSelect v-model="form.allowedDeptIds" :options="deptSelectOptions" multiple placeholder="选择一个或多个部门" />
+                <YdMultiSelect v-model="form.allowedDeptIds" :options="deptSelectOptions" placeholder="选择一个或多个部门" />
               </label>
             </div>
 
@@ -287,18 +288,18 @@ async function save() {
               <div class="flex flex-wrap items-center justify-between gap-2">
                 <h3 class="text-base font-semibold">核验方式</h3>
                 <div class="flex flex-wrap gap-2">
-                  <FaButton size="sm" variant="outline" type="button" :disabled="!minecraftReady" @click="model.addBinding('PLAYTIME')">
-                    <FaIcon name="i-ri:timer-line" />添加时长检测
-                  </FaButton>
-                  <FaButton size="sm" variant="outline" type="button" :disabled="!formReady" @click="model.addBinding('FORM')">
-                    <FaIcon name="i-ri:file-list-3-line" />添加表单提交
-                  </FaButton>
-                  <FaButton size="sm" variant="outline" type="button" :disabled="!quizReady || hasQuizBinding" @click="model.addBinding('QUIZ')">
-                    <FaIcon name="i-ri:questionnaire-line" />添加答题
-                  </FaButton>
-                  <FaButton size="sm" variant="outline" type="button" :disabled="hasAdvancedBinding" @click="model.addBinding('ADVANCED')">
-                    <FaIcon name="i-ri:function-line" />添加高级自定义
-                  </FaButton>
+                  <YdButton size="sm" variant="outline" type="button" :disabled="!minecraftReady" @click="model.addBinding('PLAYTIME')">
+                    <YdIcon name="i-ri:timer-line" />添加时长检测
+                  </YdButton>
+                  <YdButton size="sm" variant="outline" type="button" :disabled="!formReady" @click="model.addBinding('FORM')">
+                    <YdIcon name="i-ri:file-list-3-line" />添加表单提交
+                  </YdButton>
+                  <YdButton size="sm" variant="outline" type="button" :disabled="!quizReady || hasQuizBinding" @click="model.addBinding('QUIZ')">
+                    <YdIcon name="i-ri:questionnaire-line" />添加答题
+                  </YdButton>
+                  <YdButton size="sm" variant="outline" type="button" :disabled="hasAdvancedBinding" @click="model.addBinding('ADVANCED')">
+                    <YdIcon name="i-ri:function-line" />添加高级自定义
+                  </YdButton>
                 </div>
               </div>
               <p class="text-sm text-muted-foreground">
@@ -310,36 +311,36 @@ async function save() {
               <div v-if="form.bindings.length" class="grid gap-3">
                 <div v-for="(binding, index) in form.bindings" :key="index" class="grid gap-3 rounded-md border p-3">
                   <div class="flex items-center justify-between gap-2">
-                    <FaTag :variant="bindingTag(binding.type).variant">
+                    <YdTag :variant="bindingTag(binding.type).variant">
                       {{ bindingTag(binding.type).text }}
-                    </FaTag>
-                    <FaButton size="sm" variant="destructive" type="button" @click="model.removeBinding(index)">
-                      <FaIcon name="i-ri:delete-bin-line" />移除
-                    </FaButton>
+                    </YdTag>
+                    <YdButton size="sm" variant="destructive" type="button" @click="model.removeBinding(index)">
+                      <YdIcon name="i-ri:delete-bin-line" />移除
+                    </YdButton>
                   </div>
                   <template v-if="binding.type === 'PLAYTIME'">
                     <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
                       <label class="grid gap-2">
                         <span>服务器 <em class="required-mark">*</em></span>
-                        <FaSelect :model-value="binding.serverId" :options="serverSelectOptions" placeholder="选择服务器" @update:model-value="value => model.changeServer(binding, String(value || ''))" />
+                        <YdSelect :model-value="binding.serverId" :options="serverSelectOptions" placeholder="选择服务器" @update:model-value="value => model.changeServer(binding, String(value || ''))" />
                       </label>
                       <!-- 代理端才有下游子服；单机服的 subServers 为空，这里整块不出现。 -->
                       <label v-if="model.subServersOf(binding.serverId).length" class="grid gap-2">
                         <span>子服</span>
-                        <FaSelect v-model="binding.subServer" :options="subServerOptions(binding.serverId)" placeholder="整服（不限子服）" />
+                        <YdSelect v-model="binding.subServer" :options="subServerOptions(binding.serverId)" placeholder="整服（不限子服）" />
                         <span class="text-xs text-muted-foreground">留空表示整服口径：把该玩家在这台服务器全部子服上的时长相加。选择某一台子服后只按那台计时长。</span>
                       </label>
                       <label class="grid gap-2">
                         <span>活动时段在线时长（分钟）</span>
-                        <FaNumberField v-model="binding.minOnlineMinutes" :min="0" placeholder="0 表示不限时长" />
+                        <YdNumberField v-model="binding.minOnlineMinutes" :min="0" placeholder="0 表示不限时长" />
                       </label>
                     </div>
-                    <FaCheckbox v-model="binding.includeAfk">
+                    <YdCheckbox v-model="binding.includeAfk">
                     挂机时间也计入在线时长
-                    </FaCheckbox>
-                    <FaCheckbox v-model="binding.autoJoin">
+                    </YdCheckbox>
+                    <YdCheckbox v-model="binding.autoJoin">
                     加入该服务器的玩家自动算作参与活动（可事后移除）
-                    </FaCheckbox>
+                    </YdCheckbox>
                     <span v-if="binding.autoJoin" class="text-xs text-muted-foreground">
                       开启后可在活动管理页手动同步活动时间窗内上线过的玩家为参与者并自动核验；被管理员移除的参与者不会再被同步加回。
                     </span>
@@ -347,7 +348,7 @@ async function save() {
                   <template v-else-if="binding.type === 'FORM'">
                     <label class="grid gap-2">
                       <span>表单 <em class="required-mark">*</em></span>
-                      <FaSelect v-model="binding.formCode" :options="formSelectOptions" placeholder="选择已发布的表单" />
+                      <YdSelect v-model="binding.formCode" :options="formSelectOptions" placeholder="选择已发布的表单" />
                     </label>
                     <span class="text-xs text-muted-foreground">用户在活动时段内提交该表单即通过核验。</span>
                   </template>
@@ -368,15 +369,15 @@ async function save() {
                       <div class="flex flex-wrap items-center justify-between gap-2">
                         <span>计分参数 <em class="required-mark">*</em></span>
                         <div class="flex flex-wrap gap-2">
-                          <FaButton size="sm" variant="outline" type="button" :disabled="!minecraftReady" @click="model.addAdvancedParam(binding, 'PLAYTIME')">
-                            <FaIcon name="i-ri:timer-line" />服务器在线时长
-                          </FaButton>
-                          <FaButton size="sm" variant="outline" type="button" :disabled="!quizReady" @click="model.addAdvancedParam(binding, 'QUIZ')">
-                            <FaIcon name="i-ri:questionnaire-line" />答题得分
-                          </FaButton>
-                          <FaButton size="sm" variant="outline" type="button" :disabled="!formReady" @click="model.addAdvancedParam(binding, 'FORM')">
-                            <FaIcon name="i-ri:file-list-3-line" />表单提交
-                          </FaButton>
+                          <YdButton size="sm" variant="outline" type="button" :disabled="!minecraftReady" @click="model.addAdvancedParam(binding, 'PLAYTIME')">
+                            <YdIcon name="i-ri:timer-line" />服务器在线时长
+                          </YdButton>
+                          <YdButton size="sm" variant="outline" type="button" :disabled="!quizReady" @click="model.addAdvancedParam(binding, 'QUIZ')">
+                            <YdIcon name="i-ri:questionnaire-line" />答题得分
+                          </YdButton>
+                          <YdButton size="sm" variant="outline" type="button" :disabled="!formReady" @click="model.addAdvancedParam(binding, 'FORM')">
+                            <YdIcon name="i-ri:file-list-3-line" />表单提交
+                          </YdButton>
                         </div>
                       </div>
                       <template v-if="binding.params.length">
@@ -395,30 +396,30 @@ async function save() {
                             <span class="inline-flex h-6 w-9 items-center justify-center rounded bg-muted font-mono text-sm font-semibold">
                               {{ paramKey(paramIndex) }}
                             </span>
-                            <FaSelect
+                            <YdSelect
                               :model-value="param.type"
                               :options="advancedParamTypeOptions"
                               @update:model-value="value => model.changeAdvancedParamType(param, String(value || ''))"
                             />
                             <div class="grid gap-2 md:grid-cols-2">
                               <template v-if="param.type === 'PLAYTIME'">
-                                <FaSelect
+                                <YdSelect
                                   :model-value="param.serverId"
                                   :options="serverSelectOptions"
                                   placeholder="选择服务器"
                                   @update:model-value="value => model.changeServer(param, String(value || ''))"
                                 />
-                                <FaSelect
+                                <YdSelect
                                   v-if="model.subServersOf(param.serverId).length"
                                   v-model="param.subServer"
                                   :options="subServerOptions(param.serverId)"
                                   placeholder="整服（不限子服）"
                                 />
-                                <FaCheckbox v-model="param.includeAfk" class="md:col-span-2">
+                                <YdCheckbox v-model="param.includeAfk" class="md:col-span-2">
                                   挂机时间也计入（在线口径）
-                                </FaCheckbox>
+                                </YdCheckbox>
                               </template>
-                              <FaSelect
+                              <YdSelect
                                 v-else-if="param.type === 'FORM'"
                                 v-model="param.formCode"
                                 class="md:col-span-2"
@@ -429,9 +430,9 @@ async function save() {
                                 取本活动答题环节的答对题数（答对题数在「答题环节」配置）。
                               </span>
                             </div>
-                            <FaButton size="sm" variant="destructive" type="button" @click="model.removeAdvancedParam(binding, paramIndex)">
-                              <FaIcon name="i-ri:delete-bin-line" />
-                            </FaButton>
+                            <YdButton size="sm" variant="destructive" type="button" @click="model.removeAdvancedParam(binding, paramIndex)">
+                              <YdIcon name="i-ri:delete-bin-line" />
+                            </YdButton>
                           </div>
                         </div>
                         <div class="grid gap-2 rounded-md border bg-muted/40 p-3">
@@ -454,7 +455,7 @@ async function save() {
                     </div>
                     <label class="grid gap-2">
                       <span>计分公式 <em class="required-mark">*</em></span>
-                      <FaInput
+                      <YdInput
                         v-model="binding.expression"
                         placeholder="如：0.5*a/30 + 0.5*b/30 + c*0.2"
                       />
@@ -468,11 +469,11 @@ async function save() {
                     <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
                       <label class="grid gap-2">
                         <span>达标分数线 <em class="required-mark">*</em></span>
-                        <FaNumberField v-model="binding.minScore" :min="0" placeholder="综合得分达到该分数线即通过" />
+                        <YdNumberField v-model="binding.minScore" :min="0" placeholder="综合得分达到该分数线即通过" />
                       </label>
                       <label class="grid gap-2">
                         <span>分数上限（可选）</span>
-                        <FaNumberField v-model="binding.maxScore" :min="0" placeholder="0 表示不设上限" />
+                        <YdNumberField v-model="binding.maxScore" :min="0" placeholder="0 表示不设上限" />
                       </label>
                     </div>
                     <span class="text-xs text-muted-foreground">
@@ -492,7 +493,7 @@ async function save() {
             <div v-if="isEdit" class="grid gap-3 rounded-lg border p-4">
               <div class="flex flex-wrap items-center justify-between gap-2">
                 <h3 class="text-base font-semibold">答题环节（题库随机抽题）</h3>
-                <FaSwitch v-model="quizForm.enabled" />
+                <YdSwitch v-model="quizForm.enabled" />
               </div>
               <p class="text-sm text-muted-foreground">
                 开启后，参与用户可从活动详情进入答题，系统按下方规则现场随机抽题；答对达到达标题数即视为答题达标。
@@ -503,50 +504,50 @@ async function save() {
                 <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
                   <label class="grid gap-2">
                     <span>抽题数量 <em class="required-mark">*</em></span>
-                    <FaNumberField v-model="quizForm.count" :min="1" :max="50" />
+                    <YdNumberField v-model="quizForm.count" :min="1" :max="50" />
                   </label>
                   <label class="grid gap-2">
                     <span>达标题数（答对题数） <em class="required-mark">*</em></span>
-                    <FaNumberField v-model="quizForm.passCorrect" :min="1" :max="quizForm.count || 50" />
+                    <YdNumberField v-model="quizForm.passCorrect" :min="1" :max="quizForm.count || 50" />
                   </label>
                   <label class="grid gap-2">
                     <span>限定分类</span>
-                    <FaSelect v-model="quizForm.categoryId" :options="quizCategoryOptions" />
+                    <YdSelect v-model="quizForm.categoryId" :options="quizCategoryOptions" />
                   </label>
                   <label class="grid gap-2">
                     <span>限定标签（逗号分隔，留空不限）</span>
-                    <FaInput v-model="quizForm.tagsText" placeholder="如：招新，笔试" />
+                    <YdInput v-model="quizForm.tagsText" placeholder="如：招新，笔试" />
                   </label>
                 </div>
                 <div class="grid gap-2">
                   <span>限定题型（留空不限）</span>
-                  <FaCheckboxGroup v-model="quizForm.types" :options="quizTypeOptions" class="flex flex-wrap gap-3" />
+                  <YdCheckboxGroup v-model="quizForm.types" :options="quizTypeOptions" class="flex flex-wrap gap-3" />
                 </div>
                 <div class="grid gap-2">
                   <span>限定难度（留空不限）</span>
-                  <FaCheckboxGroup v-model="quizForm.difficulties" :options="quizDifficultyOptions" class="flex flex-wrap gap-3" />
+                  <YdCheckboxGroup v-model="quizForm.difficulties" :options="quizDifficultyOptions" class="flex flex-wrap gap-3" />
                 </div>
                 <label class="grid max-w-md gap-2">
                   <span>简答题判分方式</span>
-                  <FaSelect v-model="quizForm.subjectiveMode" :options="quizSubjectiveOptions" />
+                  <YdSelect v-model="quizForm.subjectiveMode" :options="quizSubjectiveOptions" />
                 </label>
               </template>
               <div class="flex justify-end">
-                <FaButton size="sm" variant="outline" type="button" :loading="quizSaving" :disabled="readonly" @click="model.saveQuiz()">
-                  <FaIcon name="i-ri:save-3-line" />保存答题配置
-                </FaButton>
+                <YdButton size="sm" variant="outline" type="button" :loading="quizSaving" :disabled="readonly" @click="model.saveQuiz()">
+                  <YdIcon name="i-ri:save-3-line" />保存答题配置
+                </YdButton>
               </div>
             </div>
 
             <div class="flex justify-end gap-2">
-              <FaButton variant="outline" type="button" @click="back">取消</FaButton>
-              <FaButton type="submit" :loading="saving" :disabled="readonly">
-                <FaIcon name="i-ri:save-3-line" />保存活动
-              </FaButton>
+              <YdButton variant="outline" type="button" @click="back">取消</YdButton>
+              <YdButton type="submit" :loading="saving" :disabled="readonly">
+                <YdIcon name="i-ri:save-3-line" />保存活动
+              </YdButton>
             </div>
           </fieldset>
         </form>
-      </div>
-    </FaPageMain>
+      </div></YdLoadingOverlay>
+    </YdPageMain>
   </section>
 </template>

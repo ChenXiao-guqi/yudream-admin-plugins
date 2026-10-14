@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { ActivityProofExportRecord } from '../types'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
-import { FaButton, FaCard, FaIcon, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable } from '@yudream/components'
+import { YdButton, YdCard, YdIcon, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable } from '@yudream/components'
 import { onMounted } from 'vue'
 import { useMyProofs } from '../composables/useMyProofs'
 import { formatTime } from '../composables/utils'
@@ -28,14 +29,14 @@ const columns: TableColumn<ActivityProofExportRecord>[] = [
 
 <template>
   <section class="proof-page">
-    <FaPageHeader title="我的活动证明" class="mb-0">
-      <FaButton variant="outline" :loading="loading" @click="model.load">
-        <FaIcon name="i-ri:refresh-line" />刷新
-      </FaButton>
-    </FaPageHeader>
-    <FaPageMain>
-      <FaResponsiveTable
-        v-loading="loading"
+    <YdPageHeader title="我的活动证明" class="mb-0">
+      <YdButton variant="outline" :loading="loading" @click="model.load">
+        <YdIcon name="i-ri:refresh-line" />刷新
+      </YdButton>
+    </YdPageHeader>
+    <YdPageMain>
+      <YdLoadingOverlay :loading="loading"><YdResponsiveTable
+
         row-key="id"
         table-root-class="proof-table-scroll"
         table-class="proof-table-w760"
@@ -47,10 +48,10 @@ const columns: TableColumn<ActivityProofExportRecord>[] = [
       >
         <template #cell-uploadedAt="{ row }">{{ formatTime(row.original.stampedPdfUploadedAt) }}</template>
         <template #cell-operation="{ row }">
-          <FaButton size="sm" variant="outline" :loading="downloading" @click="model.downloadStamped(row.original)">下载 PDF</FaButton>
+          <YdButton size="sm" variant="outline" :loading="downloading" @click="model.downloadStamped(row.original)">下载 PDF</YdButton>
         </template>
         <template #card="{ row }">
-          <FaCard class="w-full">
+          <YdCard class="w-full">
             <div class="flex flex-col gap-3">
               <div class="flex items-center justify-between gap-2">
                 <span class="min-w-0 break-words text-base font-semibold">{{ row.activityName }}</span>
@@ -66,13 +67,13 @@ const columns: TableColumn<ActivityProofExportRecord>[] = [
                 </div>
               </div>
               <div class="flex flex-wrap gap-2 border-t pt-3">
-                <FaButton size="sm" variant="outline" :loading="downloading" @click="model.downloadStamped(row)">下载 PDF</FaButton>
+                <YdButton size="sm" variant="outline" :loading="downloading" @click="model.downloadStamped(row)">下载 PDF</YdButton>
               </div>
             </div>
-          </FaCard>
+          </YdCard>
         </template>
-      </FaResponsiveTable>
-      <FaPagination
+      </YdResponsiveTable></YdLoadingOverlay>
+      <YdPagination
         v-model:page="pager.page"
         v-model:size="pager.size"
         :total="pager.total"
@@ -80,6 +81,6 @@ const columns: TableColumn<ActivityProofExportRecord>[] = [
         @page-change="model.load"
         @size-change="model.load"
       />
-    </FaPageMain>
+    </YdPageMain>
   </section>
 </template>

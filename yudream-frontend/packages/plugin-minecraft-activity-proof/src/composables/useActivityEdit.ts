@@ -1,7 +1,7 @@
 import type { Activity, ActivityBindingForm, ActivityDeptOption, ActivityFormOption, ActivityParamForm, ActivityProofServer, ActivityQuizCategoryOption, ActivitySaveForm, QuizSubjectiveMode, TimeValue } from '../types'
 import type { ActivitySavePayload } from '../api/activity-proof-api'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { useFaToast } from '@yudream/components'
+import { useYdToast } from '@yudream/components'
 import { computed, reactive, ref } from 'vue'
 import { createActivityProofApi } from '../api/activity-proof-api'
 import { paramKey, validateFormula } from './formula'
@@ -9,7 +9,7 @@ import { dateRangeToEpochs, errorMessage, normalizeFileUrl, normalizeMarkdownFil
 
 export function useActivityEdit(sdk: YuDreamPluginSdk) {
   const api = createActivityProofApi(sdk)
-  const toast = useFaToast()
+  const toast = useYdToast()
   const loading = ref(false)
   const saving = ref(false)
   const uploadingCover = ref(false)

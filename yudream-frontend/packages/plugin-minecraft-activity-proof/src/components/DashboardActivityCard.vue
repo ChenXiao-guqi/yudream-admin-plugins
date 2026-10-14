@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { MyParticipation, TimeValue, UserActivity } from '../types'
-import { FaButton, FaIcon } from '@yudream/components'
+import { YdButton, YdIcon } from '@yudream/components'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { createActivityProofApi } from '../api/activity-proof-api'
 import { activityStage, activityStageTag, normalizeTime } from '../composables/utils'
@@ -69,24 +69,24 @@ function dateParts(value: TimeValue) {
 <template>
   <div ref="cardElement" class="dashboard-card__content activity-dashboard-card" :class="{ 'activity-dashboard-card--compact': availableHeight < 160 }">
     <div v-if="loading" class="activity-dashboard-card__state">
-      <FaIcon name="i-ri:loader-4-line" class="animate-spin" />正在读取活动
+      <YdIcon name="i-ri:loader-4-line" class="animate-spin" />正在读取活动
     </div>
     <div v-else-if="error" class="activity-dashboard-card__state">
-      <span>{{ error }}</span><FaButton variant="ghost" size="sm" @click="load">
+      <span>{{ error }}</span><YdButton variant="ghost" size="sm" @click="load">
         重试
-      </FaButton>
+      </YdButton>
     </div>
     <template v-else>
       <div class="activity-agenda-tabs" role="group" aria-label="活动范围">
-        <FaButton size="sm" class="activity-agenda-tab min-w-0 h-7 px-2 text-xs" :variant="tab === 'latest' ? 'secondary' : 'ghost'" :aria-pressed="tab === 'latest'" @click="tab = 'latest'">
+        <YdButton size="sm" class="activity-agenda-tab min-w-0 h-7 px-2 text-xs" :variant="tab === 'latest' ? 'secondary' : 'ghost'" :aria-pressed="tab === 'latest'" @click="tab = 'latest'">
           最新活动
-        </FaButton>
-        <FaButton size="sm" class="activity-agenda-tab min-w-0 h-7 px-2 text-xs" :variant="tab === 'mine' ? 'secondary' : 'ghost'" :aria-pressed="tab === 'mine'" @click="tab = 'mine'">
+        </YdButton>
+        <YdButton size="sm" class="activity-agenda-tab min-w-0 h-7 px-2 text-xs" :variant="tab === 'mine' ? 'secondary' : 'ghost'" :aria-pressed="tab === 'mine'" @click="tab = 'mine'">
           我的参与 <span>{{ participationTotal }}</span>
-        </FaButton>
-        <FaButton v-if="card?.actionPath" size="icon-sm" variant="ghost" class="activity-agenda-open size-7" aria-label="查看全部活动" title="查看全部活动" @click="onOpen?.(card)">
-          <FaIcon name="i-ri:arrow-right-up-line" />
-        </FaButton>
+        </YdButton>
+        <YdButton v-if="card?.actionPath" size="icon-sm" variant="ghost" class="activity-agenda-open size-7" aria-label="查看全部活动" title="查看全部活动" @click="onOpen?.(card)">
+          <YdIcon name="i-ri:arrow-right-up-line" />
+        </YdButton>
       </div>
       <div class="activity-agenda" :style="{ '--agenda-visible-count': visibleEntries.length || 1 }">
         <div v-for="entry in visibleEntries" :key="`${tab}-${entry.id}`" class="activity-agenda-row">
@@ -98,7 +98,7 @@ function dateParts(value: TimeValue) {
           </div>
         </div>
         <div v-if="!entries.length" class="activity-agenda-empty">
-          <FaIcon name="i-ri:calendar-event-line" /><strong>{{ tab === 'mine' ? '你的下一次相聚，从这里开始' : '好活动，值得期待' }}</strong><span>{{ tab === 'mine' ? '去活动广场发现感兴趣的活动' : '发布新活动后，会在这里显示' }}</span>
+          <YdIcon name="i-ri:calendar-event-line" /><strong>{{ tab === 'mine' ? '你的下一次相聚，从这里开始' : '好活动，值得期待' }}</strong><span>{{ tab === 'mine' ? '去活动广场发现感兴趣的活动' : '发布新活动后，会在这里显示' }}</span>
         </div>
       </div>
     </template>

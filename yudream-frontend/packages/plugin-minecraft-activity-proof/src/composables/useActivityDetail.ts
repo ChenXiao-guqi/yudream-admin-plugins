@@ -1,6 +1,6 @@
 import type { ActivityQuizView, UserActivity } from '../types'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { useFaModal, useFaToast } from '@yudream/components'
+import { useYdModal, useYdToast } from '@yudream/components'
 import QRCode from 'qrcode'
 import { computed, ref } from 'vue'
 import { createActivityProofApi } from '../api/activity-proof-api'
@@ -10,8 +10,8 @@ const DETAIL_PATH = '/platform/plugins/yudream-student-info/activity-square/deta
 
 export function useActivityDetail(sdk: YuDreamPluginSdk) {
   const api = createActivityProofApi(sdk)
-  const toast = useFaToast()
-  const modal = useFaModal()
+  const toast = useYdToast()
+  const modal = useYdModal()
   const loading = ref(false)
   const acting = ref(false)
   const activity = ref<UserActivity | null>(null)

@@ -283,7 +283,7 @@
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  color: rgb(var(--primary-6));
+  color: var(--color-text-1);
   text-decoration: none;
 }
 

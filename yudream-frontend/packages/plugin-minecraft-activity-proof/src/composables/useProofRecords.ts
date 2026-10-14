@@ -1,14 +1,14 @@
 import type { ActivityProofExportRecord } from '../types'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { useFaModal, useFaToast } from '@yudream/components'
+import { useYdModal, useYdToast } from '@yudream/components'
 import { reactive, ref } from 'vue'
 import { createActivityProofApi } from '../api/activity-proof-api'
 import { errorMessage, fileToBase64, saveBlobResponse } from './utils'
 
 export function useProofRecords(sdk: YuDreamPluginSdk) {
   const api = createActivityProofApi(sdk)
-  const toast = useFaToast()
-  const modal = useFaModal()
+  const toast = useYdToast()
+  const modal = useYdModal()
   const loading = ref(false)
   const acting = ref(false)
   const records = ref<ActivityProofExportRecord[]>([])

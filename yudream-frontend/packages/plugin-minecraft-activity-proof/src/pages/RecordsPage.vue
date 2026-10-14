@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { TableColumn } from '@yudream/components'
 import type { ActivityProofExportRecord } from '../types'
-import { FaButton, FaCard, FaFileUpload, FaIcon, FaModal, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable } from '@yudream/components'
+import { YdButton, YdCard, YdFileUpload, YdIcon, YdModal, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable } from '@yudream/components'
 import { onMounted, ref } from 'vue'
 import { useProofRecords } from '../composables/useProofRecords'
 import { formatFileSize, formatTime } from '../composables/utils'
@@ -51,14 +52,14 @@ async function handleUpload(options: { file: File }) {
 
 <template>
   <section class="proof-page">
-    <FaPageHeader title="活动证明记录">
-      <FaButton variant="outline" :loading="loading" @click="model.load">
-        <FaIcon name="i-ri:refresh-line" />刷新
-      </FaButton>
-    </FaPageHeader>
-    <FaPageMain>
-      <FaResponsiveTable
-        v-loading="loading"
+    <YdPageHeader title="活动证明记录">
+      <YdButton variant="outline" :loading="loading" @click="model.load">
+        <YdIcon name="i-ri:refresh-line" />刷新
+      </YdButton>
+    </YdPageHeader>
+    <YdPageMain>
+      <YdLoadingOverlay :loading="loading"><YdResponsiveTable
+
         row-key="id"
         table-root-class="proof-table-scroll"
         table-class="proof-table-w1280"
@@ -82,14 +83,14 @@ async function handleUpload(options: { file: File }) {
         <template #cell-generatedAt="{ row }">{{ formatTime(row.original.generatedAt) }}</template>
         <template #cell-operation="{ row }">
           <div class="flex-center gap-2">
-            <FaButton size="sm" variant="outline" :loading="acting" @click="model.download(row.original)">下载 Word</FaButton>
-            <FaButton v-if="row.original.stampedPdfReady" size="sm" variant="outline" :loading="acting" @click="model.downloadStamped(row.original)">下载 PDF</FaButton>
-            <FaButton size="sm" variant="outline" @click="openUpload(row.original)">上传 PDF</FaButton>
-            <FaButton size="sm" variant="destructive" @click="model.remove(row.original)">删除</FaButton>
+            <YdButton size="sm" variant="outline" :loading="acting" @click="model.download(row.original)">下载 Word</YdButton>
+            <YdButton v-if="row.original.stampedPdfReady" size="sm" variant="outline" :loading="acting" @click="model.downloadStamped(row.original)">下载 PDF</YdButton>
+            <YdButton size="sm" variant="outline" @click="openUpload(row.original)">上传 PDF</YdButton>
+            <YdButton size="sm" variant="destructive" @click="model.remove(row.original)">删除</YdButton>
           </div>
         </template>
         <template #card="{ row }">
-          <FaCard class="w-full">
+          <YdCard class="w-full">
             <div class="flex flex-col gap-3">
               <div class="flex items-center justify-between gap-2">
                 <span class="min-w-0 break-words text-base font-semibold">{{ row.outputFilename }}</span>
@@ -113,16 +114,16 @@ async function handleUpload(options: { file: File }) {
                 </div>
               </div>
               <div class="flex flex-wrap gap-2 border-t pt-3">
-                <FaButton size="sm" variant="outline" :loading="acting" @click="model.download(row)">下载 Word</FaButton>
-                <FaButton v-if="row.stampedPdfReady" size="sm" variant="outline" :loading="acting" @click="model.downloadStamped(row)">下载 PDF</FaButton>
-                <FaButton size="sm" variant="outline" @click="openUpload(row)">上传 PDF</FaButton>
-                <FaButton size="sm" variant="destructive" @click="model.remove(row)">删除</FaButton>
+                <YdButton size="sm" variant="outline" :loading="acting" @click="model.download(row)">下载 Word</YdButton>
+                <YdButton v-if="row.stampedPdfReady" size="sm" variant="outline" :loading="acting" @click="model.downloadStamped(row)">下载 PDF</YdButton>
+                <YdButton size="sm" variant="outline" @click="openUpload(row)">上传 PDF</YdButton>
+                <YdButton size="sm" variant="destructive" @click="model.remove(row)">删除</YdButton>
               </div>
             </div>
-          </FaCard>
+          </YdCard>
         </template>
-      </FaResponsiveTable>
-      <FaPagination
+      </YdResponsiveTable></YdLoadingOverlay>
+      <YdPagination
         v-model:page="pager.page"
         v-model:size="pager.size"
         :total="pager.total"
@@ -130,7 +131,7 @@ async function handleUpload(options: { file: File }) {
         @page-change="model.load"
         @size-change="model.load"
       />
-      <FaModal
+      <YdModal
         v-model="uploadVisible"
         title="上传盖章 PDF"
         :description="uploadTarget ? `为「${uploadTarget.outputFilename}」上传盖章后的 PDF 文件。` : '上传盖章后的 PDF 文件。'"
@@ -138,8 +139,8 @@ async function handleUpload(options: { file: File }) {
         show-cancel-button
         cancel-button-text="关闭"
       >
-        <FaFileUpload v-model="uploadFiles" :max="1" :before-upload="file => file.type === 'application/pdf'" :http-request="handleUpload" description="拖放或点击选择 PDF 文件" />
-      </FaModal>
-    </FaPageMain>
+        <YdFileUpload v-model="uploadFiles" :max="1" :before-upload="file => file.type === 'application/pdf'" :http-request="handleUpload" description="拖放或点击选择 PDF 文件" />
+      </YdModal>
+    </YdPageMain>
   </section>
 </template>

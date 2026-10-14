@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { MyParticipation } from '../types'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
-import { FaButton, FaCard, FaIcon, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable, FaTag } from '@yudream/components'
+import { YdButton, YdCard, YdIcon, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdTag } from '@yudream/components'
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import CoverThumb from '../components/CoverThumb.vue'
@@ -59,14 +60,14 @@ function openDetail(row: MyParticipation) {
 
 <template>
   <section class="proof-page">
-    <FaPageHeader title="我的参与" class="mb-0">
-      <FaButton variant="outline" :loading="loading" @click="model.load">
-        <FaIcon name="i-ri:refresh-line" />刷新
-      </FaButton>
-    </FaPageHeader>
-    <FaPageMain>
-      <FaResponsiveTable
-        v-loading="loading"
+    <YdPageHeader title="我的参与" class="mb-0">
+      <YdButton variant="outline" :loading="loading" @click="model.load">
+        <YdIcon name="i-ri:refresh-line" />刷新
+      </YdButton>
+    </YdPageHeader>
+    <YdPageMain>
+      <YdLoadingOverlay :loading="loading"><YdResponsiveTable
+
         row-key="activityId"
         table-root-class="proof-table-scroll"
         table-class="proof-table-w1240"
@@ -86,23 +87,23 @@ function openDetail(row: MyParticipation) {
             />
             <div class="grid gap-1">
               <strong>{{ row.original.title }}</strong>
-              <FaTag v-if="ended(row.original)" variant="secondary" class="w-fit">已结束</FaTag>
+              <YdTag v-if="ended(row.original)" variant="secondary" class="w-fit">已结束</YdTag>
             </div>
           </div>
         </template>
         <template #cell-activityTime="{ row }">{{ formatTimeRange(row.original.activityStart, row.original.activityEnd) }}</template>
         <template #cell-status="{ row }">
-          <FaTag :variant="statusTag(row.original).variant">{{ statusTag(row.original).text }}</FaTag>
+          <YdTag :variant="statusTag(row.original).variant">{{ statusTag(row.original).text }}</YdTag>
         </template>
         <template #cell-verifyStatus="{ row }">
-          <FaTag :variant="verifyTag(row.original).variant">{{ verifyTag(row.original).text }}</FaTag>
+          <YdTag :variant="verifyTag(row.original).variant">{{ verifyTag(row.original).text }}</YdTag>
         </template>
         <template #cell-verifyNote="{ row }">{{ row.original.verifyNote || '-' }}</template>
         <template #cell-joinedAt="{ row }">{{ formatTime(row.original.joinedAt) }}</template>
         <template #cell-operation="{ row }">
           <div class="flex-center flex-wrap gap-2">
-            <FaButton size="sm" variant="outline" @click="openDetail(row.original)">查看活动</FaButton>
-            <FaButton
+            <YdButton size="sm" variant="outline" @click="openDetail(row.original)">查看活动</YdButton>
+            <YdButton
               v-if="row.original.status === 'JOINED' && row.original.verifyStatus !== 'PASSED'"
               size="sm"
               variant="outline"
@@ -110,8 +111,8 @@ function openDetail(row: MyParticipation) {
               @click="model.verify(row.original)"
             >
               自助核验
-            </FaButton>
-            <FaButton
+            </YdButton>
+            <YdButton
               v-if="row.original.status === 'JOINED' && !ended(row.original)"
               size="sm"
               variant="destructive"
@@ -119,15 +120,15 @@ function openDetail(row: MyParticipation) {
               @click="model.cancel(row.original)"
             >
               取消参与
-            </FaButton>
+            </YdButton>
           </div>
         </template>
         <template #card="{ row }">
-          <FaCard class="w-full">
+          <YdCard class="w-full">
             <div class="flex flex-col gap-3">
               <div class="flex items-center justify-between gap-2">
                 <span class="min-w-0 break-words text-base font-semibold">{{ row.title }}</span>
-                <FaTag :variant="verifyTag(row).variant">{{ verifyTag(row).text }}</FaTag>
+                <YdTag :variant="verifyTag(row).variant">{{ verifyTag(row).text }}</YdTag>
               </div>
               <div class="flex flex-col gap-1 text-sm">
                 <div class="flex gap-2">
@@ -148,8 +149,8 @@ function openDetail(row: MyParticipation) {
                 </div>
               </div>
               <div class="flex flex-wrap gap-2 border-t pt-3">
-                <FaButton size="sm" variant="outline" @click="openDetail(row)">查看活动</FaButton>
-                <FaButton
+                <YdButton size="sm" variant="outline" @click="openDetail(row)">查看活动</YdButton>
+                <YdButton
                   v-if="row.status === 'JOINED' && row.verifyStatus !== 'PASSED'"
                   size="sm"
                   variant="outline"
@@ -157,8 +158,8 @@ function openDetail(row: MyParticipation) {
                   @click="model.verify(row)"
                 >
                   自助核验
-                </FaButton>
-                <FaButton
+                </YdButton>
+                <YdButton
                   v-if="row.status === 'JOINED' && !ended(row)"
                   size="sm"
                   variant="destructive"
@@ -166,13 +167,13 @@ function openDetail(row: MyParticipation) {
                   @click="model.cancel(row)"
                 >
                   取消参与
-                </FaButton>
+                </YdButton>
               </div>
             </div>
-          </FaCard>
+          </YdCard>
         </template>
-      </FaResponsiveTable>
-      <FaPagination
+      </YdResponsiveTable></YdLoadingOverlay>
+      <YdPagination
         v-model:page="pager.page"
         v-model:size="pager.size"
         :total="pager.total"
@@ -180,6 +181,6 @@ function openDetail(row: MyParticipation) {
         @page-change="model.load"
         @size-change="model.load"
       />
-    </FaPageMain>
+    </YdPageMain>
   </section>
 </template>

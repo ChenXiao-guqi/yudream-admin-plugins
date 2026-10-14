@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { Activity } from '../types'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
-import { FaButton, FaCard, FaIcon, FaInput, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable, FaSearchBar, FaSelect, FaTag } from '@yudream/components'
+import { YdButton, YdCard, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdSelect, YdTag } from '@yudream/components'
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAdminActivities } from '../composables/useAdminActivities'
@@ -74,14 +75,14 @@ function openDetail(row: Activity) {
 
 <template>
   <section class="proof-page">
-    <FaPageHeader title="活动管理" class="mb-0">
-      <FaButton @click="openEdit()">
-        <FaIcon name="i-ri:add-line" />发布活动
-      </FaButton>
-    </FaPageHeader>
-    <FaPageMain>
-      <FaResponsiveTable
-        v-loading="loading"
+    <YdPageHeader title="活动管理" class="mb-0">
+      <YdButton @click="openEdit()">
+        <YdIcon name="i-ri:add-line" />发布活动
+      </YdButton>
+    </YdPageHeader>
+    <YdPageMain>
+      <YdLoadingOverlay :loading="loading"><YdResponsiveTable
+
         row-key="id"
         table-root-class="proof-table-scroll"
         table-class="proof-table-w1740"
@@ -92,18 +93,18 @@ function openDetail(row: Activity) {
         :data="activities"
       >
         <template #toolbar>
-          <FaSearchBar class="w-full">
+          <YdSearchBar class="w-full">
             <div class="activity-filter">
-              <FaInput v-model="filters.keyword" placeholder="搜索活动标题" clearable @keyup.enter="model.search" />
-              <FaSelect v-model="filters.status" :options="statusOptions" placeholder="状态" />
+              <YdInput v-model="filters.keyword" placeholder="搜索活动标题" clearable @keyup.enter="model.search" />
+              <YdSelect v-model="filters.status" :options="statusOptions" placeholder="状态" />
               <div class="flex justify-end gap-2">
-                <FaButton variant="outline" @click="model.resetFilters">重置</FaButton>
-                <FaButton :loading="loading" @click="model.search">
-                  <FaIcon name="i-ri:search-line" />查询
-                </FaButton>
+                <YdButton variant="outline" @click="model.resetFilters">重置</YdButton>
+                <YdButton :loading="loading" @click="model.search">
+                  <YdIcon name="i-ri:search-line" />查询
+                </YdButton>
               </div>
             </div>
-          </FaSearchBar>
+          </YdSearchBar>
         </template>
         <template #cell-title="{ row }">
           <div class="grid gap-1">
@@ -112,7 +113,7 @@ function openDetail(row: Activity) {
           </div>
         </template>
         <template #cell-status="{ row }">
-          <FaTag :variant="statusTag(row.original).variant">{{ statusTag(row.original).text }}</FaTag>
+          <YdTag :variant="statusTag(row.original).variant">{{ statusTag(row.original).text }}</YdTag>
         </template>
         <template #cell-dept="{ row }">{{ deptText(row.original) }}</template>
         <template #cell-bindings="{ row }">
@@ -124,17 +125,17 @@ function openDetail(row: Activity) {
         <template #cell-createdAt="{ row }">{{ formatTime(row.original.createdAt) }}</template>
         <template #cell-operation="{ row }">
           <div class="flex-center flex-wrap gap-2">
-            <FaButton size="sm" variant="outline" @click="openDetail(row.original)">详情核验</FaButton>
-            <FaButton v-if="row.original.status !== 'CLOSED'" size="sm" variant="outline" @click="openEdit(row.original)">编辑</FaButton>
-            <FaButton
+            <YdButton size="sm" variant="outline" @click="openDetail(row.original)">详情核验</YdButton>
+            <YdButton v-if="row.original.status !== 'CLOSED'" size="sm" variant="outline" @click="openEdit(row.original)">编辑</YdButton>
+            <YdButton
               v-if="row.original.status === 'DRAFT'"
               size="sm"
               :loading="actingId === row.original.id"
               @click="model.publish(row.original)"
             >
               发布
-            </FaButton>
-            <FaButton
+            </YdButton>
+            <YdButton
               v-if="row.original.status === 'PUBLISHED'"
               size="sm"
               variant="outline"
@@ -142,23 +143,23 @@ function openDetail(row: Activity) {
               @click="model.close(row.original)"
             >
               结束
-            </FaButton>
-            <FaButton
+            </YdButton>
+            <YdButton
               size="sm"
               variant="destructive"
               :loading="actingId === row.original.id"
               @click="model.remove(row.original)"
             >
               删除
-            </FaButton>
+            </YdButton>
           </div>
         </template>
         <template #card="{ row }">
-          <FaCard class="w-full">
+          <YdCard class="w-full">
             <div class="flex flex-col gap-3">
               <div class="flex items-center justify-between gap-2">
                 <span class="min-w-0 break-words text-base font-semibold">{{ row.title }}</span>
-                <FaTag :variant="statusTag(row).variant">{{ statusTag(row).text }}</FaTag>
+                <YdTag :variant="statusTag(row).variant">{{ statusTag(row).text }}</YdTag>
               </div>
               <div class="flex flex-col gap-1 text-sm">
                 <div class="flex gap-2">
@@ -183,17 +184,17 @@ function openDetail(row: Activity) {
                 </div>
               </div>
               <div class="flex flex-wrap gap-2 border-t pt-3">
-                <FaButton size="sm" variant="outline" @click="openDetail(row)">详情核验</FaButton>
-                <FaButton v-if="row.status !== 'CLOSED'" size="sm" variant="outline" @click="openEdit(row)">编辑</FaButton>
-                <FaButton v-if="row.status === 'DRAFT'" size="sm" :loading="actingId === row.id" @click="model.publish(row)">发布</FaButton>
-                <FaButton v-if="row.status === 'PUBLISHED'" size="sm" variant="outline" :loading="actingId === row.id" @click="model.close(row)">结束</FaButton>
-                <FaButton size="sm" variant="destructive" :loading="actingId === row.id" @click="model.remove(row)">删除</FaButton>
+                <YdButton size="sm" variant="outline" @click="openDetail(row)">详情核验</YdButton>
+                <YdButton v-if="row.status !== 'CLOSED'" size="sm" variant="outline" @click="openEdit(row)">编辑</YdButton>
+                <YdButton v-if="row.status === 'DRAFT'" size="sm" :loading="actingId === row.id" @click="model.publish(row)">发布</YdButton>
+                <YdButton v-if="row.status === 'PUBLISHED'" size="sm" variant="outline" :loading="actingId === row.id" @click="model.close(row)">结束</YdButton>
+                <YdButton size="sm" variant="destructive" :loading="actingId === row.id" @click="model.remove(row)">删除</YdButton>
               </div>
             </div>
-          </FaCard>
+          </YdCard>
         </template>
-      </FaResponsiveTable>
-      <FaPagination
+      </YdResponsiveTable></YdLoadingOverlay>
+      <YdPagination
         v-model:page="pager.page"
         v-model:size="pager.size"
         :total="pager.total"
@@ -201,6 +202,6 @@ function openDetail(row: Activity) {
         @page-change="model.load"
         @size-change="model.load"
       />
-    </FaPageMain>
+    </YdPageMain>
   </section>
 </template>

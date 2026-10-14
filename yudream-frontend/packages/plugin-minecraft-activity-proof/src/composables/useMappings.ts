@@ -1,14 +1,14 @@
 import type { ActivityProofMapping, ActivityProofServer } from '../types'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { useFaModal, useFaToast } from '@yudream/components'
+import { useYdModal, useYdToast } from '@yudream/components'
 import { reactive, ref } from 'vue'
 import { createActivityProofApi } from '../api/activity-proof-api'
 import { errorMessage } from './utils'
 
 export function useMappings(sdk: YuDreamPluginSdk) {
   const api = createActivityProofApi(sdk)
-  const toast = useFaToast()
-  const modal = useFaModal()
+  const toast = useYdToast()
+  const modal = useYdModal()
   const loading = ref(false)
   const saving = ref(false)
   const mappings = ref<ActivityProofMapping[]>([])

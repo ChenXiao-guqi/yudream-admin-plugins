@@ -1,7 +1,7 @@
 import type { ActivityProofSettings, ActivityProofStatus, ActivityProofTemplate, ActivityQqConnection, ActivityQqGroup, ActivityUserOption, ActivityUserPickerRow } from '../types'
 import type { YdTablePickerQuery, YdTablePickerResult } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { useFaModal, useFaToast } from '@yudream/components'
+import { useYdModal, useYdToast } from '@yudream/components'
 import { computed, reactive, ref } from 'vue'
 import { createActivityProofApi } from '../api/activity-proof-api'
 import { toUserPickerResult } from './user-picker'
@@ -25,8 +25,8 @@ function messagingCatalog(sdk: YuDreamPluginSdk): MessagingCatalog {
 
 export function useProofSettings(sdk: YuDreamPluginSdk) {
   const api = createActivityProofApi(sdk)
-  const toast = useFaToast()
-  const modal = useFaModal()
+  const toast = useYdToast()
+  const modal = useYdModal()
   const loading = ref(false)
   const saving = ref(false)
   const status = ref<ActivityProofStatus | null>(null)

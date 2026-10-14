@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { UserActivity } from '../types'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
-import { FaButton, FaIcon, FaPageHeader, FaPageMain, FaPagination, FaTag } from '@yudream/components'
+import { YdButton, YdIcon, YdPageHeader, YdPageMain, YdPagination, YdTag, YdAction } from '@yudream/components'
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import CoverThumb from '../components/CoverThumb.vue'
@@ -38,27 +39,24 @@ function openDetail(activity: UserActivity) {
 
 <template>
   <section class="proof-page">
-    <FaPageHeader title="活动广场" class="mb-0">
-      <FaButton variant="outline" :loading="loading" @click="model.load">
-        <FaIcon name="i-ri:refresh-line" />刷新
-      </FaButton>
-    </FaPageHeader>
-    <FaPageMain>
-      <div v-loading="loading" class="activity-square">
+    <YdPageHeader title="活动广场" class="mb-0">
+      <YdButton variant="outline" :loading="loading" @click="model.load">
+        <YdIcon name="i-ri:refresh-line" />刷新
+      </YdButton>
+    </YdPageHeader>
+    <YdPageMain>
+      <YdLoadingOverlay :loading="loading"><div  class="activity-square">
         <div v-if="!loading && !activities.length" class="activity-square-empty">
-          <FaIcon name="i-ri:calendar-event-line" class="text-4xl text-muted-foreground" />
+          <YdIcon name="i-ri:calendar-event-line" class="text-4xl text-muted-foreground" />
           <p>暂无进行中的活动</p>
         </div>
         <div v-else class="activity-square-grid">
-          <article
+          <YdAction
             v-for="activity in activities"
             :key="activity.id"
             class="activity-card"
             :class="{ 'activity-card-ended': isActivityEnded(activity.status, activity.activityEnd) }"
-            role="button"
-            tabindex="0"
             @click="openDetail(activity)"
-            @keydown.enter="openDetail(activity)"
           >
             <div class="activity-card-cover">
               <CoverThumb
@@ -68,27 +66,27 @@ function openDetail(activity: UserActivity) {
                 :alt="activity.title"
               />
               <div v-else class="activity-card-cover-placeholder">
-                <FaIcon name="i-ri:image-line" class="text-3xl" />
+                <YdIcon name="i-ri:image-line" class="text-3xl" />
               </div>
-              <FaTag class="activity-card-tag" :variant="statusTag(activity).variant">
+              <YdTag class="activity-card-tag" :variant="statusTag(activity).variant">
                 {{ statusTag(activity).text }}
-              </FaTag>
+              </YdTag>
             </div>
             <div class="activity-card-body">
               <h3>{{ activity.title }}</h3>
               <p v-if="activity.summary" class="activity-card-summary">{{ activity.summary }}</p>
               <div class="activity-card-meta">
-                <span><FaIcon name="i-ri:time-line" />{{ formatTimeRange(activity.activityStart, activity.activityEnd) }}</span>
-                <span><FaIcon name="i-ri:user-line" />{{ activity.participantCount }} 人已参与</span>
+                <span><YdIcon name="i-ri:time-line" />{{ formatTimeRange(activity.activityStart, activity.activityEnd) }}</span>
+                <span><YdIcon name="i-ri:user-line" />{{ activity.participantCount }} 人已参与</span>
               </div>
               <div v-if="activity.deptRestricted" class="activity-card-dept">
-                <FaIcon name="i-ri:group-line" />限 {{ (activity.allowedDeptNames || []).join('、') || '指定部门' }} 参与
+                <YdIcon name="i-ri:group-line" />限 {{ (activity.allowedDeptNames || []).join('、') || '指定部门' }} 参与
               </div>
             </div>
-          </article>
+          </YdAction>
         </div>
-      </div>
-      <FaPagination
+      </div></YdLoadingOverlay>
+      <YdPagination
         v-model:page="pager.page"
         v-model:size="pager.size"
         :total="pager.total"
@@ -96,6 +94,6 @@ function openDetail(activity: UserActivity) {
         @page-change="model.load"
         @size-change="model.load"
       />
-    </FaPageMain>
+    </YdPageMain>
   </section>
 </template>

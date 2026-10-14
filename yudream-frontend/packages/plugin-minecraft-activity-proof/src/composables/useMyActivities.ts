@@ -1,14 +1,14 @@
 import type { MyParticipation } from '../types'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { useFaModal, useFaToast } from '@yudream/components'
+import { useYdModal, useYdToast } from '@yudream/components'
 import { reactive, ref } from 'vue'
 import { createActivityProofApi } from '../api/activity-proof-api'
 import { errorMessage, resolveFileUrl, resolveThumbUrl } from './utils'
 
 export function useMyActivities(sdk: YuDreamPluginSdk) {
   const api = createActivityProofApi(sdk)
-  const toast = useFaToast()
-  const modal = useFaModal()
+  const toast = useYdToast()
+  const modal = useYdModal()
   const loading = ref(false)
   const actingId = ref('')
   const participations = ref<MyParticipation[]>([])
