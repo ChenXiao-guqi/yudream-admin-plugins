@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { TimelinePluginModel } from '../composables/useTimelinePlugin'
 import type { TimelineEventSummary } from '../types'
-import { FaIcon } from '@yudream/components'
+import { YdAction, YdIcon, YdModal } from '@yudream/components'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import CoverThumb from '../components/CoverThumb.vue'
 import MarkdownPreview from '../components/MarkdownPreview.vue'
@@ -181,15 +181,15 @@ onBeforeUnmount(() => {
       </div>
 
       <div v-else-if="model.publicError" class="tl-state">
-        <FaIcon name="i-ri:error-warning-line" class="tl-state-icon" />
+        <YdIcon name="i-ri:error-warning-line" class="tl-state-icon" />
         <p>{{ model.publicError }}</p>
-        <button type="button" class="tl-btn" @click="model.loadPublicEvents">
+        <YdAction type="button" class="tl-btn" @click="model.loadPublicEvents">
           重新加载
-        </button>
+        </YdAction>
       </div>
 
       <div v-else-if="!model.publicEvents.length" class="tl-state">
-        <FaIcon name="i-ri:time-line" class="tl-state-icon" />
+        <YdIcon name="i-ri:time-line" class="tl-state-icon" />
         <p>还没有公开的大事记，敬请期待</p>
       </div>
 
@@ -206,13 +206,13 @@ onBeforeUnmount(() => {
             :class="{ 'tl-item-right': index % 2 === 1 }"
           >
             <span class="tl-node" aria-hidden="true"><span class="tl-dot" /></span>
-            <button type="button" class="tl-card" :class="`tl-card--${eventTypeClass(event.eventType)}`" @click="openEvent(event)">
+            <YdAction type="button" class="tl-card" :class="`tl-card--${eventTypeClass(event.eventType)}`" @click="openEvent(event)">
               <span v-if="event.coverImage" class="tl-card-cover">
                 <CoverThumb :src="coverThumb(event)" :fallback-src="coverUrl(event)" :alt="event.title" />
               </span>
               <span class="tl-card-body">
                 <span class="tl-type-badge" :class="`tl-type-badge--${eventTypeClass(event.eventType)}`">
-                  <FaIcon :name="eventTypeMeta(event.eventType).icon" />
+                  <YdIcon :name="eventTypeMeta(event.eventType).icon" />
                   {{ eventTypeChip(event) }}
                 </span>
                 <span class="tl-card-date">{{ formatEventDate(event.eventDate, event.dateLabel) }}</span>
@@ -220,22 +220,20 @@ onBeforeUnmount(() => {
                 <span v-if="event.summary" class="tl-card-summary">{{ event.summary }}</span>
                 <span class="tl-card-more">
                   阅读详情
-                  <FaIcon name="i-ri:arrow-right-line" />
+                  <YdIcon name="i-ri:arrow-right-line" />
                 </span>
               </span>
-            </button>
+            </YdAction>
           </div>
         </template>
       </div>
     </section>
 
-    <Teleport to="body">
-      <Transition name="tl-fade">
-        <div v-if="detailOpen" class="tl-overlay" @click.self="closeDetail">
-          <div class="tl-detail" role="dialog" aria-modal="true">
-            <button type="button" class="tl-detail-close" aria-label="关闭" @click="closeDetail">
-              <FaIcon name="i-ri:close-line" />
-            </button>
+    <YdModal v-model="detailOpen" :title="detail?.title || '时间线详情'" :header="false" :footer="false" :close-on-click-overlay="true" :close-on-press-escape="true" class="tl-detail-modal" content-class="tl-detail-modal-content" @close="closeDetail">
+          <div class="tl-detail">
+            <YdAction type="button" class="tl-detail-close" aria-label="关闭" @click="closeDetail">
+              <YdIcon name="i-ri:close-line" />
+            </YdAction>
             <div v-if="model.publicDetailLoading" class="tl-detail-loading">
               <span class="tl-spinner" />
               <p>正在加载…</p>
@@ -246,7 +244,7 @@ onBeforeUnmount(() => {
                 <div class="tl-detail-hero-mask" />
                 <div class="tl-detail-hero-text">
                   <span class="tl-type-badge" :class="`tl-type-badge--${eventTypeClass(detail.eventType)}`">
-                    <FaIcon :name="eventTypeMeta(detail.eventType).icon" />
+                    <YdIcon :name="eventTypeMeta(detail.eventType).icon" />
                     {{ eventTypeChip(detail) }}
                   </span>
                   <span class="tl-detail-date">{{ formatEventDate(detail.eventDate, detail.dateLabel) }}</span>
@@ -260,7 +258,7 @@ onBeforeUnmount(() => {
                 <div v-if="showRoster" class="tl-roster">
                   <section v-if="detail.outgoingMembers?.length" class="tl-roster-col">
                     <header class="tl-roster-head">
-                      <FaIcon name="i-ri:logout-box-r-line" />
+                      <YdIcon name="i-ri:logout-box-r-line" />
                       <span>卸任</span>
                       <em>{{ detail.outgoingMembers.length }}</em>
                     </header>
@@ -272,7 +270,7 @@ onBeforeUnmount(() => {
                   </section>
                   <section v-if="detail.incomingMembers?.length" class="tl-roster-col">
                     <header class="tl-roster-head">
-                      <FaIcon name="i-ri:login-box-line" />
+                      <YdIcon name="i-ri:login-box-line" />
                       <span>新任</span>
                       <em>{{ detail.incomingMembers.length }}</em>
                     </header>
@@ -285,7 +283,7 @@ onBeforeUnmount(() => {
                 </div>
                 <MarkdownPreview v-if="detail.detail" :sdk="model.sdk" :content="detail.detail" />
                 <div v-if="detailImages.length" class="tl-gallery">
-                  <button
+                  <YdAction
                     v-for="(image, index) in detailImages"
                     :key="index"
                     type="button"
@@ -293,41 +291,39 @@ onBeforeUnmount(() => {
                     @click="openLightbox(index)"
                   >
                     <img :src="image" :alt="`${detail.title} 图片 ${index + 1}`" loading="lazy">
-                  </button>
+                  </YdAction>
                 </div>
               </div>
             </template>
           </div>
-        </div>
-      </Transition>
+    </YdModal>
 
-      <Transition name="tl-fade">
-        <div v-if="lightboxIndex >= 0" class="tl-lightbox" @click.self="lightboxIndex = -1">
+    <YdModal :model-value="lightboxIndex >= 0" title="图片预览" :header="false" :footer="false" :close-on-click-overlay="true" :close-on-press-escape="true" class="tl-lightbox-modal" content-class="tl-lightbox-modal-content" @update:model-value="value => !value && (lightboxIndex = -1)">
+      <div class="tl-lightbox">
           <span class="tl-lightbox-counter">{{ lightboxIndex + 1 }} / {{ detailImages.length }}</span>
-          <button type="button" class="tl-lightbox-close" aria-label="关闭" @click="lightboxIndex = -1">
-            <FaIcon name="i-ri:close-line" />
-          </button>
-          <button
+          <YdAction type="button" class="tl-lightbox-close" aria-label="关闭" @click="lightboxIndex = -1">
+            <YdIcon name="i-ri:close-line" />
+          </YdAction>
+          <YdAction
             v-if="detailImages.length > 1"
             type="button"
             class="tl-lightbox-nav tl-lightbox-prev"
             aria-label="上一张"
             @click.stop="stepLightbox(-1)"
           >
-            <FaIcon name="i-ri:arrow-left-s-line" />
-          </button>
+            <YdIcon name="i-ri:arrow-left-s-line" />
+          </YdAction>
           <img :src="lightboxCurrent" :alt="detail?.title || ''" class="tl-lightbox-img" @click.stop>
-          <button
+          <YdAction
             v-if="detailImages.length > 1"
             type="button"
             class="tl-lightbox-nav tl-lightbox-next"
             aria-label="下一张"
             @click.stop="stepLightbox(1)"
           >
-            <FaIcon name="i-ri:arrow-right-s-line" />
-          </button>
-        </div>
-      </Transition>
-    </Teleport>
+            <YdIcon name="i-ri:arrow-right-s-line" />
+          </YdAction>
+      </div>
+    </YdModal>
   </div>
 </template>

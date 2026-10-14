@@ -1,13 +1,13 @@
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { TimelineEventPayload, TimelineEventSummary, TimelineEventView, TimelineStatusFilter, TimelineTypeFilter } from '../types'
-import { useFaToast } from '@yudream/components'
+import { useYdToast } from '@yudream/components'
 import { reactive, ref } from 'vue'
 import { createTimelineApi } from '../api/timeline-api'
 import { errorMessage, normalizeFileUrl } from './utils'
 
 export function useTimelinePlugin(sdk: YuDreamPluginSdk) {
   const api = createTimelineApi(sdk)
-  const toast = useFaToast()
+  const toast = useYdToast()
 
   // 公开时间轴
   const publicEvents = ref<TimelineEventSummary[]>([])

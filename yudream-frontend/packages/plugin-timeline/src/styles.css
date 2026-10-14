@@ -694,6 +694,52 @@ html[data-theme='light']:has(.site-chrome.is-theme-chrome) .tl-overlay {
   overflow-y: auto;
 }
 
+.tl-detail-modal,
+.tl-lightbox-modal {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.tl-detail-modal {
+  width: min(880px, calc(100vw - 32px));
+  max-width: 880px;
+  min-height: 0;
+  max-height: 90vh;
+  overflow: visible;
+  --tl-primary: var(--yb-site-primary, #5b6cff);
+  --tl-text: var(--yb-site-text, var(--color-text-1, #1d2129));
+  --tl-heading: var(--yb-site-heading, var(--color-text-1, #1d2129));
+  --tl-muted: var(--yb-site-muted, var(--color-text-2, #4e5969));
+  --tl-caption: var(--yb-site-caption, var(--color-text-3, #86909c));
+  --tl-surface: var(--yb-site-surface, var(--color-bg-1, #ffffff));
+  --tl-border: var(--yb-site-border, var(--color-border-2, rgba(15, 23, 42, 0.08)));
+  --tl-bg: var(--yb-site-bg, var(--color-bg-2, #f6f7fb));
+}
+
+.tl-detail-modal-content {
+  min-height: 0;
+  padding: 0;
+  overflow: auto;
+}
+
+.tl-lightbox-modal {
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  max-height: none;
+  min-height: 0;
+  overflow: visible;
+}
+
+.tl-lightbox-modal-content {
+  display: flex;
+  min-height: 100vh;
+  padding: 0;
+  overflow: visible;
+}
+
 .tl-detail {
   position: relative;
   width: min(880px, 100%);
@@ -954,10 +1000,10 @@ html[data-theme='light']:has(.site-chrome.is-theme-chrome) .tl-overlay {
 }
 
 /* 灯箱 */
-.tl-lightbox {
-  position: fixed;
-  inset: 0;
-  z-index: 1300;
+ .tl-lightbox {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;

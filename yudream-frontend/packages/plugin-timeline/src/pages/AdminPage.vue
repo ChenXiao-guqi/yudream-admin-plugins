@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { TimelinePluginModel } from '../composables/useTimelinePlugin'
 import type { TimelineEventSummary } from '../types'
-import { FaButton, FaCard, FaIcon, FaInput, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable, FaSearchBar, FaSelect, FaTag, useFaModal } from '@yudream/components'
+import { YdButton, YdCard, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdSelect, YdTag, useYdModal } from '@yudream/components'
 import { onMounted, ref } from 'vue'
 import CoverThumb from '../components/CoverThumb.vue'
 import EventEditorModal from '../components/EventEditorModal.vue'
@@ -10,7 +11,7 @@ import { EVENT_TYPE_OPTIONS, eventTypeMeta, formatEventDate, formatTime, resolve
 
 const props = defineProps<{ model: TimelinePluginModel }>()
 const model = props.model
-const confirm = useFaModal()
+const confirm = useYdModal()
 
 const editorOpen = ref(false)
 const editingId = ref<string | null>(null)
@@ -82,31 +83,31 @@ onMounted(() => {
 </script>
 
 <template>
-  <FaPageHeader title="事件管理" description="维护大事记时间轴：新建与编辑事件、Markdown 图文详情、发布到公开站点">
-    <FaButton @click="openCreate">
-      <FaIcon name="i-ri:add-line" />新建事件
-    </FaButton>
-  </FaPageHeader>
-  <FaPageMain>
-    <FaSearchBar class="w-full">
+  <YdPageHeader title="事件管理" description="维护大事记时间轴：新建与编辑事件、Markdown 图文详情、发布到公开站点">
+    <YdButton @click="openCreate">
+      <YdIcon name="i-ri:add-line" />新建事件
+    </YdButton>
+  </YdPageHeader>
+  <YdPageMain>
+    <YdSearchBar class="w-full">
       <div class="tl-toolbar">
-        <FaInput
+        <YdInput
           v-model="model.adminFilters.keyword"
           placeholder="搜索标题、简述或时间文案"
           clearable
           @keydown.enter="applyFilters"
           @clear="applyFilters"
         />
-        <FaSelect v-model="model.adminFilters.status" :options="statusOptions" @change="applyFilters" />
-        <FaSelect v-model="model.adminFilters.type" :options="typeOptions" @change="applyFilters" />
-        <FaButton variant="outline" @click="applyFilters">
-          <FaIcon name="i-ri:search-line" />查询
-        </FaButton>
+        <YdSelect v-model="model.adminFilters.status" :options="statusOptions" @change="applyFilters" />
+        <YdSelect v-model="model.adminFilters.type" :options="typeOptions" @change="applyFilters" />
+        <YdButton variant="outline" @click="applyFilters">
+          <YdIcon name="i-ri:search-line" />查询
+        </YdButton>
       </div>
-    </FaSearchBar>
+    </YdSearchBar>
 
-    <FaResponsiveTable
-      v-loading="model.adminLoading"
+    <YdLoadingOverlay :loading="model.adminLoading"><YdResponsiveTable
+
       :columns="columns"
       :data="model.adminEvents"
       row-key="id"
@@ -131,9 +132,9 @@ onMounted(() => {
           />
           <div class="tl-event-cell-text">
             <span class="tl-event-cell-title" :title="row.original.title">
-              <FaTag :variant="eventTypeMeta(row.original.eventType).tagVariant" class="tl-event-type-tag">
+              <YdTag :variant="eventTypeMeta(row.original.eventType).tagVariant" class="tl-event-type-tag">
                 {{ eventTypeMeta(row.original.eventType).label }}
-              </FaTag>
+              </YdTag>
               {{ row.original.title }}
             </span>
             <span v-if="row.original.summary" class="tl-event-cell-summary" :title="row.original.summary">{{ row.original.summary }}</span>
@@ -141,28 +142,28 @@ onMounted(() => {
         </div>
       </template>
       <template #cell-published="{ row }">
-        <FaTag :variant="row.original.published ? 'default' : 'outline'">
+        <YdTag :variant="row.original.published ? 'default' : 'outline'">
           {{ row.original.published ? '已发布' : '草稿' }}
-        </FaTag>
+        </YdTag>
       </template>
       <template #cell-updatedAt="{ row }">
         {{ formatTime(row.original.updatedAt) }}
       </template>
       <template #cell-operation="{ row }">
         <div class="flex-center gap-2">
-          <FaButton size="sm" variant="outline" @click="openEdit(row.original)">
+          <YdButton size="sm" variant="outline" @click="openEdit(row.original)">
             编辑
-          </FaButton>
-          <FaButton size="sm" variant="outline" :disabled="model.toggling" @click="togglePublish(row.original)">
+          </YdButton>
+          <YdButton size="sm" variant="outline" :disabled="model.toggling" @click="togglePublish(row.original)">
             {{ row.original.published ? '下架' : '发布' }}
-          </FaButton>
-          <FaButton size="sm" variant="destructive" @click="confirmDelete(row.original)">
+          </YdButton>
+          <YdButton size="sm" variant="destructive" @click="confirmDelete(row.original)">
             删除
-          </FaButton>
+          </YdButton>
         </div>
       </template>
       <template #card="{ row }">
-        <FaCard class="w-full">
+        <YdCard class="w-full">
           <div class="tl-mobile-card">
             <div class="tl-mobile-card-head">
               <CoverThumb
@@ -174,37 +175,37 @@ onMounted(() => {
               />
               <div class="tl-event-cell-text">
                 <span class="tl-event-cell-title">
-                  <FaTag :variant="eventTypeMeta(row.eventType).tagVariant" class="tl-event-type-tag">
+                  <YdTag :variant="eventTypeMeta(row.eventType).tagVariant" class="tl-event-type-tag">
                     {{ eventTypeMeta(row.eventType).label }}
-                  </FaTag>
+                  </YdTag>
                   {{ row.title }}
                 </span>
                 <span class="tl-event-cell-summary">{{ formatEventDate(row.eventDate, row.dateLabel) }}</span>
               </div>
-              <FaTag :variant="row.published ? 'default' : 'outline'">
+              <YdTag :variant="row.published ? 'default' : 'outline'">
                 {{ row.published ? '已发布' : '草稿' }}
-              </FaTag>
+              </YdTag>
             </div>
             <div v-if="row.summary" class="tl-mobile-card-summary">
               {{ row.summary }}
             </div>
             <div class="tl-mobile-card-actions">
-              <FaButton size="sm" variant="outline" @click="openEdit(row)">
+              <YdButton size="sm" variant="outline" @click="openEdit(row)">
                 编辑
-              </FaButton>
-              <FaButton size="sm" variant="outline" :disabled="model.toggling" @click="togglePublish(row)">
+              </YdButton>
+              <YdButton size="sm" variant="outline" :disabled="model.toggling" @click="togglePublish(row)">
                 {{ row.published ? '下架' : '发布' }}
-              </FaButton>
-              <FaButton size="sm" variant="destructive" @click="confirmDelete(row)">
+              </YdButton>
+              <YdButton size="sm" variant="destructive" @click="confirmDelete(row)">
                 删除
-              </FaButton>
+              </YdButton>
             </div>
           </div>
-        </FaCard>
+        </YdCard>
       </template>
-    </FaResponsiveTable>
+    </YdResponsiveTable></YdLoadingOverlay>
 
-    <FaPagination
+    <YdPagination
       v-model:page="model.adminPager.page"
       v-model:size="model.adminPager.size"
       :total="model.adminPager.total"
@@ -214,5 +215,5 @@ onMounted(() => {
     />
 
     <EventEditorModal v-model:open="editorOpen" :event-id="editingId" :model="model" @saved="onSaved" />
-  </FaPageMain>
+  </YdPageMain>
 </template>

@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { TimelinePluginModel } from '../composables/useTimelinePlugin'
 import type { TimelineEventPayload } from '../types'
-import { FaButton, FaIcon, FaImageUpload, FaInput, FaModal, FaNumberField, FaRadioGroup, FaSwitch, FaTextarea, YdDatePicker, useFaToast } from '@yudream/components'
+import { YdButton, YdIcon, YdImageUpload, YdInput, YdModal, YdNumberField, YdRadioGroup, YdSwitch, YdTextarea, YdDatePicker, useYdToast } from '@yudream/components'
 import { computed, reactive, ref, watch } from 'vue'
 import { EVENT_TYPE_OPTIONS, errorMessage, joinRoster, normalizeFileUrl, resolveImageUrl, splitRoster } from '../composables/utils'
 import MarkdownEditor from './MarkdownEditor.vue'
@@ -18,7 +19,7 @@ const emit = defineEmits<{
 }>()
 
 const model = props.model
-const toast = useFaToast()
+const toast = useYdToast()
 
 const modalOpen = computed({
   get: () => props.open,
@@ -50,7 +51,7 @@ const incomingText = ref('')
 const showImages = computed(() => form.eventType !== 'TEXT')
 const showRoster = computed(() => form.eventType === 'ELECTION')
 
-// FaImageUpload 内部通过 push/splice 原地改数组，不会触发 update:modelValue；
+// YdImageUpload 内部通过 push/splice 原地改数组，不会触发 update:modelValue；
 // 用独立 ref 承接组件持有的数组引用，再用 deep watch 同步回 form。
 // 列表项始终是可展示的完整 URL（assetUrl），写回 form 时才归一化为 /api/files/ 相对路径
 const coverList = ref<string[]>([])
@@ -157,19 +158,19 @@ async function save() {
 </script>
 
 <template>
-  <FaModal v-model="modalOpen" :title="eventId ? '编辑事件' : '新建事件'" class="sm:max-w-2xl" :show-confirm-button="false" :close-on-click-overlay="false">
-    <div v-loading="loadingDetail" class="tl-editor">
+  <YdModal v-model="modalOpen" :title="eventId ? '编辑事件' : '新建事件'" class="sm:max-w-2xl" :show-confirm-button="false" :close-on-click-overlay="false">
+    <YdLoadingOverlay :loading="loadingDetail"><div  class="tl-editor">
       <div class="grid gap-2">
         <span>事件类型</span>
-        <FaRadioGroup v-model="form.eventType" :options="[...EVENT_TYPE_OPTIONS]" class="tl-type-grid" />
+        <YdRadioGroup v-model="form.eventType" :options="[...EVENT_TYPE_OPTIONS]" class="tl-type-grid" />
       </div>
       <div class="grid gap-2">
         <span>事件标题 <em class="tl-required">*</em></span>
-        <FaInput v-model="form.title" placeholder="例如：社团正式成立" :maxlength="60" />
+        <YdInput v-model="form.title" placeholder="例如：社团正式成立" :maxlength="60" />
       </div>
       <div class="grid gap-2">
         <span>一句话简述</span>
-        <FaTextarea v-model="form.summary" placeholder="时间轴卡片上展示的摘要，最多 200 字" :maxlength="200" :rows="2" />
+        <YdTextarea v-model="form.summary" placeholder="时间轴卡片上展示的摘要，最多 200 字" :maxlength="200" :rows="2" />
       </div>
       <div class="tl-editor-row">
         <div class="grid gap-2">
@@ -178,28 +179,28 @@ async function save() {
         </div>
         <div class="grid gap-2">
           <span>时间展示文案</span>
-          <FaInput v-model="form.dateLabel" placeholder="可选，如「2024 年春」，留空按日期展示" :maxlength="40" />
+          <YdInput v-model="form.dateLabel" placeholder="可选，如「2024 年春」，留空按日期展示" :maxlength="40" />
         </div>
       </div>
       <template v-if="showRoster">
         <div class="grid gap-2">
           <span>届次</span>
-          <FaInput v-model="form.termLabel" placeholder="例如：第八届" :maxlength="20" />
+          <YdInput v-model="form.termLabel" placeholder="例如：第八届" :maxlength="20" />
         </div>
         <div class="tl-editor-row">
           <div class="grid gap-2">
             <span>卸任名单</span>
-            <FaTextarea v-model="outgoingText" placeholder="每行一位，例如：小明 · 会长" :rows="6" />
+            <YdTextarea v-model="outgoingText" placeholder="每行一位，例如：小明 · 会长" :rows="6" />
           </div>
           <div class="grid gap-2">
             <span>新任名单</span>
-            <FaTextarea v-model="incomingText" placeholder="每行一位，例如：小红 · 会长" :rows="6" />
+            <YdTextarea v-model="incomingText" placeholder="每行一位，例如：小红 · 会长" :rows="6" />
           </div>
         </div>
       </template>
       <div v-if="showImages" class="grid gap-2">
         <span>事件封面</span>
-        <FaImageUpload
+        <YdImageUpload
           :model-value="coverList"
           :max="1"
           :width="240"
@@ -211,7 +212,7 @@ async function save() {
       </div>
       <div v-if="showImages" class="grid gap-2">
         <span>详情图集（最多 12 张）</span>
-        <FaImageUpload
+        <YdImageUpload
           :model-value="imageList"
           :max="12"
           :width="160"
@@ -227,25 +228,25 @@ async function save() {
       <div class="tl-editor-row">
         <div class="grid gap-2">
           <span>排序权重</span>
-          <FaNumberField v-model="form.sort" :min="-9999" :max="9999" placeholder="0" />
+          <YdNumberField v-model="form.sort" :min="-9999" :max="9999" placeholder="0" />
           <span class="text-xs text-muted-foreground">同一天的事件按权重从大到小排列。</span>
         </div>
         <div class="grid gap-2">
           <span>发布状态</span>
           <div class="tl-switch-row">
-            <FaSwitch v-model="form.published" />
+            <YdSwitch v-model="form.published" />
             <span class="text-sm">{{ form.published ? '已发布，公开时间轴可见' : '草稿，仅管理端可见' }}</span>
           </div>
         </div>
       </div>
-    </div>
+    </div></YdLoadingOverlay>
     <template #footer>
-      <FaButton variant="outline" :disabled="model.saving" @click="modalOpen = false">
+      <YdButton variant="outline" :disabled="model.saving" @click="modalOpen = false">
         取消
-      </FaButton>
-      <FaButton :loading="model.saving" @click="save">
-        <FaIcon name="i-ri:save-line" />保存
-      </FaButton>
+      </YdButton>
+      <YdButton :loading="model.saving" @click="save">
+        <YdIcon name="i-ri:save-line" />保存
+      </YdButton>
     </template>
-  </FaModal>
+  </YdModal>
 </template>

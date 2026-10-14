@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { UploadImgEvent } from 'md-editor-v3'
-import { useFaToast } from '@yudream/components'
+import { useYdToast } from '@yudream/components'
 import { MdEditor } from 'md-editor-v3'
 import { computed } from 'vue'
 
@@ -26,7 +26,7 @@ const emit = defineEmits<{
   'update:modelValue': [value: string]
 }>()
 
-const toast = useFaToast()
+const toast = useYdToast()
 
 const editorValue = computed({
   get: () => props.modelValue || '',
