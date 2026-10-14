@@ -1,5 +1,7 @@
 <template>
-  <section class="skin-page">
+
+  <YdPageHeader title="我的角色" class="mb-0" />
+  <YdPageMain>  <section class="skin-page">
     <div class="skin-command-bar">
       <div>
         <span>{{ isManagement ? '角色管理' : '我的角色' }}</span>
@@ -131,12 +133,13 @@
       </main>
     </div>
   </section>
+</YdPageMain>
 </template>
 
 <script setup lang="ts">
 import type { SkinPluginModel } from '../composables/useSkinPlugin'
 import { computed } from 'vue'
-import { YdLabel, YdButton, YdIcon, YdInput, YdSelect, YdTag, YdTooltip } from '@yudream/components'
+import { YdButton, YdIcon, YdInput, YdLabel, YdPageHeader, YdPageMain, YdSelect, YdTag, YdTooltip } from '@yudream/components'
 import SkinPanel from '../components/SkinPanel.vue'
 import SkinPreview from '../components/SkinPreview.vue'
 

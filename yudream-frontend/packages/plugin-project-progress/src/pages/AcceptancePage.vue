@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+// yudream-self-chrome 页面自管页头与卡片
+import { YdLoadingOverlay, YdPageHeader, YdPageMain } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { ProjectProgressModel } from '../composables/useProjectProgress'
 import type { ProjectWorkDetail } from '../types'
@@ -46,7 +47,9 @@ async function submitReview() {
 </script>
 
 <template>
-  <section class="pp-page">
+
+  <YdPageHeader title="任务验收" class="mb-0" />
+  <YdPageMain>  <section class="pp-page">
     <section class="pp-toolbar">
       <div><span>验收处理</span><h2>任务验收</h2></div>
       <YdButton variant="outline" :loading="model.loading" @click="model.loadAcceptance">刷新</YdButton>
@@ -94,4 +97,5 @@ async function submitReview() {
       <template #footer><YdButton variant="outline" @click="reviewVisible = false">取消</YdButton><YdButton :variant="accepted ? 'default' : 'destructive'" :loading="model.saving" @click="submitReview">{{ accepted ? '确认通过' : '确认退回' }}</YdButton></template>
     </YdModal>
   </section>
+</YdPageMain>
 </template>

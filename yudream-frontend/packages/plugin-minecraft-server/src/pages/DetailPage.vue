@@ -1,5 +1,7 @@
 <template>
-  <section class="mc-page">
+
+  <YdPageHeader title="服务器详情" class="mb-0" />
+  <YdPageMain>  <section class="mc-page">
     <section class="mc-hero">
       <div><div class="mc-title-row"><h2>{{ server?.name || '服务器详情' }}</h2><span v-if="server && !server.enabled" class="mc-closed-badge">已关闭</span></div><p>{{ server?.currentSeason?.name || '当前周目未设置' }}</p></div>
       <div class="mc-actions"><YdButton as="a" variant="outline" :href="model.closedSurface ? '/platform/plugins/minecraft-server?closed=true' : '/platform/plugins/minecraft-server'"><YdIcon name="i-ri:list-check" />列表</YdButton></div>
@@ -52,12 +54,13 @@
     </div>
     <YdCard v-else title="未找到服务器" description="Empty"><div class="mc-empty">请从服务器列表重新进入。</div></YdCard>
   </section>
+</YdPageMain>
 </template>
 <script setup lang="ts">
 import type { TableColumn } from '@yudream/components'
 import type { EconomyRecord, MinecraftSubServer } from '../types'
 import { computed } from 'vue'
-import { YdButton, YdCard, YdIcon, YdPagination, YdResponsiveTable, YdTag } from '@yudream/components'
+import { YdButton, YdCard, YdIcon, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdTag } from '@yudream/components'
 import MarkdownPreview from '../components/MarkdownPreview.vue'
 import OnlineTrendChart from '../components/OnlineTrendChart.vue'
 import type { MinecraftServerPluginModel } from '../composables/useMinecraftServerPlugin'

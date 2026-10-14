@@ -2,6 +2,7 @@
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
 import ProductPlaza from '../components/ProductPlaza.vue'
+import { YdPageHeader, YdPageMain } from '@yudream/components'
 
 /**
  * 玩家市场：只列玩家发布、用钱包货币互相买卖的商品（SELLER 结算：钱从买家转给卖家）。
@@ -14,7 +15,9 @@ defineProps<{
 </script>
 
 <template>
-  <ProductPlaza
+
+  <YdPageHeader title="商品广场" class="mb-0" />
+  <YdPageMain>  <ProductPlaza
     :sdk="sdk"
     settlement="SELLER"
     title="玩家市场"
@@ -23,4 +26,5 @@ defineProps<{
     empty-icon="i-ri:store-2-line"
     show-publish
   />
+</YdPageMain>
 </template>

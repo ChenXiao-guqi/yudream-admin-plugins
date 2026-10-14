@@ -1,6 +1,7 @@
 <script setup lang="ts">
+// yudream-self-chrome 页面自管页头与卡片
 import type { ProjectProgressModel } from '../composables/useProjectProgress'
-import { YdButton } from '@yudream/components'
+import { YdButton, YdPageHeader, YdPageMain } from '@yudream/components'
 import ProgressPanel from '../components/ProgressPanel.vue'
 
 defineProps<{
@@ -9,7 +10,9 @@ defineProps<{
 </script>
 
 <template>
-  <section class="pp-page">
+
+  <YdPageHeader title="插件设置" class="mb-0" />
+  <YdPageMain>  <section class="pp-page">
     <section class="pp-toolbar">
       <div>
         <span>联动状态</span>
@@ -31,4 +34,5 @@ defineProps<{
       </div>
     </ProgressPanel>
   </section>
+</YdPageMain>
 </template>

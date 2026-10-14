@@ -1,7 +1,8 @@
 <script setup lang="ts">
+// yudream-self-chrome 页面自管页头与卡片
 import type { TimelinePluginModel } from '../composables/useTimelinePlugin'
 import type { TimelineEventSummary } from '../types'
-import { YdAction, YdIcon, YdModal } from '@yudream/components'
+import { YdAction, YdIcon, YdModal, YdPageHeader, YdPageMain } from '@yudream/components'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import CoverThumb from '../components/CoverThumb.vue'
 import MarkdownPreview from '../components/MarkdownPreview.vue'
@@ -153,7 +154,9 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="root" class="tl-page">
+
+  <YdPageHeader title="大事记" class="mb-0" />
+  <YdPageMain>  <div ref="root" class="tl-page">
     <section class="tl-hero">
       <div class="tl-aurora tl-aurora-a" />
       <div class="tl-aurora tl-aurora-b" />
@@ -326,4 +329,5 @@ onBeforeUnmount(() => {
       </div>
     </YdModal>
   </div>
+</YdPageMain>
 </template>

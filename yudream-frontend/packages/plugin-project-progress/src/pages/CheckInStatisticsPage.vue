@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+// yudream-self-chrome 页面自管页头与卡片
+import { YdLoadingOverlay, YdPageHeader, YdPageMain } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { ProjectProgressModel } from '../composables/useProjectProgress'
 import { YdButton, YdCard, YdPagination, YdResponsiveTable, YdSelect } from '@yudream/components'
@@ -48,7 +49,9 @@ async function selectProject(projectId: unknown) {
 </script>
 
 <template>
-  <section class="pp-page">
+
+  <YdPageHeader title="打卡统计" class="mb-0" />
+  <YdPageMain>  <section class="pp-page">
     <section class="pp-toolbar">
       <div><span>项目打卡</span><h2>打卡统计</h2></div>
       <div class="pp-actions"><YdSelect :model-value="model.selectedProjectId" :options="projectOptions" placeholder="选择项目" class="pp-project-select" @update:model-value="selectProject" /><YdButton variant="outline" :loading="model.loading" @click="model.loadCheckInStatistics()">刷新</YdButton><YdButton variant="outline" :disabled="!model.checkIns.length" @click="model.exportCheckIns">导出</YdButton></div>
@@ -78,4 +81,5 @@ async function selectProject(projectId: unknown) {
       <YdPagination v-model:page="pagination.page" v-model:size="pagination.size" :total="memberRows.length" class="mt-3" />
     </section>
   </section>
+</YdPageMain>
 </template>

@@ -1,5 +1,7 @@
 <template>
-  <section class="skin-page">
+
+  <YdPageHeader title="皮肤库" class="mb-0" />
+  <YdPageMain>  <section class="skin-page">
     <div class="skin-command-bar">
       <div>
         <h2>{{ isManagement ? '管理全站材质' : '浏览全站材质' }}</h2>
@@ -249,6 +251,7 @@
       </div>
     </YdModal>
   </section>
+</YdPageMain>
 </template>
 
 <script setup lang="ts">
@@ -256,7 +259,7 @@ import type { FileItem, FileUploadRequestOptions } from '@yudream/components'
 import type { SkinPluginModel } from '../composables/useSkinPlugin'
 import type { SkinTexture } from '../types'
 import { computed, reactive, ref, watch } from 'vue'
-import { YdLabel, YdButton, YdFileUpload, YdIcon, YdInput, YdModal, YdPagination, YdSelect, YdSwitch, YdTag, YdTooltip, useYdModal } from '@yudream/components'
+import { useYdModal, YdButton, YdFileUpload, YdIcon, YdInput, YdLabel, YdModal, YdPageHeader, YdPageMain, YdPagination, YdSelect, YdSwitch, YdTag, YdTooltip } from '@yudream/components'
 import SkinPanel from '../components/SkinPanel.vue'
 import SkinPreview from '../components/SkinPreview.vue'
 import SkinTexturePreview from '../components/SkinTexturePreview.vue'

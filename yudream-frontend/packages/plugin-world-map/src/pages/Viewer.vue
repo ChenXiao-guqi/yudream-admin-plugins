@@ -2,7 +2,7 @@
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
 import { computed, ref } from 'vue'
-import { YdButton, YdCheckbox, YdIcon, YdInput, YdSelect, YdSlider } from '@yudream/components'
+import { YdButton, YdCheckbox, YdIcon, YdInput, YdPageHeader, YdPageMain, YdSelect, YdSlider } from '@yudream/components'
 import { useWorldMapViewer } from '../composables/useWorldMapViewer'
 import { findMarkers } from '../map/markerSearch'
 
@@ -92,7 +92,9 @@ function toggleRenderSettings() {
 </script>
 
 <template>
-  <div class="world-map-viewer">
+
+  <YdPageHeader title="世界地图" class="mb-0" />
+  <YdPageMain>  <div class="world-map-viewer">
     <div :ref="setContainer" class="world-map-canvas" />
 
     <div class="world-map-control-stack">
@@ -269,4 +271,5 @@ function toggleRenderSettings() {
     </div>
 
   </div>
+</YdPageMain>
 </template>

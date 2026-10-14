@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+// yudream-self-chrome 页面自管页头与卡片
+import { YdLoadingOverlay, YdPageHeader, YdPageMain } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { ProjectProgressModel } from '../composables/useProjectProgress'
 import type { ProjectWorkDetail } from '../types'
@@ -49,7 +50,9 @@ function confirmDelete(detail: ProjectWorkDetail) {
 </script>
 
 <template>
-  <section class="pp-page">
+
+  <YdPageHeader title="工作细节" class="mb-0" />
+  <YdPageMain>  <section class="pp-page">
     <section class="pp-toolbar"><div><span>任务拆分</span><h2>工作细节</h2></div><div class="pp-actions"><YdSelect :model-value="model.selectedProjectId" :options="projectOptions" placeholder="选择项目" class="pp-project-select" @update:model-value="selectProject" /><YdButton variant="outline" :loading="model.loading" @click="model.load">刷新</YdButton><YdButton variant="outline" :disabled="!model.details.length" @click="model.exportDetails">导出</YdButton><YdButton :disabled="!model.selectedProjectId" @click="createDetail">新建细节</YdButton></div></section>
 
     <section class="pp-panel">
@@ -110,4 +113,5 @@ function confirmDelete(detail: ProjectWorkDetail) {
       <template #footer><YdButton variant="outline" @click="modalVisible = false">取消</YdButton><YdButton :loading="model.saving" :disabled="!model.selectedProjectId" @click="saveDetail">保存细节</YdButton></template>
     </YdModal>
   </section>
+</YdPageMain>
 </template>

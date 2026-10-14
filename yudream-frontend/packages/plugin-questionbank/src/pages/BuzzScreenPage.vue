@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+// yudream-self-chrome 页面自管页头与卡片
+import { YdLoadingOverlay, YdPageHeader, YdPageMain } from '@yudream/components'
 import type { QuestionBankPluginModel } from '../composables/useQuestionBankPlugin'
 import type { PaperView, QuestionView } from '../types'
 import { YdAction, YdButton, YdIcon, YdInput, useYdToast } from '@yudream/components'
@@ -216,7 +217,9 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
 </script>
 
 <template>
-  <div class="qb-screen">
+
+  <YdPageHeader title="抢答大屏" class="mb-0" />
+  <YdPageMain>  <div class="qb-screen">
     <!-- 准备台：选题单或随机抽题 -->
     <div v-if="phase === 'setup'" class="qb-screen-setup">
       <div class="qb-screen-setup-panel">
@@ -314,4 +317,5 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
       </footer>
     </div>
   </div>
+</YdPageMain>
 </template>

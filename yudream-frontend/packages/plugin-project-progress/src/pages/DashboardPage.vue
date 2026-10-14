@@ -1,9 +1,10 @@
 <script setup lang="ts">
+// yudream-self-chrome 页面自管页头与卡片
 import type { TableColumn } from '@yudream/components'
 import type { ProjectProgressModel } from '../composables/useProjectProgress'
 import type { ProjectWorkDetail } from '../types'
 import {computed } from 'vue'
-import { YdAction, YdButton, YdCard, YdResponsiveTable, YdTag } from '@yudream/components'
+import { YdAction, YdButton, YdCard, YdPageHeader, YdPageMain, YdResponsiveTable, YdTag } from '@yudream/components'
 import ProgressPanel from '../components/ProgressPanel.vue'
 
 defineProps<{
@@ -19,7 +20,9 @@ const detailColumns = computed<TableColumn<ProjectWorkDetail>[]>(() => [
 </script>
 
 <template>
-  <section class="pp-page">
+
+  <YdPageHeader title="项目看板" class="mb-0" />
+  <YdPageMain>  <section class="pp-page">
     <section class="pp-toolbar">
       <div>
         <span>实时进度</span>
@@ -128,4 +131,5 @@ const detailColumns = computed<TableColumn<ProjectWorkDetail>[]>(() => [
       </div>
     </ProgressPanel>
   </section>
+</YdPageMain>
 </template>

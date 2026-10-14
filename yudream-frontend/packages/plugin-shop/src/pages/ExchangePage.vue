@@ -2,6 +2,7 @@
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
 import ProductPlaza from '../components/ProductPlaza.vue'
+import { YdPageHeader, YdPageMain } from '@yudream/components'
 
 /**
  * 积分商城：只列官方投放的消耗类商品（BURN 结算：只扣买家钱包，没有收款方）。
@@ -14,7 +15,9 @@ defineProps<{
 </script>
 
 <template>
-  <ProductPlaza
+
+  <YdPageHeader title="积分商城" class="mb-0" />
+  <YdPageMain>  <ProductPlaza
     :sdk="sdk"
     settlement="BURN"
     title="积分商城"
@@ -22,4 +25,5 @@ defineProps<{
     empty-hint="暂时没有可兑换的官方商品"
     empty-icon="i-ri:gift-2-line"
   />
+</YdPageMain>
 </template>

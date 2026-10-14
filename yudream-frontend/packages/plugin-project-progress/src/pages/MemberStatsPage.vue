@@ -1,9 +1,10 @@
 <script setup lang="ts">
+// yudream-self-chrome 页面自管页头与卡片
 import type { TableColumn } from '@yudream/components'
 import type { ProjectProgressModel } from '../composables/useProjectProgress'
 import type { ProjectMemberStats } from '../types'
 import { computed } from 'vue'
-import { YdButton, YdCard, YdIcon, YdResponsiveTable, YdSelect } from '@yudream/components'
+import { YdButton, YdCard, YdIcon, YdPageHeader, YdPageMain, YdResponsiveTable, YdSelect } from '@yudream/components'
 
 const props = defineProps<{
   model: ProjectProgressModel
@@ -37,7 +38,9 @@ function userFor(userId: string) {
 </script>
 
 <template>
-  <section class="pp-page">
+
+  <YdPageHeader title="成员统计" class="mb-0" />
+  <YdPageMain>  <section class="pp-page">
     <section class="pp-toolbar">
       <div>
         <span>项目成员</span>
@@ -129,4 +132,5 @@ function userFor(userId: string) {
       </YdResponsiveTable>
     </section>
   </section>
+</YdPageMain>
 </template>

@@ -1,8 +1,9 @@
 <script setup lang="ts">
+// yudream-self-chrome 页面自管页头与卡片
 import type { TableColumn } from '@yudream/components'
 import type { ProjectProgressModel } from '../composables/useProjectProgress'
 import type { ProjectWorkDetail } from '../types'
-import { YdButton, YdCard, YdFileUpload, YdModal, YdPagination, YdResponsiveTable, YdTag, YdTextarea } from '@yudream/components'
+import { YdButton, YdCard, YdFileUpload, YdModal, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdTag, YdTextarea } from '@yudream/components'
 import { computed, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import EvidenceFileList from '../components/EvidenceFileList.vue'
@@ -56,7 +57,9 @@ function localUploadRequest() {
 </script>
 
 <template>
-  <section class="pp-page">
+
+  <YdPageHeader title="我的任务" class="mb-0" />
+  <YdPageMain>  <section class="pp-page">
     <section class="pp-toolbar">
       <div>
         <span>个人任务</span>
@@ -166,4 +169,5 @@ function localUploadRequest() {
       </template>
     </YdModal>
   </section>
+</YdPageMain>
 </template>

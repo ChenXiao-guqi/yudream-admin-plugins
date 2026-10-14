@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, YdPageHeader, YdPageMain } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { ProjectProgressModel } from '../composables/useProjectProgress'
 import type { ProjectProgressProject } from '../types'
@@ -53,7 +53,9 @@ function confirmDelete(project: ProjectProgressProject) { confirm.confirm({ titl
 </script>
 
 <template>
-  <section class="pp-page">
+
+  <YdPageHeader title="项目管理" class="mb-0" />
+  <YdPageMain>  <section class="pp-page">
     <section class="pp-toolbar"><div><span>项目配置</span><h2>项目管理</h2></div><div class="pp-actions"><YdButton variant="outline" :loading="model.loading" @click="model.load">刷新</YdButton><YdButton @click="createProject">新建项目</YdButton></div></section>
     <section class="pp-panel">
       <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable  row-key="id" table-root-class="max-w-full overflow-x-auto rounded-lg" table-class="min-w-[1530px]" border stripe column-visibility :columns="columns" :data="pagedRows" empty-text="暂无项目">
@@ -109,4 +111,5 @@ function confirmDelete(project: ProjectProgressProject) { confirm.confirm({ titl
       <template #footer><YdButton variant="outline" @click="modalVisible = false">取消</YdButton><YdButton :loading="model.saving" @click="saveProject">保存项目</YdButton></template>
     </YdModal>
   </section>
+</YdPageMain>
 </template>

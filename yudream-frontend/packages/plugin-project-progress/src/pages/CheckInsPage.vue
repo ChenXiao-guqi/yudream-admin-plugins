@@ -2,7 +2,7 @@
 import type { TableColumn } from '@yudream/components'
 import type { ProjectProgressModel } from '../composables/useProjectProgress'
 import type { ProjectCheckIn } from '../types'
-import { YdButton, YdCard, YdFileUpload, YdInput, YdPagination, YdRadioGroup, YdResponsiveTable, YdSelect, YdTag, YdTextarea, useYdModal } from '@yudream/components'
+import { useYdModal, YdButton, YdCard, YdFileUpload, YdInput, YdPageHeader, YdPageMain, YdPagination, YdRadioGroup, YdResponsiveTable, YdSelect, YdTag, YdTextarea } from '@yudream/components'
 import { computed, reactive, watch } from 'vue'
 
 const props = defineProps<{ model: ProjectProgressModel }>()
@@ -53,7 +53,9 @@ function confirmDelete(record: ProjectCheckIn) { modal.confirm({ title: '删除�
 </script>
 
 <template>
-  <section class="pp-page">
+
+  <YdPageHeader title="打卡记录" class="mb-0" />
+  <YdPageMain>  <section class="pp-page">
     <section class="pp-toolbar">
       <div><span>进度打卡</span><h2>项目打卡</h2></div>
       <div class="pp-actions">
@@ -117,4 +119,5 @@ function confirmDelete(record: ProjectCheckIn) { modal.confirm({ title: '删除�
       </section>
     </section>
   </section>
+</YdPageMain>
 </template>

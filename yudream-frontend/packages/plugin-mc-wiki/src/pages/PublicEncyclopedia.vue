@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { YdAction, YdButton, YdInput, YdSelect } from '@yudream/components'
+// yudream-self-chrome 页面自管页头与卡片
+import { YdAction, YdButton, YdInput, YdPageHeader, YdPageMain, YdSelect } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useMcWikiPlugin } from '../composables/useMcWikiPlugin'
@@ -62,7 +63,9 @@ watch(tab, (value) => {
 </script>
 
 <template>
-  <div class="mc-wiki-public">
+
+  <YdPageHeader title="百科" class="mb-0" />
+  <YdPageMain>  <div class="mc-wiki-public">
     <header class="mc-wiki-public__hero">
       <p class="mc-wiki-public__eyebrow">Minecraft 百科</p>
       <h1 class="mc-wiki-public__title">物品图鉴与合成配方</h1>
@@ -132,4 +135,5 @@ watch(tab, (value) => {
     <ItemDetailDrawer v-model="itemOpen" public-theme :item-id="selectedItem" :version="model.publicVersion" :render-gen="model.renderGen" :api="model.api" @view-recipe="openRecipe" />
     <RecipeDetailDrawer v-model="recipeOpen" public-theme :recipe="selectedRecipe" :icon-url="model.iconUrl" />
   </div>
+</YdPageMain>
 </template>

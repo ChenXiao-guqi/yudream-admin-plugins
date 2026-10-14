@@ -3,7 +3,7 @@ import type { FileItem, FileUploadRequestOptions, TableColumn } from '@yudream/c
 import type { SkinTexture } from '../types'
 import type { SkinPluginModel } from '../composables/useSkinPlugin'
 import { computed, reactive, ref, watch } from 'vue'
-import { YdLabel, YdButton, YdCard, YdFileUpload, YdIcon, YdInput, YdModal, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdSelect, YdSwitch, YdTag, useYdModal } from '@yudream/components'
+import { useYdModal, YdButton, YdCard, YdFileUpload, YdIcon, YdInput, YdLabel, YdModal, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdSelect, YdSwitch, YdTag } from '@yudream/components'
 import SkinTexturePreview from '../components/SkinTexturePreview.vue'
 
 const props = defineProps<{
@@ -199,7 +199,8 @@ function formatSize(size?: number) {
 </script>
 
 <template>
-  <YdPageMain><div class="skin-admin-table-page">
+
+  <YdPageHeader title="材质管理" class="mb-0" />  <YdPageMain><div class="skin-admin-table-page">
     <YdResponsiveTable
       row-key="hash"
       table-root-class="skin-admin-texture-table-root rounded-lg overflow-hidden"

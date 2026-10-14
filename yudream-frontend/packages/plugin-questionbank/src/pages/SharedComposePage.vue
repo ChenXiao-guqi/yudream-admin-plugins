@@ -1,7 +1,8 @@
 <script setup lang="ts">
+// yudream-self-chrome 页面自管页头与卡片
 import type { QuestionBankPluginModel } from '../composables/useQuestionBankPlugin'
 import type { QuestionView, SharedComposeView } from '../types'
-import { YdIcon, YdTag } from '@yudream/components'
+import { YdIcon, YdPageHeader, YdPageMain, YdTag } from '@yudream/components'
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import MarkdownPreview from '../components/MarkdownPreview.vue'
@@ -50,7 +51,9 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="qb-shared">
+
+  <YdPageHeader title="分享的组卷" class="mb-0" />
+  <YdPageMain>  <div class="qb-shared">
     <div v-if="loading" class="qb-shared-state">加载中…</div>
     <div v-else-if="error" class="qb-shared-state">
       <YdIcon name="i-ri:link-unlink" class="qb-shared-state-icon" />
@@ -99,4 +102,5 @@ onMounted(async () => {
       <div v-if="!data.questions.length" class="qb-muted text-center py-10">这份组卷的题目已全部失效</div>
     </template>
   </div>
+</YdPageMain>
 </template>
