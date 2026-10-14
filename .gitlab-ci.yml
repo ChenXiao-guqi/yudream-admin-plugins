@@ -75,7 +75,7 @@ validate:yd-ui:
   stage: validate
   image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/node:24.15.0-bookworm
   before_script:
-    - apt-get update -qq && apt-get install -y -qq --no-install-recommends ripgrep
+    - apt-get update -qq && apt-get install -y -qq --no-install-recommends git ripgrep
     - npm config set registry "$NPM_CONFIG_REGISTRY"
     - corepack enable && corepack prepare pnpm@11.9.0 --activate
     - pnpm --dir yudream-frontend install --frozen-lockfile
