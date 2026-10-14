@@ -1,16 +1,17 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { DomainRecord } from '../types'
-import { FaAlert, FaButton, FaIcon, FaInput, FaLabel, FaModal, FaPageHeader, FaPageMain, FaResponsiveTable, FaSwitch, useFaModal, useFaToast } from '@yudream/components'
+import { YdAlert, YdButton, YdIcon, YdInput, YdLabel, YdModal, YdPageHeader, YdPageMain, YdResponsiveTable, YdSwitch, useYdModal, useYdToast } from '@yudream/components'
 import { onMounted, ref } from 'vue'
 import { createEduVerifyApi } from '../api/edu-verify-api'
 import { errorMessage, formatTime } from '../types'
 
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 const api = createEduVerifyApi(props.sdk)
-const toast = useFaToast()
-const confirm = useFaModal()
+const toast = useYdToast()
+const confirm = useYdModal()
 
 const loading = ref(false)
 const saving = ref(false)
@@ -119,17 +120,17 @@ onMounted(load)
 
 <template>
   <section class="ev-page">
-    <FaPageHeader title="邮箱域名" description="教育邮箱认证仅接受白名单中的高校域名。默认包含 edu.cn。">
-      <FaButton @click="openCreate">
-        <FaIcon name="i-ri:add-line" />
+    <YdPageHeader title="邮箱域名" description="教育邮箱认证仅接受白名单中的高校域名。默认包含 edu.cn。">
+      <YdButton @click="openCreate">
+        <YdIcon name="i-ri:add-line" />
         新增域名
-      </FaButton>
-    </FaPageHeader>
+      </YdButton>
+    </YdPageHeader>
 
-    <FaPageMain>
-      <FaAlert v-if="error" variant="destructive" title="加载失败" :description="error" />
-      <FaResponsiveTable
-        v-loading="loading"
+    <YdPageMain>
+      <YdAlert v-if="error" variant="destructive" title="加载失败" :description="error" />
+      <YdLoadingOverlay :loading="loading"><YdResponsiveTable
+
         :columns="columns"
         :data="rows"
         row-key="domain"
@@ -140,52 +141,52 @@ onMounted(load)
         empty-text="还没有域名白名单"
       >
         <template #cell-enabled="{ row }">
-          <FaSwitch :model-value="row.original.enabled" @update:model-value="value => toggle(row.original, Boolean(value))" />
+          <YdSwitch :model-value="row.original.enabled" @update:model-value="value => toggle(row.original, Boolean(value))" />
         </template>
         <template #cell-createdAt="{ row }">{{ formatTime(row.original.createdAt) }}</template>
         <template #cell-operation="{ row }">
           <div class="ev-row-actions">
-            <FaButton size="sm" variant="destructive" @click="remove(row.original)">删除</FaButton>
+            <YdButton size="sm" variant="destructive" @click="remove(row.original)">删除</YdButton>
           </div>
         </template>
         <template #card="{ row }">
           <div class="ev-record-card">
             <div class="ev-record-head">
               <strong>{{ row.domain }}</strong>
-              <FaSwitch :model-value="row.enabled" @update:model-value="value => toggle(row, Boolean(value))" />
+              <YdSwitch :model-value="row.enabled" @update:model-value="value => toggle(row, Boolean(value))" />
             </div>
             <div class="ev-muted">{{ row.chineseName || '未设置中文校名' }}<span v-if="row.englishName"> · {{ row.englishName }}</span></div>
             <div class="ev-muted">{{ row.source || 'CUSTOM' }} · {{ formatTime(row.createdAt) }}</div>
             <div class="ev-actions ev-actions-end">
-              <FaButton size="sm" variant="destructive" @click="remove(row)">删除</FaButton>
+              <YdButton size="sm" variant="destructive" @click="remove(row)">删除</YdButton>
             </div>
           </div>
         </template>
-      </FaResponsiveTable>
-    </FaPageMain>
+      </YdResponsiveTable></YdLoadingOverlay>
+    </YdPageMain>
 
-    <FaModal v-model="open" title="新增域名" :confirm-button-loading="saving" :before-close="handleSaveClose">
+    <YdModal v-model="open" title="新增域名" :confirm-button-loading="saving" :before-close="handleSaveClose">
       <div class="ev-form">
-        <FaLabel label="域名" class="ev-field">
-          <FaInput v-model="domain" class="w-full" maxlength="80" placeholder="如 edu.cn 或 stu.pku.edu.cn" />
-        </FaLabel>
-        <FaLabel label="中文校名" class="ev-field">
-          <FaInput v-model="chineseName" class="w-full" maxlength="80" placeholder="如：西南科技大学" />
-        </FaLabel>
-        <FaLabel label="英文校名" class="ev-field">
-          <FaInput v-model="englishName" class="w-full" maxlength="160" placeholder="如：Southwest University of Science and Technology" />
-        </FaLabel>
-        <FaLabel label="来源" class="ev-field">
-          <FaInput v-model="source" class="w-full" maxlength="40" placeholder="CUSTOM" />
-        </FaLabel>
+        <YdLabel label="域名" class="ev-field">
+          <YdInput v-model="domain" class="w-full" maxlength="80" placeholder="如 edu.cn 或 stu.pku.edu.cn" />
+        </YdLabel>
+        <YdLabel label="中文校名" class="ev-field">
+          <YdInput v-model="chineseName" class="w-full" maxlength="80" placeholder="如：西南科技大学" />
+        </YdLabel>
+        <YdLabel label="英文校名" class="ev-field">
+          <YdInput v-model="englishName" class="w-full" maxlength="160" placeholder="如：Southwest University of Science and Technology" />
+        </YdLabel>
+        <YdLabel label="来源" class="ev-field">
+          <YdInput v-model="source" class="w-full" maxlength="40" placeholder="CUSTOM" />
+        </YdLabel>
         <div class="ev-switch-row">
-          <FaSwitch v-model="enabled" />
+          <YdSwitch v-model="enabled" />
           <div class="ev-switch-copy">
             <strong>{{ enabled ? '立即启用' : '先保存为停用' }}</strong>
             <small>停用后该域名邮箱无法通过教育邮箱认证。</small>
           </div>
         </div>
       </div>
-    </FaModal>
+    </YdModal>
   </section>
 </template>

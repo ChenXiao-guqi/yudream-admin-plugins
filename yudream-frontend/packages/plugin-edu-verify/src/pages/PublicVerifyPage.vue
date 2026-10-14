@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { FaButton, FaIcon, FaPageHeader, FaPageMain } from '@yudream/components'
+import { YdButton, YdIcon, YdPageHeader, YdPageMain } from '@yudream/components'
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import PublicVerifyForm from '../components/PublicVerifyForm.vue'
@@ -23,13 +23,13 @@ function backToRegister() {
 
 <template>
   <section class="ev-page">
-    <FaPageHeader title="高校学历认证" description="注册前请先完成高校身份核验。白名单内的教育邮箱填写后即视为已核验；学信网或人工审核须填写姓名与学校。">
-      <FaButton variant="outline" @click="backToRegister">
-        <FaIcon name="i-ri:arrow-go-back-line" />
+    <YdPageHeader title="高校学历认证" description="注册前请先完成高校身份核验。白名单内的教育邮箱填写后即视为已核验；学信网或人工审核须填写姓名与学校。">
+      <YdButton variant="outline" @click="backToRegister">
+        <YdIcon name="i-ri:arrow-go-back-line" />
         返回注册
-      </FaButton>
-    </FaPageHeader>
-    <FaPageMain>
+      </YdButton>
+    </YdPageHeader>
+    <YdPageMain>
       <PublicVerifyForm
         :sdk="props.sdk"
         :initial-email="email"
@@ -37,6 +37,6 @@ function backToRegister() {
         @update:email="value => email = value"
         @done="payload => email = payload.email"
       />
-    </FaPageMain>
+    </YdPageMain>
   </section>
 </template>

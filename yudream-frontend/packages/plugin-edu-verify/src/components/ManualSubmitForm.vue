@@ -2,7 +2,7 @@
 import type { FileItem, FileUploadRequestOptions } from '@yudream/components'
 import type { YuDreamPluginFileObject, YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { ManualMaterialPayload } from '../types'
-import { FaButton, FaFileUpload, FaIcon, FaInput, FaLabel, FaSelect, FaTextarea } from '@yudream/components'
+import { YdButton, YdFileUpload, YdIcon, YdInput, YdLabel, YdSelect, YdTextarea } from '@yudream/components'
 import { ref, watch } from 'vue'
 import { assertUploadable, uploadFileWithProgress } from '../api/upload'
 import { MATERIAL_KIND_OPTIONS } from '../types'
@@ -125,27 +125,27 @@ defineExpose({ reset })
 
 <template>
   <form class="ev-form" @submit.prevent="onSubmit">
-    <FaLabel v-if="showEmail" label="联系邮箱" class="ev-field">
-      <FaInput v-model="email" class="w-full" maxlength="120" placeholder="用于绑定认证记录并完成注册" :disabled="disabled" />
+    <YdLabel v-if="showEmail" label="联系邮箱" class="ev-field">
+      <YdInput v-model="email" class="w-full" maxlength="120" placeholder="用于绑定认证记录并完成注册" :disabled="disabled" />
       <span class="ev-field-hint">不必是教育邮箱。审核通过后须用同一邮箱注册。</span>
-    </FaLabel>
-    <FaLabel label="真实姓名" class="ev-field">
-      <FaInput v-model="realName" class="w-full" maxlength="40" placeholder="与证件一致" :disabled="disabled" />
-    </FaLabel>
-    <FaLabel label="学校名称" class="ev-field">
-      <FaInput v-model="schoolName" class="w-full" maxlength="80" placeholder="如：某某大学" :disabled="disabled" />
-    </FaLabel>
-    <FaLabel label="学信网在线验证码（选填）" class="ev-field">
-      <FaInput v-model="vcode" class="w-full" maxlength="16" placeholder="16 位字母或数字，有则填写" :disabled="disabled" />
-    </FaLabel>
-    <FaLabel label="补充说明" class="ev-field">
-      <FaTextarea v-model="note" :rows="3" maxlength="300" placeholder="可选，说明材料与学籍关系" :disabled="disabled" />
-    </FaLabel>
-    <FaLabel label="材料类型" class="ev-field">
-      <FaSelect v-model="kind" :options="MATERIAL_KIND_OPTIONS" :disabled="disabled" />
-    </FaLabel>
-    <FaLabel label="证明材料" class="ev-field">
-      <FaFileUpload
+    </YdLabel>
+    <YdLabel label="真实姓名" class="ev-field">
+      <YdInput v-model="realName" class="w-full" maxlength="40" placeholder="与证件一致" :disabled="disabled" />
+    </YdLabel>
+    <YdLabel label="学校名称" class="ev-field">
+      <YdInput v-model="schoolName" class="w-full" maxlength="80" placeholder="如：某某大学" :disabled="disabled" />
+    </YdLabel>
+    <YdLabel label="学信网在线验证码（选填）" class="ev-field">
+      <YdInput v-model="vcode" class="w-full" maxlength="16" placeholder="16 位字母或数字，有则填写" :disabled="disabled" />
+    </YdLabel>
+    <YdLabel label="补充说明" class="ev-field">
+      <YdTextarea v-model="note" :rows="3" maxlength="300" placeholder="可选，说明材料与学籍关系" :disabled="disabled" />
+    </YdLabel>
+    <YdLabel label="材料类型" class="ev-field">
+      <YdSelect v-model="kind" :options="MATERIAL_KIND_OPTIONS" :disabled="disabled" />
+    </YdLabel>
+    <YdLabel label="证明材料" class="ev-field">
+      <YdFileUpload
         v-model="files"
         :max="6"
         :http-request="httpRequest"
@@ -156,13 +156,13 @@ defineExpose({ reset })
       />
       <span class="ev-field-hint">材料类型按上传时的选择记录。建议上传学信网报告截图、学生证或录取通知书。请先填写联系邮箱再上传；文件会校验真实类型并限流，过期未提交将自动清理。</span>
       <span v-if="uploadError" class="ev-field-hint">{{ uploadError }}</span>
-    </FaLabel>
+    </YdLabel>
     <p v-if="formError" class="ev-field-hint">{{ formError }}</p>
     <div class="ev-actions ev-actions-end">
-      <FaButton type="submit" :loading="submitting" :disabled="disabled">
-        <FaIcon name="i-ri:send-plane-line" />
+      <YdButton type="submit" :loading="submitting" :disabled="disabled">
+        <YdIcon name="i-ri:send-plane-line" />
         提交人工审核
-      </FaButton>
+      </YdButton>
     </div>
   </form>
 </template>

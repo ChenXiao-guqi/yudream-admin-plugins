@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { ChannelInfo, PublicMethods, StatusPayload, VerificationChannel, VerificationRecord } from '../types'
-import { FaAlert, FaButton, FaCard, FaIcon, FaInput, FaLabel, FaModal, FaTabs, useFaToast } from '@yudream/components'
+import { YdAlert, YdButton, YdCard, YdIcon, YdInput, YdLabel, YdModal, YdTabs, useYdToast } from '@yudream/components'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { createEduVerifyApi } from '../api/edu-verify-api'
 import ManualSubmitForm from './ManualSubmitForm.vue'
@@ -21,7 +22,7 @@ const emit = defineEmits<{
 }>()
 
 const api = createEduVerifyApi(props.sdk)
-const toast = useFaToast()
+const toast = useYdToast()
 
 const loading = ref(false)
 const methods = ref<PublicMethods | null>(null)
@@ -303,67 +304,67 @@ onUnmounted(() => {
 
 <template>
   <div class="ev-stack">
-    <FaAlert v-if="error" variant="destructive" title="操作未完成" :description="error" />
-    <FaAlert v-if="successHint" title="认证进度" :description="successHint" />
-    <FaAlert v-if="eduDomainPassed" title="教育邮箱已核验" description="该邮箱域名已在白名单中，无需验证码，可直接返回注册。" />
-    <FaAlert v-if="pendingMail" title="等待学信网报告邮件" :description="`报告页已核验，请在 ${mailWaitMinutes} 分钟内用学信网官方「发送到邮箱」按钮把报告发到指定收件邮箱。系统会核对发件域、验证码和关键词，不会代发。`" />
-    <FaAlert v-else-if="pending" title="人工审核中" description="该邮箱已提交人工审核，通过后即可用同一邮箱注册。可在下方查看当前进度。" />
+    <YdAlert v-if="error" variant="destructive" title="操作未完成" :description="error" />
+    <YdAlert v-if="successHint" title="认证进度" :description="successHint" />
+    <YdAlert v-if="eduDomainPassed" title="教育邮箱已核验" description="该邮箱域名已在白名单中，无需验证码，可直接返回注册。" />
+    <YdAlert v-if="pendingMail" title="等待学信网报告邮件" :description="`报告页已核验，请在 ${mailWaitMinutes} 分钟内用学信网官方「发送到邮箱」按钮把报告发到指定收件邮箱。系统会核对发件域、验证码和关键词，不会代发。`" />
+    <YdAlert v-else-if="pending" title="人工审核中" description="该邮箱已提交人工审核，通过后即可用同一邮箱注册。可在下方查看当前进度。" />
 
-    <FaCard v-if="latest" title="最近一次结果" content-class="ev-card-content">
+    <YdCard v-if="latest" title="最近一次结果" content-class="ev-card-content">
       <VerificationStatusCard :record="latest" />
       <p class="ev-muted">认证通过后请使用同一邮箱完成账号注册。待审核记录不会立即放行。</p>
-    </FaCard>
+    </YdCard>
 
-    <FaCard v-if="status?.records.length" title="该邮箱已有记录" content-class="ev-card-content">
+    <YdCard v-if="status?.records.length" title="该邮箱已有记录" content-class="ev-card-content">
       <div class="ev-record-list">
         <VerificationStatusCard v-for="item in status.records" :key="item.id" :record="item" />
       </div>
-    </FaCard>
+    </YdCard>
 
-    <FaCard v-loading="loading" title="选择认证方式" :description="currentChannel?.description" content-class="ev-card-content">
-      <FaTabs v-if="tabs.length" v-model="tab" :list="tabs" />
+    <YdLoadingOverlay :loading="loading"><YdCard  title="选择认证方式" :description="currentChannel?.description" content-class="ev-card-content">
+      <YdTabs v-if="tabs.length" v-model="tab" :list="tabs" />
       <div v-if="currentChannel?.tutorialMarkdown" class="ev-actions ev-actions-end">
-        <FaButton size="sm" variant="outline" @click="openTutorial(currentChannel)">
-          <FaIcon name="i-ri:book-open-line" />
+        <YdButton size="sm" variant="outline" @click="openTutorial(currentChannel)">
+          <YdIcon name="i-ri:book-open-line" />
           查看教程
-        </FaButton>
+        </YdButton>
       </div>
       <p v-else class="ev-muted">当前没有可用的认证渠道，请联系管理员开启。</p>
 
       <template v-if="tab === 'EMAIL' && channelOf('EMAIL')?.enabled">
         <form class="ev-form" @submit.prevent="recognizeEduEmail">
-          <FaLabel label="教育邮箱" class="ev-field">
-            <FaInput v-model="email" class="w-full" maxlength="120" placeholder="name@xxx.edu.cn" />
+          <YdLabel label="教育邮箱" class="ev-field">
+            <YdInput v-model="email" class="w-full" maxlength="120" placeholder="name@xxx.edu.cn" />
             <span class="ev-field-hint">填写白名单内的高校教育邮箱即视为已核验，无需验证码。默认包含 edu.cn 及其子域，管理员可在域名白名单中增补。</span>
-          </FaLabel>
+          </YdLabel>
           <div class="ev-actions ev-actions-end">
-            <FaButton type="submit" :loading="loading">
-              <FaIcon name="i-ri:shield-check-line" />
+            <YdButton type="submit" :loading="loading">
+              <YdIcon name="i-ri:shield-check-line" />
               识别教育邮箱
-            </FaButton>
+            </YdButton>
           </div>
         </form>
       </template>
 
       <template v-else-if="tab === 'CHSI' && channelOf('CHSI')?.enabled">
         <form class="ev-form" @submit.prevent="verifyChsi">
-          <FaLabel label="联系邮箱" class="ev-field">
-            <FaInput v-model="email" class="w-full" maxlength="120" placeholder="用于绑定认证记录并完成注册" />
+          <YdLabel label="联系邮箱" class="ev-field">
+            <YdInput v-model="email" class="w-full" maxlength="120" placeholder="用于绑定认证记录并完成注册" />
             <span class="ev-field-hint">不必是教育邮箱。核验通过后请用同一邮箱注册。</span>
-          </FaLabel>
-          <FaLabel label="16 位在线验证码" class="ev-field">
-            <FaInput v-model="chsiVcode" class="w-full" maxlength="16" placeholder="学信档案在线验证码" />
+          </YdLabel>
+          <YdLabel label="16 位在线验证码" class="ev-field">
+            <YdInput v-model="chsiVcode" class="w-full" maxlength="16" placeholder="学信档案在线验证码" />
             <span class="ev-field-hint">{{ mailConfirmationEnabled ? '请先在学信网申请报告并填写 16 位验证码。姓名和学校从官方报告页截取，无需手填。报告页通过后，还须用学信网官方发送按钮把报告发到指定邮箱，两步都通过后才可注册。' : '请先在学信网申请《学籍在线验证报告》或《学历证书电子注册备案表》，再填写 16 位验证码。系统会读取官方报告页并截取姓名和学校，无需手填。' }}</span>
-          </FaLabel>
+          </YdLabel>
           <div class="ev-actions ev-actions-end">
-            <FaButton v-if="pendingMail" type="button" variant="outline" :loading="chsiBusy" @click="confirmChsiMail">
-              <FaIcon name="i-ri:mail-check-line" />
+            <YdButton v-if="pendingMail" type="button" variant="outline" :loading="chsiBusy" @click="confirmChsiMail">
+              <YdIcon name="i-ri:mail-check-line" />
               我已发送报告邮件
-            </FaButton>
-            <FaButton type="submit" :loading="chsiBusy">
-              <FaIcon name="i-ri:shield-check-line" />
+            </YdButton>
+            <YdButton type="submit" :loading="chsiBusy">
+              <YdIcon name="i-ri:shield-check-line" />
               提交学信网核验
-            </FaButton>
+            </YdButton>
           </div>
         </form>
       </template>
@@ -380,10 +381,10 @@ onUnmounted(() => {
           @submit="submitManual"
         />
       </template>
-    </FaCard>
+    </YdCard></YdLoadingOverlay>
 
-    <FaModal v-model="tutorialOpen" :title="tutorialChannel ? `${tutorialChannel.name}教程` : '认证教程'" :show-confirm-button="false">
+    <YdModal v-model="tutorialOpen" :title="tutorialChannel ? `${tutorialChannel.name}教程` : '认证教程'" :show-confirm-button="false">
       <MarkdownPreview :content="tutorialChannel?.tutorialMarkdown" />
-    </FaModal>
+    </YdModal>
   </div>
 </template>

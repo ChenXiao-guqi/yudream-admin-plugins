@@ -1,15 +1,16 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { MaterialItem, VerificationRecord } from '../types'
-import { FaAlert, FaButton, FaCard, FaDrawer, FaIcon, FaInput, FaLabel, FaModal, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable, FaSearchBar, FaSelect, FaTag, FaTextarea, useFaToast } from '@yudream/components'
+import { YdAlert, YdButton, YdCard, YdDrawer, YdIcon, YdInput, YdLabel, YdModal, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdSelect, YdTag, YdTextarea, useYdToast } from '@yudream/components'
 import { computed, onMounted, ref } from 'vue'
 import { createEduVerifyApi } from '../api/edu-verify-api'
 import { channelLabel, errorMessage, formatSize, formatTime, isImageMaterial, kindLabel, statusLabel, statusVariant } from '../types'
 
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 const api = createEduVerifyApi(props.sdk)
-const toast = useFaToast()
+const toast = useYdToast()
 
 const loading = ref(false)
 const acting = ref(false)
@@ -210,29 +211,29 @@ onMounted(load)
 
 <template>
   <section class="ev-page">
-    <FaPageHeader title="认证审核" :description="`共 ${total} 条认证记录`">
-      <FaButton variant="outline" :loading="loading" @click="load">
-        <FaIcon name="i-ri:refresh-line" />
+    <YdPageHeader title="认证审核" :description="`共 ${total} 条认证记录`">
+      <YdButton variant="outline" :loading="loading" @click="load">
+        <YdIcon name="i-ri:refresh-line" />
         刷新
-      </FaButton>
-    </FaPageHeader>
+      </YdButton>
+    </YdPageHeader>
 
-    <FaPageMain>
-      <FaAlert v-if="error" variant="destructive" title="加载失败" :description="error" />
-      <FaSearchBar class="w-full">
+    <YdPageMain>
+      <YdAlert v-if="error" variant="destructive" title="加载失败" :description="error" />
+      <YdSearchBar class="w-full">
         <div class="ev-toolbar">
-          <FaInput v-model="keyword" placeholder="邮箱 / 姓名 / 学校" clearable @keydown.enter="search" @clear="search" />
-          <FaSelect v-model="status" :options="statusOptions" @change="search" />
-          <FaSelect v-model="channel" :options="channelOptions" @change="search" />
-          <FaButton variant="outline" @click="search">
-            <FaIcon name="i-ri:search-line" />
+          <YdInput v-model="keyword" placeholder="邮箱 / 姓名 / 学校" clearable @keydown.enter="search" @clear="search" />
+          <YdSelect v-model="status" :options="statusOptions" @change="search" />
+          <YdSelect v-model="channel" :options="channelOptions" @change="search" />
+          <YdButton variant="outline" @click="search">
+            <YdIcon name="i-ri:search-line" />
             查询
-          </FaButton>
+          </YdButton>
         </div>
-      </FaSearchBar>
+      </YdSearchBar>
 
-      <FaResponsiveTable
-        v-loading="loading"
+      <YdLoadingOverlay :loading="loading"><YdResponsiveTable
+
         :columns="columns"
         :data="records"
         row-key="id"
@@ -253,25 +254,25 @@ onMounted(load)
           {{ channelLabel(row.original.channel, row.original.channelName) }}
         </template>
         <template #cell-status="{ row }">
-          <FaTag :variant="statusVariant(row.original.status)">
+          <YdTag :variant="statusVariant(row.original.status)">
             {{ statusLabel(row.original.status, row.original.statusName) }}
-          </FaTag>
+          </YdTag>
         </template>
         <template #cell-realName="{ row }">{{ row.original.realName || '-' }}</template>
         <template #cell-schoolName="{ row }">{{ row.original.schoolName || '-' }}</template>
         <template #cell-submittedAt="{ row }">{{ formatTime(row.original.submittedAt) }}</template>
         <template #cell-operation="{ row }">
           <div class="ev-row-actions">
-            <FaButton size="sm" variant="outline" @click="openDetail(row.original)">详情</FaButton>
-            <FaButton
+            <YdButton size="sm" variant="outline" @click="openDetail(row.original)">详情</YdButton>
+            <YdButton
               v-if="row.original.status === 'PENDING' || row.original.status === 'REJECTED'"
               size="sm"
               :disabled="acting"
               @click="openApprove(row.original)"
             >
               通过
-            </FaButton>
-            <FaButton
+            </YdButton>
+            <YdButton
               v-if="row.original.status === 'PENDING'"
               size="sm"
               variant="destructive"
@@ -279,8 +280,8 @@ onMounted(load)
               @click="openReason(row.original, 'reject')"
             >
               驳回
-            </FaButton>
-            <FaButton
+            </YdButton>
+            <YdButton
               v-if="row.original.status === 'PASSED' && !row.original.userId"
               size="sm"
               variant="destructive"
@@ -288,15 +289,15 @@ onMounted(load)
               @click="openReason(row.original, 'revoke')"
             >
               撤销
-            </FaButton>
+            </YdButton>
           </div>
         </template>
         <template #card="{ row }">
-          <FaCard class="w-full">
+          <YdCard class="w-full">
             <div class="ev-record-card">
               <div class="ev-record-head">
                 <div class="ev-record-title">
-                  <FaTag :variant="statusVariant(row.status)">{{ statusLabel(row.status, row.statusName) }}</FaTag>
+                  <YdTag :variant="statusVariant(row.status)">{{ statusLabel(row.status, row.statusName) }}</YdTag>
                   <strong>{{ row.email || '-' }}</strong>
                 </div>
                 <span class="ev-record-meta">{{ channelLabel(row.channel, row.channelName) }}</span>
@@ -304,17 +305,17 @@ onMounted(load)
               <div class="ev-muted">{{ row.realName || '-' }} · {{ row.schoolName || '-' }}</div>
               <div class="ev-record-meta">提交于 {{ formatTime(row.submittedAt) }}</div>
               <div class="ev-actions ev-actions-end">
-                <FaButton size="sm" variant="outline" @click="openDetail(row)">详情</FaButton>
-                <FaButton v-if="row.status === 'PENDING' || row.status === 'REJECTED'" size="sm" :disabled="acting" @click="openApprove(row)">通过</FaButton>
-                <FaButton v-if="row.status === 'PENDING'" size="sm" variant="destructive" :disabled="acting" @click="openReason(row, 'reject')">驳回</FaButton>
-                <FaButton v-if="row.status === 'PASSED'" size="sm" variant="destructive" :disabled="acting" @click="openReason(row, 'revoke')">撤销</FaButton>
+                <YdButton size="sm" variant="outline" @click="openDetail(row)">详情</YdButton>
+                <YdButton v-if="row.status === 'PENDING' || row.status === 'REJECTED'" size="sm" :disabled="acting" @click="openApprove(row)">通过</YdButton>
+                <YdButton v-if="row.status === 'PENDING'" size="sm" variant="destructive" :disabled="acting" @click="openReason(row, 'reject')">驳回</YdButton>
+                <YdButton v-if="row.status === 'PASSED'" size="sm" variant="destructive" :disabled="acting" @click="openReason(row, 'revoke')">撤销</YdButton>
               </div>
             </div>
-          </FaCard>
+          </YdCard>
         </template>
-      </FaResponsiveTable>
+      </YdResponsiveTable></YdLoadingOverlay>
 
-      <FaPagination
+      <YdPagination
         v-model:page="page"
         v-model:size="size"
         :total="total"
@@ -323,9 +324,9 @@ onMounted(load)
         @page-change="load"
         @size-change="search"
       />
-    </FaPageMain>
+    </YdPageMain>
 
-    <FaDrawer
+    <YdDrawer
       v-model="drawerOpen"
       :title="detail ? `${detail.email || '认证详情'}` : '认证详情'"
       :show-confirm-button="false"
@@ -334,7 +335,7 @@ onMounted(load)
     >
       <div v-if="detail" class="ev-stack">
         <dl class="ev-detail">
-          <div><dt>状态</dt><dd><FaTag :variant="statusVariant(detail.status)">{{ statusLabel(detail.status, detail.statusName) }}</FaTag></dd></div>
+          <div><dt>状态</dt><dd><YdTag :variant="statusVariant(detail.status)">{{ statusLabel(detail.status, detail.statusName) }}</YdTag></dd></div>
           <div><dt>渠道</dt><dd>{{ channelLabel(detail.channel, detail.channelName) }}</dd></div>
           <div><dt>邮箱</dt><dd>{{ detail.email || '-' }}</dd></div>
           <div><dt>用户</dt><dd>{{ detail.userId || '尚未绑定' }}</dd></div>
@@ -365,34 +366,34 @@ onMounted(load)
         </div>
         <p v-else class="ev-muted">没有可预览的证明材料。</p>
         <div class="ev-actions ev-actions-end">
-          <FaButton
+          <YdButton
             v-if="detail.status === 'PENDING' || detail.status === 'REJECTED'"
             :disabled="acting"
             @click="openApprove(detail)"
           >
             通过
-          </FaButton>
-          <FaButton
+          </YdButton>
+          <YdButton
             v-if="detail.status === 'PENDING'"
             variant="destructive"
             :disabled="acting"
             @click="openReason(detail, 'reject')"
           >
             驳回
-          </FaButton>
-          <FaButton
+          </YdButton>
+          <YdButton
             v-if="detail.status === 'PASSED'"
             variant="destructive"
             :disabled="acting"
             @click="openReason(detail, 'revoke')"
           >
             撤销
-          </FaButton>
+          </YdButton>
         </div>
       </div>
-    </FaDrawer>
+    </YdDrawer>
 
-    <FaModal
+    <YdModal
       v-model="approveOpen"
       title="通过认证"
       :confirm-button-loading="acting"
@@ -400,24 +401,24 @@ onMounted(load)
     >
       <div class="ev-stack">
         <p class="ev-muted">通过前必须核对并填写姓名、学校，写入人员管理留档。学信网转入的申请若申请人未填，请管理员在此补全或纠正。</p>
-        <FaLabel label="真实姓名" class="ev-field">
-          <FaInput v-model="approveRealName" class="w-full" maxlength="40" placeholder="与证件或学信网报告一致" />
-        </FaLabel>
-        <FaLabel label="学校名称" class="ev-field">
-          <FaInput v-model="approveSchoolName" class="w-full" maxlength="80" placeholder="如：某某大学" />
-        </FaLabel>
+        <YdLabel label="真实姓名" class="ev-field">
+          <YdInput v-model="approveRealName" class="w-full" maxlength="40" placeholder="与证件或学信网报告一致" />
+        </YdLabel>
+        <YdLabel label="学校名称" class="ev-field">
+          <YdInput v-model="approveSchoolName" class="w-full" maxlength="80" placeholder="如：某某大学" />
+        </YdLabel>
       </div>
-    </FaModal>
+    </YdModal>
 
-    <FaModal
+    <YdModal
       v-model="reasonOpen"
       :title="reasonTitle"
       :confirm-button-loading="acting"
       :before-close="handleReasonClose"
     >
-      <FaLabel :label="reasonAction === 'reject' ? '驳回原因' : '撤销原因'" class="ev-field">
-        <FaTextarea v-model="reason" :rows="4" maxlength="200" placeholder="必填，将通知申请人" />
-      </FaLabel>
-    </FaModal>
+      <YdLabel :label="reasonAction === 'reject' ? '驳回原因' : '撤销原因'" class="ev-field">
+        <YdTextarea v-model="reason" :rows="4" maxlength="200" placeholder="必填，将通知申请人" />
+      </YdLabel>
+    </YdModal>
   </section>
 </template>

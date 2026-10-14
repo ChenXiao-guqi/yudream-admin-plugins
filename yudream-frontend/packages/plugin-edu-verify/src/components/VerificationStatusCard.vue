@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { VerificationRecord } from '../types'
-import { FaCard, FaTag } from '@yudream/components'
+import { YdCard, YdTag } from '@yudream/components'
 import { channelLabel, formatTime, statusLabel, statusVariant } from '../types'
 
 defineProps<{
@@ -10,13 +10,13 @@ defineProps<{
 </script>
 
 <template>
-  <FaCard :title="title || channelLabel(record.channel, record.channelName)" content-class="ev-card-content">
+  <YdCard :title="title || channelLabel(record.channel, record.channelName)" content-class="ev-card-content">
     <div class="ev-record-card">
       <div class="ev-record-head">
         <div class="ev-record-title">
-          <FaTag :variant="statusVariant(record.status)">
+          <YdTag :variant="statusVariant(record.status)">
             {{ statusLabel(record.status, record.statusName) }}
-          </FaTag>
+          </YdTag>
           <span>{{ channelLabel(record.channel, record.channelName) }}</span>
         </div>
         <span class="ev-record-meta">提交于 {{ formatTime(record.submittedAt) }}</span>
@@ -30,5 +30,5 @@ defineProps<{
         <div v-if="record.decidedAt && record.decidedAt !== '0'"><dt>处理时间</dt><dd>{{ formatTime(record.decidedAt) }}</dd></div>
       </dl>
     </div>
-  </FaCard>
+  </YdCard>
 </template>
