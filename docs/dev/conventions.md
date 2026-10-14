@@ -3,7 +3,7 @@
 > **适用范围**：`yudream-admin-plugins` 全仓。
 > **目标**：明确独立仓边界、版本/发布纪律、验证路径与文档维护规则。
 
-专项规则见 [plugin-development.md](plugin-development.md)；经验库见 `../exp/README.md`；双仓同步按主仓 `D:/code/yudream-admim/docs/dev/repo-sync.md`。
+专项规则见 [plugin-development.md](plugin-development.md)；经验库见 `../exp/README.md`；双仓同步按主仓仓库内 `docs/dev/repo-sync.md`。
 
 ## 1. 仓库职责与边界
 

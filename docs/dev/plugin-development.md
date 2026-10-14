@@ -3,7 +3,7 @@
 > **适用范围**：本仓 Java 后端 JAR、Vue Web remote frontend、React Native 插件适配边界。
 > **目标**：保持宿主契约隔离、用户/管理员数据严格分权、插件生命周期完整、UI 只消费已发布公开组件。
 
-宿主规范权威与本仓同步地图见 `D:/code/yudream-admim/docs/dev/plugin-system.md`、`docs/dev/backend-architecture.md`、`docs/dev/permission-codes.md`、`docs/dev/repo-sync.md`。组件视觉规范见本仓同步副本 `docs/yd-ui-guidelines.md`。
+宿主规范权威与本仓同步地图见主仓仓库内 `docs/dev/plugin-system.md`、`docs/dev/backend-architecture.md`、`docs/dev/permission-codes.md`、`docs/dev/repo-sync.md`。组件视觉规范见本仓同步副本 `docs/yd-ui-guidelines.md`。
 
 ## 1. 第一步与影响面
 
