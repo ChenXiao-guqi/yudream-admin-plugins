@@ -2,6 +2,7 @@
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import { computed, ref } from 'vue'
 import { RouterLink } from 'vue-router'
+import { YdAction, YdInput } from '@yudream/components'
 import { pluginAsset, themeAsset, useThemeContext, useThemeSeo } from './use-theme-context'
 
 const props = defineProps<{ sdk: YuDreamPluginSdk, route?: { meta?: { plugin?: { component?: string } } } }>()
@@ -116,19 +117,19 @@ function setPage() {
     </div>
     <div v-if="loaded && activities.length" class="activity-pagination">
       <div class="activity-pagination-item">
-        <button type="button" class="minecraft-button" @click="movePage('prev')">&lt;</button>
+        <YdAction class="minecraft-button" aria-label="上一页" :disabled="page <= 1" @click="movePage('prev')">&lt;</YdAction>
         <span>第</span>
         <span class="page">{{ page }}</span>
         <span>/</span>
         <span class="total">{{ maxPage }}</span>
         <span>页</span>
-        <button type="button" class="minecraft-button" @click="movePage('next')">&gt;</button>
+        <YdAction class="minecraft-button" aria-label="下一页" :disabled="page >= maxPage" @click="movePage('next')">&gt;</YdAction>
       </div>
       <div class="activity-pagination-item">
         <span>前往</span>
-        <input v-model="pageInput" class="minecraft-input" @keyup.enter="setPage">
+        <YdInput v-model="pageInput" class="minecraft-input" aria-label="跳转到页码" inputmode="numeric" @keyup.enter="setPage" />
         <span>页</span>
-        <button type="button" class="minecraft-button" @click="setPage">→</button>
+        <YdAction class="minecraft-button" aria-label="跳转" @click="setPage">→</YdAction>
       </div>
     </div>
   </div>

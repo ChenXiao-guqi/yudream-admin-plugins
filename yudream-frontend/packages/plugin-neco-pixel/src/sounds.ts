@@ -1,3 +1,6 @@
+import type { YdDomActionInstance } from '@yudream/components'
+import { useYdDomAction } from '@yudream/components'
+
 /**
  * 交互音效：使用上游 neco 打包的原版 MC 按钮点击音（public/button.click.ogg，MIT）。
  * 仅在主题处于激活状态且事件发生在公开页容器内时播放。
@@ -11,7 +14,7 @@ const INTERACTIVE_SELECTOR = 'a, button, summary, input, select, textarea, [role
 
 let clickAudio: HTMLAudioElement | null = null
 let lastHoverTarget: EventTarget | null = null
-let toggleButton: HTMLButtonElement | null = null
+let toggleButton: YdDomActionInstance | null = null
 let headObserver: MutationObserver | null = null
 let installed = false
 
@@ -94,37 +97,37 @@ function onClick(event: MouseEvent) {
 
 function syncToggleVisibility() {
   if (toggleButton) {
-    toggleButton.hidden = !themeActive()
+    toggleButton.element && (toggleButton.element.hidden = !themeActive())
   }
 }
 
-function createToggleButton() {
-  const button = document.createElement('button')
-  button.type = 'button'
-  button.className = 'neco-sound-toggle'
-  button.title = '像素音效开关'
+function createToggleButton(): YdDomActionInstance {
   const render = () => {
     const enabled = soundEnabled()
-    button.textContent = enabled ? '♪' : '×'
-    button.classList.toggle('neco-sound-off', !enabled)
-    button.setAttribute('aria-pressed', String(enabled))
+    toggleButton?.update({ text: enabled ? '♪' : '×', pressed: enabled })
+    toggleButton?.element?.classList.toggle('neco-sound-off', !enabled)
   }
-  button.addEventListener('click', (event) => {
-    event.stopPropagation()
-    try {
-      localStorage.setItem(STORAGE_KEY, soundEnabled() ? 'off' : 'on')
-    }
-    catch {
-      // localStorage 不可用时仅切换当次会话
-    }
-    render()
-    if (soundEnabled()) {
-      playClick()
-    }
+  return useYdDomAction(document.body, {
+    type: 'button',
+    class: 'neco-sound-toggle',
+    title: '像素音效开关',
+    ariaLabel: '切换像素音效',
+    pressed: soundEnabled(),
+    text: soundEnabled() ? '♪' : '×',
+    onClick: (event) => {
+      event.stopPropagation()
+      try {
+        localStorage.setItem(STORAGE_KEY, soundEnabled() ? 'off' : 'on')
+      }
+      catch {
+        // localStorage 不可用时仅切换当次会话
+      }
+      render()
+      if (soundEnabled()) {
+        playClick()
+      }
+    },
   })
-  render()
-  document.body.appendChild(button)
-  return button
 }
 
 export function installSounds() {
@@ -149,7 +152,7 @@ export function disposeSounds() {
   document.removeEventListener('click', onClick, true)
   headObserver?.disconnect()
   headObserver = null
-  toggleButton?.remove()
+  toggleButton?.dispose()
   toggleButton = null
   lastHoverTarget = null
   clickAudio = null

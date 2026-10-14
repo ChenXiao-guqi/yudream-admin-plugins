@@ -2,6 +2,7 @@
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
+import { YdAction } from '@yudream/components'
 import { pluginAsset } from './use-theme-context'
 
 interface NavItem {
@@ -239,8 +240,7 @@ onUnmounted(() => {
   <div class="neco-chrome">
     <div v-if="!blank" class="nav-container">
       <div class="nav-controls">
-        <button
-          type="button"
+        <YdAction
           class="nav-fold-btn"
           :aria-expanded="!navFolded"
           aria-controls="site-nav"
@@ -251,15 +251,14 @@ onUnmounted(() => {
             <path d="M4 6h16M4 12h16M4 18h16" />
           </svg>
           <span class="nav-fold-text">菜单</span>
-        </button>
+        </YdAction>
         <div class="nav-auth">
           <template v-if="!isLogin">
             <a class="nav-auth-link" href="/login" @click.prevent="go('/login')">登录</a>
             <a class="nav-auth-link nav-auth-link--primary" href="/register" @click.prevent="go('/register')">注册</a>
           </template>
           <div v-else class="nav-account" :class="{ 'is-open': accountOpen }">
-            <button
-              type="button"
+            <YdAction
               class="nav-account-btn"
               :aria-expanded="accountOpen"
               aria-haspopup="true"
@@ -269,7 +268,7 @@ onUnmounted(() => {
               <span v-else class="nav-account-fallback mcfont" aria-hidden="true">{{ (account || '?').slice(0, 1) }}</span>
               <span class="nav-account-name mcfont">{{ account }}</span>
               <span class="nav-account-caret" aria-hidden="true">▾</span>
-            </button>
+            </YdAction>
             <div v-show="accountOpen" class="nav-account-menu" role="menu">
               <a href="/" role="menuitem" @click.prevent="go('/')">控制台</a>
               <a href="/profile" role="menuitem" @click.prevent="go('/profile')">个人资料</a>

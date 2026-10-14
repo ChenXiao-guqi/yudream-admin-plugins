@@ -1,3 +1,7 @@
+import { h } from 'vue'
+import type { YdDomActionInstance } from '@yudream/components'
+import { useYdDomAction } from '@yudream/components'
+
 /**
  * 6 色强调色切换器运行时：移植上游 neco 的 data-accent 体系（MIT）。
  *
@@ -31,7 +35,8 @@ const ACCENTS: AccentOption[] = [
 
 const DEFAULT_ACCENT = 'green'
 
-let toggleButton: HTMLButtonElement | null = null
+let toggleButton: YdDomActionInstance | null = null
+const swatchActions: YdDomActionInstance[] = []
 let panel: HTMLDivElement | null = null
 let headObserver: MutationObserver | null = null
 let outsideClickHandler: ((event: MouseEvent) => void) | null = null
@@ -111,21 +116,18 @@ function selectAccent(accent: string) {
 }
 
 function syncSwatchState() {
-  if (!panel) {
-    return
-  }
   const active = currentAccent()
-  panel.querySelectorAll<HTMLButtonElement>('.neco-palette-swatch').forEach((swatch) => {
-    const isActive = swatch.dataset.accent === active
-    swatch.classList.toggle('active', isActive)
-    swatch.setAttribute('aria-pressed', String(isActive))
+  swatchActions.forEach((swatch, index) => {
+    const isActive = ACCENTS[index]?.id === active
+    swatch.update({ pressed: isActive })
+    swatch.element?.classList.toggle('active', isActive)
   })
 }
 
 function syncVisibility() {
   const visible = themeActive()
   if (toggleButton) {
-    toggleButton.hidden = !visible
+    toggleButton.element && (toggleButton.element.hidden = !visible)
   }
   if (!visible && panel) {
     panel.hidden = true
@@ -145,24 +147,19 @@ function closePanel() {
   }
 }
 
-function createToggleButton() {
-  const button = document.createElement('button')
-  button.type = 'button'
-  button.className = 'neco-palette-toggle'
-  button.title = '强调色'
-  button.setAttribute('aria-haspopup', 'true')
+function createToggleButton(): YdDomActionInstance {
   const iconColors = ['#3c8527', '#b02e26', '#3c44aa', '#c8a03a']
-  for (const color of iconColors) {
-    const square = document.createElement('i')
-    square.style.background = color
-    button.appendChild(square)
-  }
-  button.addEventListener('click', (event) => {
-    event.stopPropagation()
-    togglePanel()
+  return useYdDomAction(document.body, {
+    type: 'button',
+    class: 'neco-palette-toggle',
+    title: '强调色',
+    ariaLabel: '打开强调色色板',
+    content: () => h('span', iconColors.map(color => h('i', { style: { backgroundColor: color } }))),
+    onClick: (event) => {
+      event.stopPropagation()
+      togglePanel()
+    },
   })
-  document.body.appendChild(button)
-  return button
 }
 
 function createPanel() {
@@ -180,18 +177,21 @@ function createPanel() {
   const swatches = document.createElement('div')
   swatches.className = 'neco-palette-swatches'
   for (const accent of ACCENTS) {
-    const swatch = document.createElement('button')
-    swatch.type = 'button'
-    swatch.className = 'neco-palette-swatch'
-    swatch.dataset.accent = accent.id
-    swatch.title = accent.label
-    swatch.style.setProperty('--swatch', accent.color)
-    swatch.addEventListener('click', (event) => {
-      event.stopPropagation()
-      selectAccent(accent.id)
-      closePanel()
+    const action = useYdDomAction(swatches, {
+      type: 'button',
+      class: 'neco-palette-swatch',
+      title: accent.label,
+      ariaLabel: `切换强调色：${accent.label}`,
+      pressed: currentAccent() === accent.id,
+      onClick: (event) => {
+        event.stopPropagation()
+        selectAccent(accent.id)
+        closePanel()
+      },
     })
-    swatches.appendChild(swatch)
+    action.element?.style.setProperty('--swatch', accent.color)
+    action.element?.setAttribute('data-accent', accent.id)
+    swatchActions.push(action)
   }
   el.appendChild(swatches)
 
@@ -211,7 +211,7 @@ export function installAccent() {
   panel = createPanel()
   syncSwatchState()
   outsideClickHandler = (event: MouseEvent) => {
-    if (panel && !panel.hidden && event.target !== toggleButton) {
+    if (panel && !panel.hidden && !toggleButton?.element?.contains(event.target as Node)) {
       closePanel()
     }
   }
@@ -232,8 +232,9 @@ export function disposeAccent() {
     document.removeEventListener('click', outsideClickHandler, true)
     outsideClickHandler = null
   }
-  toggleButton?.remove()
+  toggleButton?.dispose()
   toggleButton = null
+  swatchActions.splice(0).forEach(action => action.dispose())
   panel?.remove()
   panel = null
   document.documentElement.removeAttribute('data-accent')

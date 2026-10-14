@@ -2,6 +2,7 @@
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
+import { YdAction } from '@yudream/components'
 import { pluginAsset, themeAsset, useThemeSeo } from './use-theme-context'
 
 interface PublicActivity {
@@ -190,9 +191,9 @@ function goJoin() {
         <div v-if="activity.description" class="activity-description">{{ activity.description }}</div>
         <div class="activity-actions">
           <RouterLink class="minecraft-button activity-back" to="/activities">返回列表</RouterLink>
-          <button type="button" class="minecraft-button activity-join" @click="goJoin">
+          <YdAction class="minecraft-button activity-join" @click="goJoin">
             {{ loggedIn ? '立即参与' : '登录后参与' }}
-          </button>
+          </YdAction>
         </div>
       </div>
     </article>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { YdAction } from '@yudream/components'
 import { configList, configText, pluginAsset, themeAsset, useThemeContext, useThemeSeo } from './use-theme-context'
 
 interface ServerPlayer {
@@ -31,7 +32,6 @@ const listBackground = computed(() => pluginAsset(props.sdk, 'background/list-ba
 const copyHint = computed(() => configText(config.value, 'serversHint', '双击卡片复制地址，进游戏粘贴直接加入。'))
 const unreachableSrc = computed(() => pluginAsset(props.sdk, 'ui/server/Server_Unreachable.png'))
 
-const focusIndex = ref(-1)
 const pingFrame = ref(1)
 const pingDirection = ref(1)
 const expandedPlayers = ref<Record<number, boolean>>({})
@@ -124,7 +124,6 @@ onUnmounted(() => {
 
 watch(servers, () => {
   expandedPlayers.value = {}
-  focusIndex.value = -1
 })
 </script>
 
@@ -137,15 +136,13 @@ watch(servers, () => {
         v-for="(server, index) in servers"
         :key="index"
         class="server-card"
-        :class="{ 'is-focus': focusIndex === index }"
         :style="{ '--delay': `${index * 0.2}s` }"
-        @click="focusIndex = index"
         @dblclick="copyAddress(server.address)"
       >
         <div class="item-border">
-          <button type="button" class="server-icon-button" :aria-label="`复制 ${server.name} 的服务器地址`" @click.stop="copyAddress(server.address)">
+          <YdAction class="server-icon-button" :aria-label="`复制 ${server.name} 的服务器地址`" @click.stop="copyAddress(server.address)">
             <img :src="iconSrc(server)" class="server-icon" alt="">
-          </button>
+          </YdAction>
           <div class="item-info mcfont">
             <span class="server-name">{{ server.name }}</span>
             <span class="server-motd">{{ motd(server) }}</span>
@@ -158,14 +155,14 @@ watch(servers, () => {
             </span>
             <span class="server-actions">
               <a v-if="server.onlineMapUrl || server.mapUrl" :href="server.onlineMapUrl || server.mapUrl" target="_blank" rel="noopener noreferrer">网页地图</a>
-              <button
+              <YdAction
                 v-if="liveServers && server.online && players(server).length"
-                type="button"
                 class="player-toggle-button"
+                :aria-expanded="!!expandedPlayers[index]"
                 @click.stop="expandedPlayers[index] = !expandedPlayers[index]"
               >
                 {{ expandedPlayers[index] ? '收起玩家' : '查看玩家' }}
-              </button>
+              </YdAction>
             </span>
           </div>
         </div>
@@ -271,7 +268,7 @@ watch(servers, () => {
   border: 2px solid transparent;
 }
 
-.server-card.is-focus > .item-border,
+.server-card:focus-within > .item-border,
 .item-border:hover {
   background-color: var(--neco-bg-sunken, #111111);
   border: 2px solid var(--neco-focus-ring, #fff);
