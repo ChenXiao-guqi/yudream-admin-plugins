@@ -1,4 +1,0 @@
-interface:
-  display_name: "YuDream 插件开发"
-  short_description: "按 YuDream 契约、UI 与 DDD 规范开发插件"
-  default_prompt: "Use $yudream-plugin-development to implement a YuDream plugin with the repository UI, frontend, backend, and contract conventions."

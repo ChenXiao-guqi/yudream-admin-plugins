@@ -1,22 +1,38 @@
-# 插件前端工程规则
+# YuDream Admin Plugin Frontend
 
-本文件适用于本仓 `yudream-frontend`。同时遵守根 [AGENTS.md](../AGENTS.md) 与 [YD 视觉与组件使用规范](../docs/yd-ui-guidelines.md)。后者是宿主仓同名文档的同步副本；组件选型和视觉规则变化时，先维护宿主权威文档，再在同一工作项同步本副本、AGENTS 与 `.codex/skills/yudream-plugin-development/` 相关 reference。
+> **适用范围**：本仓 `yudream-frontend/` 中的 Vue Web remote 与 React Native 插件包。
+> **目标**：提供前端工作入口；本仓硬规则以根 `../AGENTS.md` 与 `../docs/dev/` 为准。
 
-## Vue Web 组件边界
+## 1. 工程概览
 
-- 业务只使用已发布 `@yudream/components` 的公开 `Yd*` / `useYd*`，显式导入并通过 SDK 共享桥消费宿主实例；不继承宿主 auto-import。
-- 宿主与插件已迁移的 Vue Web 规范门禁保持零违规；保留 findings={} 与验收 Git SHA，不得重新放回历史例外。基线只能从明确已提交版本生成。
-- 禁止业务直接使用 Fa、Arco、TDesign、Reka 等通用控件或局部别名，禁止原生通用交互与页面私有加载/通知/选择弹窗。语义内容、真实链接和纯布局元素可以保留；技术引擎必须经 YD adapter。
-- 无组件时先在宿主封装，核对模型、事件、插槽、实例方法、主题与弹层，完成公开导出、SDK 共享桥与预览；components/SDK 发布验签通过后才更新本仓 catalog/lockfile。不得复制宿主代码、依赖本地宿主 workspace 或填写未发布版本。
-- 普通管理使用 `YdPageHeader`/`YdPageMain`、基础表单控件与 `YdResponsiveTable #card`；短编辑/确认用 `YdModal`，上下文详情用 `YdDrawer`，轻量锚点交互用 `YdPopover`，远程分页选人/资源用 `YdTablePicker`，独立长流程使用路由页。
-- 少量选项用 `YdSelect`/`YdRadioGroup`，可见多选用 `YdCheckboxGroup`，搜索单选用 `YdCombobox`，单值路径用 `YdCascader`，层级浏览/勾选用 `YdTree`。需要完整多选、远程搜索、异步树或拖拽时先检查契约，缺失先封装，不机械替换。
-- 阶段用 `YdSteps`，顺序任务用 `YdMultiStepLoader`，进度用 `YdProgress`，历史用 `YdTimeline`。装饰仅强调少量重点，不遮挡表单、表格、错误与危险确认。三套外观中功能动画保持运行。
-- 使用声明式 `style.css` 与 SDK UnoCSS 插件，保持 `yudream-base < yudream-plugin < 宿主工具类` 层级；禁止手写 style 注入、固定主色与业务私有激活色。支持明暗、三套外观、窄屏、键盘、焦点及全状态。
+- Vue Web 插件位于 `packages/plugin-{code}`；React Native 插件独立使用 `@yudream/plugin-mobile-ui`，不导入 Vue YD。
+- Workspace 只包含 `packages/plugin-*`；不依赖宿主 workspace、本地源码或宿主 app。
+- Vue Web 组件权威规范在主仓 `D:/code/yudream-admim/docs/yd-ui-guidelines.md`，本仓副本 `../docs/yd-ui-guidelines.md`。
 
-## React Native 适配边界
+## 2. 必须遵守
 
-`plugin-*-mobile`、`plugin-mobile-ui` 与 `plugin-sdk-mobile` 采用 React Native，不能导入 Vue YD。业务通用交互复用独立的 `@yudream/plugin-mobile-ui`；缺少能力先扩展该共享 adapter，继承宿主移动 theme tokens、无障碍、加载/错误/禁用状态与资源清理约定。此边界不豁免 Web 业务的 YD-only 规则。
+1. UI 工作前读根 `../AGENTS.md`、`../docs/dev/plugin-development.md`、`../docs/yd-ui-guidelines.md`。
+2. Vue Web 业务只用已发布 `@yudream/components` 公开 `Yd*`/`useYd*`，显式导入并经 SDK shared bridge；禁止 Fa/裸 Arco/TDesign/Reka、别名和手写通用交互。缺能力先主仓封装、同步导出/resolver/SDK bridge/preview、发布验签，再更新本仓 catalog/lockfile。
+3. 用户面 `/me/**` 与管理面 `/admin/**` 分开 routes/pages/API/store；个人数据始终只按当前 principal，管理员在用户面不获得跨用户权限。
+4. 可增长管理列表必须 API 分页；比较型数据使用 `YdResponsiveTable` + `#card`，使用 `YdPagination`，不以装饰卡片代替表格。
+5. 每个 route 映射独立真实 page，不按 path/meta 猜页面；一页一条主业务流，长流程独立 route。
+6. Long/Snowflake ID 保持 string；禁止 `Number(id)` 和数值表单控件。
+7. 组件契约变更/规范约束性修改要检查主仓 `docs/dev/repo-sync.md`，命中即同一工作项同步主仓文件与 `docs/yd-ui-guidelines.md` 副本；本仓副本不得成为新事实来源。
+8. 目标包 typecheck/build；跨插件、依赖、打包或发布变化运行根 `ci/verify-plugin-repo-readiness.sh`。
 
-## 工作流程
+## 3. 前端组织与适配
 
-读取 `.codex/skills/yudream-plugin-development/SKILL.md` 及对应 reference；检查匹配后端元数据、远程入口、Vite 与打包配置。规范同步 → 契约包发布与 verify → 已发布依赖同步 → 按模块迁移与验证，不跳过契约边界。保留已有改动，每个独立模块完成目标 typecheck/lint 和 build 后创建中文提交；未获授权不 push/tag/发布。前端包行为变化按根规则同步受影响插件版本与 releaseNotes，纯文档不升版。
+- Composition API + `<script setup lang="ts">`；`src/api` 放 SDK wrappers，`components` 放复用 UI，`composables` 放有状态 workflow，`pages` 放真实 route pages，`index.ts` 导出 remote contract，`types.ts` 放共享模型。
+- 插件不继承宿主 auto-import；shared components 显式从包根入口导入。API wrapper 使用 host SDK，不创建私有 axios/fetch 或写死宿主 origin。
+- 业务页面保持 loading/empty/error/disabled/success states，表单防重复提交并显示后端错误，modal/drawer 关闭时清临时状态；窄屏检查内容、按钮与操作区不重叠。
+- 用户/管理员 API、页面和状态缓存分开；账号切换、logout、plugin unload 清个人缓存。
+
+## 4. 常用命令
+
+```powershell
+pnpm install --frozen-lockfile
+pnpm --filter @yudream/plugin-{code} run typecheck
+pnpm --filter @yudream/plugin-{code} run build
+```
+
+纯文档改动不升插件版本；行为变更按根 `../docs/dev/conventions.md` 更新受影响插件 SemVer 与 `releaseNotes`。
