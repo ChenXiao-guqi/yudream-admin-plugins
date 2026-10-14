@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { QuestionBankPluginModel } from '../composables/useQuestionBankPlugin'
 import type { QuestionView } from '../types'
-import { FaButton, FaCheckbox, FaIcon, FaPageHeader, FaPageMain, FaTag } from '@yudream/components'
+import { YdButton, YdCheckbox, YdIcon, YdPageHeader, YdPageMain, YdTag } from '@yudream/components'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import MarkdownPreview from '../components/MarkdownPreview.vue'
@@ -49,16 +49,16 @@ onMounted(() => {
 </script>
 
 <template>
-  <FaPageHeader class="qb-no-print" title="打印题单" description="随机抽题题单每次打开/重新抽题都会换题；浏览器打印对话框中可另存为 PDF">
+  <YdPageHeader class="qb-no-print" title="打印题单" description="随机抽题题单每次打开/重新抽题都会换题；浏览器打印对话框中可另存为 PDF">
     <template v-if="data">
-      <FaCheckbox v-if="data.paper.mode === 'RULE'" v-model="showAnswers">附答案与解析</FaCheckbox>
-      <FaButton v-if="data.paper.mode === 'RULE'" variant="outline" :loading="model.printLoading" @click="redraw">
-        <FaIcon name="i-ri:shuffle-line" />重新抽题
-      </FaButton>
-      <FaButton :disabled="model.printLoading" @click="doPrint"><FaIcon name="i-ri:printer-line" />打印 / 存为 PDF</FaButton>
+      <YdCheckbox v-if="data.paper.mode === 'RULE'" v-model="showAnswers">附答案与解析</YdCheckbox>
+      <YdButton v-if="data.paper.mode === 'RULE'" variant="outline" :loading="model.printLoading" @click="redraw">
+        <YdIcon name="i-ri:shuffle-line" />重新抽题
+      </YdButton>
+      <YdButton :disabled="model.printLoading" @click="doPrint"><YdIcon name="i-ri:printer-line" />打印 / 存为 PDF</YdButton>
     </template>
-  </FaPageHeader>
-  <FaPageMain>
+  </YdPageHeader>
+  <YdPageMain>
     <div v-if="model.printLoading && !data" class="qb-print">加载中…</div>
     <div v-else-if="!data" class="qb-print">
       <div class="qb-muted text-center py-10">题单不存在或没有可打印的题目</div>
@@ -78,8 +78,8 @@ onMounted(() => {
       <div v-for="(question, index) in data.questions" :key="question.id ?? index" class="qb-print-question">
         <div class="qb-question-meta">
           <strong>{{ index + 1 }}.</strong>
-          <FaTag variant="secondary">{{ question.typeLabel }}</FaTag>
-          <FaTag variant="outline">{{ difficultyLabel(question.difficulty) }}</FaTag>
+          <YdTag variant="secondary">{{ question.typeLabel }}</YdTag>
+          <YdTag variant="outline">{{ difficultyLabel(question.difficulty) }}</YdTag>
         </div>
         <MarkdownPreview :sdk="model.sdk" :content="question.content" />
         <div v-if="question.type === 'SINGLE' || question.type === 'MULTIPLE'" class="qb-options">
@@ -111,5 +111,5 @@ onMounted(() => {
         </template>
       </div>
     </div>
-  </FaPageMain>
+  </YdPageMain>
 </template>

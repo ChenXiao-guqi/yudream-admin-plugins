@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { QuestionBankPluginModel } from '../composables/useQuestionBankPlugin'
-import { Select as ASelect } from '@arco-design/web-vue'
-import { FaButton, FaCard, FaCheckboxGroup, FaIcon, FaNumberField, FaPageHeader, FaPageMain } from '@yudream/components'
+import { YdButton, YdCard, YdCheckboxGroup, YdIcon, YdNumberField, YdPageHeader, YdPageMain, YdMultiSelect } from '@yudream/components'
 import { computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import CategorySelect from '../components/CategorySelect.vue'
@@ -41,25 +40,25 @@ onMounted(async () => {
 </script>
 
 <template>
-  <FaPageHeader title="抽题练习" description="按分类、标签、题型与难度自由组合，随机抽题在线作答">
-    <FaButton variant="outline" @click="router.push('/platform/plugins/questionbank/papers')">
-      <FaIcon name="i-ri:file-paper-2-line" />题单作答
-    </FaButton>
-    <FaButton variant="outline" @click="router.push('/platform/plugins/questionbank/records')">
-      <FaIcon name="i-ri:history-line" />成绩记录
-    </FaButton>
-  </FaPageHeader>
-  <FaPageMain>
+  <YdPageHeader title="抽题练习" description="按分类、标签、题型与难度自由组合，随机抽题在线作答">
+    <YdButton variant="outline" @click="router.push('/platform/plugins/questionbank/papers')">
+      <YdIcon name="i-ri:file-paper-2-line" />题单作答
+    </YdButton>
+    <YdButton variant="outline" @click="router.push('/platform/plugins/questionbank/records')">
+      <YdIcon name="i-ri:history-line" />成绩记录
+    </YdButton>
+  </YdPageHeader>
+  <YdPageMain>
     <div v-if="practiceClosed" class="qb-practice">
-      <FaCard>
+      <YdCard>
         <div class="flex flex-col items-center gap-3 py-6">
           <span class="qb-muted">自由刷题功能已关闭，请通过题单进行作答</span>
-          <FaButton @click="router.push('/platform/plugins/questionbank/papers')"><FaIcon name="i-ri:file-paper-2-line" />去题单作答</FaButton>
+          <YdButton @click="router.push('/platform/plugins/questionbank/papers')"><YdIcon name="i-ri:file-paper-2-line" />去题单作答</YdButton>
         </div>
-      </FaCard>
+      </YdCard>
     </div>
     <div v-else class="qb-practice">
-      <FaCard>
+      <YdCard>
         <div class="qb-practice-summary">
           <div>
             <div class="qb-practice-count">{{ model.meta?.total ?? 0 }}</div>
@@ -69,8 +68,8 @@ onMounted(async () => {
             {{ model.meta?.categories.length ?? 0 }} 个分类 · {{ Object.keys(model.meta?.tags ?? {}).length }} 个标签
           </div>
         </div>
-      </FaCard>
-      <FaCard title="抽题条件" description="不勾选即不限制该维度">
+      </YdCard>
+      <YdCard title="抽题条件" description="不勾选即不限制该维度">
         <div class="qb-form">
           <div class="qb-form-row">
             <span class="qb-form-label">分类</span>
@@ -83,29 +82,28 @@ onMounted(async () => {
           </div>
           <div class="qb-form-row">
             <span class="qb-form-label">标签（命中任一即可）</span>
-            <ASelect
+            <YdMultiSelect
               v-model="model.practiceFilter.tags"
               :options="tagOptions"
               placeholder="不限标签"
-              multiple
               allow-search
             />
           </div>
           <div class="qb-form-row">
             <span class="qb-form-label">题型</span>
-            <FaCheckboxGroup v-model="model.practiceFilter.types" :options="typeOptions" class="flex flex-wrap gap-3" />
+            <YdCheckboxGroup v-model="model.practiceFilter.types" :options="typeOptions" class="flex flex-wrap gap-3" />
           </div>
           <div class="qb-form-row">
             <span class="qb-form-label">难度</span>
-            <FaCheckboxGroup v-model="model.practiceFilter.difficulties" :options="difficultyOptions" class="flex flex-wrap gap-3" />
+            <YdCheckboxGroup v-model="model.practiceFilter.difficulties" :options="difficultyOptions" class="flex flex-wrap gap-3" />
           </div>
           <div class="qb-form-row">
             <span class="qb-form-label">抽题数量（1~50）</span>
-            <FaNumberField v-model="model.practiceFilter.count" :min="1" :max="50" />
+            <YdNumberField v-model="model.practiceFilter.count" :min="1" :max="50" />
           </div>
         </div>
-      </FaCard>
-      <FaCard>
+      </YdCard>
+      <YdCard>
         <div class="qb-practice-summary">
           <div class="text-sm">
             <span v-if="model.counting" class="qb-muted">正在计算题量…</span>
@@ -117,11 +115,11 @@ onMounted(async () => {
             </template>
             <span v-else class="qb-muted">调整条件后自动计算可抽题量</span>
           </div>
-          <FaButton :disabled="startDisabled" :loading="starting" @click="start">
-            <FaIcon name="i-ri:play-line" />开始练习
-          </FaButton>
+          <YdButton :disabled="startDisabled" :loading="starting" @click="start">
+            <YdIcon name="i-ri:play-line" />开始练习
+          </YdButton>
         </div>
-      </FaCard>
+      </YdCard>
     </div>
-  </FaPageMain>
+  </YdPageMain>
 </template>

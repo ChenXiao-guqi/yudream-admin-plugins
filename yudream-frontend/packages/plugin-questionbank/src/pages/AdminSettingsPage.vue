@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { QuestionBankPluginModel } from '../composables/useQuestionBankPlugin'
 import type { QqCommandWindow, QqQuizGroup } from '../types'
-import { FaButton, FaCard, FaIcon, FaInput, FaPageHeader, FaPageMain, FaSelect, FaSwitch, FaTag, YdTimePicker, useFaToast } from '@yudream/components'
+import { YdButton, YdCard, YdIcon, YdInput, YdPageHeader, YdPageMain, YdSelect, YdSwitch, YdTag, YdTimePicker, useYdToast } from '@yudream/components'
 import { computed, onMounted, ref } from 'vue'
 import CategorySelect from '../components/CategorySelect.vue'
 import MultiSelect from '../components/MultiSelect.vue'
@@ -9,7 +9,7 @@ import { QUESTION_TYPE_OPTIONS } from '../composables/utils'
 
 const props = defineProps<{ model: QuestionBankPluginModel }>()
 const model = props.model
-const toast = useFaToast()
+const toast = useYdToast()
 
 const practiceEnabled = ref(true)
 const aiProviderCode = ref('')
@@ -172,32 +172,32 @@ function save() {
 </script>
 
 <template>
-  <FaPageHeader title="题库设置" description="控制题库对普通用户开放的功能范围与 AI 判分配置" />
-  <FaPageMain>
+  <YdPageHeader title="题库设置" description="控制题库对普通用户开放的功能范围与 AI 判分配置" />
+  <YdPageMain>
     <div class="qb-form">
-      <FaCard title="自由刷题" description="关闭后，用户端「抽题练习」入口不可用；已发布题单的作答不受影响">
+      <YdCard title="自由刷题" description="关闭后，用户端「抽题练习」入口不可用；已发布题单的作答不受影响">
         <div class="qb-form">
           <div class="qb-form-row">
             <span class="qb-form-label">自由刷题开关</span>
             <div class="flex items-center gap-3">
-              <FaSwitch v-model="practiceEnabled" :disabled="model.settingsSaving" />
-              <FaTag :variant="practiceEnabled ? 'default' : 'outline'">{{ practiceEnabled ? '已开启' : '已关闭' }}</FaTag>
+              <YdSwitch v-model="practiceEnabled" :disabled="model.settingsSaving" />
+              <YdTag :variant="practiceEnabled ? 'default' : 'outline'">{{ practiceEnabled ? '已开启' : '已关闭' }}</YdTag>
             </div>
           </div>
           <p class="qb-muted text-sm">
             题库的推荐用法是发布题单给指定人群作答（招新笔试、活动答题等）；自由刷题适合作为公开练习入口，可按需关闭。
           </p>
         </div>
-      </FaCard>
-      <FaCard title="AI 能力" description="题单简答题评分方式选择「AI 判分」与题目管理「AI 导入」时生效；默认使用平台默认 AI 供应商与模型，判分失败自动转人工审核">
+      </YdCard>
+      <YdCard title="AI 能力" description="题单简答题评分方式选择「AI 判分」与题目管理「AI 导入」时生效；默认使用平台默认 AI 供应商与模型，判分失败自动转人工审核">
         <div class="qb-form">
           <div class="qb-form-row">
             <span class="qb-form-label">AI 供应商</span>
-            <FaSelect v-model="aiProviderCode" :options="providerOptions" @change="onProviderChange" />
+            <YdSelect v-model="aiProviderCode" :options="providerOptions" @change="onProviderChange" />
           </div>
           <div class="qb-form-row">
             <span class="qb-form-label">AI 模型</span>
-            <FaSelect v-model="aiModelCode" :options="modelOptions" />
+            <YdSelect v-model="aiModelCode" :options="modelOptions" />
           </div>
           <p v-if="!model.aiProviders.length" class="qb-muted text-sm">
             平台当前未配置可用的 AI 供应商，AI 判分将自动转人工审核、AI 导入暂不可用；配置后此处会出现可选项。
@@ -206,40 +206,40 @@ function save() {
             仅在需要为判分/导入指定专用模型时选择；留空使用平台默认供应商与模型。
           </p>
         </div>
-      </FaCard>
-      <FaCard title="QQ 群抽题" description="群内发送 /抽题 或 /抽题 <分组名> 发起限时抢答；客观题自动判分，简答题可用上方配置的 AI 模型判分">
+      </YdCard>
+      <YdCard title="QQ 群抽题" description="群内发送 /抽题 或 /抽题 <分组名> 发起限时抢答；客观题自动判分，简答题可用上方配置的 AI 模型判分">
         <div class="qb-form">
           <div class="qb-form-row">
             <span class="qb-form-label">默认分组</span>
-            <FaSelect v-model="qqDefaultGroup" :options="qqGroupNameOptions" />
+            <YdSelect v-model="qqDefaultGroup" :options="qqGroupNameOptions" />
           </div>
           <div class="qb-form-row">
             <span class="qb-form-label">抢答限时（秒）</span>
-            <FaInput v-model="qqAnswerSeconds" placeholder="10-600" />
+            <YdInput v-model="qqAnswerSeconds" placeholder="10-600" />
           </div>
           <div class="qb-form-row">
             <span class="qb-form-label">简答题 AI 判分</span>
             <div class="flex items-center gap-3">
-              <FaSwitch v-model="qqAiGrading" :disabled="model.settingsSaving" />
-              <FaTag :variant="qqAiGrading ? 'default' : 'outline'">{{ qqAiGrading ? '已开启' : '已关闭' }}</FaTag>
+              <YdSwitch v-model="qqAiGrading" :disabled="model.settingsSaving" />
+              <YdTag :variant="qqAiGrading ? 'default' : 'outline'">{{ qqAiGrading ? '已开启' : '已关闭' }}</YdTag>
             </div>
           </div>
           <div class="qb-form-row items-start">
             <span class="qb-form-label pt-2">抽题分组</span>
             <div class="flex flex-1 flex-col gap-2">
               <div v-for="(group, index) in qqGroups" :key="index" class="flex flex-wrap items-center gap-2 rounded-md border p-2">
-                <FaInput v-model="group.name" class="max-w-36" placeholder="分组名（群内指令用）" />
+                <YdInput v-model="group.name" class="max-w-36" placeholder="分组名（群内指令用）" />
                 <CategorySelect v-model="group.categoryId" :categories="model.adminCategories" empty-label="不限分类" class="min-w-40" />
-                <FaInput
+                <YdInput
                   :model-value="groupTagsText(group)"
                   class="min-w-40 flex-1"
                   placeholder="标签，逗号分隔（可选）"
                   @update:model-value="updateGroupTags(group, String($event))"
                 />
-                <FaButton size="sm" variant="ghost" @click="removeQqGroup(index)"><FaIcon name="i-ri:close-line" /></FaButton>
+                <YdButton size="sm" variant="ghost" @click="removeQqGroup(index)"><YdIcon name="i-ri:close-line" /></YdButton>
               </div>
               <div>
-                <FaButton size="sm" variant="outline" @click="addQqGroup"><FaIcon name="i-ri:add-line" />添加分组</FaButton>
+                <YdButton size="sm" variant="outline" @click="addQqGroup"><YdIcon name="i-ri:add-line" />添加分组</YdButton>
               </div>
               <p class="qb-muted text-sm">
                 分组 = 一个指令名字 + 抽题范围（分类/标签，可都留空表示全库）。群内发送 /抽题 分组名 即按该范围抽一道题。
@@ -265,14 +265,14 @@ function save() {
             </div>
           </div>
         </div>
-      </FaCard>
-      <FaCard title="群指令开放时间" description="限制群内 /抽题、/抢答榜 的可用时段；不在时段内发送指令时，群内会收到「现在不在开放时间，开放时间为 …」">
+      </YdCard>
+      <YdCard title="群指令开放时间" description="限制群内 /抽题、/抢答榜 的可用时段；不在时段内发送指令时，群内会收到「现在不在开放时间，开放时间为 …」">
         <div class="qb-form">
           <div class="qb-form-row">
             <span class="qb-form-label">限制调用时间</span>
             <div class="flex items-center gap-3">
-              <FaSwitch v-model="qqCommandWindowEnabled" :disabled="model.settingsSaving" />
-              <FaTag :variant="qqCommandWindowEnabled ? 'default' : 'outline'">{{ qqCommandWindowEnabled ? '已开启' : '已关闭' }}</FaTag>
+              <YdSwitch v-model="qqCommandWindowEnabled" :disabled="model.settingsSaving" />
+              <YdTag :variant="qqCommandWindowEnabled ? 'default' : 'outline'">{{ qqCommandWindowEnabled ? '已开启' : '已关闭' }}</YdTag>
             </div>
           </div>
           <div class="qb-form-row items-start">
@@ -280,10 +280,10 @@ function save() {
             <div class="flex flex-1 flex-col gap-2">
               <div v-for="(row, index) in qqCommandWindowRows" :key="index" class="flex flex-wrap items-center gap-2 rounded-md border p-2">
                 <YdTimePicker v-model="qqCommandWindowRows[index]" range format="HH:mm" class="min-w-56" />
-                <FaButton size="sm" variant="ghost" @click="removeQqCommandWindow(index)"><FaIcon name="i-ri:close-line" /></FaButton>
+                <YdButton size="sm" variant="ghost" @click="removeQqCommandWindow(index)"><YdIcon name="i-ri:close-line" /></YdButton>
               </div>
               <div>
-                <FaButton size="sm" variant="outline" @click="addQqCommandWindow"><FaIcon name="i-ri:add-line" />添加时间段</FaButton>
+                <YdButton size="sm" variant="outline" @click="addQqCommandWindow"><YdIcon name="i-ri:add-line" />添加时间段</YdButton>
               </div>
               <p class="qb-muted text-sm">
                 可以配置多段（例如 12:00-13:30、19:00-21:00）；开始时间晚于结束时间表示跨零点，例如 22:00-02:00 表示当天 22:00 到次日 02:00。
@@ -295,14 +295,14 @@ function save() {
             </div>
           </div>
         </div>
-      </FaCard>
-      <FaCard>
+      </YdCard>
+      <YdCard>
         <div class="flex justify-end gap-2">
-          <FaButton :disabled="!dirty" :loading="model.settingsSaving" @click="save">
-            <FaIcon name="i-ri:save-line" />保存设置
-          </FaButton>
+          <YdButton :disabled="!dirty" :loading="model.settingsSaving" @click="save">
+            <YdIcon name="i-ri:save-line" />保存设置
+          </YdButton>
         </div>
-      </FaCard>
+      </YdCard>
     </div>
-  </FaPageMain>
+  </YdPageMain>
 </template>

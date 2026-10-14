@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { QuestionBankPluginModel } from '../composables/useQuestionBankPlugin'
 import type { AnswerPayload, SessionQuestionView, SessionView } from '../types'
-import { FaButton, FaCard, FaIcon, FaInput, FaPageHeader, FaPageMain, FaTag, FaTextarea, useFaModal } from '@yudream/components'
+import { YdButton, YdCard, YdIcon, YdInput, YdPageHeader, YdPageMain, YdTag, YdTextarea, useYdModal, YdAction } from '@yudream/components'
 import { computed, reactive, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import MarkdownPreview from '../components/MarkdownPreview.vue'
@@ -11,7 +11,7 @@ const props = defineProps<{ model: QuestionBankPluginModel }>()
 const model = props.model
 const route = useRoute()
 const router = useRouter()
-const confirm = useFaModal()
+const confirm = useYdModal()
 
 const sessionId = String(route.query.id ?? '')
 
@@ -267,25 +267,25 @@ function selfMark(question: SessionQuestionView, correct: boolean) {
 </script>
 
 <template>
-  <FaPageHeader title="在线作答" description="答题过程中可随时离开，从成绩记录继续作答">
-    <FaButton variant="outline" @click="router.push('/platform/plugins/questionbank/records')">
-      <FaIcon name="i-ri:history-line" />成绩记录
-    </FaButton>
-  </FaPageHeader>
-  <FaPageMain>
+  <YdPageHeader title="在线作答" description="答题过程中可随时离开，从成绩记录继续作答">
+    <YdButton variant="outline" @click="router.push('/platform/plugins/questionbank/records')">
+      <YdIcon name="i-ri:history-line" />成绩记录
+    </YdButton>
+  </YdPageHeader>
+  <YdPageMain>
     <div v-if="model.sessionLoading" class="qb-session">
-      <FaCard>加载中…</FaCard>
+      <YdCard>加载中…</YdCard>
     </div>
     <div v-else-if="!sessionId || !model.session" class="qb-session">
-      <FaCard>
+      <YdCard>
         <div class="flex flex-col items-center gap-3 py-6">
           <span class="qb-muted">练习不存在或已被删除</span>
-          <FaButton variant="outline" @click="router.push('/platform/plugins/questionbank')">返回抽题</FaButton>
+          <YdButton variant="outline" @click="router.push('/platform/plugins/questionbank')">返回抽题</YdButton>
         </div>
-      </FaCard>
+      </YdCard>
     </div>
     <div v-else class="qb-session">
-      <FaCard v-if="finished" class="qb-result-card">
+      <YdCard v-if="finished" class="qb-result-card">
         <div class="qb-result-banner">
           <div>
             <div class="qb-result-score">{{ model.session.correctCount }} / {{ model.session.totalCount }}</div>
@@ -298,34 +298,34 @@ function selfMark(question: SessionQuestionView, correct: boolean) {
             <div v-else-if="aiMode" class="qb-muted">简答题由 AI 自动判分；判分失败将转管理员人工审核</div>
           </div>
           <div class="flex gap-2">
-            <FaButton @click="router.push(model.session?.paperId ? '/platform/plugins/questionbank/papers' : '/platform/plugins/questionbank')">
-              <FaIcon name="i-ri:refresh-line" />{{ model.session?.paperId ? '返回题单' : '再来一组' }}
-            </FaButton>
+            <YdButton @click="router.push(model.session?.paperId ? '/platform/plugins/questionbank/papers' : '/platform/plugins/questionbank')">
+              <YdIcon name="i-ri:refresh-line" />{{ model.session?.paperId ? '返回题单' : '再来一组' }}
+            </YdButton>
           </div>
         </div>
-      </FaCard>
-      <FaCard v-else>
+      </YdCard>
+      <YdCard v-else>
         <div class="qb-session-head">
           <span class="text-sm">共 {{ model.session.questions.length }} 题，已作答 {{ answeredCount }} 题</span>
-          <FaButton :loading="model.submitting" @click="confirmSubmit"><FaIcon name="i-ri:check-line" />提交作答</FaButton>
+          <YdButton :loading="model.submitting" @click="confirmSubmit"><YdIcon name="i-ri:check-line" />提交作答</YdButton>
         </div>
-      </FaCard>
+      </YdCard>
       <template v-for="(group, groupIndex) in groupedQuestions" :key="group.type">
         <div class="qb-type-heading">
           {{ GROUP_NUMERALS[groupIndex] ?? groupIndex + 1 }}、{{ group.label }}<span class="qb-type-heading-count">（共 {{ group.items.length }} 题）</span>
         </div>
-        <FaCard v-for="({ question, no }) in group.items" :key="question.questionId">
+        <YdCard v-for="({ question, no }) in group.items" :key="question.questionId">
           <div class="qb-question-card">
             <div class="qb-question-meta">
               <strong>{{ no }}.</strong>
-            <FaTag variant="secondary">{{ question.typeLabel }}</FaTag>
-            <FaTag variant="outline">{{ difficultyLabel(question.difficulty) }}</FaTag>
-            <FaTag v-if="finished" :variant="resultTag(question).variant">{{ resultTag(question).text }}</FaTag>
+            <YdTag variant="secondary">{{ question.typeLabel }}</YdTag>
+            <YdTag variant="outline">{{ difficultyLabel(question.difficulty) }}</YdTag>
+            <YdTag v-if="finished" :variant="resultTag(question).variant">{{ resultTag(question).text }}</YdTag>
           </div>
           <MarkdownPreview :sdk="model.sdk" :content="question.content" />
           <template v-if="!finished">
             <div v-if="question.type === 'SINGLE'" class="qb-options">
-              <div
+              <YdAction
                 v-for="(option, optionIndex) in question.options"
                 :key="optionKey(optionIndex)"
                 class="qb-option"
@@ -334,10 +334,10 @@ function selfMark(question: SessionQuestionView, correct: boolean) {
               >
                 <span class="qb-option-key">{{ optionKey(optionIndex) }}</span>
                 <MarkdownPreview :sdk="model.sdk" :content="option" />
-              </div>
+              </YdAction>
             </div>
             <div v-else-if="question.type === 'TRUE_FALSE'" class="qb-options">
-              <div
+              <YdAction
                 v-for="item in trueFalseOptions(question)"
                 :key="item.key"
                 class="qb-option"
@@ -345,10 +345,10 @@ function selfMark(question: SessionQuestionView, correct: boolean) {
                 @click="toggleSingle(question, item.key)"
               >
                 <span class="qb-option-key">{{ item.label }}</span>
-              </div>
+              </YdAction>
             </div>
             <div v-else-if="question.type === 'MULTIPLE'" class="qb-options">
-              <div
+              <YdAction
                 v-for="(option, optionIndex) in question.options"
                 :key="optionKey(optionIndex)"
                 class="qb-option"
@@ -357,19 +357,19 @@ function selfMark(question: SessionQuestionView, correct: boolean) {
               >
                 <span class="qb-option-key">{{ optionKey(optionIndex) }}</span>
                 <MarkdownPreview :sdk="model.sdk" :content="option" />
-              </div>
+              </YdAction>
             </div>
             <div v-else-if="question.type === 'FILL'" class="qb-options">
               <div v-for="blankIndex in question.blankCount ?? 0" :key="blankIndex" class="qb-blank-row">
                 <span class="qb-option-key">第 {{ blankIndex }} 空</span>
-                <FaInput
+                <YdInput
                   v-model="drafts[question.questionId].blanks[blankIndex - 1]"
                   placeholder="填写答案"
                   clearable
                 />
               </div>
             </div>
-            <FaTextarea
+            <YdTextarea
               v-else-if="question.type === 'SHORT'"
               v-model="drafts[question.questionId].text"
               placeholder="写下你的作答，提交后对照参考答案自评"
@@ -378,14 +378,14 @@ function selfMark(question: SessionQuestionView, correct: boolean) {
           </template>
           <template v-else>
             <div v-if="question.type === 'SINGLE' || question.type === 'MULTIPLE'" class="qb-options">
-              <div
+              <YdAction
                 v-for="(option, optionIndex) in question.options"
                 :key="optionKey(optionIndex)"
                 :class="optionResultClass(question, optionKey(optionIndex))"
               >
                 <span class="qb-option-key">{{ optionKey(optionIndex) }}</span>
                 <MarkdownPreview :sdk="model.sdk" :content="option" />
-              </div>
+              </YdAction>
             </div>
             <div v-else-if="question.type === 'TRUE_FALSE'" class="qb-options">
               <div v-for="item in trueFalseOptions(question)" :key="item.key" :class="item.className">
@@ -405,8 +405,8 @@ function selfMark(question: SessionQuestionView, correct: boolean) {
                 <div class="text-sm">参考答案：</div>
                 <MarkdownPreview :sdk="model.sdk" :content="question.referenceAnswer ?? ''" />
                 <div v-if="question.userAnswer?.correct == null && !externalGrading" class="flex gap-2">
-                  <FaButton size="sm" variant="outline" @click="selfMark(question, true)">我答对了</FaButton>
-                  <FaButton size="sm" variant="outline" @click="selfMark(question, false)">我答错了</FaButton>
+                  <YdButton size="sm" variant="outline" @click="selfMark(question, true)">我答对了</YdButton>
+                  <YdButton size="sm" variant="outline" @click="selfMark(question, false)">我答错了</YdButton>
                 </div>
                 <div v-else-if="question.userAnswer?.correct == null && aiMode" class="qb-muted text-sm">
                   AI 判分中，稍后刷新查看；判分失败将转管理员人工审核
@@ -423,14 +423,14 @@ function selfMark(question: SessionQuestionView, correct: boolean) {
             </div>
           </template>
         </div>
-        </FaCard>
+        </YdCard>
       </template>
-      <FaCard v-if="!finished">
+      <YdCard v-if="!finished">
         <div class="qb-session-head">
           <span class="text-sm">已作答 {{ answeredCount }} / {{ model.session.questions.length }} 题</span>
-          <FaButton :loading="model.submitting" @click="confirmSubmit"><FaIcon name="i-ri:check-line" />提交作答</FaButton>
+          <YdButton :loading="model.submitting" @click="confirmSubmit"><YdIcon name="i-ri:check-line" />提交作答</YdButton>
         </div>
-      </FaCard>
+      </YdCard>
     </div>
-  </FaPageMain>
+  </YdPageMain>
 </template>

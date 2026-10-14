@@ -1,15 +1,16 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { QuestionBankPluginModel } from '../composables/useQuestionBankPlugin'
 import type { SessionSummary } from '../types'
-import { FaButton, FaDrawer, FaIcon, FaInput, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable, FaSearchBar, FaSelect, FaTag, useFaModal } from '@yudream/components'
+import { YdButton, YdDrawer, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdSelect, YdTag, useYdModal } from '@yudream/components'
 import { onMounted, ref } from 'vue'
 import MarkdownPreview from '../components/MarkdownPreview.vue'
 import { formatTime, optionKey } from '../composables/utils'
 
 const props = defineProps<{ model: QuestionBankPluginModel }>()
 const model = props.model
-const confirm = useFaModal()
+const confirm = useYdModal()
 
 const statusOptions = [
   { label: '全部状态', value: '' },
@@ -115,10 +116,10 @@ onMounted(() => model.loadAdminRecords())
 </script>
 
 <template>
-  <FaPageHeader title="练习记录" description="跨用户查看全部抽题练习与作答结果" />
-  <FaPageMain>
-    <FaResponsiveTable
-      v-loading="model.loading"
+  <YdPageHeader title="练习记录" description="跨用户查看全部抽题练习与作答结果" />
+  <YdPageMain>
+    <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable
+
       :columns="columns"
       :data="model.adminRecords"
       row-key="id"
@@ -128,13 +129,13 @@ onMounted(() => model.loadAdminRecords())
       empty-text="暂无练习记录"
     >
       <template #toolbar>
-        <FaSearchBar class="w-full">
+        <YdSearchBar class="w-full">
           <div class="qb-toolbar">
-            <FaInput v-model="model.adminRecordsFilters.keyword" placeholder="搜索用户昵称或 ID" clearable @keydown.enter="model.applyAdminRecordsFilters" @clear="model.applyAdminRecordsFilters" />
-            <FaSelect v-model="model.adminRecordsFilters.status" :options="statusOptions" @change="model.applyAdminRecordsFilters" />
-            <FaButton variant="outline" @click="model.applyAdminRecordsFilters"><FaIcon name="i-ri:search-line" />查询</FaButton>
+            <YdInput v-model="model.adminRecordsFilters.keyword" placeholder="搜索用户昵称或 ID" clearable @keydown.enter="model.applyAdminRecordsFilters" @clear="model.applyAdminRecordsFilters" />
+            <YdSelect v-model="model.adminRecordsFilters.status" :options="statusOptions" @change="model.applyAdminRecordsFilters" />
+            <YdButton variant="outline" @click="model.applyAdminRecordsFilters"><YdIcon name="i-ri:search-line" />查询</YdButton>
           </div>
-        </FaSearchBar>
+        </YdSearchBar>
       </template>
       <template #cell-user="{ row }">{{ row.original.userName || row.original.userId }}</template>
       <template #cell-paperName="{ row }">{{ row.original.paperName || '-' }}</template>
@@ -142,35 +143,35 @@ onMounted(() => model.loadAdminRecords())
       <template #cell-correct="{ row }">{{ row.original.status === 'FINISHED' ? row.original.correctCount : '-' }}</template>
       <template #cell-accuracy="{ row }">{{ accuracy(row.original) }}</template>
       <template #cell-status="{ row }">
-        <FaTag v-if="row.original.pendingReview" variant="secondary">待审核</FaTag>
-        <FaTag v-else :variant="row.original.status === 'FINISHED' ? 'default' : 'outline'">{{ row.original.status === 'FINISHED' ? '已提交' : '作答中' }}</FaTag>
+        <YdTag v-if="row.original.pendingReview" variant="secondary">待审核</YdTag>
+        <YdTag v-else :variant="row.original.status === 'FINISHED' ? 'default' : 'outline'">{{ row.original.status === 'FINISHED' ? '已提交' : '作答中' }}</YdTag>
       </template>
       <template #cell-createdAt="{ row }">{{ formatTime(row.original.createdAt) }}</template>
       <template #cell-submittedAt="{ row }">{{ formatTime(row.original.submittedAt) }}</template>
       <template #cell-operation="{ row }">
         <div class="flex-center gap-2">
-          <FaButton size="sm" variant="outline" @click="openDetail(row.original)">详情</FaButton>
-          <FaButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</FaButton>
+          <YdButton size="sm" variant="outline" @click="openDetail(row.original)">详情</YdButton>
+          <YdButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</YdButton>
         </div>
       </template>
       <template #card="{ row }">
         <div class="flex flex-col gap-2 text-sm">
           <div class="flex items-center justify-between">
             <strong class="text-base">{{ row.userName || row.userId }}</strong>
-            <FaTag :variant="row.status === 'FINISHED' ? 'default' : 'outline'">{{ row.status === 'FINISHED' ? '已提交' : '作答中' }}</FaTag>
+            <YdTag :variant="row.status === 'FINISHED' ? 'default' : 'outline'">{{ row.status === 'FINISHED' ? '已提交' : '作答中' }}</YdTag>
           </div>
           <div class="text-secondary-foreground/60">
             {{ row.totalCount }} 道题<template v-if="row.status === 'FINISHED'"> · 答对 {{ row.correctCount }} · 正确率 {{ accuracy(row) }}</template>
           </div>
           <div class="text-secondary-foreground/60">{{ formatTime(row.createdAt) }}</div>
           <div class="flex gap-2">
-            <FaButton size="sm" variant="outline" @click="openDetail(row)">详情</FaButton>
-            <FaButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</FaButton>
+            <YdButton size="sm" variant="outline" @click="openDetail(row)">详情</YdButton>
+            <YdButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</YdButton>
           </div>
         </div>
       </template>
-    </FaResponsiveTable>
-    <FaPagination
+    </YdResponsiveTable></YdLoadingOverlay>
+    <YdPagination
       v-model:page="model.adminRecordsPager.page"
       v-model:size="model.adminRecordsPager.size"
       :total="model.adminRecordsPager.total"
@@ -178,8 +179,8 @@ onMounted(() => model.loadAdminRecords())
       @page-change="model.loadAdminRecords"
       @size-change="model.applyAdminRecordsFilters"
     />
-    <FaDrawer v-model="detailOpen" title="练习详情" size="720px">
-      <div v-loading="detailLoading" class="flex flex-col gap-4">
+    <YdDrawer v-model="detailOpen" title="练习详情" size="720px">
+      <YdLoadingOverlay :loading="detailLoading"><div  class="flex flex-col gap-4">
         <template v-if="detail">
           <div class="qb-result-banner">
             <span class="qb-result-score">{{ detail.correctCount }} / {{ detail.totalCount }}</span>
@@ -188,8 +189,8 @@ onMounted(() => model.loadAdminRecords())
           <div v-for="(question, index) in detail.questions" :key="question.questionId" class="qb-question-card rounded-lg border p-4">
             <div class="qb-question-meta">
               <strong>第 {{ index + 1 }} 题</strong>
-              <FaTag variant="secondary">{{ question.typeLabel }}</FaTag>
-              <FaTag :variant="correctTagVariant(question.userAnswer?.correct)">{{ correctTagText(question.userAnswer?.correct) }}</FaTag>
+              <YdTag variant="secondary">{{ question.typeLabel }}</YdTag>
+              <YdTag :variant="correctTagVariant(question.userAnswer?.correct)">{{ correctTagText(question.userAnswer?.correct) }}</YdTag>
             </div>
             <MarkdownPreview :sdk="model.sdk" :content="question.content" />
             <div v-if="question.options.length" class="flex flex-col gap-1 text-sm">
@@ -211,7 +212,7 @@ onMounted(() => model.loadAdminRecords())
             </div>
           </div>
         </template>
-      </div>
-    </FaDrawer>
-  </FaPageMain>
+      </div></YdLoadingOverlay>
+    </YdDrawer>
+  </YdPageMain>
 </template>

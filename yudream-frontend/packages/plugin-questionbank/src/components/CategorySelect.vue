@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Select as ASelect } from '@arco-design/web-vue'
+import { YdCombobox } from '@yudream/components'
 import { computed } from 'vue'
 
 const props = withDefaults(defineProps<{
@@ -19,5 +19,5 @@ const options = computed(() => {
 </script>
 
 <template>
-  <ASelect v-model="model" :options="options" :placeholder="placeholder" allow-search />
+  <YdCombobox v-model="model" :options="options" :placeholder="placeholder" />
 </template>

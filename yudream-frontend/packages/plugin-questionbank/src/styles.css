@@ -124,11 +124,11 @@
 }
 
 .qb-option:hover {
-  border-color: rgb(var(--primary-6, 22 93 255));
+  border-color: var(--color-text-1, #1d2129);
 }
 
 .qb-option-selected {
-  border-color: rgb(var(--primary-6, 22 93 255));
+  border-color: var(--color-text-1, #1d2129);
   background: var(--color-primary-light-1, #e8f3ff);
 }
 

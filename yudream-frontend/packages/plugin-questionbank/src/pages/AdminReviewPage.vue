@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { QuestionBankPluginModel } from '../composables/useQuestionBankPlugin'
 import type { SessionQuestionView, SessionSummary } from '../types'
-import { FaButton, FaDrawer, FaIcon, FaInput, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable, FaSearchBar, FaTag } from '@yudream/components'
+import { YdButton, YdDrawer, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdTag } from '@yudream/components'
 import { onMounted, ref } from 'vue'
 import MarkdownPreview from '../components/MarkdownPreview.vue'
 import { formatTime, optionKey } from '../composables/utils'
@@ -59,10 +60,10 @@ onMounted(() => model.loadReviewQueue())
 </script>
 
 <template>
-  <FaPageHeader title="简答审核" description="人工审核题单的简答题作答，判定对错后计入成绩" />
-  <FaPageMain>
-    <FaResponsiveTable
-      v-loading="model.loading"
+  <YdPageHeader title="简答审核" description="人工审核题单的简答题作答，判定对错后计入成绩" />
+  <YdPageMain>
+    <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable
+
       :columns="columns"
       :data="model.reviewList"
       row-key="id"
@@ -72,38 +73,38 @@ onMounted(() => model.loadReviewQueue())
       empty-text="暂无待审核的作答"
     >
       <template #toolbar>
-        <FaSearchBar class="w-full">
+        <YdSearchBar class="w-full">
           <div class="qb-toolbar">
-            <FaInput v-model="model.reviewKeyword" placeholder="搜索用户昵称、ID 或题单名称" clearable @keydown.enter="model.applyReviewFilters" @clear="model.applyReviewFilters" />
-            <FaButton variant="outline" @click="model.applyReviewFilters"><FaIcon name="i-ri:search-line" />查询</FaButton>
+            <YdInput v-model="model.reviewKeyword" placeholder="搜索用户昵称、ID 或题单名称" clearable @keydown.enter="model.applyReviewFilters" @clear="model.applyReviewFilters" />
+            <YdButton variant="outline" @click="model.applyReviewFilters"><YdIcon name="i-ri:search-line" />查询</YdButton>
           </div>
-        </FaSearchBar>
+        </YdSearchBar>
       </template>
       <template #cell-user="{ row }">{{ row.original.userName || row.original.userId }}</template>
       <template #cell-paperName="{ row }">{{ row.original.paperName || '-' }}</template>
       <template #cell-score="{ row }">{{ scoreText(row.original) }}</template>
       <template #cell-pending="{ row }">
-        <FaTag variant="secondary">{{ row.original.pendingReview ? '待审核' : '已完成' }}</FaTag>
+        <YdTag variant="secondary">{{ row.original.pendingReview ? '待审核' : '已完成' }}</YdTag>
       </template>
       <template #cell-submittedAt="{ row }">{{ formatTime(row.original.submittedAt) }}</template>
       <template #cell-operation="{ row }">
-        <FaButton size="sm" variant="outline" @click="openReview(row.original)">审核</FaButton>
+        <YdButton size="sm" variant="outline" @click="openReview(row.original)">审核</YdButton>
       </template>
       <template #card="{ row }">
         <div class="flex flex-col gap-2 text-sm">
           <div class="flex items-center justify-between">
             <strong>{{ row.userName || row.userId }}</strong>
-            <FaTag variant="secondary">{{ row.pendingReview ? '待审核' : '已完成' }}</FaTag>
+            <YdTag variant="secondary">{{ row.pendingReview ? '待审核' : '已完成' }}</YdTag>
           </div>
           <div class="text-secondary-foreground/60">{{ row.paperName || '-' }} · 当前得分 {{ scoreText(row) }}</div>
           <div class="text-secondary-foreground/60">{{ formatTime(row.submittedAt) }}</div>
           <div class="flex gap-2">
-            <FaButton size="sm" variant="outline" @click="openReview(row)">审核</FaButton>
+            <YdButton size="sm" variant="outline" @click="openReview(row)">审核</YdButton>
           </div>
         </div>
       </template>
-    </FaResponsiveTable>
-    <FaPagination
+    </YdResponsiveTable></YdLoadingOverlay>
+    <YdPagination
       v-model:page="model.reviewPager.page"
       v-model:size="model.reviewPager.size"
       :total="model.reviewPager.total"
@@ -111,8 +112,8 @@ onMounted(() => model.loadReviewQueue())
       @page-change="model.loadReviewQueue"
       @size-change="model.applyReviewFilters"
     />
-    <FaDrawer v-model="drawerOpen" title="简答审核" size="720px" @close="closeDrawer">
-      <div v-loading="model.reviewSessionLoading" class="flex flex-col gap-4">
+    <YdDrawer v-model="drawerOpen" title="简答审核" size="720px" @close="closeDrawer">
+      <YdLoadingOverlay :loading="model.reviewSessionLoading"><div  class="flex flex-col gap-4">
         <template v-if="model.reviewSession">
           <div class="qb-result-banner">
             <span class="qb-result-score">{{ model.reviewSession.correctCount }} / {{ model.reviewSession.totalCount }}</span>
@@ -127,10 +128,10 @@ onMounted(() => model.loadReviewQueue())
           >
             <div class="qb-question-meta">
               <strong>第 {{ index + 1 }} 题</strong>
-              <FaTag variant="secondary">{{ question.typeLabel }}</FaTag>
-              <FaTag v-if="question.userAnswer?.correct === true" variant="default">已判对</FaTag>
-              <FaTag v-else-if="question.userAnswer?.correct === false" variant="outline">已判错</FaTag>
-              <FaTag v-else variant="secondary">待审核</FaTag>
+              <YdTag variant="secondary">{{ question.typeLabel }}</YdTag>
+              <YdTag v-if="question.userAnswer?.correct === true" variant="default">已判对</YdTag>
+              <YdTag v-else-if="question.userAnswer?.correct === false" variant="outline">已判错</YdTag>
+              <YdTag v-else variant="secondary">待审核</YdTag>
             </div>
             <MarkdownPreview :sdk="model.sdk" :content="question.content" />
             <div class="qb-answer-panel text-sm">
@@ -144,19 +145,19 @@ onMounted(() => model.loadReviewQueue())
               </template>
             </div>
             <div class="flex gap-2">
-              <FaButton size="sm" :variant="question.userAnswer?.correct === true ? 'default' : 'outline'" @click="mark(question, true)">
-                <FaIcon name="i-ri:check-line" />判对
-              </FaButton>
-              <FaButton size="sm" :variant="question.userAnswer?.correct === false ? 'destructive' : 'outline'" @click="mark(question, false)">
-                <FaIcon name="i-ri:close-line" />判错
-              </FaButton>
+              <YdButton size="sm" :variant="question.userAnswer?.correct === true ? 'default' : 'outline'" @click="mark(question, true)">
+                <YdIcon name="i-ri:check-line" />判对
+              </YdButton>
+              <YdButton size="sm" :variant="question.userAnswer?.correct === false ? 'destructive' : 'outline'" @click="mark(question, false)">
+                <YdIcon name="i-ri:close-line" />判错
+              </YdButton>
             </div>
           </div>
           <div v-if="!model.reviewSession.questions.some(q => q.type === 'SHORT')" class="qb-muted text-center py-4">
             这份作答没有简答题
           </div>
         </template>
-      </div>
-    </FaDrawer>
-  </FaPageMain>
+      </div></YdLoadingOverlay>
+    </YdDrawer>
+  </YdPageMain>
 </template>

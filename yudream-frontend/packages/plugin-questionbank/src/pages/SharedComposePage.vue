@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { QuestionBankPluginModel } from '../composables/useQuestionBankPlugin'
 import type { QuestionView, SharedComposeView } from '../types'
-import { FaIcon, FaTag } from '@yudream/components'
+import { YdIcon, YdTag } from '@yudream/components'
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import MarkdownPreview from '../components/MarkdownPreview.vue'
@@ -53,7 +53,7 @@ onMounted(async () => {
   <div class="qb-shared">
     <div v-if="loading" class="qb-shared-state">加载中…</div>
     <div v-else-if="error" class="qb-shared-state">
-      <FaIcon name="i-ri:link-unlink" class="qb-shared-state-icon" />
+      <YdIcon name="i-ri:link-unlink" class="qb-shared-state-icon" />
       <div class="qb-shared-state-title">无法打开这份组卷</div>
       <div class="qb-muted">{{ error }}</div>
     </div>
@@ -70,8 +70,8 @@ onMounted(async () => {
       <div v-for="(question, index) in data.questions" :key="question.id ?? index" class="qb-print-question">
         <div class="qb-question-meta">
           <strong>{{ index + 1 }}.</strong>
-          <FaTag variant="secondary">{{ question.typeLabel }}</FaTag>
-          <FaTag variant="outline">{{ difficultyLabel(question.difficulty) }}</FaTag>
+          <YdTag variant="secondary">{{ question.typeLabel }}</YdTag>
+          <YdTag variant="outline">{{ difficultyLabel(question.difficulty) }}</YdTag>
         </div>
         <MarkdownPreview :sdk="model.sdk" :content="question.content" />
         <div v-if="question.type === 'SINGLE' || question.type === 'MULTIPLE'" class="qb-options">

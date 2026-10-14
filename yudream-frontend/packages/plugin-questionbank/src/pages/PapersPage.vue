@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { QuestionBankPluginModel } from '../composables/useQuestionBankPlugin'
 import type { PaperView } from '../types'
-import { FaButton, FaCard, FaIcon, FaPageHeader, FaPageMain, FaTag } from '@yudream/components'
+import { YdButton, YdCard, YdIcon, YdPageHeader, YdPageMain, YdTag } from '@yudream/components'
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { difficultyLabel, formatTime, questionTypeLabel } from '../composables/utils'
@@ -38,39 +38,39 @@ onMounted(() => model.loadMyPapers())
 </script>
 
 <template>
-  <FaPageHeader title="题单作答" description="管理员发布的题单，每次进入按规则现场抽题">
-    <FaButton variant="outline" @click="router.push('/platform/plugins/questionbank/records')">
-      <FaIcon name="i-ri:history-line" />成绩记录
-    </FaButton>
-  </FaPageHeader>
-  <FaPageMain>
+  <YdPageHeader title="题单作答" description="管理员发布的题单，每次进入按规则现场抽题">
+    <YdButton variant="outline" @click="router.push('/platform/plugins/questionbank/records')">
+      <YdIcon name="i-ri:history-line" />成绩记录
+    </YdButton>
+  </YdPageHeader>
+  <YdPageMain>
     <div v-if="model.papersLoading" class="qb-practice">
-      <FaCard>加载中…</FaCard>
+      <YdCard>加载中…</YdCard>
     </div>
     <div v-else-if="!model.papers.length" class="qb-practice">
-      <FaCard>
+      <YdCard>
         <div class="flex flex-col items-center gap-3 py-6">
           <span class="qb-muted">暂无已发布的题单</span>
         </div>
-      </FaCard>
+      </YdCard>
     </div>
     <div v-else class="qb-practice">
-      <FaCard v-for="paper in model.papers" :key="paper.id" :title="paper.name">
+      <YdCard v-for="paper in model.papers" :key="paper.id" :title="paper.name">
         <div class="flex flex-col gap-3">
           <div class="flex flex-wrap items-center gap-2">
-            <FaTag variant="secondary">{{ paper.mode === 'RULE' ? '随机抽题' : '固定题目' }}</FaTag>
-            <FaTag variant="outline">{{ paper.questionCount }} 题</FaTag>
-            <FaTag v-if="paper.subjectiveMode === 'REVIEW'" variant="outline">简答人工审核</FaTag>
-            <FaTag v-else-if="paper.subjectiveMode === 'AI'" variant="outline">简答 AI 判分</FaTag>
+            <YdTag variant="secondary">{{ paper.mode === 'RULE' ? '随机抽题' : '固定题目' }}</YdTag>
+            <YdTag variant="outline">{{ paper.questionCount }} 题</YdTag>
+            <YdTag v-if="paper.subjectiveMode === 'REVIEW'" variant="outline">简答人工审核</YdTag>
+            <YdTag v-else-if="paper.subjectiveMode === 'AI'" variant="outline">简答 AI 判分</YdTag>
             <span class="qb-muted text-sm">{{ ruleText(paper) }}</span>
           </div>
           <div v-if="paper.description" class="text-sm" style="white-space: pre-wrap">{{ paper.description }}</div>
           <div class="flex items-center justify-between">
             <span class="qb-muted text-sm">发布于 {{ formatTime(paper.createdAt) }}</span>
-            <FaButton :loading="model.loading" @click="attempt(paper)"><FaIcon name="i-ri:play-line" />开始作答</FaButton>
+            <YdButton :loading="model.loading" @click="attempt(paper)"><YdIcon name="i-ri:play-line" />开始作答</YdButton>
           </div>
         </div>
-      </FaCard>
+      </YdCard>
     </div>
-  </FaPageMain>
+  </YdPageMain>
 </template>

@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { QuestionBankPluginModel } from '../composables/useQuestionBankPlugin'
 import type { PaperView } from '../types'
-import { FaButton, FaIcon, FaInput, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable, FaSearchBar, FaSelect, FaTag, useFaModal } from '@yudream/components'
+import { YdButton, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdSelect, YdTag, useYdModal } from '@yudream/components'
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { difficultyLabel, formatTime, questionTypeLabel } from '../composables/utils'
@@ -10,7 +11,7 @@ import { difficultyLabel, formatTime, questionTypeLabel } from '../composables/u
 const props = defineProps<{ model: QuestionBankPluginModel }>()
 const model = props.model
 const router = useRouter()
-const confirm = useFaModal()
+const confirm = useYdModal()
 
 const statusOptions = [
   { label: '全部状态', value: '' },
@@ -95,12 +96,12 @@ onMounted(() => model.loadAdminPapers())
 </script>
 
 <template>
-  <FaPageHeader title="题单管理" description="按规则随机抽题或手动固定选题，发布给用户作答，并可打印纸质试卷">
-    <FaButton @click="openCreate"><FaIcon name="i-ri:add-line" />新建题单</FaButton>
-  </FaPageHeader>
-  <FaPageMain>
-    <FaResponsiveTable
-      v-loading="model.loading"
+  <YdPageHeader title="题单管理" description="按规则随机抽题或手动固定选题，发布给用户作答，并可打印纸质试卷">
+    <YdButton @click="openCreate"><YdIcon name="i-ri:add-line" />新建题单</YdButton>
+  </YdPageHeader>
+  <YdPageMain>
+    <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable
+
       :columns="columns"
       :data="model.adminPapers"
       row-key="id"
@@ -110,50 +111,50 @@ onMounted(() => model.loadAdminPapers())
       empty-text="暂无题单，点击右上角新建"
     >
       <template #toolbar>
-        <FaSearchBar class="w-full">
+        <YdSearchBar class="w-full">
           <div class="qb-toolbar">
-            <FaInput v-model="model.adminPapersFilters.keyword" placeholder="搜索题单名称" clearable @keydown.enter="model.applyAdminPapersFilters" @clear="model.applyAdminPapersFilters" />
-            <FaSelect v-model="model.adminPapersFilters.status" :options="statusOptions" @change="model.applyAdminPapersFilters" />
-            <FaButton variant="outline" @click="model.applyAdminPapersFilters"><FaIcon name="i-ri:search-line" />查询</FaButton>
+            <YdInput v-model="model.adminPapersFilters.keyword" placeholder="搜索题单名称" clearable @keydown.enter="model.applyAdminPapersFilters" @clear="model.applyAdminPapersFilters" />
+            <YdSelect v-model="model.adminPapersFilters.status" :options="statusOptions" @change="model.applyAdminPapersFilters" />
+            <YdButton variant="outline" @click="model.applyAdminPapersFilters"><YdIcon name="i-ri:search-line" />查询</YdButton>
           </div>
-        </FaSearchBar>
+        </YdSearchBar>
       </template>
       <template #cell-mode="{ row }">
-        <FaTag :variant="row.original.mode === 'RULE' ? 'default' : 'secondary'">
+        <YdTag :variant="row.original.mode === 'RULE' ? 'default' : 'secondary'">
           {{ row.original.mode === 'RULE' ? '随机抽题' : '固定题目' }}
-        </FaTag>
+        </YdTag>
       </template>
       <template #cell-scope="{ row }">{{ scopeText(row.original) }}</template>
       <template #cell-subjective="{ row }">{{ subjectiveText(row.original.subjectiveMode) }}</template>
       <template #cell-status="{ row }">
-        <FaTag :variant="statusTag(row.original).variant">{{ statusTag(row.original).text }}</FaTag>
+        <YdTag :variant="statusTag(row.original).variant">{{ statusTag(row.original).text }}</YdTag>
       </template>
       <template #cell-updatedAt="{ row }">{{ formatTime(row.original.updatedAt) }}</template>
       <template #cell-operation="{ row }">
         <div class="flex-center gap-2">
-          <FaButton size="sm" variant="outline" @click="openEdit(row.original)">编辑</FaButton>
-          <FaButton size="sm" variant="outline" @click="openPrint(row.original)">打印</FaButton>
-          <FaButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</FaButton>
+          <YdButton size="sm" variant="outline" @click="openEdit(row.original)">编辑</YdButton>
+          <YdButton size="sm" variant="outline" @click="openPrint(row.original)">打印</YdButton>
+          <YdButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</YdButton>
         </div>
       </template>
       <template #card="{ row }">
         <div class="flex flex-col gap-2 text-sm">
           <div class="flex items-center justify-between gap-2">
             <strong class="text-base">{{ row.name }}</strong>
-            <FaTag :variant="statusTag(row).variant">{{ statusTag(row).text }}</FaTag>
+            <YdTag :variant="statusTag(row).variant">{{ statusTag(row).text }}</YdTag>
           </div>
           <div class="text-secondary-foreground/60">
             {{ row.mode === 'RULE' ? '随机抽题' : '固定题目' }} · {{ row.questionCount }} 题 · {{ scopeText(row) }}
           </div>
           <div class="flex gap-2">
-            <FaButton size="sm" variant="outline" @click="openEdit(row)">编辑</FaButton>
-            <FaButton size="sm" variant="outline" @click="openPrint(row)">打印</FaButton>
-            <FaButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</FaButton>
+            <YdButton size="sm" variant="outline" @click="openEdit(row)">编辑</YdButton>
+            <YdButton size="sm" variant="outline" @click="openPrint(row)">打印</YdButton>
+            <YdButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</YdButton>
           </div>
         </div>
       </template>
-    </FaResponsiveTable>
-    <FaPagination
+    </YdResponsiveTable></YdLoadingOverlay>
+    <YdPagination
       v-model:page="model.adminPapersPager.page"
       v-model:size="model.adminPapersPager.size"
       :total="model.adminPapersPager.total"
@@ -161,5 +162,5 @@ onMounted(() => model.loadAdminPapers())
       @page-change="model.loadAdminPapers"
       @size-change="model.applyAdminPapersFilters"
     />
-  </FaPageMain>
+  </YdPageMain>
 </template>

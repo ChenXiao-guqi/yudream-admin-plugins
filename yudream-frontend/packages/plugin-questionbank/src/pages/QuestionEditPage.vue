@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { QuestionBankPluginModel } from '../composables/useQuestionBankPlugin'
 import type { QuestionPayload } from '../types'
-import { FaButton, FaCheckboxGroup, FaIcon, FaInput, FaNumberField, FaPageHeader, FaPageMain, FaRadioGroup, FaSelect, useFaToast } from '@yudream/components'
+import { YdButton, YdCheckboxGroup, YdIcon, YdInput, YdNumberField, YdPageHeader, YdPageMain, YdRadioGroup, YdSelect, useYdToast } from '@yudream/components'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import CategorySelect from '../components/CategorySelect.vue'
@@ -13,7 +14,7 @@ const props = defineProps<{ model: QuestionBankPluginModel }>()
 const model = props.model
 const route = useRoute()
 const router = useRouter()
-const toast = useFaToast()
+const toast = useYdToast()
 
 const questionId = computed(() => String(route.query.id || ''))
 const loading = ref(false)
@@ -223,14 +224,14 @@ onMounted(async () => {
 </script>
 
 <template>
-  <FaPageHeader :title="questionId ? '编辑题目' : '新建题目'" description="题干、解析、参考答案均支持 Markdown 与图片">
-    <FaButton variant="outline" @click="back"><FaIcon name="i-ri:arrow-left-line" />返回题目管理</FaButton>
-  </FaPageHeader>
-  <FaPageMain>
-    <div v-loading="loading" class="qb-form">
+  <YdPageHeader :title="questionId ? '编辑题目' : '新建题目'" description="题干、解析、参考答案均支持 Markdown 与图片">
+    <YdButton variant="outline" @click="back"><YdIcon name="i-ri:arrow-left-line" />返回题目管理</YdButton>
+  </YdPageHeader>
+  <YdPageMain>
+    <YdLoadingOverlay :loading="loading"><div  class="qb-form">
       <div class="qb-form-row">
         <span class="qb-form-label">题型 <em class="qb-required">*</em></span>
-        <FaRadioGroup v-model="form.type" :options="QUESTION_TYPE_OPTIONS" />
+        <YdRadioGroup v-model="form.type" :options="QUESTION_TYPE_OPTIONS" />
       </div>
       <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div class="qb-form-row">
@@ -239,7 +240,7 @@ onMounted(async () => {
         </div>
         <div class="qb-form-row">
           <span class="qb-form-label">难度（1 最易，5 最难）</span>
-          <FaNumberField v-model="form.difficulty" :min="1" :max="5" />
+          <YdNumberField v-model="form.difficulty" :min="1" :max="5" />
         </div>
       </div>
       <div class="qb-form-row">
@@ -257,26 +258,26 @@ onMounted(async () => {
           <div class="flex flex-col gap-2">
             <div v-for="(option, index) in form.options" :key="index" class="flex items-center gap-2">
               <span class="qb-option-key shrink-0">{{ optionKey(index) }}.</span>
-              <FaInput v-model="form.options[index]" :placeholder="`选项 ${optionKey(index)} 内容`" clearable />
-              <FaButton size="sm" variant="outline" class="shrink-0" :disabled="form.options.length <= 2" @click="removeOption(index)">
-                <FaIcon name="i-ri:delete-bin-line" />
-              </FaButton>
+              <YdInput v-model="form.options[index]" :placeholder="`选项 ${optionKey(index)} 内容`" clearable />
+              <YdButton size="sm" variant="outline" class="shrink-0" :disabled="form.options.length <= 2" @click="removeOption(index)">
+                <YdIcon name="i-ri:delete-bin-line" />
+              </YdButton>
             </div>
             <div>
-              <FaButton size="sm" variant="outline" @click="addOption"><FaIcon name="i-ri:add-line" />添加选项</FaButton>
+              <YdButton size="sm" variant="outline" @click="addOption"><YdIcon name="i-ri:add-line" />添加选项</YdButton>
             </div>
           </div>
         </div>
         <div class="qb-form-row">
           <span class="qb-form-label">答案 <em class="qb-required">*</em></span>
-          <FaRadioGroup v-if="form.type === 'SINGLE'" v-model="form.answer" :options="answerOptions" />
-          <FaCheckboxGroup v-else v-model="form.answers" :options="answerOptions" />
+          <YdRadioGroup v-if="form.type === 'SINGLE'" v-model="form.answer" :options="answerOptions" />
+          <YdCheckboxGroup v-else v-model="form.answers" :options="answerOptions" />
         </div>
       </template>
 
       <div v-else-if="form.type === 'TRUE_FALSE'" class="qb-form-row">
         <span class="qb-form-label">答案 <em class="qb-required">*</em></span>
-        <FaRadioGroup v-model="form.answer" :options="trueFalseOptions" />
+        <YdRadioGroup v-model="form.answer" :options="trueFalseOptions" />
       </div>
 
       <div v-else-if="form.type === 'FILL'" class="qb-form-row">
@@ -285,20 +286,20 @@ onMounted(async () => {
           <div v-for="(blank, blankIndex) in form.blanks" :key="blankIndex" class="flex flex-col gap-2 rounded-md border p-3">
             <div class="flex items-center justify-between">
               <span class="qb-form-label">第 {{ blankIndex + 1 }} 空</span>
-              <FaButton size="sm" variant="outline" :disabled="form.blanks.length <= 1" @click="removeBlank(blankIndex)">删除此空</FaButton>
+              <YdButton size="sm" variant="outline" :disabled="form.blanks.length <= 1" @click="removeBlank(blankIndex)">删除此空</YdButton>
             </div>
             <div v-for="(accepted, answerIndex) in blank" :key="answerIndex" class="qb-blank-accepted">
-              <FaInput v-model="blank[answerIndex]" placeholder="可接受答案" clearable />
-              <FaButton size="sm" variant="outline" class="shrink-0" :disabled="blank.length <= 1" @click="removeAccepted(blankIndex, answerIndex)">
-                <FaIcon name="i-ri:delete-bin-line" />
-              </FaButton>
+              <YdInput v-model="blank[answerIndex]" placeholder="可接受答案" clearable />
+              <YdButton size="sm" variant="outline" class="shrink-0" :disabled="blank.length <= 1" @click="removeAccepted(blankIndex, answerIndex)">
+                <YdIcon name="i-ri:delete-bin-line" />
+              </YdButton>
             </div>
             <div>
-              <FaButton size="sm" variant="outline" @click="addAccepted(blankIndex)"><FaIcon name="i-ri:add-line" />添加同义答案</FaButton>
+              <YdButton size="sm" variant="outline" @click="addAccepted(blankIndex)"><YdIcon name="i-ri:add-line" />添加同义答案</YdButton>
             </div>
           </div>
           <div>
-            <FaButton size="sm" variant="outline" @click="addBlank"><FaIcon name="i-ri:add-line" />添加一个空</FaButton>
+            <YdButton size="sm" variant="outline" @click="addBlank"><YdIcon name="i-ri:add-line" />添加一个空</YdButton>
           </div>
         </div>
       </div>
@@ -314,12 +315,12 @@ onMounted(async () => {
       </div>
       <div class="qb-form-row">
         <span class="qb-form-label">状态</span>
-        <FaSelect v-model="form.status" :options="statusOptions" />
+        <YdSelect v-model="form.status" :options="statusOptions" />
       </div>
       <div class="flex gap-2">
-        <FaButton :loading="saving" @click="save"><FaIcon name="i-ri:save-line" />保存题目</FaButton>
-        <FaButton variant="outline" @click="back">取消</FaButton>
+        <YdButton :loading="saving" @click="save"><YdIcon name="i-ri:save-line" />保存题目</YdButton>
+        <YdButton variant="outline" @click="back">取消</YdButton>
       </div>
-    </div>
-  </FaPageMain>
+    </div></YdLoadingOverlay>
+  </YdPageMain>
 </template>

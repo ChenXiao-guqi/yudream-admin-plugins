@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { QuestionBankPluginModel } from '../composables/useQuestionBankPlugin'
 import type { PaperPayload, QuestionView } from '../types'
-import { Select as ASelect } from '@arco-design/web-vue'
-import { FaButton, FaCard, FaCheckboxGroup, FaDrawer, FaIcon, FaInput, FaNumberField, FaPageHeader, FaPageMain, FaPagination, FaSelect, FaTag, FaTextarea, useFaToast } from '@yudream/components'
+import { YdButton, YdCard, YdCheckboxGroup, YdDrawer, YdIcon, YdInput, YdNumberField, YdPageHeader, YdPageMain, YdPagination, YdSelect, YdTag, YdTextarea, useYdToast, YdMultiSelect } from '@yudream/components'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import CategorySelect from '../components/CategorySelect.vue'
@@ -12,7 +12,7 @@ const props = defineProps<{ model: QuestionBankPluginModel }>()
 const model = props.model
 const route = useRoute()
 const router = useRouter()
-const toast = useFaToast()
+const toast = useYdToast()
 
 const paperId = String(route.query.id ?? '')
 const editing = computed(() => !!paperId)
@@ -214,39 +214,39 @@ onMounted(async () => {
 </script>
 
 <template>
-  <FaPageHeader :title="editing ? '编辑题单' : '新建题单'" description="随机抽题每次作答/打印现场随机；固定题目顺序固定，题目删除或停用后自动跳过">
-    <FaButton variant="outline" @click="router.push('/platform/plugins/questionbank/admin/papers')">
-      <FaIcon name="i-ri:arrow-left-line" />返回列表
-    </FaButton>
-  </FaPageHeader>
-  <FaPageMain>
-    <div v-loading="pageLoading" class="qb-form">
-      <FaCard title="基本信息">
+  <YdPageHeader :title="editing ? '编辑题单' : '新建题单'" description="随机抽题每次作答/打印现场随机；固定题目顺序固定，题目删除或停用后自动跳过">
+    <YdButton variant="outline" @click="router.push('/platform/plugins/questionbank/admin/papers')">
+      <YdIcon name="i-ri:arrow-left-line" />返回列表
+    </YdButton>
+  </YdPageHeader>
+  <YdPageMain>
+    <YdLoadingOverlay :loading="pageLoading"><div  class="qb-form">
+      <YdCard title="基本信息">
         <div class="qb-form">
           <div class="qb-form-row">
             <span class="qb-form-label"><span class="qb-required">*</span>题单名称</span>
-            <FaInput v-model="form.name" placeholder="例如：2026 春季招新笔试" clearable />
+            <YdInput v-model="form.name" placeholder="例如：2026 春季招新笔试" clearable />
           </div>
           <div class="qb-form-row">
             <span class="qb-form-label">说明</span>
-            <FaTextarea v-model="form.description" placeholder="给作答者看的题单说明（可选）" :rows="3" />
+            <YdTextarea v-model="form.description" placeholder="给作答者看的题单说明（可选）" :rows="3" />
           </div>
           <div class="qb-form-row">
             <span class="qb-form-label">抽题方式</span>
-            <FaSelect v-model="form.mode" :options="modeOptions" />
+            <YdSelect v-model="form.mode" :options="modeOptions" />
           </div>
           <div class="qb-form-row">
             <span class="qb-form-label">简答题判分</span>
-            <FaSelect v-model="form.subjectiveMode" :options="subjectiveOptions" />
+            <YdSelect v-model="form.subjectiveMode" :options="subjectiveOptions" />
           </div>
           <div class="qb-form-row">
             <span class="qb-form-label">状态</span>
-            <FaSelect v-model="form.status" :options="statusOptions" />
+            <YdSelect v-model="form.status" :options="statusOptions" />
           </div>
         </div>
-      </FaCard>
+      </YdCard>
 
-      <FaCard v-if="form.mode === 'RULE'" title="抽题规则" description="不勾选即不限制该维度；每次作答与每次打印都会按规则现场重新随机抽题">
+      <YdCard v-if="form.mode === 'RULE'" title="抽题规则" description="不勾选即不限制该维度；每次作答与每次打印都会按规则现场重新随机抽题">
         <div class="qb-form">
           <div class="qb-form-row">
             <span class="qb-form-label">分类</span>
@@ -259,47 +259,47 @@ onMounted(async () => {
           </div>
           <div class="qb-form-row">
             <span class="qb-form-label">标签（命中任一即可）</span>
-            <ASelect v-model="form.tags" :options="tagOptions" placeholder="不限标签" multiple allow-search />
+            <YdMultiSelect v-model="form.tags" :options="tagOptions" placeholder="不限标签" allow-search />
           </div>
           <div class="qb-form-row">
             <span class="qb-form-label">题型</span>
-            <FaCheckboxGroup v-model="form.types" :options="typeOptions" class="flex flex-wrap gap-3" />
+            <YdCheckboxGroup v-model="form.types" :options="typeOptions" class="flex flex-wrap gap-3" />
           </div>
           <div class="qb-form-row">
             <span class="qb-form-label">难度</span>
-            <FaCheckboxGroup v-model="form.difficulties" :options="difficultyOptions" class="flex flex-wrap gap-3" />
+            <YdCheckboxGroup v-model="form.difficulties" :options="difficultyOptions" class="flex flex-wrap gap-3" />
           </div>
           <div class="qb-form-row">
             <span class="qb-form-label"><span class="qb-required">*</span>抽题数量（1~100）</span>
-            <FaNumberField v-model="form.count" :min="1" :max="100" />
+            <YdNumberField v-model="form.count" :min="1" :max="100" />
           </div>
         </div>
-      </FaCard>
+      </YdCard>
 
-      <FaCard v-else title="固定选题" description="按添加顺序出题；已删除或停用的题目在作答/打印时自动跳过">
+      <YdCard v-else title="固定选题" description="按添加顺序出题；已删除或停用的题目在作答/打印时自动跳过">
         <div class="flex flex-col gap-3">
           <div class="flex items-center justify-between gap-3">
             <span class="text-sm qb-muted">{{ pickedSummary }}</span>
-            <FaButton variant="outline" @click="openPicker"><FaIcon name="i-ri:list-check-2" />选择题目</FaButton>
+            <YdButton variant="outline" @click="openPicker"><YdIcon name="i-ri:list-check-2" />选择题目</YdButton>
           </div>
         </div>
-      </FaCard>
+      </YdCard>
 
-      <FaCard>
+      <YdCard>
         <div class="flex justify-end gap-2">
-          <FaButton variant="outline" @click="router.push('/platform/plugins/questionbank/admin/papers')">取消</FaButton>
-          <FaButton :loading="model.loading" @click="save"><FaIcon name="i-ri:save-line" />保存题单</FaButton>
+          <YdButton variant="outline" @click="router.push('/platform/plugins/questionbank/admin/papers')">取消</YdButton>
+          <YdButton :loading="model.loading" @click="save"><YdIcon name="i-ri:save-line" />保存题单</YdButton>
         </div>
-      </FaCard>
-    </div>
+      </YdCard>
+    </div></YdLoadingOverlay>
 
-    <FaDrawer v-model="pickerOpen" title="选择题目（勾选并排序）" size="720px">
+    <YdDrawer v-model="pickerOpen" title="选择题目（勾选并排序）" size="720px">
       <div class="flex flex-col gap-4">
         <div class="qb-toolbar">
-          <FaInput v-model="pickerKeyword" placeholder="搜索题干或标签" clearable @keydown.enter="pickerSearch" @clear="pickerSearch" />
-          <FaButton variant="outline" @click="pickerSearch"><FaIcon name="i-ri:search-line" />查询</FaButton>
+          <YdInput v-model="pickerKeyword" placeholder="搜索题干或标签" clearable @keydown.enter="pickerSearch" @clear="pickerSearch" />
+          <YdButton variant="outline" @click="pickerSearch"><YdIcon name="i-ri:search-line" />查询</YdButton>
         </div>
-        <div v-loading="pickerLoading" class="flex flex-col gap-2">
+        <YdLoadingOverlay :loading="pickerLoading"><div  class="flex flex-col gap-2">
           <div
             v-for="row in pickerList"
             :key="row.id"
@@ -307,19 +307,19 @@ onMounted(async () => {
           >
             <div class="flex flex-col gap-1">
               <div class="flex items-center gap-2">
-                <FaTag variant="secondary">{{ row.typeLabel }}</FaTag>
+                <YdTag variant="secondary">{{ row.typeLabel }}</YdTag>
                 <span style="color: var(--color-warning-6, #ff7d00)">{{ difficultyLabel(row.difficulty) }}</span>
                 <span class="qb-muted">{{ row.categoryName || '未分类' }}</span>
               </div>
               <div>{{ plainContent(row) || '（空题干）' }}</div>
             </div>
-            <FaButton size="sm" :variant="isPicked(row) ? 'destructive' : 'outline'" @click="togglePick(row)">
+            <YdButton size="sm" :variant="isPicked(row) ? 'destructive' : 'outline'" @click="togglePick(row)">
               {{ isPicked(row) ? '移除' : '添加' }}
-            </FaButton>
+            </YdButton>
           </div>
           <div v-if="!pickerLoading && !pickerList.length" class="qb-muted text-center py-4">没有匹配的启用题目</div>
-        </div>
-        <FaPagination
+        </div></YdLoadingOverlay>
+        <YdPagination
           v-model:page="pickerPager.page"
           v-model:size="pickerPager.size"
           :total="pickerPager.total"
@@ -335,17 +335,17 @@ onMounted(async () => {
           >
             <span>{{ index + 1 }}. {{ plainContent(item) || '（空题干）' }}</span>
             <div class="flex gap-1">
-              <FaButton size="sm" variant="outline" :disabled="index === 0" @click="movePick(index, -1)"><FaIcon name="i-ri:arrow-up-line" /></FaButton>
-              <FaButton size="sm" variant="outline" :disabled="index === pickerSelected.length - 1" @click="movePick(index, 1)"><FaIcon name="i-ri:arrow-down-line" /></FaButton>
-              <FaButton size="sm" variant="destructive" @click="togglePick(item)"><FaIcon name="i-ri:close-line" /></FaButton>
+              <YdButton size="sm" variant="outline" :disabled="index === 0" @click="movePick(index, -1)"><YdIcon name="i-ri:arrow-up-line" /></YdButton>
+              <YdButton size="sm" variant="outline" :disabled="index === pickerSelected.length - 1" @click="movePick(index, 1)"><YdIcon name="i-ri:arrow-down-line" /></YdButton>
+              <YdButton size="sm" variant="destructive" @click="togglePick(item)"><YdIcon name="i-ri:close-line" /></YdButton>
             </div>
           </div>
         </div>
         <div class="flex justify-end gap-2">
-          <FaButton variant="outline" @click="pickerOpen = false">取消</FaButton>
-          <FaButton @click="confirmPicker"><FaIcon name="i-ri:check-line" />确定选题（{{ pickerSelected.length }}）</FaButton>
+          <YdButton variant="outline" @click="pickerOpen = false">取消</YdButton>
+          <YdButton @click="confirmPicker"><YdIcon name="i-ri:check-line" />确定选题（{{ pickerSelected.length }}）</YdButton>
         </div>
       </div>
-    </FaDrawer>
-  </FaPageMain>
+    </YdDrawer>
+  </YdPageMain>
 </template>

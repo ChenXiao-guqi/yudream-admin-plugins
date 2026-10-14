@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { QuestionBankPluginModel } from '../composables/useQuestionBankPlugin'
 import type { ComposeRecordView, QuestionView } from '../types'
-import { FaButton, FaCard, FaDrawer, FaIcon, FaInput, FaModal, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable, FaSearchBar, FaSelect, FaSwitch, FaTabs, FaTag, FaTextarea, useFaModal, useFaToast } from '@yudream/components'
+import { YdButton, YdCard, YdDrawer, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdSelect, YdSwitch, YdTabs, YdTag, YdTextarea, useYdModal, useYdToast } from '@yudream/components'
 import { computed, onMounted, ref } from 'vue'
 import CategorySelect from '../components/CategorySelect.vue'
 import MarkdownPreview from '../components/MarkdownPreview.vue'
@@ -10,8 +11,8 @@ import { difficultyLabel, formatTime, optionKey, QUESTION_TYPE_OPTIONS } from '.
 
 const props = defineProps<{ model: QuestionBankPluginModel }>()
 const model = props.model
-const toast = useFaToast()
-const confirm = useFaModal()
+const toast = useYdToast()
+const confirm = useYdModal()
 
 const tab = ref<'workbench' | 'records'>('workbench')
 const tabs = [
@@ -162,27 +163,27 @@ onMounted(async () => {
 </script>
 
 <template>
-  <FaPageHeader title="组卷中心" description="手动选题或按规则随机抽题；可大屏放映、导出 Word，也可保存为组卷记录并分享在线查看">
+  <YdPageHeader title="组卷中心" description="手动选题或按规则随机抽题；可大屏放映、导出 Word，也可保存为组卷记录并分享在线查看">
     <template v-if="tab === 'workbench'">
-      <FaButton variant="outline" :disabled="!model.composeSelected.length" @click="presentCurrentList">
-        <FaIcon name="i-ri:slideshow-2-line" />大屏放映
-      </FaButton>
-      <FaButton variant="outline" :disabled="!model.composeSelected.length" @click="saveOpen = true">
-        <FaIcon name="i-ri:save-3-line" />保存为记录
-      </FaButton>
-      <FaButton :loading="model.composeExporting" :disabled="!model.composeSelected.length" @click="doExport">
-        <FaIcon name="i-ri:file-word-2-line" />导出 Word{{ model.composeSelected.length ? `（${model.composeSelected.length} 题）` : '' }}
-      </FaButton>
+      <YdButton variant="outline" :disabled="!model.composeSelected.length" @click="presentCurrentList">
+        <YdIcon name="i-ri:slideshow-2-line" />大屏放映
+      </YdButton>
+      <YdButton variant="outline" :disabled="!model.composeSelected.length" @click="saveOpen = true">
+        <YdIcon name="i-ri:save-3-line" />保存为记录
+      </YdButton>
+      <YdButton :loading="model.composeExporting" :disabled="!model.composeSelected.length" @click="doExport">
+        <YdIcon name="i-ri:file-word-2-line" />导出 Word{{ model.composeSelected.length ? `（${model.composeSelected.length} 题）` : '' }}
+      </YdButton>
     </template>
-  </FaPageHeader>
-  <FaPageMain>
-    <FaTabs v-model="tab" :list="tabs" class="mb-4" />
+  </YdPageHeader>
+  <YdPageMain>
+    <YdTabs v-model="tab" :list="tabs" class="mb-4" />
 
     <!-- 组卷工作台：宽屏左右两栏（右栏吸附），窄屏单栏堆叠 -->
     <div v-if="tab === 'workbench'" class="qb-compose-layout">
-      <FaCard title="题目拾取" description="仅显示启用中的题目，点击「加入」进入右侧组卷列表">
-        <FaResponsiveTable
-          v-loading="model.loading"
+      <YdCard title="题目拾取" description="仅显示启用中的题目，点击「加入」进入右侧组卷列表">
+        <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable
+
           :columns="columns"
           :data="model.composeQuestions"
           row-key="id"
@@ -192,57 +193,57 @@ onMounted(async () => {
           empty-text="暂无符合条件的启用题目"
         >
           <template #toolbar>
-            <FaSearchBar class="w-full">
+            <YdSearchBar class="w-full">
               <div class="qb-toolbar">
-                <FaInput v-model="model.composeFilters.keyword" placeholder="搜索题干或标签" clearable @keydown.enter="model.applyComposeFilters" @clear="model.applyComposeFilters" />
+                <YdInput v-model="model.composeFilters.keyword" placeholder="搜索题干或标签" clearable @keydown.enter="model.applyComposeFilters" @clear="model.applyComposeFilters" />
                 <CategorySelect v-model="model.composeFilters.categoryId" :categories="model.composeOptions.categories" empty-label="全部分类" @update:model-value="model.applyComposeFilters" />
-                <FaSelect v-model="model.composeFilters.tag" :options="tagOptions" @change="model.applyComposeFilters" />
-                <FaSelect v-model="model.composeFilters.type" :options="typeOptions" @change="model.applyComposeFilters" />
-                <FaButton variant="outline" @click="model.applyComposeFilters"><FaIcon name="i-ri:search-line" />查询</FaButton>
+                <YdSelect v-model="model.composeFilters.tag" :options="tagOptions" @change="model.applyComposeFilters" />
+                <YdSelect v-model="model.composeFilters.type" :options="typeOptions" @change="model.applyComposeFilters" />
+                <YdButton variant="outline" @click="model.applyComposeFilters"><YdIcon name="i-ri:search-line" />查询</YdButton>
               </div>
-            </FaSearchBar>
+            </YdSearchBar>
           </template>
           <template #cell-content="{ row }">
             <span class="qb-question-content-cell" :title="plainContent(row.original)">{{ plainContent(row.original) || '（空题干）' }}</span>
           </template>
-          <template #cell-type="{ row }"><FaTag variant="secondary">{{ row.original.typeLabel }}</FaTag></template>
+          <template #cell-type="{ row }"><YdTag variant="secondary">{{ row.original.typeLabel }}</YdTag></template>
           <template #cell-category="{ row }">{{ row.original.categoryName || '-' }}</template>
           <template #cell-tags="{ row }">
             <div class="flex flex-wrap gap-1">
-              <FaTag v-for="tag in row.original.tags" :key="tag" variant="outline">{{ tag }}</FaTag>
+              <YdTag v-for="tag in row.original.tags" :key="tag" variant="outline">{{ tag }}</YdTag>
               <span v-if="!row.original.tags.length" class="qb-muted">-</span>
             </div>
           </template>
           <template #cell-difficulty="{ row }"><span style="color: var(--color-warning-6, #ff7d00)">{{ difficultyLabel(row.original.difficulty) }}</span></template>
           <template #cell-operation="{ row }">
-            <FaButton v-if="!isSelected(row.original)" size="sm" variant="outline" @click="model.addComposeQuestion(row.original)">
-              <FaIcon name="i-ri:add-line" />加入
-            </FaButton>
-            <FaTag v-else variant="default">已加入</FaTag>
+            <YdButton v-if="!isSelected(row.original)" size="sm" variant="outline" @click="model.addComposeQuestion(row.original)">
+              <YdIcon name="i-ri:add-line" />加入
+            </YdButton>
+            <YdTag v-else variant="default">已加入</YdTag>
           </template>
           <template #card="{ row }">
-            <FaCard>
+            <YdCard>
               <div class="qb-mobile-card">
                 <div class="qb-mobile-card-title">{{ plainContent(row) || '（空题干）' }}</div>
                 <div class="qb-mobile-card-meta">
-                  <FaTag variant="secondary">{{ row.typeLabel }}</FaTag>
+                  <YdTag variant="secondary">{{ row.typeLabel }}</YdTag>
                   <span>{{ row.categoryName || '未分类' }}</span>
                   <span style="color: var(--color-warning-6, #ff7d00)">{{ difficultyLabel(row.difficulty) }}</span>
                 </div>
                 <div v-if="row.tags.length" class="flex flex-wrap gap-1">
-                  <FaTag v-for="tag in row.tags" :key="tag" variant="outline">{{ tag }}</FaTag>
+                  <YdTag v-for="tag in row.tags" :key="tag" variant="outline">{{ tag }}</YdTag>
                 </div>
                 <div class="qb-mobile-card-actions">
-                  <FaButton v-if="!isSelected(row)" size="sm" variant="outline" @click="model.addComposeQuestion(row)">
-                    <FaIcon name="i-ri:add-line" />加入
-                  </FaButton>
-                  <FaTag v-else variant="default">已加入</FaTag>
+                  <YdButton v-if="!isSelected(row)" size="sm" variant="outline" @click="model.addComposeQuestion(row)">
+                    <YdIcon name="i-ri:add-line" />加入
+                  </YdButton>
+                  <YdTag v-else variant="default">已加入</YdTag>
                 </div>
               </div>
-            </FaCard>
+            </YdCard>
           </template>
-        </FaResponsiveTable>
-        <FaPagination
+        </YdResponsiveTable></YdLoadingOverlay>
+        <YdPagination
           v-model:page="model.composePager.page"
           v-model:size="model.composePager.size"
           :total="model.composePager.total"
@@ -250,28 +251,28 @@ onMounted(async () => {
           @page-change="model.loadComposeQuestions"
           @size-change="model.applyComposeFilters"
         />
-      </FaCard>
+      </YdCard>
       <div class="qb-compose-rail">
-        <FaCard title="试卷信息" description="导出 Word / 保存记录时的标题与说明，可自定义" class="qb-compose-rail-fixed">
+        <YdCard title="试卷信息" description="导出 Word / 保存记录时的标题与说明，可自定义" class="qb-compose-rail-fixed">
           <div class="qb-form">
             <div class="qb-form-row">
               <span class="qb-form-label">试卷标题</span>
-              <FaInput v-model="title" placeholder="默认：试题卷" clearable />
+              <YdInput v-model="title" placeholder="默认：试题卷" clearable />
             </div>
             <div class="qb-form-row items-start">
               <span class="qb-form-label pt-2">试卷说明</span>
-              <FaTextarea v-model="description" :rows="3" placeholder="考试时间、注意事项等（可选）" />
+              <YdTextarea v-model="description" :rows="3" placeholder="考试时间、注意事项等（可选）" />
             </div>
             <div class="qb-form-row">
               <span class="qb-form-label">附带答案与解析</span>
               <div class="flex items-center gap-3">
-                <FaSwitch v-model="withAnswers" />
-                <FaTag :variant="withAnswers ? 'default' : 'outline'">{{ withAnswers ? '附答案页' : '纯试卷' }}</FaTag>
+                <YdSwitch v-model="withAnswers" />
+                <YdTag :variant="withAnswers ? 'default' : 'outline'">{{ withAnswers ? '附答案页' : '纯试卷' }}</YdTag>
               </div>
             </div>
           </div>
-        </FaCard>
-        <FaCard title="随机抽题" description="按条件随机抽题追加到组卷列表，自动去重" class="qb-compose-rail-fixed">
+        </YdCard>
+        <YdCard title="随机抽题" description="按条件随机抽题追加到组卷列表，自动去重" class="qb-compose-rail-fixed">
           <div class="qb-form">
             <div class="qb-form-row">
               <span class="qb-form-label">分类</span>
@@ -279,22 +280,22 @@ onMounted(async () => {
             </div>
             <div class="qb-form-row">
               <span class="qb-form-label">标签</span>
-              <FaSelect v-model="drawRule.tag" :options="drawTagOptions" />
+              <YdSelect v-model="drawRule.tag" :options="drawTagOptions" />
             </div>
             <div class="qb-form-row">
               <span class="qb-form-label">题型</span>
-              <FaSelect v-model="drawRule.type" :options="drawTypeOptions" />
+              <YdSelect v-model="drawRule.type" :options="drawTypeOptions" />
             </div>
             <div class="qb-form-row">
               <span class="qb-form-label">数量</span>
-              <FaInput v-model="drawRule.count" placeholder="1-100" />
+              <YdInput v-model="drawRule.count" placeholder="1-100" />
             </div>
-            <FaButton variant="outline" :loading="model.composeDrawing" @click="doDraw">
-              <FaIcon name="i-ri:shuffle-line" />随机抽题
-            </FaButton>
+            <YdButton variant="outline" :loading="model.composeDrawing" @click="doDraw">
+              <YdIcon name="i-ri:shuffle-line" />随机抽题
+            </YdButton>
           </div>
-        </FaCard>
-        <FaCard
+        </YdCard>
+        <YdCard
           :title="`组卷列表（${model.composeSelected.length}）`"
           description="按加入顺序出卷，可逐题移除"
           class="qb-compose-selected-card"
@@ -307,23 +308,23 @@ onMounted(async () => {
                 <div class="truncate" :title="plainContent(item)">{{ plainContent(item) || '（空题干）' }}</div>
                 <div class="qb-muted text-xs">{{ item.typeLabel }}<template v-if="item.categoryName"> · {{ item.categoryName }}</template></div>
               </div>
-              <FaButton size="sm" variant="ghost" @click="model.removeComposeQuestion(item.id)">
-                <FaIcon name="i-ri:close-line" />
-              </FaButton>
+              <YdButton size="sm" variant="ghost" @click="model.removeComposeQuestion(item.id)">
+                <YdIcon name="i-ri:close-line" />
+              </YdButton>
             </div>
           </div>
           <p v-else class="qb-muted text-sm">还没有题目，从左侧表格加入或使用随机抽题。</p>
           <div v-if="model.composeSelected.length" class="qb-compose-selected-actions">
-            <FaButton size="sm" variant="outline" @click="model.composeSelected = []">清空列表</FaButton>
+            <YdButton size="sm" variant="outline" @click="model.composeSelected = []">清空列表</YdButton>
           </div>
-        </FaCard>
+        </YdCard>
       </div>
     </div>
 
     <!-- 组卷记录 -->
-    <FaCard v-else title="组卷记录" description="记录只保存题目引用，打开时实时解析；已删除或停用的题目会自动跳过">
-      <FaResponsiveTable
-        v-loading="model.composeRecordsLoading"
+    <YdCard v-else title="组卷记录" description="记录只保存题目引用，打开时实时解析；已删除或停用的题目会自动跳过">
+      <YdLoadingOverlay :loading="model.composeRecordsLoading"><YdResponsiveTable
+
         :columns="recordColumns"
         :data="model.composeRecords"
         row-key="id"
@@ -333,58 +334,58 @@ onMounted(async () => {
         empty-text="还没有组卷记录，去工作台保存一份吧"
       >
         <template #toolbar>
-          <FaSearchBar class="w-full">
+          <YdSearchBar class="w-full">
             <div class="qb-toolbar">
-              <FaInput v-model="model.composeRecordsFilters.keyword" placeholder="搜索标题或说明" clearable @keydown.enter="model.applyComposeRecordsFilters" @clear="model.applyComposeRecordsFilters" />
-              <FaSelect v-if="model.questionbankManager" v-model="recordScope" :options="scopeOptions" @change="model.applyComposeRecordsFilters" />
-              <FaButton variant="outline" @click="model.applyComposeRecordsFilters"><FaIcon name="i-ri:search-line" />查询</FaButton>
-              <FaButton variant="outline" @click="model.loadComposeRecords"><FaIcon name="i-ri:refresh-line" />刷新</FaButton>
+              <YdInput v-model="model.composeRecordsFilters.keyword" placeholder="搜索标题或说明" clearable @keydown.enter="model.applyComposeRecordsFilters" @clear="model.applyComposeRecordsFilters" />
+              <YdSelect v-if="model.questionbankManager" v-model="recordScope" :options="scopeOptions" @change="model.applyComposeRecordsFilters" />
+              <YdButton variant="outline" @click="model.applyComposeRecordsFilters"><YdIcon name="i-ri:search-line" />查询</YdButton>
+              <YdButton variant="outline" @click="model.loadComposeRecords"><YdIcon name="i-ri:refresh-line" />刷新</YdButton>
             </div>
-          </FaSearchBar>
+          </YdSearchBar>
         </template>
         <template #cell-withAnswers="{ row }">
-          <FaTag :variant="row.original.withAnswers ? 'default' : 'outline'">{{ row.original.withAnswers ? '附答案' : '纯试卷' }}</FaTag>
+          <YdTag :variant="row.original.withAnswers ? 'default' : 'outline'">{{ row.original.withAnswers ? '附答案' : '纯试卷' }}</YdTag>
         </template>
         <template #cell-shared="{ row }">
-          <FaTag :variant="row.original.shared ? 'default' : 'secondary'">{{ row.original.shared ? '分享中' : '未分享' }}</FaTag>
+          <YdTag :variant="row.original.shared ? 'default' : 'secondary'">{{ row.original.shared ? '分享中' : '未分享' }}</YdTag>
         </template>
         <template #cell-createdAt="{ row }">{{ formatTime(row.original.createdAt) }}</template>
         <template #cell-operation="{ row }">
           <div class="flex flex-wrap gap-1">
-            <FaButton size="sm" variant="outline" @click="viewRecord(row.original)"><FaIcon name="i-ri:eye-line" />查看</FaButton>
-            <FaButton size="sm" variant="outline" @click="presentRecord(row.original)"><FaIcon name="i-ri:slideshow-2-line" />大屏</FaButton>
-            <FaButton size="sm" variant="outline" @click="model.exportComposeRecordWord(row.original)"><FaIcon name="i-ri:file-word-2-line" />Word</FaButton>
-            <FaButton size="sm" :variant="row.original.shared ? 'ghost' : 'outline'" @click="toggleShare(row.original)">
-              <FaIcon :name="row.original.shared ? 'i-ri:link-unlink' : 'i-ri:share-line'" />{{ row.original.shared ? '取消分享' : '分享' }}
-            </FaButton>
-            <FaButton size="sm" variant="destructive" @click="confirmDeleteRecord(row.original)"><FaIcon name="i-ri:delete-bin-line" />删除</FaButton>
+            <YdButton size="sm" variant="outline" @click="viewRecord(row.original)"><YdIcon name="i-ri:eye-line" />查看</YdButton>
+            <YdButton size="sm" variant="outline" @click="presentRecord(row.original)"><YdIcon name="i-ri:slideshow-2-line" />大屏</YdButton>
+            <YdButton size="sm" variant="outline" @click="model.exportComposeRecordWord(row.original)"><YdIcon name="i-ri:file-word-2-line" />Word</YdButton>
+            <YdButton size="sm" :variant="row.original.shared ? 'ghost' : 'outline'" @click="toggleShare(row.original)">
+              <YdIcon :name="row.original.shared ? 'i-ri:link-unlink' : 'i-ri:share-line'" />{{ row.original.shared ? '取消分享' : '分享' }}
+            </YdButton>
+            <YdButton size="sm" variant="destructive" @click="confirmDeleteRecord(row.original)"><YdIcon name="i-ri:delete-bin-line" />删除</YdButton>
           </div>
         </template>
         <template #card="{ row }">
-          <FaCard>
+          <YdCard>
             <div class="qb-mobile-card">
               <div class="qb-mobile-card-title">{{ row.title }}</div>
               <div class="qb-mobile-card-meta">
                 <span v-if="model.questionbankManager">{{ row.ownerName }}</span>
                 <span>{{ row.questionCount }} 题</span>
-                <FaTag :variant="row.withAnswers ? 'default' : 'outline'">{{ row.withAnswers ? '附答案' : '纯试卷' }}</FaTag>
-                <FaTag :variant="row.shared ? 'default' : 'secondary'">{{ row.shared ? '分享中' : '未分享' }}</FaTag>
+                <YdTag :variant="row.withAnswers ? 'default' : 'outline'">{{ row.withAnswers ? '附答案' : '纯试卷' }}</YdTag>
+                <YdTag :variant="row.shared ? 'default' : 'secondary'">{{ row.shared ? '分享中' : '未分享' }}</YdTag>
                 <span>{{ formatTime(row.createdAt) }}</span>
               </div>
               <div class="qb-mobile-card-actions">
-                <FaButton size="sm" variant="outline" @click="viewRecord(row)">查看</FaButton>
-                <FaButton size="sm" variant="outline" @click="presentRecord(row)">大屏</FaButton>
-                <FaButton size="sm" variant="outline" @click="model.exportComposeRecordWord(row)">Word</FaButton>
-                <FaButton size="sm" :variant="row.shared ? 'ghost' : 'outline'" @click="toggleShare(row)">
+                <YdButton size="sm" variant="outline" @click="viewRecord(row)">查看</YdButton>
+                <YdButton size="sm" variant="outline" @click="presentRecord(row)">大屏</YdButton>
+                <YdButton size="sm" variant="outline" @click="model.exportComposeRecordWord(row)">Word</YdButton>
+                <YdButton size="sm" :variant="row.shared ? 'ghost' : 'outline'" @click="toggleShare(row)">
                   {{ row.shared ? '取消分享' : '分享' }}
-                </FaButton>
-                <FaButton size="sm" variant="destructive" @click="confirmDeleteRecord(row)">删除</FaButton>
+                </YdButton>
+                <YdButton size="sm" variant="destructive" @click="confirmDeleteRecord(row)">删除</YdButton>
               </div>
             </div>
-          </FaCard>
+          </YdCard>
         </template>
-      </FaResponsiveTable>
-      <FaPagination
+      </YdResponsiveTable></YdLoadingOverlay>
+      <YdPagination
         v-model:page="model.composeRecordsPager.page"
         v-model:size="model.composeRecordsPager.size"
         :total="model.composeRecordsPager.total"
@@ -392,32 +393,32 @@ onMounted(async () => {
         @page-change="model.loadComposeRecords"
         @size-change="model.applyComposeRecordsFilters"
       />
-    </FaCard>
+    </YdCard>
 
     <!-- 保存为记录 -->
-    <FaModal v-model="saveOpen" title="保存为组卷记录" :confirm-button-loading="model.composeRecordSaving" @confirm="doSaveRecord">
+    <YdModal v-model="saveOpen" title="保存为组卷记录" :confirm-button-loading="model.composeRecordSaving" @confirm="doSaveRecord">
       <div class="qb-form">
         <div class="qb-form-row">
           <span class="qb-form-label">标题</span>
-          <FaInput v-model="title" placeholder="默认：未命名组卷" clearable />
+          <YdInput v-model="title" placeholder="默认：未命名组卷" clearable />
         </div>
         <div class="qb-form-row items-start">
           <span class="qb-form-label pt-2">说明</span>
-          <FaTextarea v-model="description" :rows="3" placeholder="用途、场景等（可选）" />
+          <YdTextarea v-model="description" :rows="3" placeholder="用途、场景等（可选）" />
         </div>
         <div class="qb-form-row">
           <span class="qb-form-label">附带答案与解析</span>
           <div class="flex items-center gap-3">
-            <FaSwitch v-model="withAnswers" />
-            <FaTag :variant="withAnswers ? 'default' : 'outline'">{{ withAnswers ? '附答案' : '纯试卷' }}</FaTag>
+            <YdSwitch v-model="withAnswers" />
+            <YdTag :variant="withAnswers ? 'default' : 'outline'">{{ withAnswers ? '附答案' : '纯试卷' }}</YdTag>
           </div>
         </div>
         <p class="qb-muted text-xs">记录将保存当前组卷列表的 {{ model.composeSelected.length }} 道题目引用，可在「组卷记录」页签管理、分享与再次导出。</p>
       </div>
-    </FaModal>
+    </YdModal>
 
-    <!-- 在线查看记录；FaDrawer 没有 size prop，宽度用 content-class 走插件 CSS（移动端满宽） -->
-    <FaDrawer v-model="detailOpen" :title="model.composeRecordDetail?.title ?? '组卷详情'" content-class="qb-record-drawer">
+    <!-- 在线查看记录；YdDrawer 没有 size prop，宽度用 content-class 走插件 CSS（移动端满宽） -->
+    <YdDrawer v-model="detailOpen" :title="model.composeRecordDetail?.title ?? '组卷详情'" content-class="qb-record-drawer">
       <div v-if="model.composeRecordDetailLoading" class="qb-muted py-10 text-center">加载中…</div>
       <div v-else-if="!model.composeRecordDetail" class="qb-muted py-10 text-center">记录不存在或已删除</div>
       <div v-else class="flex flex-col gap-4">
@@ -429,8 +430,8 @@ onMounted(async () => {
         <div v-for="(question, index) in model.composeRecordDetail.questions ?? []" :key="question.id ?? index" class="rounded-md border p-3">
           <div class="qb-question-meta">
             <strong>{{ index + 1 }}.</strong>
-            <FaTag variant="secondary">{{ question.typeLabel }}</FaTag>
-            <FaTag variant="outline">{{ difficultyLabel(question.difficulty) }}</FaTag>
+            <YdTag variant="secondary">{{ question.typeLabel }}</YdTag>
+            <YdTag variant="outline">{{ difficultyLabel(question.difficulty) }}</YdTag>
           </div>
           <MarkdownPreview :sdk="model.sdk" :content="question.content" />
           <div v-if="question.type === 'SINGLE' || question.type === 'MULTIPLE'" class="qb-options">
@@ -457,6 +458,6 @@ onMounted(async () => {
         </div>
         <div v-if="!(model.composeRecordDetail.questions ?? []).length" class="qb-muted py-6 text-center text-sm">这份记录的题目已全部失效</div>
       </div>
-    </FaDrawer>
-  </FaPageMain>
+    </YdDrawer>
+  </YdPageMain>
 </template>

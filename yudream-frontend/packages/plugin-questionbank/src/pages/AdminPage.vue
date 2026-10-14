@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import type { TableColumn } from '@yudream/components'
+import { YdLoadingOverlay } from '@yudream/components'
+import type { TableColumn, YdFilePickerInstance } from '@yudream/components'
 import type { QuestionBankPluginModel } from '../composables/useQuestionBankPlugin'
 import type { ImportResult, QuestionPayload, QuestionView } from '../types'
-import { FaButton, FaCard, FaCheckbox, FaIcon, FaInput, FaModal, FaPageHeader, FaPageMain, FaPagination, FaSearchBar, FaSelect, FaTable, FaTag, FaTextarea, useFaModal, useFaToast } from '@yudream/components'
+import { YdButton, YdCard, YdCheckbox, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdSearchBar, YdSelect, YdResponsiveTable, YdTag, YdTextarea, YdFilePicker, useYdModal, useYdToast } from '@yudream/components'
 import { onMounted, ref, shallowRef } from 'vue'
 import { useRouter } from 'vue-router'
 import { saveBlob } from '../api/questionbank-api'
@@ -12,19 +13,22 @@ import { difficultyLabel, formatTime, QUESTION_TYPE_OPTIONS } from '../composabl
 const props = defineProps<{ model: QuestionBankPluginModel }>()
 const model = props.model
 const router = useRouter()
-const confirm = useFaModal()
-const toast = useFaToast()
+const confirm = useYdModal()
+const toast = useYdToast()
 
 const selectedRows = shallowRef<QuestionView[]>([])
+const rowSelection = shallowRef<Record<string, boolean>>({})
 const exporting = ref(false)
 const importOpen = ref(false)
 const importing = ref(false)
 const importResult = ref<ImportResult | null>(null)
 const importFileName = ref('')
+const importFilePicker = ref<YdFilePickerInstance | null>(null)
 
 const aiImportOpen = ref(false)
 const aiImportText = ref('')
 const aiImportFileName = ref('')
+const aiImportFilePicker = ref<YdFilePickerInstance | null>(null)
 const aiStreaming = ref(false)
 const aiLogs = shallowRef<{ level?: string, message: string }[]>([])
 const aiQuestions = shallowRef<{ seq: number, ok: boolean, summary: string, reason?: string }[]>([])
@@ -49,25 +53,19 @@ function stopAiStream() {
   aiStreaming.value = false
 }
 
-/** 与 JSON 导入同款：CI 禁 .vue 原生 input，文件选择用 JS 动态创建。 */
-function pickAiImportFile() {
-  const input = document.createElement('input')
-  input.type = 'file'
-  input.accept = '.md,.markdown,.txt,text/markdown,text/plain'
-  input.onchange = async () => {
-    const file = input.files?.[0]
-    if (!file) {
-      return
-    }
-    try {
-      aiImportText.value = await file.text()
-      aiImportFileName.value = file.name
-    }
-    catch {
-      toast.error('读取文件失败，请重试')
-    }
+async function onAiImportFileSelect(files: File[]) {
+  const file = files[0]
+  if (!file) return
+  try {
+    aiImportText.value = await file.text()
+    aiImportFileName.value = file.name
   }
-  input.click()
+  catch {
+    toast.error('读取文件失败，请重试')
+  }
+  finally {
+    aiImportFilePicker.value?.reset()
+  }
 }
 
 /** 启动 AI 导入任务并订阅 SSE 事件流：分段解析日志 + 逐题入库结果实时推送。 */
@@ -208,21 +206,6 @@ function onSelectionChange(rows: QuestionView[]) {
   selectedRows.value = rows
 }
 
-function isSelected(row: QuestionView) {
-  return selectedRows.value.some(item => item.id === row.id)
-}
-
-/** 移动端卡片没有表格勾选事件，用 FaCheckbox 直接维护同一份 selectedRows。 */
-function toggleSelect(row: QuestionView, checked: boolean | 'indeterminate' | null | undefined) {
-  if (checked === true) {
-    if (!isSelected(row)) {
-      selectedRows.value = [...selectedRows.value, row]
-    }
-  }
-  else {
-    selectedRows.value = selectedRows.value.filter(item => item.id !== row.id)
-  }
-}
 
 function openCreate() {
   void router.push({ path: '/platform/plugins/questionbank/admin/questions/edit' })
@@ -277,45 +260,34 @@ function openImport() {
 }
 
 /** 目录选择同款规避：CI 禁 .vue 原生 input，文件选择用 JS 动态创建。 */
-function pickImportFile() {
-  const input = document.createElement('input')
-  input.type = 'file'
-  input.accept = '.json,application/json'
-  input.onchange = async () => {
-    const file = input.files?.[0]
-    if (!file) {
+async function onImportFileSelect(files: File[]) {
+  const file = files[0]
+  if (!file) return
+  importFileName.value = file.name
+  importing.value = true
+  try {
+    const text = await file.text()
+    const parsed = JSON.parse(text) as { questions?: QuestionPayload[] } | QuestionPayload[]
+    const questions = Array.isArray(parsed) ? parsed : parsed.questions
+    if (!Array.isArray(questions) || !questions.length) {
+      toast.warning('文件里没有可导入的题目（应为 { questions: [...] } JSON）')
       return
     }
-    importFileName.value = file.name
-    importing.value = true
-    try {
-      const text = await file.text()
-      const parsed = JSON.parse(text) as { questions?: QuestionPayload[] } | QuestionPayload[]
-      const questions = Array.isArray(parsed) ? parsed : parsed.questions
-      if (!Array.isArray(questions) || !questions.length) {
-        toast.warning('文件里没有可导入的题目（应为 { questions: [...] } JSON）')
-        return
-      }
-      const result = await model.api.importQuestions(questions)
-      importResult.value = result
-      if (result.failures.length) {
-        toast.warning(`已导入 ${result.imported} 道，${result.failures.length} 道失败`)
-      }
-      else {
-        toast.success(`已导入 ${result.imported} 道题`)
-      }
-      await model.loadAdminQuestions()
-      await model.loadAdminTags()
-      await model.loadAdminCategories()
-    }
-    catch (error) {
-      toast.error(error instanceof SyntaxError ? 'JSON 解析失败，请检查文件格式' : (error instanceof Error ? error.message : '导入失败'))
-    }
-    finally {
-      importing.value = false
-    }
+    const result = await model.api.importQuestions(questions)
+    importResult.value = result
+    if (result.failures.length) toast.warning(`已导入 ${result.imported} 道，${result.failures.length} 道失败`)
+    else toast.success(`已导入 ${result.imported} 道题`)
+    await model.loadAdminQuestions()
+    await model.loadAdminTags()
+    await model.loadAdminCategories()
   }
-  input.click()
+  catch (error) {
+    toast.error(error instanceof SyntaxError ? 'JSON 解析失败，请检查文件格式' : (error instanceof Error ? error.message : '导入失败'))
+  }
+  finally {
+    importing.value = false
+    importFilePicker.value?.reset()
+  }
 }
 
 onMounted(async () => {
@@ -327,32 +299,32 @@ onMounted(async () => {
 </script>
 
 <template>
-  <FaPageHeader title="题目管理" description="维护题库题目：单选/多选/判断/填空/简答，支持标签、分类、导入导出">
-    <FaButton variant="outline" :disabled="importing" @click="openImport"><FaIcon name="i-ri:upload-2-line" />导入</FaButton>
-    <FaButton variant="outline" @click="openAiImport"><FaIcon name="i-ri:sparkling-line" />AI 导入</FaButton>
-    <FaButton variant="outline" :loading="exporting" @click="doExport('json')"><FaIcon name="i-ri:download-2-line" />导出 JSON{{ selectedRows.length ? `（${selectedRows.length}）` : '（全部）' }}</FaButton>
-    <FaButton variant="outline" :loading="exporting" @click="doExport('markdown')"><FaIcon name="i-ri:markdown-line" />导出 Markdown{{ selectedRows.length ? `（${selectedRows.length}）` : '（全部）' }}</FaButton>
-    <FaButton @click="openCreate"><FaIcon name="i-ri:add-line" />新建题目</FaButton>
-  </FaPageHeader>
-  <FaPageMain>
+  <YdPageHeader title="题目管理" description="维护题库题目：单选/多选/判断/填空/简答，支持标签、分类、导入导出">
+    <YdButton variant="outline" :disabled="importing" @click="openImport"><YdIcon name="i-ri:upload-2-line" />导入</YdButton>
+    <YdButton variant="outline" @click="openAiImport"><YdIcon name="i-ri:sparkling-line" />AI 导入</YdButton>
+    <YdButton variant="outline" :loading="exporting" @click="doExport('json')"><YdIcon name="i-ri:download-2-line" />导出 JSON{{ selectedRows.length ? `（${selectedRows.length}）` : '（全部）' }}</YdButton>
+    <YdButton variant="outline" :loading="exporting" @click="doExport('markdown')"><YdIcon name="i-ri:markdown-line" />导出 Markdown{{ selectedRows.length ? `（${selectedRows.length}）` : '（全部）' }}</YdButton>
+    <YdButton @click="openCreate"><YdIcon name="i-ri:add-line" />新建题目</YdButton>
+  </YdPageHeader>
+  <YdPageMain>
     <!-- 工具栏提到表格外面：移动端卡片列表也要共用同一套筛选与批量删除 -->
-    <FaSearchBar class="w-full">
+    <YdSearchBar class="w-full">
       <div class="qb-toolbar">
-        <FaInput v-model="model.adminFilters.keyword" placeholder="搜索题干或标签" clearable @keydown.enter="model.applyAdminFilters" @clear="model.applyAdminFilters" />
+        <YdInput v-model="model.adminFilters.keyword" placeholder="搜索题干或标签" clearable @keydown.enter="model.applyAdminFilters" @clear="model.applyAdminFilters" />
         <CategorySelect v-model="model.adminFilters.categoryId" :categories="model.adminCategories" empty-label="全部分类" @update:model-value="model.applyAdminFilters" />
-        <FaSelect v-model="model.adminFilters.tag" :options="tagOptions" @change="model.applyAdminFilters" />
-        <FaSelect v-model="model.adminFilters.type" :options="typeOptions" @change="model.applyAdminFilters" />
-        <FaSelect v-model="model.adminFilters.status" :options="statusOptions" @change="model.applyAdminFilters" />
-        <FaButton variant="outline" @click="model.applyAdminFilters"><FaIcon name="i-ri:search-line" />查询</FaButton>
-        <FaButton variant="destructive" :disabled="!selectedRows.length" @click="confirmBatchDelete">
+        <YdSelect v-model="model.adminFilters.tag" :options="tagOptions" @change="model.applyAdminFilters" />
+        <YdSelect v-model="model.adminFilters.type" :options="typeOptions" @change="model.applyAdminFilters" />
+        <YdSelect v-model="model.adminFilters.status" :options="statusOptions" @change="model.applyAdminFilters" />
+        <YdButton variant="outline" @click="model.applyAdminFilters"><YdIcon name="i-ri:search-line" />查询</YdButton>
+        <YdButton variant="destructive" :disabled="!selectedRows.length" @click="confirmBatchDelete">
           批量删除{{ selectedRows.length ? `（${selectedRows.length}）` : '' }}
-        </FaButton>
+        </YdButton>
       </div>
-    </FaSearchBar>
-    <!-- FaResponsiveTable 的事件会落到包装 div 上无法透传（selectionChange 收不到），需要勾选事件的表格直接用 FaTable -->
-    <div class="qb-desktop-only">
-      <FaTable
-        v-loading="model.loading"
+    </YdSearchBar>
+
+
+      <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable v-model:row-selection="rowSelection"
+
         :columns="columns"
         :data="model.adminQuestions"
         row-key="id"
@@ -367,57 +339,39 @@ onMounted(async () => {
         <template #cell-content="{ row }">
           <span class="qb-question-content-cell" :title="plainContent(row.original)">{{ plainContent(row.original) || '（空题干）' }}</span>
         </template>
-        <template #cell-type="{ row }"><FaTag variant="secondary">{{ row.original.typeLabel }}</FaTag></template>
+        <template #cell-type="{ row }"><YdTag variant="secondary">{{ row.original.typeLabel }}</YdTag></template>
         <template #cell-category="{ row }">{{ row.original.categoryName || '-' }}</template>
         <template #cell-tags="{ row }">
           <div class="flex flex-wrap gap-1">
-            <FaTag v-for="tag in row.original.tags" :key="tag" variant="outline">{{ tag }}</FaTag>
+            <YdTag v-for="tag in row.original.tags" :key="tag" variant="outline">{{ tag }}</YdTag>
             <span v-if="!row.original.tags.length" class="qb-muted">-</span>
           </div>
         </template>
         <template #cell-difficulty="{ row }"><span style="color: var(--color-warning-6, #ff7d00)">{{ difficultyLabel(row.original.difficulty) }}</span></template>
         <template #cell-status="{ row }">
-          <FaTag :variant="row.original.status === 'DISABLED' ? 'outline' : 'default'">{{ row.original.status === 'DISABLED' ? '停用' : '启用' }}</FaTag>
+          <YdTag :variant="row.original.status === 'DISABLED' ? 'outline' : 'default'">{{ row.original.status === 'DISABLED' ? '停用' : '启用' }}</YdTag>
         </template>
         <template #cell-updatedAt="{ row }">{{ formatTime(row.original.updatedAt) }}</template>
         <template #cell-operation="{ row }">
           <div class="flex-center gap-2">
-            <FaButton size="sm" variant="outline" @click="openEdit(row.original)">编辑</FaButton>
-            <FaButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</FaButton>
+            <YdButton size="sm" variant="outline" @click="openEdit(row.original)">编辑</YdButton>
+            <YdButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</YdButton>
           </div>
         </template>
-      </FaTable>
-    </div>
-    <div class="qb-mobile-only">
-      <div v-loading="model.loading" class="qb-mobile-list">
-        <FaCard v-for="row in model.adminQuestions" :key="row.id">
-          <div class="qb-mobile-card">
-            <div class="qb-mobile-card-head">
-              <FaCheckbox :model-value="isSelected(row)" @change="toggleSelect(row, $event)" />
-              <div class="qb-mobile-card-title">{{ plainContent(row) || '（空题干）' }}</div>
-            </div>
-            <div class="qb-mobile-card-meta">
-              <FaTag variant="secondary">{{ row.typeLabel }}</FaTag>
-              <span>{{ row.categoryName || '未分类' }}</span>
-              <span style="color: var(--color-warning-6, #ff7d00)">{{ difficultyLabel(row.difficulty) }}</span>
-              <FaTag :variant="row.status === 'DISABLED' ? 'outline' : 'default'">{{ row.status === 'DISABLED' ? '停用' : '启用' }}</FaTag>
-              <span>{{ formatTime(row.updatedAt) }}</span>
-            </div>
-            <div v-if="row.tags.length" class="flex flex-wrap gap-1">
-              <FaTag v-for="tag in row.tags" :key="tag" variant="outline">{{ tag }}</FaTag>
-            </div>
-            <div class="qb-mobile-card-actions">
-              <FaButton size="sm" variant="outline" @click="openEdit(row)">编辑</FaButton>
-              <FaButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</FaButton>
-            </div>
-          </div>
-        </FaCard>
-        <div v-if="!model.loading && model.adminQuestions.length === 0" class="qb-mobile-empty">
-          暂无题目，点击右上角新建或导入
-        </div>
-      </div>
-    </div>
-    <FaPagination
+      <template #card="{ row, selected, selectDisabled, toggleSelected }">
+            <YdCard class="w-full">
+              <div class="qb-mobile-card">
+                <div class="qb-mobile-card-head"><YdCheckbox :model-value="selected" :disabled="selectDisabled" @change="value => toggleSelected(value === true)" /><div class="qb-mobile-card-title">{{ plainContent(row) || '（空题干）' }}</div></div>
+                <div class="qb-mobile-card-meta"><YdTag variant="secondary">{{ row.typeLabel }}</YdTag><span>{{ row.categoryName || '未分类' }}</span><span style="color: var(--color-warning-6, #ff7d00)">{{ difficultyLabel(row.difficulty) }}</span><YdTag :variant="row.status === 'DISABLED' ? 'outline' : 'default'">{{ row.status === 'DISABLED' ? '停用' : '启用' }}</YdTag><span>{{ formatTime(row.updatedAt) }}</span></div>
+                <div v-if="row.tags.length" class="flex flex-wrap gap-1"><YdTag v-for="tag in row.tags" :key="tag" variant="outline">{{ tag }}</YdTag></div>
+                <div class="qb-mobile-card-actions"><YdButton size="sm" variant="outline" @click="openEdit(row)">编辑</YdButton><YdButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</YdButton></div>
+              </div>
+            </YdCard>
+          </template>
+          </YdResponsiveTable></YdLoadingOverlay>
+
+
+    <YdPagination
       v-model:page="model.adminPager.page"
       v-model:size="model.adminPager.size"
       :total="model.adminPager.total"
@@ -425,20 +379,20 @@ onMounted(async () => {
       @page-change="model.loadAdminQuestions"
       @size-change="model.applyAdminFilters"
     />
-    <FaModal v-model="importOpen" title="导入题目" :show-confirm-button="false" cancel-button-text="关闭">
+    <YdModal v-model="importOpen" title="导入题目" :show-confirm-button="false" cancel-button-text="关闭">
       <div class="flex flex-col gap-3 text-sm">
         <p class="qb-muted">
           选择 JSON 文件导入，格式为 <code>{ "questions": [...] }</code> 或题目数组；字段与导出 JSON 一致。
           分类按名称自动复用或创建，单次最多 500 道。
         </p>
         <div class="flex items-center gap-2">
-          <FaButton variant="outline" :loading="importing" @click="pickImportFile"><FaIcon name="i-ri:file-add-line" />选择 JSON 文件</FaButton>
+          <YdFilePicker ref="importFilePicker" accept=".json,application/json" aria-label="选择 JSON 文件" :disabled="importing" @select="onImportFileSelect"><template #default="{ open, triggerAttrs }"><YdButton v-bind="triggerAttrs" variant="outline" :loading="importing" @click="open"><YdIcon name="i-ri:file-add-line" />选择 JSON 文件</YdButton></template></YdFilePicker>
           <span v-if="importFileName" class="qb-muted">{{ importFileName }}</span>
         </div>
         <template v-if="importResult">
-          <FaTag :variant="importResult.failures.length ? 'outline' : 'default'">
+          <YdTag :variant="importResult.failures.length ? 'outline' : 'default'">
             已导入 {{ importResult.imported }} 道<template v-if="importResult.failures.length">，{{ importResult.failures.length }} 道失败</template>
-          </FaTag>
+          </YdTag>
           <div v-if="importResult.failures.length" class="flex flex-col gap-1">
             <div v-for="failure in importResult.failures" :key="failure.index" class="text-secondary-foreground/80">
               第 {{ failure.index }} 道：{{ failure.reason }}
@@ -446,32 +400,36 @@ onMounted(async () => {
           </div>
         </template>
       </div>
-    </FaModal>
-    <FaModal v-model="aiImportOpen" title="AI 一键导入题目" :show-confirm-button="false" cancel-button-text="关闭" @update:model-value="!$event && stopAiStream()">
+    </YdModal>
+    <YdModal v-model="aiImportOpen" title="AI 一键导入题目" :show-confirm-button="false" cancel-button-text="关闭" @update:model-value="!$event && stopAiStream()">
       <div class="flex flex-col gap-3 text-sm">
         <p class="qb-muted">
           粘贴从别处复制的题目文本（可多道混合），或上传 Markdown 文件；AI 流式识别并<strong>逐题调用创建工具直接入库</strong>，
           实时输出、每题成败都展示在下方。单次最多 20000 字、50 道题。
         </p>
-        <FaTextarea
+        <YdTextarea
           v-model="aiImportText"
           :rows="8"
           placeholder="在此粘贴题目内容…"
           :disabled="aiStreaming"
         />
         <div class="flex items-center gap-2">
-          <FaButton variant="outline" :disabled="aiStreaming" @click="pickAiImportFile">
-            <FaIcon name="i-ri:markdown-line" />上传 Markdown 文件
-          </FaButton>
+          <YdFilePicker ref="aiImportFilePicker" accept=".md,.markdown,.txt,text/markdown,text/plain" aria-label="上传 Markdown 文件" :disabled="aiStreaming" @select="onAiImportFileSelect">
+            <template #default="{ open, triggerAttrs }">
+              <YdButton v-bind="triggerAttrs" variant="outline" :disabled="aiStreaming" @click="open">
+                <YdIcon name="i-ri:markdown-line" />上传 Markdown 文件
+              </YdButton>
+            </template>
+          </YdFilePicker>
           <span v-if="aiImportFileName" class="qb-muted">{{ aiImportFileName }}</span>
-          <FaButton class="ml-auto" :loading="aiStreaming" :disabled="!!aiDone" @click="startAiImport">
-            <FaIcon name="i-ri:sparkling-line" />{{ aiLogs.length ? '重新导入' : '开始导入' }}
-          </FaButton>
+          <YdButton class="ml-auto" :loading="aiStreaming" :disabled="!!aiDone" @click="startAiImport">
+            <YdIcon name="i-ri:sparkling-line" />{{ aiLogs.length ? '重新导入' : '开始导入' }}
+          </YdButton>
         </div>
         <div v-if="aiStreamText" class="rounded-md border p-2">
           <div class="qb-muted mb-1 flex items-center gap-1 text-xs">
-            <FaIcon name="i-ri:robot-2-line" />AI 实时输出
-            <FaIcon v-if="aiStreaming" name="i-ri:loader-4-line" class="animate-spin" />
+            <YdIcon name="i-ri:robot-2-line" />AI 实时输出
+            <YdIcon v-if="aiStreaming" name="i-ri:loader-4-line" class="animate-spin" />
           </div>
           <pre class="qb-muted max-h-40 overflow-y-auto whitespace-pre-wrap break-all text-xs">{{ aiStreamText }}</pre>
         </div>
@@ -481,19 +439,19 @@ onMounted(async () => {
               {{ log.message }}
             </div>
             <div v-for="question in aiQuestions" :key="question.seq" class="flex items-start gap-2 border-t pt-1">
-              <FaIcon :name="question.ok ? 'i-ri:check-line' : 'i-ri:close-line'" :class="question.ok ? 'text-success-6' : 'text-destructive'" />
+              <YdIcon :name="question.ok ? 'i-ri:check-line' : 'i-ri:close-line'" :class="question.ok ? 'text-success-6' : 'text-destructive'" />
               <div class="min-w-0 flex-1">
                 <div class="truncate" :title="question.summary">第 {{ question.seq }} 道：{{ question.summary || '（空题干）' }}</div>
                 <div v-if="!question.ok" class="text-destructive text-xs">{{ question.reason }}</div>
               </div>
             </div>
           </div>
-          <FaTag v-if="aiDone" :variant="aiDone.failed ? 'outline' : 'default'">
+          <YdTag v-if="aiDone" :variant="aiDone.failed ? 'outline' : 'default'">
             导入完成：成功 {{ aiDone.imported }} 道<template v-if="aiDone.failed">，失败 {{ aiDone.failed }} 道</template>
-          </FaTag>
+          </YdTag>
           <p v-else-if="aiStreaming" class="qb-muted text-xs">正在导入，可关闭弹窗稍后回来查看题目列表（任务在后台继续）。</p>
         </template>
       </div>
-    </FaModal>
-  </FaPageMain>
+    </YdModal>
+  </YdPageMain>
 </template>

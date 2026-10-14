@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { QuestionBankPluginModel } from '../composables/useQuestionBankPlugin'
 import type { PaperView, QuestionView } from '../types'
-import { FaButton, FaIcon, FaInput, useFaToast } from '@yudream/components'
+import { YdAction, YdButton, YdIcon, YdInput, useYdToast } from '@yudream/components'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import MarkdownPreview from '../components/MarkdownPreview.vue'
@@ -9,7 +10,7 @@ import { difficultyLabel, optionKey } from '../composables/utils'
 
 const props = defineProps<{ model: QuestionBankPluginModel }>()
 const model = props.model
-const toast = useFaToast()
+const toast = useYdToast()
 const route = useRoute()
 
 const phase = ref<'setup' | 'present'>('setup')
@@ -220,19 +221,19 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
     <div v-if="phase === 'setup'" class="qb-screen-setup">
       <div class="qb-screen-setup-panel">
         <h1 class="qb-screen-setup-title">
-          <FaIcon name="i-ri:presentation-line" />抢答大屏
+          <YdIcon name="i-ri:presentation-line" />抢答大屏
         </h1>
         <p class="qb-screen-setup-desc">
           选择已发布的题单现场抽题，或直接从题库随机抽题。放映中 ←/→ 切题，空格/回车揭晓答案，Esc 退出。
         </p>
         <p v-if="setupError" class="qb-screen-setup-error">{{ setupError }}</p>
         <div v-if="entryRecordId" class="qb-screen-setup-random">
-          <FaButton variant="outline" :loading="drawing" @click="startRecord(entryRecordId)">
-            <FaIcon name="i-ri:restart-line" />重新放映组卷记录
-          </FaButton>
+          <YdButton variant="outline" :loading="drawing" @click="startRecord(entryRecordId)">
+            <YdIcon name="i-ri:restart-line" />重新放映组卷记录
+          </YdButton>
         </div>
-        <div v-loading="papersLoading" class="qb-screen-setup-papers">
-          <button
+        <YdLoadingOverlay :loading="papersLoading"><div  class="qb-screen-setup-papers">
+          <YdAction
             v-for="paper in papers"
             :key="paper.id"
             type="button"
@@ -242,12 +243,12 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
           >
             <span class="qb-screen-paper-name">{{ paper.name }}</span>
             <span class="qb-screen-paper-meta">{{ paper.questionCount }} 题 · {{ paper.mode === 'RULE' ? '随机抽题' : '固定题目' }}</span>
-          </button>
+          </YdAction>
           <p v-if="!papersLoading && !papers.length && !setupError" class="qb-screen-setup-desc">暂无已发布的题单。</p>
-        </div>
+        </div></YdLoadingOverlay>
         <div class="qb-screen-setup-random">
-          <FaInput v-model="drawCount" class="qb-screen-count" placeholder="题数（1-100）" />
-          <FaButton :loading="drawing" @click="startRandom"><FaIcon name="i-ri:shuffle-line" />随机抽题开演</FaButton>
+          <YdInput v-model="drawCount" class="qb-screen-count" placeholder="题数（1-100）" />
+          <YdButton :loading="drawing" @click="startRandom"><YdIcon name="i-ri:shuffle-line" />随机抽题开演</YdButton>
         </div>
       </div>
     </div>
@@ -256,12 +257,12 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
     <div v-else-if="question" class="qb-screen-stage">
       <header class="qb-screen-bar">
         <div class="qb-screen-bar-title">
-          <FaIcon name="i-ri:presentation-line" />
+          <YdIcon name="i-ri:presentation-line" />
           {{ paperName }}
         </div>
         <div class="qb-screen-bar-right">
           <span class="qb-screen-progress">{{ current + 1 }} / {{ questions.length }}</span>
-          <button type="button" class="qb-screen-exit" @click="exitPresent"><FaIcon name="i-ri:close-line" />退出</button>
+          <YdAction type="button" class="qb-screen-exit" @click="exitPresent"><YdIcon name="i-ri:close-line" />退出</YdAction>
         </div>
       </header>
 
@@ -291,7 +292,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
         <!-- 答案揭晓：翻转入场 + 光晕扫过 -->
         <Transition name="qb-screen-answer">
           <div v-if="revealed" key="answer" class="qb-screen-answer">
-            <div class="qb-screen-answer-badge"><FaIcon name="i-ri:key-2-line" />答案揭晓</div>
+            <div class="qb-screen-answer-badge"><YdIcon name="i-ri:key-2-line" />答案揭晓</div>
             <div class="qb-screen-answer-text">{{ answerText || '（未配置答案）' }}</div>
             <div v-if="question.analysis" class="qb-screen-answer-analysis">
               <MarkdownPreview :sdk="model.sdk" :content="question.analysis" />
@@ -301,15 +302,15 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
       </main>
 
       <footer class="qb-screen-controls">
-        <button type="button" class="qb-screen-btn" :disabled="current <= 0" @click="gotoQuestion(current - 1)">
-          <FaIcon name="i-ri:arrow-left-line" />上一题
-        </button>
-        <button type="button" class="qb-screen-btn qb-screen-btn-primary" @click="toggleReveal">
-          <FaIcon :name="revealed ? 'i-ri:eye-off-line' : 'i-ri:eye-line'" />{{ revealed ? '收起答案' : '揭晓答案' }}
-        </button>
-        <button type="button" class="qb-screen-btn" :disabled="current >= questions.length - 1" @click="gotoQuestion(current + 1)">
-          下一题<FaIcon name="i-ri:arrow-right-line" />
-        </button>
+        <YdAction type="button" class="qb-screen-btn" :disabled="current <= 0" @click="gotoQuestion(current - 1)">
+          <YdIcon name="i-ri:arrow-left-line" />上一题
+        </YdAction>
+        <YdAction type="button" class="qb-screen-btn qb-screen-btn-primary" @click="toggleReveal">
+          <YdIcon :name="revealed ? 'i-ri:eye-off-line' : 'i-ri:eye-line'" />{{ revealed ? '收起答案' : '揭晓答案' }}
+        </YdAction>
+        <YdAction type="button" class="qb-screen-btn" :disabled="current >= questions.length - 1" @click="gotoQuestion(current + 1)">
+          下一题<YdIcon name="i-ri:arrow-right-line" />
+        </YdAction>
       </footer>
     </div>
   </div>

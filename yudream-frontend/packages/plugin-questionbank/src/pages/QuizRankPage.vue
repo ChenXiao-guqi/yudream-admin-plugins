@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { QuestionBankPluginModel } from '../composables/useQuestionBankPlugin'
 import type { QuizRankEntry } from '../types'
-import { FaButton, FaIcon, FaPageHeader, FaPageMain, FaResponsiveTable, FaTag } from '@yudream/components'
+import { YdButton, YdIcon, YdPageHeader, YdPageMain, YdResponsiveTable, YdTag } from '@yudream/components'
 import { onMounted } from 'vue'
 import { formatTime } from '../composables/utils'
 
@@ -24,14 +25,14 @@ onMounted(() => model.loadQuizLeaderboard())
 </script>
 
 <template>
-  <FaPageHeader title="抢答排行榜" description="QQ 群内 /抽题 抢答的累计答对榜；绑定系统账号后以昵称上榜，未绑定显示脱敏 QQ 号">
-    <FaButton variant="outline" :loading="model.quizLeaderboardLoading" @click="model.loadQuizLeaderboard()">
-      <FaIcon name="i-ri:refresh-line" />刷新
-    </FaButton>
-  </FaPageHeader>
-  <FaPageMain>
-    <FaResponsiveTable
-      v-loading="model.quizLeaderboardLoading"
+  <YdPageHeader title="抢答排行榜" description="QQ 群内 /抽题 抢答的累计答对榜；绑定系统账号后以昵称上榜，未绑定显示脱敏 QQ 号">
+    <YdButton variant="outline" :loading="model.quizLeaderboardLoading" @click="model.loadQuizLeaderboard()">
+      <YdIcon name="i-ri:refresh-line" />刷新
+    </YdButton>
+  </YdPageHeader>
+  <YdPageMain>
+    <YdLoadingOverlay :loading="model.quizLeaderboardLoading"><YdResponsiveTable
+
       :columns="columns"
       :data="model.quizLeaderboard"
       row-key="rank"
@@ -44,8 +45,8 @@ onMounted(() => model.loadQuizLeaderboard())
       <template #cell-name="{ row }">
         <div class="flex items-center gap-2">
           <span>{{ row.original.name }}</span>
-          <FaTag v-if="row.original.bound" variant="secondary">已绑定</FaTag>
-          <FaTag v-else variant="outline">未绑定</FaTag>
+          <YdTag v-if="row.original.bound" variant="secondary">已绑定</YdTag>
+          <YdTag v-else variant="outline">未绑定</YdTag>
         </div>
       </template>
       <template #cell-score="{ row }">{{ row.original.score }} 题</template>
@@ -54,11 +55,11 @@ onMounted(() => model.loadQuizLeaderboard())
         <div class="flex flex-col gap-2 text-sm">
           <div class="flex items-center justify-between">
             <strong class="text-base">{{ rankText(row.rank) }} {{ row.name }}</strong>
-            <FaTag :variant="row.bound ? 'secondary' : 'outline'">{{ row.bound ? '已绑定' : '未绑定' }}</FaTag>
+            <YdTag :variant="row.bound ? 'secondary' : 'outline'">{{ row.bound ? '已绑定' : '未绑定' }}</YdTag>
           </div>
           <div class="text-secondary-foreground/60">累计答对 {{ row.score }} 题 · 最近 {{ formatTime(row.lastAt) }}</div>
         </div>
       </template>
-    </FaResponsiveTable>
-  </FaPageMain>
+    </YdResponsiveTable></YdLoadingOverlay>
+  </YdPageMain>
 </template>

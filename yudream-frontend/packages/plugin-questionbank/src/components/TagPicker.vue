@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { TableColumn, YdTablePickerQuery, YdTablePickerResult } from '@yudream/components'
 import type { TagView } from '../types'
-import { FaButton, FaInput, useFaToast, YdTablePicker } from '@yudream/components'
+import { YdButton, YdInput, useYdToast, YdTablePicker } from '@yudream/components'
 import { ref } from 'vue'
 
 /**
@@ -15,7 +15,7 @@ const props = withDefaults(defineProps<{
 }>(), { max: 10, maxLength: 30 })
 
 const model = defineModel<string[]>({ default: () => [] })
-const toast = useFaToast()
+const toast = useYdToast()
 const newTag = ref('')
 
 const columns: TableColumn<TagView>[] = [
@@ -80,16 +80,16 @@ function addTag() {
       @change="onChange"
     />
     <div class="flex gap-2">
-      <FaInput
+      <YdInput
         v-model="newTag"
         placeholder="输入新标签，回车添加"
         :maxlength="maxLength"
         clearable
         @keydown.enter.prevent="addTag"
       />
-      <FaButton variant="outline" class="shrink-0" @click="addTag">
+      <YdButton variant="outline" class="shrink-0" @click="addTag">
         新建标签
-      </FaButton>
+      </YdButton>
     </div>
   </div>
 </template>

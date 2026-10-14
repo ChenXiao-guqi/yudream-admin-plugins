@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { QuestionBankPluginModel } from '../composables/useQuestionBankPlugin'
 import type { SessionSummary } from '../types'
-import { FaButton, FaIcon, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable, FaTag, useFaModal } from '@yudream/components'
+import { YdButton, YdIcon, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdTag, useYdModal } from '@yudream/components'
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { difficultyLabel, formatTime, questionTypeLabel } from '../composables/utils'
@@ -10,7 +11,7 @@ import { difficultyLabel, formatTime, questionTypeLabel } from '../composables/u
 const props = defineProps<{ model: QuestionBankPluginModel }>()
 const model = props.model
 const router = useRouter()
-const confirm = useFaModal()
+const confirm = useYdModal()
 
 const columns: TableColumn<SessionSummary>[] = [
   { accessorKey: 'createdAt', header: '开始时间', width: 170, fixed: 'left' },
@@ -62,15 +63,15 @@ onMounted(() => model.loadMyRecords())
 </script>
 
 <template>
-  <FaPageHeader title="成绩记录" description="我的练习历史，进行中的练习可以继续作答">
-    <FaButton variant="outline" @click="router.push('/platform/plugins/questionbank/papers')">
-      <FaIcon name="i-ri:file-paper-2-line" />题单作答
-    </FaButton>
-    <FaButton @click="router.push('/platform/plugins/questionbank')"><FaIcon name="i-ri:play-line" />去练习</FaButton>
-  </FaPageHeader>
-  <FaPageMain>
-    <FaResponsiveTable
-      v-loading="model.loading"
+  <YdPageHeader title="成绩记录" description="我的练习历史，进行中的练习可以继续作答">
+    <YdButton variant="outline" @click="router.push('/platform/plugins/questionbank/papers')">
+      <YdIcon name="i-ri:file-paper-2-line" />题单作答
+    </YdButton>
+    <YdButton @click="router.push('/platform/plugins/questionbank')"><YdIcon name="i-ri:play-line" />去练习</YdButton>
+  </YdPageHeader>
+  <YdPageMain>
+    <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable
+
       :columns="columns"
       :data="model.myRecords"
       row-key="id"
@@ -83,40 +84,40 @@ onMounted(() => model.loadMyRecords())
       <template #cell-scope="{ row }">{{ scopeText(row.original) }}</template>
       <template #cell-score="{ row }">{{ accuracy(row.original) }}</template>
       <template #cell-status="{ row }">
-        <FaTag v-if="row.original.status === 'FINISHED' && row.original.pendingReview" variant="secondary">待审核</FaTag>
-        <FaTag v-else :variant="row.original.status === 'FINISHED' ? 'default' : 'outline'">
+        <YdTag v-if="row.original.status === 'FINISHED' && row.original.pendingReview" variant="secondary">待审核</YdTag>
+        <YdTag v-else :variant="row.original.status === 'FINISHED' ? 'default' : 'outline'">
           {{ row.original.status === 'FINISHED' ? '已完成' : '进行中' }}
-        </FaTag>
+        </YdTag>
       </template>
       <template #cell-submittedAt="{ row }">{{ row.original.status === 'FINISHED' ? formatTime(row.original.submittedAt) : '-' }}</template>
       <template #cell-operation="{ row }">
         <div class="flex-center gap-2">
-          <FaButton size="sm" variant="outline" @click="open(row.original)">
+          <YdButton size="sm" variant="outline" @click="open(row.original)">
             {{ row.original.status === 'FINISHED' ? '查看' : '继续作答' }}
-          </FaButton>
-          <FaButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</FaButton>
+          </YdButton>
+          <YdButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</YdButton>
         </div>
       </template>
       <template #card="{ row }">
         <div class="flex flex-col gap-2 text-sm">
           <div class="flex items-center justify-between">
             <strong>{{ formatTime(row.createdAt) }}</strong>
-            <FaTag :variant="row.status === 'FINISHED' ? 'default' : 'outline'">
+            <YdTag :variant="row.status === 'FINISHED' ? 'default' : 'outline'">
               {{ row.status === 'FINISHED' ? '已完成' : '进行中' }}
-            </FaTag>
+            </YdTag>
           </div>
           <div class="text-secondary-foreground/60">{{ scopeText(row) }}</div>
           <div>{{ row.totalCount }} 题 · 成绩 {{ accuracy(row) }}</div>
           <div class="flex gap-2">
-            <FaButton size="sm" variant="outline" @click="open(row)">
+            <YdButton size="sm" variant="outline" @click="open(row)">
               {{ row.status === 'FINISHED' ? '查看' : '继续作答' }}
-            </FaButton>
-            <FaButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</FaButton>
+            </YdButton>
+            <YdButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</YdButton>
           </div>
         </div>
       </template>
-    </FaResponsiveTable>
-    <FaPagination
+    </YdResponsiveTable></YdLoadingOverlay>
+    <YdPagination
       v-model:page="model.myRecordsPager.page"
       v-model:size="model.myRecordsPager.size"
       :total="model.myRecordsPager.total"
@@ -124,5 +125,5 @@ onMounted(() => model.loadMyRecords())
       @page-change="model.loadMyRecords"
       @size-change="model.loadMyRecords"
     />
-  </FaPageMain>
+  </YdPageMain>
 </template>

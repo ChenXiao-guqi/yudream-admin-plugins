@@ -1,13 +1,13 @@
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { AiProviderOption, AnswerPayload, CategoryView, ComposeOptions, ComposeRecordView, DrawApiOptions, PaperPayload, PaperPrintView, PaperView, PluginSettings, PracticeFilter, PracticeMeta, QuestionPayload, QuestionView, QuizRankEntry, SessionSummary, SessionView, TagView } from '../types'
-import { useFaToast } from '@yudream/components'
+import { useYdToast } from '@yudream/components'
 import { computed, reactive, ref } from 'vue'
 import { createQuestionBankApi, saveBlob } from '../api/questionbank-api'
 import { errorMessage } from './utils'
 
 export function useQuestionBankPlugin(sdk: YuDreamPluginSdk) {
   const api = createQuestionBankApi(sdk)
-  const toast = useFaToast()
+  const toast = useYdToast()
 
   const loading = ref(false)
 
@@ -771,8 +771,9 @@ export function useQuestionBankPlugin(sdk: YuDreamPluginSdk) {
         : await api.shareComposeRecord(record.id)
       if (result?.token) {
         const link = `${window.location.origin}/platform/plugins/questionbank/shared?token=${result.token}`
-        await copyText(link)
-        toast.success('分享链接已生成并复制到剪贴板')
+        const copied = await copyText(link)
+        if (copied) toast.success('分享链接已生成并复制到剪贴板')
+        else toast.warning('分享链接已生成，但浏览器剪贴板不可用')
         return link
       }
       toast.success('已取消分享')
@@ -787,20 +788,14 @@ export function useQuestionBankPlugin(sdk: YuDreamPluginSdk) {
     }
   }
 
-  /** 复制文本：优先 Clipboard API，非安全上下文回退 execCommand。 */
-  async function copyText(text: string) {
+  /** 使用浏览器剪贴板写入分享链接；失败时由调用方提示用户。 */
+  async function copyText(text: string): Promise<boolean> {
     try {
       await navigator.clipboard.writeText(text)
+      return true
     }
     catch {
-      const area = document.createElement('textarea')
-      area.value = text
-      area.style.position = 'fixed'
-      area.style.opacity = '0'
-      document.body.appendChild(area)
-      area.select()
-      document.execCommand('copy')
-      area.remove()
+      return false
     }
   }
 
