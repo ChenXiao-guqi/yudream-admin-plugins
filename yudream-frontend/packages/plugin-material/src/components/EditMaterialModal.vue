@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { CategoryView, DeptOption, MaterialSummary, TagView } from '../types'
-import { FaInput, FaModal } from '@yudream/components'
+import { YdInput, YdModal } from '@yudream/components'
 import { ref, watch } from 'vue'
 import CategoryPicker from './CategoryPicker.vue'
 import TagPicker from './TagPicker.vue'
@@ -58,11 +58,11 @@ function onConfirm() {
 </script>
 
 <template>
-  <FaModal v-model="open" title="编辑物料信息" :confirm-button-loading="saving" @confirm="onConfirm">
+  <YdModal v-model="open" title="编辑物料信息" :confirm-button-loading="saving" @confirm="onConfirm">
     <div class="flex flex-col gap-3">
       <label class="flex flex-col gap-1 text-sm">
         <span class="text-secondary-foreground/80">名称</span>
-        <FaInput v-model="name" maxlength="120" />
+        <YdInput v-model="name" maxlength="120" />
       </label>
       <label class="flex flex-col gap-1 text-sm">
         <span class="text-secondary-foreground/80">分类</span>
@@ -74,5 +74,5 @@ function onConfirm() {
       </label>
       <VisibilityDeptField v-model:visibility="visibility" v-model:dept-ids="deptIds" :dept-options="props.deptOptions" />
     </div>
-  </FaModal>
+  </YdModal>
 </template>

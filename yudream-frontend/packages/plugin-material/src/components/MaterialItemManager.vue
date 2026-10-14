@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { MaterialPluginModel } from '../composables/useMaterialPlugin'
 import type { MaterialItemView, VersionView } from '../types'
-import { FaButton, FaIcon, FaInput, FaModal, useFaModal } from '@yudream/components'
+import { YdButton, YdIcon, YdInput, YdModal, useYdModal } from '@yudream/components'
 import { computed, ref, watch } from 'vue'
 import MaterialItemModal from './MaterialItemModal.vue'
 import MaterialItemsTable from './MaterialItemsTable.vue'
@@ -24,7 +24,7 @@ const props = defineProps<{
 }>()
 const activeId = defineModel<string>('activeId', { default: '' })
 const emit = defineEmits<{ preview: [{ item: MaterialItemView, version: number }] }>()
-const confirm = useFaModal()
+const confirm = useYdModal()
 
 /**
  * 预览主文件的本地镜像：以父组件传入的 prop 为准，设置成功后立即更新，
@@ -211,9 +211,9 @@ function confirmRemoveVersion(version: VersionView) {
         <span class="text-xs text-secondary-foreground/70">共 {{ props.model.items.length }} 个，各自独立管理版本</span>
         <span v-if="props.model.items.length" class="text-xs text-secondary-foreground/60">行内「设为主文件」指定父物料预览与下载使用哪个子物料</span>
       </div>
-      <FaButton v-if="canWrite" size="sm" variant="outline" @click="openCreate">
-        <FaIcon name="i-ri:add-line" />新增子物料
-      </FaButton>
+      <YdButton v-if="canWrite" size="sm" variant="outline" @click="openCreate">
+        <YdIcon name="i-ri:add-line" />新增子物料
+      </YdButton>
     </div>
     <MaterialItemsTable
       :items="props.model.items"
@@ -230,12 +230,12 @@ function confirmRemoveVersion(version: VersionView) {
       @download="item => props.model.downloadItem(props.materialId, item.id, item.name, item.currentVersion, isAdmin)"
     />
     <div v-if="!props.model.items.length && !props.model.itemsLoading" class="material-item-empty">
-      <FaIcon name="i-ri:stack-line" class="material-empty-icon" />
+      <YdIcon name="i-ri:stack-line" class="material-empty-icon" />
       <p>还没有子物料</p>
       <p class="material-item-empty-hint">
         子物料是父物料下的具名文件槽，可分别上传与独立升级版本（例如「明信片」下挂原图 png、设计稿 psd、成图 png）。
       </p>
-      <FaButton v-if="canWrite" variant="outline" @click="openCreate"><FaIcon name="i-ri:add-line" />新增子物料</FaButton>
+      <YdButton v-if="canWrite" variant="outline" @click="openCreate"><YdIcon name="i-ri:add-line" />新增子物料</YdButton>
     </div>
 
     <template v-if="activeItem">
@@ -266,7 +266,7 @@ function confirmRemoveVersion(version: VersionView) {
       :saving="saving"
       @submit="submitItem"
     />
-    <FaModal
+    <YdModal
       v-model="renameOpen"
       title="重命名子物料"
       description="只修改展示名称，当前文件名与全部历史版本不受影响"
@@ -276,8 +276,8 @@ function confirmRemoveVersion(version: VersionView) {
     >
       <label class="flex flex-col gap-1 text-sm">
         <span class="text-secondary-foreground/80">子物料名称</span>
-        <FaInput v-model="renameName" maxlength="60" placeholder="如「原图」「设计稿」「成图」" />
+        <YdInput v-model="renameName" maxlength="60" placeholder="如「原图」「设计稿」「成图」" />
       </label>
-    </FaModal>
+    </YdModal>
   </div>
 </template>

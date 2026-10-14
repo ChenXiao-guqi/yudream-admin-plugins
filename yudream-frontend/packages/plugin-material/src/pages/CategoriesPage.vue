@@ -1,14 +1,15 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { MaterialPluginModel } from '../composables/useMaterialPlugin'
 import type { CategoryView } from '../types'
-import { FaButton, FaIcon, FaInput, FaModal, FaNumberField, FaPageHeader, FaPageMain, FaResponsiveTable, useFaModal } from '@yudream/components'
+import { YdButton, YdIcon, YdInput, YdModal, YdNumberField, YdPageHeader, YdPageMain, YdResponsiveTable, useYdModal } from '@yudream/components'
 import { onMounted, ref } from 'vue'
 import { formatTime } from '../types'
 
 const props = defineProps<{ model: MaterialPluginModel }>()
 const model = props.model
-const confirm = useFaModal()
+const confirm = useYdModal()
 
 const editOpen = ref(false)
 const editTarget = ref<CategoryView | null>(null)
@@ -64,12 +65,12 @@ onMounted(() => model.loadCategories())
 </script>
 
 <template>
-  <FaPageHeader title="物料分类" description="分类对所有用户共享，删除前需移出其中物料">
-    <FaButton @click="openCreate"><FaIcon name="i-ri:add-line" />新建分类</FaButton>
-  </FaPageHeader>
-  <FaPageMain>
-    <FaResponsiveTable
-      v-loading="model.loading"
+  <YdPageHeader title="物料分类" description="分类对所有用户共享，删除前需移出其中物料">
+    <YdButton @click="openCreate"><YdIcon name="i-ri:add-line" />新建分类</YdButton>
+  </YdPageHeader>
+  <YdPageMain>
+    <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable
+
       :columns="columns"
       :data="model.categories"
       row-key="id"
@@ -82,8 +83,8 @@ onMounted(() => model.loadCategories())
       <template #cell-createdAt="{ row }">{{ formatTime(row.original.createdAt) }}</template>
       <template #cell-operation="{ row }">
         <div class="flex-center gap-2">
-          <FaButton size="sm" variant="outline" @click="openEdit(row.original)">编辑</FaButton>
-          <FaButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</FaButton>
+          <YdButton size="sm" variant="outline" @click="openEdit(row.original)">编辑</YdButton>
+          <YdButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</YdButton>
         </div>
       </template>
       <template #card="{ row }">
@@ -94,23 +95,23 @@ onMounted(() => model.loadCategories())
           </div>
           <div class="text-secondary-foreground/60">排序 {{ row.sort }} · 创建于 {{ formatTime(row.createdAt) }}</div>
           <div class="flex gap-2">
-            <FaButton size="sm" variant="outline" @click="openEdit(row)">编辑</FaButton>
-            <FaButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</FaButton>
+            <YdButton size="sm" variant="outline" @click="openEdit(row)">编辑</YdButton>
+            <YdButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</YdButton>
           </div>
         </div>
       </template>
-    </FaResponsiveTable>
-    <FaModal v-model="editOpen" :title="editTarget ? '编辑分类' : '新建分类'" :confirm-button-loading="saving" @confirm="submit">
+    </YdResponsiveTable></YdLoadingOverlay>
+    <YdModal v-model="editOpen" :title="editTarget ? '编辑分类' : '新建分类'" :confirm-button-loading="saving" @confirm="submit">
       <div class="flex flex-col gap-3">
         <label class="flex flex-col gap-1 text-sm">
           <span class="text-secondary-foreground/80">分类名称</span>
-          <FaInput v-model="editName" maxlength="30" placeholder="如：宣传物料" />
+          <YdInput v-model="editName" maxlength="30" placeholder="如：宣传物料" />
         </label>
         <label class="flex flex-col gap-1 text-sm">
           <span class="text-secondary-foreground/80">排序（越小越靠前）</span>
-          <FaNumberField v-model="editSort" :min="0" :max="9999" />
+          <YdNumberField v-model="editSort" :min="0" :max="9999" />
         </label>
       </div>
-    </FaModal>
-  </FaPageMain>
+    </YdModal>
+  </YdPageMain>
 </template>

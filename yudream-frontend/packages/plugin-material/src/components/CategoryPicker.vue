@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { TableColumn, YdTablePickerQuery, YdTablePickerResult } from '@yudream/components'
 import type { CategoryView } from '../types'
-import { FaButton, FaIcon, FaInput, YdTablePicker } from '@yudream/components'
+import { YdButton, YdIcon, YdInput, YdTablePicker } from '@yudream/components'
 import { computed, nextTick, ref } from 'vue'
 
 /**
@@ -114,23 +114,23 @@ async function submitCreate() {
     <template #filters>
       <template v-if="props.create">
         <template v-if="creating">
-          <FaInput
+          <YdInput
             v-model="draftName"
             :maxlength="30"
             class="w-44"
             placeholder="新分类名称（最多 30 字）"
             @keyup.enter="submitCreate"
           />
-          <FaButton size="sm" :loading="busy" :disabled="!draftName.trim()" @click="submitCreate">
+          <YdButton size="sm" :loading="busy" :disabled="!draftName.trim()" @click="submitCreate">
             保存
-          </FaButton>
-          <FaButton size="sm" variant="outline" :disabled="busy" @click="cancelCreate">
+          </YdButton>
+          <YdButton size="sm" variant="outline" :disabled="busy" @click="cancelCreate">
             取消
-          </FaButton>
+          </YdButton>
         </template>
-        <FaButton v-else size="sm" variant="outline" @click="startCreate">
-          <FaIcon name="i-ri:add-line" />新建分类
-        </FaButton>
+        <YdButton v-else size="sm" variant="outline" @click="startCreate">
+          <YdIcon name="i-ri:add-line" />新建分类
+        </YdButton>
       </template>
     </template>
   </YdTablePicker>

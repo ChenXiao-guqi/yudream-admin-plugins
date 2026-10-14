@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { MaterialPluginModel } from '../composables/useMaterialPlugin'
 import type { MaterialItemView, MaterialSummary, PreviewInfo } from '../types'
-import { FaButton, FaDrawer, FaIcon, FaInput, FaModal, FaPageHeader, FaPageMain, FaPagination, FaSearchBar, FaSelect, FaTable, FaTag, useFaModal } from '@yudream/components'
+import { YdButton, YdDrawer, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdSearchBar, YdSelect, YdResponsiveTable, YdCheckbox, YdTag, useYdModal } from '@yudream/components'
 import { onMounted, ref, watch } from 'vue'
 import CategoryPicker from '../components/CategoryPicker.vue'
 import EditMaterialModal from '../components/EditMaterialModal.vue'
@@ -15,7 +16,7 @@ import { formatSize, formatTime, isBundle, MATERIAL_TYPES } from '../types'
 
 const props = defineProps<{ model: MaterialPluginModel }>()
 const model = props.model
-const confirm = useFaModal()
+const confirm = useYdModal()
 
 const previewOpen = ref(false)
 const previewInfo = ref<PreviewInfo | null>(null)
@@ -38,8 +39,9 @@ const itemsActiveId = ref('')
 const itemPreviewOpen = ref(false)
 const itemPreviewLabel = ref('')
 
-// 批量操作：FaResponsiveTable 会吞 selectionChange，批量勾选必须用 FaTable（questionbank 同款坑）
+// 批量选择由 YdResponsiveTable 在桌面表格与窄屏卡片间共享。
 const selectedRows = ref<MaterialSummary[]>([])
+const rowSelection = ref<Record<string, boolean>>({})
 const batchCategoryOpen = ref(false)
 const batchCategoryId = ref('')
 const batchTagsOpen = ref(false)
@@ -78,6 +80,7 @@ watch(() => model.adminList, (list) => {
   }
   const ids = new Set(list.map(item => item.id))
   selectedRows.value = selectedRows.value.filter(item => ids.has(item.id))
+  rowSelection.value = Object.fromEntries(Object.entries(rowSelection.value).filter(([id, selected]) => selected && ids.has(id)))
 })
 
 function onSelectionChange(rows: MaterialSummary[]) {
@@ -203,6 +206,7 @@ async function submitBatchCategory() {
     await model.adminBatchCategory(selectedIds(), batchCategoryId.value)
     batchCategoryOpen.value = false
     selectedRows.value = []
+    rowSelection.value = {}
   }
   finally {
     batchSaving.value = false
@@ -252,11 +256,11 @@ onMounted(() => {
 </script>
 
 <template>
-  <FaPageHeader title="物料管理" description="跨用户查看全部物料，支持编辑、代传新版本、分享、归档/恢复、删除与批量操作" />
-  <FaPageMain>
-    <!-- FaResponsiveTable 的事件会落到包装 div 上无法透传（selectionChange 收不到），需要勾选事件的表格直接用 FaTable -->
-    <FaTable
-      v-loading="model.loading"
+  <YdPageHeader title="物料管理" description="跨用户查看全部物料，支持编辑、代传新版本、分享、归档/恢复、删除与批量操作" />
+  <YdPageMain>
+    <!-- YdResponsiveTable 的事件会落到包装 div 上无法透传（selectionChange 收不到），需要勾选事件的表格直接用 FaTable -->
+    <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable v-model:row-selection="rowSelection"
+
       :columns="columns"
       :data="model.adminList"
       row-key="id"
@@ -269,34 +273,34 @@ onMounted(() => {
       @selection-change="onSelectionChange"
     >
       <template #toolbar>
-        <FaSearchBar class="w-full">
+        <YdSearchBar class="w-full">
           <div class="material-filter-bar">
-            <FaInput v-model="model.adminFilters.keyword" placeholder="搜索名称或标签" clearable @keydown.enter="model.applyAdminFilters" @clear="model.applyAdminFilters" />
-            <FaInput v-model="model.adminFilters.owner" placeholder="归属用户（昵称或 ID）" clearable @keydown.enter="model.applyAdminFilters" @clear="model.applyAdminFilters" />
-            <FaSelect v-model="model.adminFilters.type" :options="MATERIAL_TYPES" @change="model.applyAdminFilters" />
+            <YdInput v-model="model.adminFilters.keyword" placeholder="搜索名称或标签" clearable @keydown.enter="model.applyAdminFilters" @clear="model.applyAdminFilters" />
+            <YdInput v-model="model.adminFilters.owner" placeholder="归属用户（昵称或 ID）" clearable @keydown.enter="model.applyAdminFilters" @clear="model.applyAdminFilters" />
+            <YdSelect v-model="model.adminFilters.type" :options="MATERIAL_TYPES" @change="model.applyAdminFilters" />
             <CategoryPicker v-model="model.adminFilters.categoryId" :categories="model.categories" placeholder="全部分类" @update:model-value="model.applyAdminFilters" />
-            <FaSelect v-model="model.adminFilters.status" :options="statusOptions" @change="model.applyAdminFilters" />
-            <FaButton variant="outline" @click="model.applyAdminFilters"><FaIcon name="i-ri:search-line" />查询</FaButton>
+            <YdSelect v-model="model.adminFilters.status" :options="statusOptions" @change="model.applyAdminFilters" />
+            <YdButton variant="outline" @click="model.applyAdminFilters"><YdIcon name="i-ri:search-line" />查询</YdButton>
           </div>
-        </FaSearchBar>
+        </YdSearchBar>
         <div v-if="selectedRows.length" class="mt-2 flex flex-wrap items-center gap-2">
           <span class="text-sm text-secondary-foreground/70">已选 {{ selectedRows.length }} 项</span>
-          <FaButton size="sm" variant="outline" @click="openBatchCategory"><FaIcon name="i-ri:folder-transfer-line" />移动分组</FaButton>
-          <FaButton size="sm" variant="outline" @click="openBatchTags"><FaIcon name="i-ri:price-tag-3-line" />打标签</FaButton>
-          <FaButton size="sm" variant="outline" @click="batchSetStatus('ARCHIVED')">批量归档</FaButton>
-          <FaButton size="sm" variant="outline" @click="batchSetStatus('ACTIVE')">批量恢复</FaButton>
-          <FaButton size="sm" variant="destructive" @click="confirmBatchDelete">批量删除</FaButton>
+          <YdButton size="sm" variant="outline" @click="openBatchCategory"><YdIcon name="i-ri:folder-transfer-line" />移动分组</YdButton>
+          <YdButton size="sm" variant="outline" @click="openBatchTags"><YdIcon name="i-ri:price-tag-3-line" />打标签</YdButton>
+          <YdButton size="sm" variant="outline" @click="batchSetStatus('ARCHIVED')">批量归档</YdButton>
+          <YdButton size="sm" variant="outline" @click="batchSetStatus('ACTIVE')">批量恢复</YdButton>
+          <YdButton size="sm" variant="destructive" @click="confirmBatchDelete">批量删除</YdButton>
         </div>
       </template>
       <template #cell-name="{ row }">
         <div class="flex items-center gap-2">
           <strong>{{ row.original.name }}</strong>
-          <FaTag v-if="hasMainFile(row.original)" variant="outline" class="shrink-0">.{{ row.original.ext || '?' }}</FaTag>
-          <FaTag v-else variant="secondary" class="shrink-0">组合物料</FaTag>
+          <YdTag v-if="hasMainFile(row.original)" variant="outline" class="shrink-0">.{{ row.original.ext || '?' }}</YdTag>
+          <YdTag v-else variant="secondary" class="shrink-0">组合物料</YdTag>
         </div>
       </template>
       <template #cell-type="{ row }">
-        <FaTag variant="secondary">{{ hasMainFile(row.original) ? row.original.typeLabel : '组合物料' }}</FaTag>
+        <YdTag variant="secondary">{{ hasMainFile(row.original) ? row.original.typeLabel : '组合物料' }}</YdTag>
       </template>
       <template #cell-owner="{ row }">{{ row.original.ownerName || row.original.ownerId }}</template>
       <template #cell-categoryName="{ row }">{{ row.original.categoryName || '-' }}</template>
@@ -306,24 +310,27 @@ onMounted(() => {
         <span v-else>{{ row.original.itemCount }} 项</span>
       </template>
       <template #cell-status="{ row }">
-        <FaTag :variant="row.original.status === 'ARCHIVED' ? 'outline' : 'default'">{{ row.original.status === 'ARCHIVED' ? '已归档' : '正常' }}</FaTag>
+        <YdTag :variant="row.original.status === 'ARCHIVED' ? 'outline' : 'default'">{{ row.original.status === 'ARCHIVED' ? '已归档' : '正常' }}</YdTag>
       </template>
       <template #cell-updatedAt="{ row }">{{ formatTime(row.original.updatedAt) }}</template>
       <template #cell-operation="{ row }">
         <div class="flex-center flex-wrap gap-2">
-          <FaButton size="sm" variant="outline" @click="openPreview(row.original)"><FaIcon name="i-ri:eye-line" />预览</FaButton>
-          <FaButton size="sm" variant="outline" @click="openItems(row.original)"><FaIcon name="i-ri:stack-line" />子物料</FaButton>
-          <FaButton size="sm" variant="outline" @click="openEdit(row.original)"><FaIcon name="i-ri:edit-line" />编辑</FaButton>
-          <FaButton v-if="hasMainFile(row.original)" size="sm" variant="outline" @click="openNewVersion(row.original)"><FaIcon name="i-ri:upload-cloud-2-line" />新版本</FaButton>
-          <FaButton v-if="hasMainFile(row.original)" size="sm" variant="outline" @click="openShare(row.original)"><FaIcon name="i-ri:share-forward-line" />分享</FaButton>
-          <FaButton v-if="hasMainFile(row.original)" size="sm" variant="outline" @click="model.adminDownload(row.original)"><FaIcon name="i-ri:download-line" />下载</FaButton>
-          <FaButton v-if="row.original.status !== 'ARCHIVED'" size="sm" variant="outline" @click="confirmArchive(row.original)">归档</FaButton>
-          <FaButton v-else size="sm" variant="outline" @click="model.adminSetStatus(row.original, 'ACTIVE')">恢复</FaButton>
-          <FaButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</FaButton>
+          <YdButton size="sm" variant="outline" @click="openPreview(row.original)"><YdIcon name="i-ri:eye-line" />预览</YdButton>
+          <YdButton size="sm" variant="outline" @click="openItems(row.original)"><YdIcon name="i-ri:stack-line" />子物料</YdButton>
+          <YdButton size="sm" variant="outline" @click="openEdit(row.original)"><YdIcon name="i-ri:edit-line" />编辑</YdButton>
+          <YdButton v-if="hasMainFile(row.original)" size="sm" variant="outline" @click="openNewVersion(row.original)"><YdIcon name="i-ri:upload-cloud-2-line" />新版本</YdButton>
+          <YdButton v-if="hasMainFile(row.original)" size="sm" variant="outline" @click="openShare(row.original)"><YdIcon name="i-ri:share-forward-line" />分享</YdButton>
+          <YdButton v-if="hasMainFile(row.original)" size="sm" variant="outline" @click="model.adminDownload(row.original)"><YdIcon name="i-ri:download-line" />下载</YdButton>
+          <YdButton v-if="row.original.status !== 'ARCHIVED'" size="sm" variant="outline" @click="confirmArchive(row.original)">归档</YdButton>
+          <YdButton v-else size="sm" variant="outline" @click="model.adminSetStatus(row.original, 'ACTIVE')">恢复</YdButton>
+          <YdButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</YdButton>
         </div>
       </template>
-    </FaTable>
-    <FaPagination
+      <template #card="{ row, selected, selectDisabled, toggleSelected }">
+        <YdCard class="w-full"><div class="flex flex-col gap-3"><div class="flex items-start gap-2"><YdCheckbox :model-value="selected" :disabled="selectDisabled" @change="value => toggleSelected(value === true)" /><strong class="min-w-0 break-words">{{ row.name }}</strong></div><div class="flex flex-wrap items-center gap-2"><YdTag variant="secondary">{{ hasMainFile(row) ? row.typeLabel : '组合物料' }}</YdTag><YdTag :variant="row.status === 'ARCHIVED' ? 'outline' : 'default'">{{ row.status === 'ARCHIVED' ? '已归档' : '正常' }}</YdTag><span>{{ row.ownerName || row.ownerId }}</span></div><div class="grid gap-1 text-sm"><span>分类：{{ row.categoryName || '-' }}</span><span>大小：{{ hasMainFile(row) ? formatSize(row.size) : '-' }}</span><span>版本：{{ hasMainFile(row) ? 'v' + row.currentVersion : row.itemCount + ' 项' }}</span><span>更新时间：{{ formatTime(row.updatedAt) }}</span></div><div class="flex flex-wrap gap-2"><YdButton size="sm" variant="outline" @click="openPreview(row)">预览</YdButton><YdButton size="sm" variant="outline" @click="openItems(row)">子物料</YdButton><YdButton size="sm" variant="outline" @click="openEdit(row)">编辑</YdButton><YdButton v-if="hasMainFile(row)" size="sm" variant="outline" @click="openNewVersion(row)">新版本</YdButton><YdButton v-if="hasMainFile(row)" size="sm" variant="outline" @click="openShare(row)">分享</YdButton><YdButton v-if="hasMainFile(row)" size="sm" variant="outline" @click="model.adminDownload(row)">下载</YdButton><YdButton v-if="row.status !== 'ARCHIVED'" size="sm" variant="outline" @click="confirmArchive(row)">归档</YdButton><YdButton v-else size="sm" variant="outline" @click="model.adminSetStatus(row, 'ACTIVE')">恢复</YdButton><YdButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</YdButton></div></div></YdCard>
+      </template>
+    </YdResponsiveTable></YdLoadingOverlay>
+    <YdPagination
       v-model:page="model.adminPager.page"
       v-model:size="model.adminPager.size"
       :total="model.adminPager.total"
@@ -331,7 +338,7 @@ onMounted(() => {
       @page-change="model.loadAdmin"
       @size-change="model.applyAdminFilters"
     />
-    <FaModal v-model="previewOpen" :title="previewTarget ? `预览：${previewTarget.name}` : '预览'" maximize :show-confirm-button="false" cancel-button-text="关闭">
+    <YdModal v-model="previewOpen" :title="previewTarget ? `预览：${previewTarget.name}` : '预览'" maximize :show-confirm-button="false" cancel-button-text="关闭">
       <PreviewFrame
         :sdk="model.sdk"
         :info="previewInfo"
@@ -339,7 +346,7 @@ onMounted(() => {
         :material-type="previewTarget?.type"
         :ext="previewTarget?.ext"
       />
-    </FaModal>
+    </YdModal>
     <EditMaterialModal
       v-model="editOpen"
       v-model:target="editTarget"
@@ -352,7 +359,7 @@ onMounted(() => {
     />
     <NewVersionModal v-model="newVersionOpen" :sdk="model.sdk" :saving="saving" @submit="submitNewVersion" />
     <ShareModal v-model="shareOpen" :material="shareTarget" :model="model" admin />
-    <FaDrawer
+    <YdDrawer
       v-model="itemsOpen"
       :title="itemsTarget ? `子物料：${itemsTarget.name}` : '子物料'"
       description="代任意用户维护子物料，并分别管理每个子物料的独立版本链"
@@ -373,8 +380,8 @@ onMounted(() => {
           @preview="previewItem"
         />
       </template>
-    </FaDrawer>
-    <FaModal
+    </YdDrawer>
+    <YdModal
       v-model="itemPreviewOpen"
       :title="`预览：${itemPreviewLabel}`"
       :z-index="2400"
@@ -388,8 +395,8 @@ onMounted(() => {
         :info="model.preview"
         :loading="model.previewLoading"
       />
-    </FaModal>
-    <FaModal
+    </YdModal>
+    <YdModal
       v-model="batchCategoryOpen"
       title="批量移动分组"
       :description="`将勾选的 ${selectedRows.length} 个物料移动到所选分类；不选分类则移出分组`"
@@ -397,8 +404,8 @@ onMounted(() => {
       @confirm="submitBatchCategory"
     >
       <CategoryPicker v-model="batchCategoryId" :categories="model.categories" placeholder="选择目标分类（不选为移出分组）" />
-    </FaModal>
-    <FaModal
+    </YdModal>
+    <YdModal
       v-model="batchTagsOpen"
       title="批量打标签"
       :description="`对勾选的 ${selectedRows.length} 个物料批量设置标签`"
@@ -409,13 +416,13 @@ onMounted(() => {
       <div class="flex flex-col gap-3">
         <label class="flex flex-col gap-1 text-sm">
           <span class="text-secondary-foreground/80">方式</span>
-          <FaSelect v-model="batchTagMode" :options="batchTagModeOptions" />
+          <YdSelect v-model="batchTagMode" :options="batchTagModeOptions" />
         </label>
         <label class="flex flex-col gap-1 text-sm">
           <span class="text-secondary-foreground/80">标签（最多 8 个）</span>
           <TagPicker v-model="batchTags" :tags="model.tags" />
         </label>
       </div>
-    </FaModal>
-  </FaPageMain>
+    </YdModal>
+  </YdPageMain>
 </template>

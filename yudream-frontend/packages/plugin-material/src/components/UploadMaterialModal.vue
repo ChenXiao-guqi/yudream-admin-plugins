@@ -2,7 +2,7 @@
 import type { FileItem, FileUploadRequestOptions } from '@yudream/components'
 import type { YuDreamPluginFileObject, YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { CategoryView, DeptOption, TagView } from '../types'
-import { FaFileUpload, FaInput, FaModal, FaRadioGroup } from '@yudream/components'
+import { YdFileUpload, YdInput, YdModal, YdRadioGroup } from '@yudream/components'
 import { computed, ref, watch } from 'vue'
 import { uploadFileWithProgress } from '../api/upload'
 import CategoryPicker from './CategoryPicker.vue'
@@ -99,7 +99,7 @@ function onConfirm() {
 </script>
 
 <template>
-  <FaModal
+  <YdModal
     v-model="open"
     title="上传物料"
     description="单文件物料支持图片、PPT、Excel、PSD、视频、音频等常见格式；组合物料可挂多个子物料"
@@ -110,13 +110,13 @@ function onConfirm() {
     <div class="flex flex-col gap-3">
       <label class="flex flex-col gap-1 text-sm">
         <span class="text-secondary-foreground/80">物料形态</span>
-        <FaRadioGroup v-model="mode" :options="modeOptions" />
+        <YdRadioGroup v-model="mode" :options="modeOptions" />
       </label>
       <p v-if="isBundle" class="material-hint">
         组合物料本身不带文件，创建后可在物料详情页上传任意多个子物料（如「明信片」下挂原图、设计稿、成图），每个子物料独立管理版本。
       </p>
       <template v-else>
-        <FaFileUpload
+        <YdFileUpload
           v-model="files"
           :max="1"
           :http-request="httpRequest"
@@ -127,7 +127,7 @@ function onConfirm() {
       <span v-if="uploadError" class="text-xs text-destructive">{{ uploadError }}</span>
       <label class="flex flex-col gap-1 text-sm">
         <span class="text-secondary-foreground/80">名称<template v-if="isBundle">（必填）</template></span>
-        <FaInput v-model="name" :placeholder="isBundle ? '如「明信片」「品牌 Logo」' : '留空则使用文件名'" maxlength="120" />
+        <YdInput v-model="name" :placeholder="isBundle ? '如「明信片」「品牌 Logo」' : '留空则使用文件名'" maxlength="120" />
       </label>
       <label class="flex flex-col gap-1 text-sm">
         <span class="text-secondary-foreground/80">分类</span>
@@ -139,5 +139,5 @@ function onConfirm() {
       </label>
       <VisibilityDeptField v-model:visibility="visibility" v-model:dept-ids="deptIds" :dept-options="props.deptOptions" />
     </div>
-  </FaModal>
+  </YdModal>
 </template>

@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { VersionView } from '../types'
-import { FaButton, FaResponsiveTable, FaTag } from '@yudream/components'
+import { YdButton, YdResponsiveTable, YdTag } from '@yudream/components'
 import { formatSize, formatTime } from '../types'
 
 /**
@@ -41,11 +42,11 @@ const columns: TableColumn<VersionView>[] = [
     <slot name="title" />
     <div class="flex items-center gap-2">
       <span class="text-xs text-secondary-foreground/70">共 {{ props.versions.length }} 个版本</span>
-      <FaButton v-if="props.canUpload" size="sm" variant="outline" @click="emit('upload')">上传新版本</FaButton>
+      <YdButton v-if="props.canUpload" size="sm" variant="outline" @click="emit('upload')">上传新版本</YdButton>
     </div>
   </div>
-  <FaResponsiveTable
-    v-loading="props.loading"
+  <YdLoadingOverlay :loading="props.loading"><YdResponsiveTable
+
     :columns="columns"
     :data="props.versions"
     row-key="version"
@@ -56,7 +57,7 @@ const columns: TableColumn<VersionView>[] = [
   >
     <template #cell-version="{ row }">
       <strong>v{{ row.original.version }}</strong>
-      <FaTag v-if="row.original.current" class="ml-2" variant="secondary">当前</FaTag>
+      <YdTag v-if="row.original.current" class="ml-2" variant="secondary">当前</YdTag>
     </template>
     <template #cell-originalName="{ row }">{{ row.original.originalName || '-' }}</template>
     <template #cell-size="{ row }">{{ formatSize(row.original.size) }}</template>
@@ -65,28 +66,28 @@ const columns: TableColumn<VersionView>[] = [
     <template #cell-createdAt="{ row }">{{ formatTime(row.original.createdAt) }}</template>
     <template #cell-operation="{ row }">
       <div class="flex-center gap-2">
-        <FaButton size="sm" variant="outline" @click="emit('preview', row.original)">预览</FaButton>
-        <FaButton size="sm" variant="outline" @click="emit('download', row.original)">下载</FaButton>
-        <FaButton v-if="props.canWrite && !row.original.current" size="sm" variant="outline" @click="emit('restore', row.original)">回滚到此</FaButton>
-        <FaButton v-if="props.canWrite && !row.original.current" size="sm" variant="destructive" @click="emit('remove', row.original)">删除</FaButton>
+        <YdButton size="sm" variant="outline" @click="emit('preview', row.original)">预览</YdButton>
+        <YdButton size="sm" variant="outline" @click="emit('download', row.original)">下载</YdButton>
+        <YdButton v-if="props.canWrite && !row.original.current" size="sm" variant="outline" @click="emit('restore', row.original)">回滚到此</YdButton>
+        <YdButton v-if="props.canWrite && !row.original.current" size="sm" variant="destructive" @click="emit('remove', row.original)">删除</YdButton>
       </div>
     </template>
     <template #card="{ row }">
       <div class="flex flex-col gap-2 text-sm">
         <div class="flex items-center justify-between gap-2">
           <strong>v{{ row.version }}</strong>
-          <FaTag v-if="row.current" variant="secondary">当前</FaTag>
+          <YdTag v-if="row.current" variant="secondary">当前</YdTag>
         </div>
         <div class="text-secondary-foreground/80">{{ row.originalName || '-' }} · {{ formatSize(row.size) }}</div>
         <div v-if="row.note" class="text-secondary-foreground/80">备注：{{ row.note }}</div>
         <div class="text-secondary-foreground/60">{{ row.uploaderName || row.uploaderId }} · {{ formatTime(row.createdAt) }}</div>
         <div class="flex flex-wrap gap-2">
-          <FaButton size="sm" variant="outline" @click="emit('preview', row)">预览</FaButton>
-          <FaButton size="sm" variant="outline" @click="emit('download', row)">下载</FaButton>
-          <FaButton v-if="props.canWrite && !row.current" size="sm" variant="outline" @click="emit('restore', row)">回滚到此</FaButton>
-          <FaButton v-if="props.canWrite && !row.current" size="sm" variant="destructive" @click="emit('remove', row)">删除</FaButton>
+          <YdButton size="sm" variant="outline" @click="emit('preview', row)">预览</YdButton>
+          <YdButton size="sm" variant="outline" @click="emit('download', row)">下载</YdButton>
+          <YdButton v-if="props.canWrite && !row.current" size="sm" variant="outline" @click="emit('restore', row)">回滚到此</YdButton>
+          <YdButton v-if="props.canWrite && !row.current" size="sm" variant="destructive" @click="emit('remove', row)">删除</YdButton>
         </div>
       </div>
     </template>
-  </FaResponsiveTable>
+  </YdResponsiveTable></YdLoadingOverlay>
 </template>

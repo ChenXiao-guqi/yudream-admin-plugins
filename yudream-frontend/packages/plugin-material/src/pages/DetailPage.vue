@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { MaterialPluginModel } from '../composables/useMaterialPlugin'
 import type { MaterialItemView, VersionView } from '../types'
-import { FaButton, FaCard, FaIcon, FaPageHeader, FaPageMain, FaSelect, useFaModal } from '@yudream/components'
+import { YdButton, YdCard, YdIcon, YdPageHeader, YdPageMain, YdSelect, useYdModal } from '@yudream/components'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import MaterialItemManager from '../components/MaterialItemManager.vue'
@@ -15,7 +15,7 @@ const props = defineProps<{ model: MaterialPluginModel }>()
 const model = props.model
 const route = useRoute()
 const router = useRouter()
-const confirm = useFaModal()
+const confirm = useYdModal()
 
 const materialId = computed(() => String(route.query.id || ''))
 const newVersionOpen = ref(false)
@@ -175,20 +175,20 @@ onMounted(async () => {
 
 <template>
   <template v-if="model.detail">
-    <FaPageHeader :title="model.detail.material.name" :description="headerDescription">
-      <FaButton variant="outline" @click="router.push('/platform/plugins/material')"><FaIcon name="i-ri:arrow-left-line" />返回物料库</FaButton>
-      <FaButton v-if="downloadable" variant="outline" @click="model.downloadMine(model.detail.material)"><FaIcon name="i-ri:download-line" />{{ downloadLabel }}</FaButton>
-      <FaButton v-if="canOperateEntry && hasMainFile" variant="outline" @click="shareOpen = true"><FaIcon name="i-ri:share-forward-line" />分享</FaButton>
-      <FaButton v-if="canOperateEntry && hasMainFile" @click="newVersionOpen = true"><FaIcon name="i-ri:upload-cloud-2-line" />上传新版本</FaButton>
-    </FaPageHeader>
-    <FaPageMain>
+    <YdPageHeader :title="model.detail.material.name" :description="headerDescription">
+      <YdButton variant="outline" @click="router.push('/platform/plugins/material')"><YdIcon name="i-ri:arrow-left-line" />返回物料库</YdButton>
+      <YdButton v-if="downloadable" variant="outline" @click="model.downloadMine(model.detail.material)"><YdIcon name="i-ri:download-line" />{{ downloadLabel }}</YdButton>
+      <YdButton v-if="canOperateEntry && hasMainFile" variant="outline" @click="shareOpen = true"><YdIcon name="i-ri:share-forward-line" />分享</YdButton>
+      <YdButton v-if="canOperateEntry && hasMainFile" @click="newVersionOpen = true"><YdIcon name="i-ri:upload-cloud-2-line" />上传新版本</YdButton>
+    </YdPageHeader>
+    <YdPageMain>
       <div class="material-detail-layout">
-        <FaCard class="material-preview-card">
+        <YdCard class="material-preview-card">
           <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
             <strong class="text-sm">在线预览</strong>
             <div class="flex flex-wrap items-center gap-2">
-              <FaSelect v-if="previewTargetOptions.length > 1" v-model="previewTarget" :options="previewTargetOptions" class="w-52" />
-              <FaSelect v-model="previewVersion" :options="previewVersionOptions" class="w-40" placeholder="当前版本" />
+              <YdSelect v-if="previewTargetOptions.length > 1" v-model="previewTarget" :options="previewTargetOptions" class="w-52" />
+              <YdSelect v-model="previewVersion" :options="previewVersionOptions" class="w-40" placeholder="当前版本" />
             </div>
           </div>
           <PreviewFrame
@@ -198,8 +198,8 @@ onMounted(async () => {
             :material-type="previewType"
             :ext="previewExt"
           />
-        </FaCard>
-        <FaCard v-if="hasMainFile">
+        </YdCard>
+        <YdCard v-if="hasMainFile">
           <MaterialVersionsTable
             :versions="model.versions"
             :can-write="isOwner"
@@ -215,8 +215,8 @@ onMounted(async () => {
               <span class="material-item-versions-tag">只影响父物料主文件</span>
             </template>
           </MaterialVersionsTable>
-        </FaCard>
-        <FaCard v-else class="material-bundle-card">
+        </YdCard>
+        <YdCard v-else class="material-bundle-card">
           <div class="flex flex-col gap-2">
             <strong class="text-sm">组合物料</strong>
             <p class="text-sm text-secondary-foreground/80">
@@ -232,9 +232,9 @@ onMounted(async () => {
               <span class="material-hint">子物料的新增、上传新版本、回滚与删除都在下方「子物料」区完成；分享链接仍只支持带主文件的物料，暂不支持组合物料。</span>
             </div>
           </div>
-        </FaCard>
+        </YdCard>
       </div>
-      <FaCard class="material-detail-items">
+      <YdCard class="material-detail-items">
         <MaterialItemManager
           v-model:active-id="previewTarget"
           :model="model"
@@ -243,22 +243,22 @@ onMounted(async () => {
           :preview-item-id="previewItemId"
           @preview="onItemPreview"
         />
-      </FaCard>
-    </FaPageMain>
+      </YdCard>
+    </YdPageMain>
     <NewVersionModal v-if="hasMainFile" v-model="newVersionOpen" :sdk="model.sdk" :saving="saving" @submit="submitNewVersion" />
     <ShareModal v-model="shareOpen" :material="model.detail.material" :model="model" :admin="!isOwner" />
   </template>
   <template v-else>
-    <FaPageHeader title="物料详情" />
-    <FaPageMain>
+    <YdPageHeader title="物料详情" />
+    <YdPageMain>
       <div class="flex flex-col items-center gap-3 py-16 text-secondary-foreground/70">
-        <FaIcon name="i-ri:loader-4-line" class="animate-spin text-2xl" />
+        <YdIcon name="i-ri:loader-4-line" class="animate-spin text-2xl" />
         <span v-if="model.loading">正在加载…</span>
         <template v-else>
           <span>物料不存在或没有权限</span>
-          <FaButton variant="outline" @click="router.push('/platform/plugins/material')">返回物料库</FaButton>
+          <YdButton variant="outline" @click="router.push('/platform/plugins/material')">返回物料库</YdButton>
         </template>
       </div>
-    </FaPageMain>
+    </YdPageMain>
   </template>
 </template>

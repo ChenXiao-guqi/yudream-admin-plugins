@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { MaterialPluginModel } from '../composables/useMaterialPlugin'
 import type { MaterialSummary } from '../types'
-import { FaButton, FaIcon, FaInput, FaPageHeader, FaPageMain, FaPagination, FaSelect, FaTag, useFaModal } from '@yudream/components'
+import { YdAction, YdButton, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdSelect, YdTag, useYdModal } from '@yudream/components'
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import EditMaterialModal from '../components/EditMaterialModal.vue'
@@ -14,7 +15,7 @@ import { formatSize, isBundle, MATERIAL_TYPES, TYPE_ICONS, visibilityLabel } fro
 const props = defineProps<{ model: MaterialPluginModel }>()
 const model = props.model
 const router = useRouter()
-const confirm = useFaModal()
+const confirm = useYdModal()
 
 const uploadOpen = ref(false)
 const importOpen = ref(false)
@@ -155,9 +156,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <FaPageHeader title="物料库" description="统一管理图片、文档、设计稿、音视频等电子物料，支持在线预览与版本回溯">
+  <YdPageHeader title="物料库" description="统一管理图片、文档、设计稿、音视频等电子物料，支持在线预览与版本回溯">
     <div class="material-header-actions">
-      <FaInput
+      <YdInput
         v-model="model.libraryFilters.keyword"
         placeholder="搜索名称或标签"
         clearable
@@ -165,51 +166,51 @@ onMounted(() => {
         @keydown.enter="model.applyLibraryFilters"
         @clear="model.applyLibraryFilters"
       />
-      <FaSelect v-model="model.libraryFilters.scope" :options="scopeOptions" class="material-header-type" @change="model.applyLibraryFilters" />
-      <FaSelect v-model="model.libraryFilters.type" :options="MATERIAL_TYPES" class="material-header-type" @change="model.applyLibraryFilters" />
-      <FaButton variant="outline" @click="importOpen = true"><FaIcon name="i-ri:folder-upload-line" />导入文件夹</FaButton>
-      <FaButton @click="uploadOpen = true"><FaIcon name="i-ri:upload-cloud-2-line" />上传物料</FaButton>
+      <YdSelect v-model="model.libraryFilters.scope" :options="scopeOptions" class="material-header-type" @change="model.applyLibraryFilters" />
+      <YdSelect v-model="model.libraryFilters.type" :options="MATERIAL_TYPES" class="material-header-type" @change="model.applyLibraryFilters" />
+      <YdButton variant="outline" @click="importOpen = true"><YdIcon name="i-ri:folder-upload-line" />导入文件夹</YdButton>
+      <YdButton @click="uploadOpen = true"><YdIcon name="i-ri:upload-cloud-2-line" />上传物料</YdButton>
     </div>
-  </FaPageHeader>
-  <FaPageMain>
+  </YdPageHeader>
+  <YdPageMain>
     <div class="material-library-layout">
       <aside class="material-sidebar">
         <div class="material-sidebar-section">
           <div class="material-sidebar-title">分类</div>
-          <FaInput
+          <YdInput
             v-if="model.categories.length > CATEGORY_SEARCH_THRESHOLD"
             v-model="categoryKeyword"
             placeholder="搜索分类"
             clearable
             class="material-sidebar-search"
           />
-          <button
+          <YdAction
             class="material-nav-item"
             :class="{ 'is-active': model.libraryFilters.categoryId === '' }"
             @click="model.setCategory('')"
           >
-            <FaIcon name="i-ri:apps-line" />
+            <YdIcon name="i-ri:apps-line" />
             <span>全部分类</span>
-          </button>
+          </YdAction>
           <div class="material-sidebar-list">
-            <button
+            <YdAction
               v-for="category in filteredCategories"
               :key="category.id"
               class="material-nav-item"
               :class="{ 'is-active': model.libraryFilters.categoryId === category.id }"
               @click="model.setCategory(category.id)"
             >
-              <FaIcon name="i-ri:folder-line" />
+              <YdIcon name="i-ri:folder-line" />
               <span class="truncate">{{ category.name }}</span>
               <span class="material-nav-count">{{ category.materials }}</span>
-            </button>
+            </YdAction>
             <div v-if="!filteredCategories.length" class="material-sidebar-empty">无匹配分类</div>
           </div>
         </div>
         <div class="material-sidebar-divider" />
         <div class="material-sidebar-section">
           <div class="material-sidebar-title">标签云</div>
-          <FaInput
+          <YdInput
             v-if="model.tags.length > TAG_SEARCH_THRESHOLD"
             v-model="tagKeyword"
             placeholder="搜索标签"
@@ -217,7 +218,7 @@ onMounted(() => {
             class="material-sidebar-search"
           />
           <div v-if="filteredTags.length" class="material-tag-cloud">
-            <button
+            <YdAction
               v-for="tag in filteredTags"
               :key="tag.name"
               class="material-tag-chip"
@@ -226,7 +227,7 @@ onMounted(() => {
               @click="model.toggleTag(tag.name)"
             >
               {{ tag.name }}
-            </button>
+            </YdAction>
           </div>
           <div v-else-if="model.tags.length" class="material-sidebar-empty">无匹配标签</div>
           <div v-else class="material-sidebar-empty">暂无标签</div>
@@ -234,40 +235,42 @@ onMounted(() => {
         <div class="material-sidebar-divider" />
         <div class="material-sidebar-section">
           <div class="material-sidebar-title">状态</div>
-          <FaSelect v-model="model.libraryFilters.status" :options="statusOptions" @change="model.applyLibraryFilters" />
+          <YdSelect v-model="model.libraryFilters.status" :options="statusOptions" @change="model.applyLibraryFilters" />
         </div>
       </aside>
       <div class="material-library-main">
         <div v-if="model.libraryFilters.tag" class="material-active-filter">
           <span>标签筛选：</span>
-          <FaTag variant="secondary">
+          <YdTag variant="secondary">
             {{ model.libraryFilters.tag }}
-            <button class="material-tag-clear" title="清除标签筛选" @click="model.toggleTag(model.libraryFilters.tag)">
-              <FaIcon name="i-ri:close-line" />
-            </button>
-          </FaTag>
+            <YdAction class="material-tag-clear" title="清除标签筛选" @click="model.toggleTag(model.libraryFilters.tag)">
+              <YdIcon name="i-ri:close-line" />
+            </YdAction>
+          </YdTag>
         </div>
-        <div v-loading="model.loading" class="material-grid-wrap">
+        <YdLoadingOverlay :loading="model.loading"><div  class="material-grid-wrap">
           <div v-if="model.library.length" class="material-grid">
             <div v-for="row in model.library" :key="row.id" class="material-card">
-              <div class="material-thumb" @click="goDetail(row)">
+              <div class="material-thumb">
+                <YdAction type="button" class="material-thumb-open" :aria-label="`预览物料 ${row.name}`" @click="goDetail(row)">
                 <MaterialCover v-if="model.covers[row.id]" :src="model.covers[row.id]" :alt="row.name" />
                 <div v-else class="material-thumb-icon">
-                  <FaIcon :name="typeIcon(row)" />
+                  <YdIcon :name="typeIcon(row)" />
                   <span class="material-thumb-ext">{{ isBundle(row) ? '组合物料' : `.${row.ext || '?'}` }}</span>
                 </div>
-                <FaTag v-if="row.status === 'ARCHIVED'" variant="secondary" class="material-thumb-archived">已归档</FaTag>
-                <FaTag v-if="isBundle(row)" variant="secondary" class="material-thumb-bundle">{{ row.itemCount }} 个子物料</FaTag>
+                </YdAction>
+                <YdTag v-if="row.status === 'ARCHIVED'" variant="secondary" class="material-thumb-archived">已归档</YdTag>
+                <YdTag v-if="isBundle(row)" variant="secondary" class="material-thumb-bundle">{{ row.itemCount }} 个子物料</YdTag>
                 <div class="material-overlay">
-                  <button class="material-overlay-btn" title="预览" @click.stop="goDetail(row)"><FaIcon name="i-ri:eye-line" /></button>
-                  <button v-if="canDownload(row)" class="material-overlay-btn" title="下载" @click.stop="model.downloadMine(row)"><FaIcon name="i-ri:download-line" /></button>
-                  <button v-if="canOperate(row)" class="material-overlay-btn" title="编辑" @click.stop="openEdit(row)"><FaIcon name="i-ri:edit-line" /></button>
-                  <button v-if="canOperate(row) && !isBundle(row)" class="material-overlay-btn" title="分享" @click.stop="openShare(row)"><FaIcon name="i-ri:share-forward-line" /></button>
-                  <button v-if="model.isOwner(row)" class="material-overlay-btn is-danger" title="删除" @click.stop="confirmDelete(row)"><FaIcon name="i-ri:delete-bin-line" /></button>
+                  <YdAction class="material-overlay-btn" title="预览" @click.stop="goDetail(row)"><YdIcon name="i-ri:eye-line" /></YdAction>
+                  <YdAction v-if="canDownload(row)" class="material-overlay-btn" title="下载" @click.stop="model.downloadMine(row)"><YdIcon name="i-ri:download-line" /></YdAction>
+                  <YdAction v-if="canOperate(row)" class="material-overlay-btn" title="编辑" @click.stop="openEdit(row)"><YdIcon name="i-ri:edit-line" /></YdAction>
+                  <YdAction v-if="canOperate(row) && !isBundle(row)" class="material-overlay-btn" title="分享" @click.stop="openShare(row)"><YdIcon name="i-ri:share-forward-line" /></YdAction>
+                  <YdAction v-if="model.isOwner(row)" class="material-overlay-btn is-danger" title="删除" @click.stop="confirmDelete(row)"><YdIcon name="i-ri:delete-bin-line" /></YdAction>
                 </div>
               </div>
               <div class="material-card-body">
-                <button class="material-link material-card-name" :title="row.name" @click="goDetail(row)">{{ row.name }}</button>
+                <YdAction class="material-link material-card-name" :title="row.name" @click="goDetail(row)">{{ row.name }}</YdAction>
                 <div class="material-card-meta">
                   <template v-if="isBundle(row)">
                     <span>组合物料</span>
@@ -281,20 +284,20 @@ onMounted(() => {
                 </div>
                 <div class="material-card-meta">
                   <span v-if="!model.isOwner(row)" class="truncate">{{ row.ownerName || '其他成员' }}</span>
-                  <FaTag variant="secondary" :title="row.visibility === 'DEPT' && (row.deptNames || []).length ? `可见部门：${(row.deptNames || []).join('、')}` : undefined">
+                  <YdTag variant="secondary" :title="row.visibility === 'DEPT' && (row.deptNames || []).length ? `可见部门：${(row.deptNames || []).join('、')}` : undefined">
                     {{ visibilityLabel(row.visibility) }}
-                  </FaTag>
+                  </YdTag>
                 </div>
               </div>
             </div>
           </div>
           <div v-else-if="!model.loading" class="material-empty">
-            <FaIcon name="i-ri:folder-open-line" class="material-empty-icon" />
+            <YdIcon name="i-ri:folder-open-line" class="material-empty-icon" />
             <p>没有符合条件的物料</p>
-            <FaButton variant="outline" @click="uploadOpen = true"><FaIcon name="i-ri:upload-cloud-2-line" />上传物料</FaButton>
+            <YdButton variant="outline" @click="uploadOpen = true"><YdIcon name="i-ri:upload-cloud-2-line" />上传物料</YdButton>
           </div>
-        </div>
-        <FaPagination
+        </div></YdLoadingOverlay>
+        <YdPagination
           v-model:page="model.libraryPager.page"
           v-model:size="model.libraryPager.size"
           :total="model.libraryPager.total"
@@ -318,5 +321,5 @@ onMounted(() => {
       :saving="saving"
       @submit="submitEdit"
     />
-  </FaPageMain>
+  </YdPageMain>
 </template>

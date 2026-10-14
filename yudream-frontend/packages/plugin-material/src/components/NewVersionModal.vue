@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { FileItem, FileUploadRequestOptions } from '@yudream/components'
 import type { YuDreamPluginFileObject, YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { FaFileUpload, FaModal, FaTextarea } from '@yudream/components'
+import { YdFileUpload, YdModal, YdTextarea } from '@yudream/components'
 import { ref, watch } from 'vue'
 import { uploadFileWithProgress } from '../api/upload'
 
@@ -45,7 +45,7 @@ function onConfirm() {
 </script>
 
 <template>
-  <FaModal
+  <YdModal
     v-model="open"
     title="上传新版本"
     description="新文件会作为下一个版本，旧版本保留可随时回滚"
@@ -54,7 +54,7 @@ function onConfirm() {
     @confirm="onConfirm"
   >
     <div class="flex flex-col gap-3">
-      <FaFileUpload
+      <YdFileUpload
         v-model="files"
         :max="1"
         :http-request="httpRequest"
@@ -64,8 +64,8 @@ function onConfirm() {
       <span v-if="uploadError" class="text-xs text-destructive">{{ uploadError }}</span>
       <label class="flex flex-col gap-1 text-sm">
         <span class="text-secondary-foreground/80">版本备注</span>
-        <FaTextarea v-model="note" placeholder="这次改了什么？（选填）" maxlength="200" :rows="3" />
+        <YdTextarea v-model="note" placeholder="这次改了什么？（选填）" maxlength="200" :rows="3" />
       </label>
     </div>
-  </FaModal>
+  </YdModal>
 </template>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { FileItem, FileUploadRequestOptions } from '@yudream/components'
 import type { YuDreamPluginFileObject, YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { FaFileUpload, FaInput, FaModal, FaTextarea } from '@yudream/components'
+import { YdFileUpload, YdInput, YdModal, YdTextarea } from '@yudream/components'
 import { computed, ref, watch } from 'vue'
 import { uploadFileWithProgress } from '../api/upload'
 
@@ -68,7 +68,7 @@ function onConfirm() {
 </script>
 
 <template>
-  <FaModal
+  <YdModal
     v-model="open"
     :title="title"
     :description="description"
@@ -77,7 +77,7 @@ function onConfirm() {
     @confirm="onConfirm"
   >
     <div class="flex flex-col gap-3">
-      <FaFileUpload
+      <YdFileUpload
         v-model="files"
         :max="1"
         :http-request="httpRequest"
@@ -87,12 +87,12 @@ function onConfirm() {
       <span v-if="uploadError" class="text-xs text-destructive">{{ uploadError }}</span>
       <label v-if="isCreate" class="flex flex-col gap-1 text-sm">
         <span class="text-secondary-foreground/80">子物料名称</span>
-        <FaInput v-model="name" placeholder="如「原图」「设计稿」「成图」，留空则使用文件名" maxlength="60" />
+        <YdInput v-model="name" placeholder="如「原图」「设计稿」「成图」，留空则使用文件名" maxlength="60" />
       </label>
       <label v-else class="flex flex-col gap-1 text-sm">
         <span class="text-secondary-foreground/80">版本备注</span>
-        <FaTextarea v-model="note" placeholder="这次改了什么？（选填）" maxlength="200" :rows="3" />
+        <YdTextarea v-model="note" placeholder="这次改了什么？（选填）" maxlength="200" :rows="3" />
       </label>
     </div>
-  </FaModal>
+  </YdModal>
 </template>

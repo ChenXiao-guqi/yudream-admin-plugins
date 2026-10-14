@@ -2,8 +2,8 @@
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { PickedFile } from '../api/upload'
 import type { DeptOption, FolderImportItem, FolderImportMode, FolderImportPayload, FolderImportResult, TagView } from '../types'
-import { Progress as AProgress } from '@arco-design/web-vue'
-import { FaButton, FaIcon, FaInput, FaModal, FaRadioGroup } from '@yudream/components'
+
+import { YdButton, YdIcon, YdInput, YdModal, YdProgress, YdRadioGroup } from '@yudream/components'
 import { computed, markRaw, reactive, ref, watch } from 'vue'
 import { uploadFileWithProgress, pickDirectory } from '../api/upload'
 import { formatSize } from '../types'
@@ -206,7 +206,7 @@ function openResult() {
 }
 
 /**
- * FaModal 默认点确认立即关窗、之后才触发 confirm 事件，导入会在后台静默进行；
+ * YdModal 默认点确认立即关窗、之后才触发 confirm 事件，导入会在后台静默进行；
  * 用 beforeClose 把导入全程留在弹窗内：confirm 跑完导入但不调 done()，停留完成态展示结果，
  * 由用户再点「完成」或 X 才真正关窗。处理函数绝不能抛出（组件内部没有 finally，loading 会卡死）。
  */
@@ -275,7 +275,7 @@ async function handleBeforeClose(action: 'confirm' | 'cancel' | 'close', done: (
 </script>
 
 <template>
-  <FaModal
+  <YdModal
     v-model="open"
     title="导入文件夹"
     :description="modalDescription"
@@ -289,11 +289,11 @@ async function handleBeforeClose(action: 'confirm' | 'cancel' | 'close', done: (
     :before-close="handleBeforeClose"
   >
     <div class="flex flex-col gap-3">
-      <FaRadioGroup v-model="mode" :options="MODE_OPTIONS" :disabled="importing || completed" />
+      <YdRadioGroup v-model="mode" :options="MODE_OPTIONS" :disabled="importing || completed" />
       <div class="flex items-center gap-2">
-        <FaButton variant="outline" :disabled="importing" @click="pickFolder">
-          <FaIcon name="i-ri:folder-upload-line" />选择文件夹
-        </FaButton>
+        <YdButton variant="outline" :disabled="importing" @click="pickFolder">
+          <YdIcon name="i-ri:folder-upload-line" />选择文件夹
+        </YdButton>
         <span v-if="files.length" class="text-sm text-secondary-foreground/80">
           {{ folderName || '所选文件夹' }}：{{ files.length }} 个文件，共 {{ formatSize(totalSize) }}
         </span>
@@ -314,7 +314,7 @@ async function handleBeforeClose(action: 'confirm' | 'cancel' | 'close', done: (
         </span>
         <label class="flex flex-col gap-1 text-sm">
           <span class="text-secondary-foreground/80">组合物料名称</span>
-          <FaInput v-model="bundleName" :disabled="importing" :placeholder="folderName || '未命名组合物料'" />
+          <YdInput v-model="bundleName" :disabled="importing" :placeholder="folderName || '未命名组合物料'" />
         </label>
         <span class="text-xs text-secondary-foreground/60">
           {{ files.length }} 个文件将作为「{{ bundleTargetName }}」的子物料，子物料名取「子文件夹名-文件名」（去扩展名），各自从 v1 开始独立版本。
@@ -342,11 +342,11 @@ async function handleBeforeClose(action: 'confirm' | 'cancel' | 'close', done: (
       </label>
       <VisibilityDeptField v-if="files.length" v-model:visibility="visibility" v-model:dept-ids="deptIds" :dept-options="props.deptOptions" :disabled="importing" />
       <div v-if="importing" class="flex flex-col gap-1">
-        <AProgress :percent="percent" />
+        <YdProgress :model-value="percent * 100" />
         <span class="text-xs text-secondary-foreground/70">已处理 {{ uploadedCount }}/{{ files.length }} 个文件</span>
       </div>
       <div v-if="completed && !failures.length" class="flex items-center gap-1 text-xs text-secondary-foreground/70">
-        <FaIcon name="i-ri:checkbox-circle-line" />{{ successText }}
+        <YdIcon name="i-ri:checkbox-circle-line" />{{ successText }}
       </div>
       <div v-if="failures.length" class="flex flex-col gap-1">
         <span class="text-xs text-destructive">{{ isBundle ? `${failures.length} 个文件未导入为子物料：` : `${failures.length} 个文件未导入：` }}</span>
@@ -358,11 +358,11 @@ async function handleBeforeClose(action: 'confirm' | 'cancel' | 'close', done: (
         </div>
       </div>
       <div v-if="completed && resultMaterialId && props.openMaterial" class="flex items-center gap-2">
-        <FaButton variant="outline" size="sm" @click="openResult">
-          <FaIcon name="i-ri:external-link-line" />查看物料
-        </FaButton>
+        <YdButton variant="outline" size="sm" @click="openResult">
+          <YdIcon name="i-ri:external-link-line" />查看物料
+        </YdButton>
         <span class="text-xs text-secondary-foreground/60">子物料已在导入时建好，后续版本维护在物料详情页完成。</span>
       </div>
     </div>
-  </FaModal>
+  </YdModal>
 </template>

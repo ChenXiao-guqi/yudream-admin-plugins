@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { DeptOption } from '../types'
-import { FaSelect } from '@yudream/components'
+import { YdSelect, YdMultiSelect } from '@yudream/components'
 import { computed } from 'vue'
 import { VISIBILITY_OPTIONS } from '../types'
 
@@ -23,12 +23,11 @@ const deptSelectOptions = computed(() => props.deptOptions.map(dept => ({ label:
 <template>
   <div class="flex flex-col gap-1 text-sm">
     <span class="text-secondary-foreground/80">可见范围</span>
-    <FaSelect v-model="visibility" :options="VISIBILITY_OPTIONS" :disabled="disabled" />
+    <YdSelect v-model="visibility" :options="VISIBILITY_OPTIONS" :disabled="disabled" />
     <template v-if="visibility === 'DEPT'">
-      <FaSelect
+      <YdMultiSelect
         v-model="deptIds"
         :options="deptSelectOptions"
-        multiple
         :disabled="disabled"
         placeholder="选择可见部门（可多选）"
       />

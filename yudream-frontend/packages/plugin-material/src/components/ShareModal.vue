@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { MaterialPluginModel } from '../composables/useMaterialPlugin'
 import type { MaterialSummary, ShareView } from '../types'
-import { FaButton, FaIcon, FaInput, FaModal, FaSelect, FaTag, useFaModal, useFaToast } from '@yudream/components'
+import { YdButton, YdIcon, YdInput, YdModal, YdSelect, YdTag, useYdModal, useYdToast } from '@yudream/components'
 import { ref, watch } from 'vue'
 import { formatTime } from '../types'
 
@@ -14,8 +14,8 @@ const props = withDefaults(defineProps<{
 }>(), { admin: false })
 const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>()
 
-const toast = useFaToast()
-const confirm = useFaModal()
+const toast = useYdToast()
+const confirm = useYdModal()
 
 const EXPIRY_OPTIONS = [
   { label: '永久有效', value: 0 },
@@ -58,13 +58,7 @@ async function copy(text: string, successText: string) {
     toast.success(successText)
   }
   catch {
-    const area = document.createElement('textarea')
-    area.value = text
-    document.body.appendChild(area)
-    area.select()
-    document.execCommand('copy')
-    area.remove()
-    toast.success(successText)
+    toast.error('复制失败，请检查浏览器剪贴板权限')
   }
 }
 
@@ -99,7 +93,7 @@ function confirmRevoke(share: ShareView) {
 </script>
 
 <template>
-  <FaModal
+  <YdModal
     :model-value="modelValue"
     :title="`分享「${material?.name ?? ''}」`"
     :footer="false"
@@ -112,9 +106,9 @@ function confirmRevoke(share: ShareView) {
           创建公开链接，任何人打开即可在线预览/下载当前版本；上传新版本或回滚后链接内容自动跟随。
         </div>
         <div class="flex flex-wrap items-center gap-2">
-          <FaSelect v-model="expiry" :options="EXPIRY_OPTIONS" class="w-40" />
-          <FaInput v-model="note" class="min-w-40 flex-1" maxlength="100" placeholder="备注（可选，仅自己可见）" />
-          <FaButton :loading="creating" @click="submit"><FaIcon name="i-ri:link" />创建链接</FaButton>
+          <YdSelect v-model="expiry" :options="EXPIRY_OPTIONS" class="w-40" />
+          <YdInput v-model="note" class="min-w-40 flex-1" maxlength="100" placeholder="备注（可选，仅自己可见）" />
+          <YdButton :loading="creating" @click="submit"><YdIcon name="i-ri:link" />创建链接</YdButton>
         </div>
       </div>
       <div v-if="model.shares.length" class="flex flex-col gap-2">
@@ -122,19 +116,19 @@ function confirmRevoke(share: ShareView) {
           <div class="min-w-0 flex-1">
             <div class="truncate text-sm" :title="shareUrl(share)">{{ shareUrl(share) }}</div>
             <div class="mt-1 flex flex-wrap items-center gap-2 text-xs text-secondary-foreground/70">
-              <FaTag v-if="share.expired" variant="destructive">已过期</FaTag>
+              <YdTag v-if="share.expired" variant="destructive">已过期</YdTag>
               <span>{{ expiresLabel(share) }}</span>
               <span v-if="share.note">备注：{{ share.note }}</span>
               <span>创建于 {{ formatTime(share.createdAt) }}</span>
             </div>
           </div>
-          <FaButton size="sm" variant="outline" @click="copy(shareUrl(share), '链接已复制')"><FaIcon name="i-ri:file-copy-line" />复制</FaButton>
-          <FaButton size="sm" variant="destructive" @click="confirmRevoke(share)">撤销</FaButton>
+          <YdButton size="sm" variant="outline" @click="copy(shareUrl(share), '链接已复制')"><YdIcon name="i-ri:file-copy-line" />复制</YdButton>
+          <YdButton size="sm" variant="destructive" @click="confirmRevoke(share)">撤销</YdButton>
         </div>
       </div>
       <div v-else class="py-4 text-center text-sm text-secondary-foreground/60">
         还没有分享链接，创建一个发给同事吧
       </div>
     </div>
-  </FaModal>
+  </YdModal>
 </template>

@@ -1,4 +1,5 @@
 import type { YuDreamPluginFileObject, YuDreamPluginSdk } from '@yudream/plugin-sdk'
+import { useYdFilePicker } from '@yudream/components'
 
 /** 目录选择返回的文件项：path 统一为「根文件夹名/…/文件名」相对路径，与 webkitRelativePath 形态一致 */
 export interface PickedFile {
@@ -79,23 +80,19 @@ async function walkDirectory(dir: FsDirectoryHandle, prefix: string, files: Pick
   }
 }
 
-function pickByDirectoryInput(): Promise<PickDirectoryResult> {
-  return new Promise((resolve) => {
-    const input = document.createElement('input')
-    input.type = 'file'
-    input.webkitdirectory = true
-    input.multiple = true
-    const done = (raw: File[]) => {
-      resolve({
-        files: raw.map(file => ({ file, path: file.webkitRelativePath || file.name })),
-        rootName: raw.length ? (raw[0].webkitRelativePath.split('/')[0] || '') : '',
-        skipped: [],
-      })
+async function pickByDirectoryInput(): Promise<PickDirectoryResult> {
+  const picker = useYdFilePicker({ multiple: true, directory: true })
+  try {
+    const raw = await picker.open()
+    return {
+      files: raw.map(file => ({ file, path: file.webkitRelativePath || file.name })),
+      rootName: raw.length ? (raw[0].webkitRelativePath.split('/')[0] || '') : '',
+      skipped: [],
     }
-    input.onchange = () => done(Array.from(input.files || []))
-    input.addEventListener('cancel', () => done([]))
-    input.click()
-  })
+  }
+  finally {
+    picker.dispose()
+  }
 }
 
 interface BackendEnvelope<T> {

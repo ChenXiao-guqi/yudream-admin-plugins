@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { MaterialItemView } from '../types'
-import { FaButton, FaIcon, FaResponsiveTable, FaTag } from '@yudream/components'
+import { YdButton, YdIcon, YdResponsiveTable, YdTag } from '@yudream/components'
 import { formatSize, formatTime, TYPE_ICONS } from '../types'
 
 /**
@@ -51,8 +52,8 @@ function isPreviewItem(item: MaterialItemView) {
 </script>
 
 <template>
-  <FaResponsiveTable
-    v-loading="props.loading"
+  <YdLoadingOverlay :loading="props.loading"><YdResponsiveTable
+
     :columns="columns"
     :data="props.items"
     row-key="id"
@@ -63,14 +64,14 @@ function isPreviewItem(item: MaterialItemView) {
   >
     <template #cell-name="{ row }">
       <div class="flex items-center gap-2">
-        <FaIcon :name="typeIcon(row.original)" class="shrink-0 text-secondary-foreground/70" />
+        <YdIcon :name="typeIcon(row.original)" class="shrink-0 text-secondary-foreground/70" />
         <strong class="truncate">{{ row.original.name }}</strong>
-        <FaTag v-if="isPreviewItem(row.original)" variant="secondary" class="shrink-0">预览主文件</FaTag>
-        <FaTag v-if="row.original.id === props.activeId" variant="outline" class="shrink-0">版本区</FaTag>
+        <YdTag v-if="isPreviewItem(row.original)" variant="secondary" class="shrink-0">预览主文件</YdTag>
+        <YdTag v-if="row.original.id === props.activeId" variant="outline" class="shrink-0">版本区</YdTag>
       </div>
     </template>
     <template #cell-type="{ row }">
-      <FaTag variant="secondary">{{ row.original.typeLabel }} · .{{ row.original.ext || '?' }}</FaTag>
+      <YdTag variant="secondary">{{ row.original.typeLabel }} · .{{ row.original.ext || '?' }}</YdTag>
     </template>
     <template #cell-fileName="{ row }">{{ row.original.name }}</template>
     <template #cell-currentVersion="{ row }">v{{ row.original.currentVersion }}</template>
@@ -78,33 +79,33 @@ function isPreviewItem(item: MaterialItemView) {
     <template #cell-updatedAt="{ row }">{{ formatTime(row.original.updatedAt) }}</template>
     <template #cell-operation="{ row }">
       <div class="flex-center flex-wrap gap-2">
-        <FaButton size="sm" variant="outline" @click="emit('versions', row.original)"><FaIcon name="i-ri:git-branch-line" />版本</FaButton>
-        <FaButton v-if="!props.readonly && !isPreviewItem(row.original)" size="sm" variant="ghost" @click="emit('set-preview', row.original)"><FaIcon name="i-ri:star-line" />设为主文件</FaButton>
-        <FaButton v-else-if="!props.readonly" size="sm" variant="ghost" @click="emit('clear-preview')"><FaIcon name="i-ri:star-fill" />取消主文件</FaButton>
-        <FaButton v-if="!props.readonly" size="sm" variant="outline" @click="emit('new-version', row.original)"><FaIcon name="i-ri:upload-cloud-2-line" />新版本</FaButton>
-        <FaButton size="sm" variant="outline" @click="emit('download', row.original)"><FaIcon name="i-ri:download-line" />下载</FaButton>
-        <FaButton v-if="!props.readonly" size="sm" variant="outline" @click="emit('rename', row.original)"><FaIcon name="i-ri:edit-line" />重命名</FaButton>
-        <FaButton v-if="!props.readonly" size="sm" variant="destructive" @click="emit('remove', row.original)"><FaIcon name="i-ri:delete-bin-line" />删除</FaButton>
+        <YdButton size="sm" variant="outline" @click="emit('versions', row.original)"><YdIcon name="i-ri:git-branch-line" />版本</YdButton>
+        <YdButton v-if="!props.readonly && !isPreviewItem(row.original)" size="sm" variant="ghost" @click="emit('set-preview', row.original)"><YdIcon name="i-ri:star-line" />设为主文件</YdButton>
+        <YdButton v-else-if="!props.readonly" size="sm" variant="ghost" @click="emit('clear-preview')"><YdIcon name="i-ri:star-fill" />取消主文件</YdButton>
+        <YdButton v-if="!props.readonly" size="sm" variant="outline" @click="emit('new-version', row.original)"><YdIcon name="i-ri:upload-cloud-2-line" />新版本</YdButton>
+        <YdButton size="sm" variant="outline" @click="emit('download', row.original)"><YdIcon name="i-ri:download-line" />下载</YdButton>
+        <YdButton v-if="!props.readonly" size="sm" variant="outline" @click="emit('rename', row.original)"><YdIcon name="i-ri:edit-line" />重命名</YdButton>
+        <YdButton v-if="!props.readonly" size="sm" variant="destructive" @click="emit('remove', row.original)"><YdIcon name="i-ri:delete-bin-line" />删除</YdButton>
       </div>
     </template>
     <template #card="{ row }">
       <div class="flex flex-col gap-2 text-sm">
         <div class="flex items-center justify-between gap-2">
           <strong class="truncate">{{ row.name }}</strong>
-          <FaTag variant="secondary">{{ row.typeLabel }}</FaTag>
+          <YdTag variant="secondary">{{ row.typeLabel }}</YdTag>
         </div>
         <div class="text-secondary-foreground/80">v{{ row.currentVersion }} · {{ formatSize(row.size) }} · {{ formatTime(row.updatedAt) }}</div>
-        <FaTag v-if="isPreviewItem(row)" variant="secondary">预览主文件</FaTag>
+        <YdTag v-if="isPreviewItem(row)" variant="secondary">预览主文件</YdTag>
         <div class="flex flex-wrap gap-2">
-          <FaButton size="sm" variant="outline" @click="emit('versions', row)">版本</FaButton>
-          <FaButton v-if="!props.readonly && !isPreviewItem(row)" size="sm" variant="ghost" @click="emit('set-preview', row)">设为主文件</FaButton>
-          <FaButton v-else-if="!props.readonly" size="sm" variant="ghost" @click="emit('clear-preview')">取消主文件</FaButton>
-          <FaButton v-if="!props.readonly" size="sm" variant="outline" @click="emit('new-version', row)">新版本</FaButton>
-          <FaButton size="sm" variant="outline" @click="emit('download', row)">下载</FaButton>
-          <FaButton v-if="!props.readonly" size="sm" variant="outline" @click="emit('rename', row)">重命名</FaButton>
-          <FaButton v-if="!props.readonly" size="sm" variant="destructive" @click="emit('remove', row)">删除</FaButton>
+          <YdButton size="sm" variant="outline" @click="emit('versions', row)">版本</YdButton>
+          <YdButton v-if="!props.readonly && !isPreviewItem(row)" size="sm" variant="ghost" @click="emit('set-preview', row)">设为主文件</YdButton>
+          <YdButton v-else-if="!props.readonly" size="sm" variant="ghost" @click="emit('clear-preview')">取消主文件</YdButton>
+          <YdButton v-if="!props.readonly" size="sm" variant="outline" @click="emit('new-version', row)">新版本</YdButton>
+          <YdButton size="sm" variant="outline" @click="emit('download', row)">下载</YdButton>
+          <YdButton v-if="!props.readonly" size="sm" variant="outline" @click="emit('rename', row)">重命名</YdButton>
+          <YdButton v-if="!props.readonly" size="sm" variant="destructive" @click="emit('remove', row)">删除</YdButton>
         </div>
       </div>
     </template>
-  </FaResponsiveTable>
+  </YdResponsiveTable></YdLoadingOverlay>
 </template>

@@ -1,13 +1,13 @@
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { BatchResult, CategoryView, DeptOption, FolderImportPayload, FolderImportResult, MaterialDetail, MaterialItemView, MaterialSummary, PreviewInfo, ShareView, TagView, VersionView } from '../types'
-import { useFaToast } from '@yudream/components'
+import { useYdToast } from '@yudream/components'
 import { computed, reactive, ref } from 'vue'
 import { createMaterialApi, saveBlob } from '../api/material-api'
 import { isBundle } from '../types'
 
 export function useMaterialPlugin(sdk: YuDreamPluginSdk) {
   const api = createMaterialApi(sdk)
-  const toast = useFaToast()
+  const toast = useYdToast()
 
   const loading = ref(false)
   const categories = ref<CategoryView[]>([])
