@@ -11,3 +11,5 @@ yudream-plugin-world-map
 yudream-plugin-neco-pixel
 yudream-plugin-mc-pet
 yudream-plugin-yudream-skin
+yudream-plugin-ymcl-adapter
+yudream-plugin-authlib-injector
