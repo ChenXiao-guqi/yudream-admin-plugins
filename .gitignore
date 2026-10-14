@@ -22,3 +22,7 @@ yudream-plugins/yudream-plugin-mcguess/tools/.cache/
 hs_err_pid*.log
 .zcode/
 yudream-frontend/audit-report.json
+
+# 本机计划与敏感信息
+/docs/plan/
+/docs/local.md
