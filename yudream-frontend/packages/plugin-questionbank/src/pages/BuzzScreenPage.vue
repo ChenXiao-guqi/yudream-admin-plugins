@@ -199,6 +199,8 @@ async function startDraft() {
 }
 
 onMounted(() => {
+  // 全屏接管：通知全局悬浮件（AI 助手、宠物、主题开关等）让位
+  document.documentElement.setAttribute('data-fullscreen-stage', 'true')
   const recordId = String(route.query.record ?? '').trim()
   if (recordId) {
     entryRecordId.value = recordId
@@ -213,7 +215,10 @@ onMounted(() => {
   window.addEventListener('keydown', onKeydown)
 })
 
-onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onKeydown)
+  document.documentElement.removeAttribute('data-fullscreen-stage')
+})
 </script>
 
 <template>

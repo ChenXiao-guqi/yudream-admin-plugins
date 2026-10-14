@@ -323,3 +323,8 @@
     max-width: none;
   }
 }
+
+/* 全屏接管页（data-fullscreen-stage）让位：放映大屏等场景不显示宠物挂件 */
+html[data-fullscreen-stage="true"] .mc-pet-global {
+	display: none;
+}

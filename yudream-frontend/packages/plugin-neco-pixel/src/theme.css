@@ -1237,3 +1237,10 @@ html[data-theme='light'][data-accent='cyan'] :is(.site-chrome, .site-page, .neco
 .login-page .login-toolbar {
   display: none !important;
 }
+
+/* ========== 全屏接管页让位（放映大屏等 data-fullscreen-stage 场景不出现主题悬浮件） ========== */
+html[data-fullscreen-stage="true"] .neco-palette-toggle,
+html[data-fullscreen-stage="true"] .neco-palette-panel,
+html[data-fullscreen-stage="true"] .neco-sound-toggle {
+	display: none;
+}
