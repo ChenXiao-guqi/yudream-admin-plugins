@@ -22,14 +22,14 @@ catalogs:
       specifier: ^0.9.1
       version: 0.9.1
     '@yudream/components':
-      specifier: 1.4.0
-      version: 1.4.0
+      specifier: 1.6.0
+      version: 1.6.0
     '@yudream/dataviz':
       specifier: 0.1.2
       version: 0.1.2
     '@yudream/plugin-sdk':
-      specifier: 1.9.0
-      version: 1.9.0
+      specifier: 1.11.0
+      version: 1.11.0
     qrcode:
       specifier: ^1.5.4
       version: 1.5.4
@@ -53,18 +53,24 @@ importers:
 
   .:
     devDependencies:
+      '@yudream/components':
+        specifier: 'catalog:'
+        version: 1.6.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
+      vue:
+        specifier: 'catalog:'
+        version: 3.5.42(typescript@6.0.3)
 
   packages/plugin-ai-chatbot:
     dependencies:
       '@yudream/components':
         specifier: 'catalog:'
-        version: 1.4.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
+        version: 1.6.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
       '@yudream/plugin-sdk':
         specifier: 'catalog:'
-        version: 1.9.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
+        version: 1.11.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
       vue:
         specifier: 'catalog:'
         version: 3.5.42(typescript@6.0.3)
@@ -98,10 +104,10 @@ importers:
         version: 2.58.0(vue@3.5.42(typescript@6.0.3))
       '@yudream/components':
         specifier: 'catalog:'
-        version: 1.4.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
+        version: 1.6.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
       '@yudream/plugin-sdk':
         specifier: 'catalog:'
-        version: 1.9.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
+        version: 1.11.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
       vue:
         specifier: 'catalog:'
         version: 3.5.42(typescript@6.0.3)
@@ -166,10 +172,10 @@ importers:
     dependencies:
       '@yudream/components':
         specifier: 'catalog:'
-        version: 1.4.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
+        version: 1.6.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
       '@yudream/plugin-sdk':
         specifier: 'catalog:'
-        version: 1.9.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
+        version: 1.11.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
       vue:
         specifier: 'catalog:'
         version: 3.5.42(typescript@6.0.3)
@@ -200,10 +206,10 @@ importers:
     dependencies:
       '@yudream/components':
         specifier: 'catalog:'
-        version: 1.4.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
+        version: 1.6.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
       '@yudream/plugin-sdk':
         specifier: 'catalog:'
-        version: 1.9.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
+        version: 1.11.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -219,10 +225,10 @@ importers:
     dependencies:
       '@yudream/components':
         specifier: 'catalog:'
-        version: 1.4.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
+        version: 1.6.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
       '@yudream/plugin-sdk':
         specifier: 'catalog:'
-        version: 1.9.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
+        version: 1.11.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
       md-editor-v3:
         specifier: ^6.5.3
         version: 6.5.6(vue@3.5.42(typescript@6.0.3))
@@ -293,10 +299,10 @@ importers:
     dependencies:
       '@yudream/components':
         specifier: 'catalog:'
-        version: 1.4.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
+        version: 1.6.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
       '@yudream/plugin-sdk':
         specifier: 'catalog:'
-        version: 1.9.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
+        version: 1.11.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
       md-editor-v3:
         specifier: ^6.5.3
         version: 6.5.6(vue@3.5.42(typescript@6.0.3))
@@ -373,10 +379,10 @@ importers:
     dependencies:
       '@yudream/components':
         specifier: 'catalog:'
-        version: 1.4.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
+        version: 1.6.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
       '@yudream/plugin-sdk':
         specifier: 'catalog:'
-        version: 1.9.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
+        version: 1.11.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
       vue:
         specifier: 'catalog:'
         version: 3.5.42(typescript@6.0.3)
@@ -410,10 +416,10 @@ importers:
         version: 2.58.0(vue@3.5.42(typescript@6.0.3))
       '@yudream/components':
         specifier: 'catalog:'
-        version: 1.4.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
+        version: 1.6.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
       '@yudream/plugin-sdk':
         specifier: 'catalog:'
-        version: 1.9.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
+        version: 1.11.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
       vue:
         specifier: 'catalog:'
         version: 3.5.42(typescript@6.0.3)
@@ -444,10 +450,10 @@ importers:
         version: 2.58.0(vue@3.5.42(typescript@6.0.3))
       '@yudream/components':
         specifier: 'catalog:'
-        version: 1.4.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
+        version: 1.6.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
       '@yudream/plugin-sdk':
         specifier: 'catalog:'
-        version: 1.9.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
+        version: 1.11.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
       md-editor-v3:
         specifier: ^6.5.3
         version: 6.5.6(vue@3.5.42(typescript@6.0.3))
@@ -515,10 +521,10 @@ importers:
     dependencies:
       '@yudream/components':
         specifier: 'catalog:'
-        version: 1.4.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
+        version: 1.6.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
       '@yudream/plugin-sdk':
         specifier: 'catalog:'
-        version: 1.9.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
+        version: 1.11.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
       skinview3d:
         specifier: ^3.4.2
         version: 3.4.2
@@ -555,10 +561,10 @@ importers:
     dependencies:
       '@yudream/components':
         specifier: 'catalog:'
-        version: 1.4.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
+        version: 1.6.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
       '@yudream/plugin-sdk':
         specifier: 'catalog:'
-        version: 1.9.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
+        version: 1.11.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
       vue:
         specifier: 'catalog:'
         version: 3.5.42(typescript@6.0.3)
@@ -629,10 +635,10 @@ importers:
     dependencies:
       '@yudream/components':
         specifier: 'catalog:'
-        version: 1.4.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
+        version: 1.6.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
       '@yudream/plugin-sdk':
         specifier: 'catalog:'
-        version: 1.9.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
+        version: 1.11.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
       vue:
         specifier: 'catalog:'
         version: 3.5.42(typescript@6.0.3)
@@ -663,13 +669,13 @@ importers:
     dependencies:
       '@yudream/components':
         specifier: 'catalog:'
-        version: 1.4.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
+        version: 1.6.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
       '@yudream/dataviz':
         specifier: 'catalog:'
         version: 0.1.2(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(vue@3.5.42(typescript@6.0.3))
       '@yudream/plugin-sdk':
         specifier: 'catalog:'
-        version: 1.9.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
+        version: 1.11.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
       vue:
         specifier: 'catalog:'
         version: 3.5.42(typescript@6.0.3)
@@ -737,10 +743,10 @@ importers:
     dependencies:
       '@yudream/components':
         specifier: 'catalog:'
-        version: 1.4.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
+        version: 1.6.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
       '@yudream/plugin-sdk':
         specifier: 'catalog:'
-        version: 1.9.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
+        version: 1.11.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
       md-editor-v3:
         specifier: ^6.5.3
         version: 6.5.6(vue@3.5.42(typescript@6.0.3))
@@ -820,10 +826,10 @@ importers:
     dependencies:
       '@yudream/components':
         specifier: 'catalog:'
-        version: 1.4.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
+        version: 1.6.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
       '@yudream/plugin-sdk':
         specifier: 'catalog:'
-        version: 1.9.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
+        version: 1.11.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
       md-editor-v3:
         specifier: ^6.5.3
         version: 6.5.6(vue@3.5.42(typescript@6.0.3))
@@ -922,10 +928,10 @@ importers:
     dependencies:
       '@yudream/components':
         specifier: 'catalog:'
-        version: 1.4.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
+        version: 1.6.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
       '@yudream/plugin-sdk':
         specifier: 'catalog:'
-        version: 1.9.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
+        version: 1.11.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
       vue:
         specifier: 'catalog:'
         version: 3.5.42(typescript@6.0.3)
@@ -953,10 +959,10 @@ importers:
     dependencies:
       '@yudream/components':
         specifier: 'catalog:'
-        version: 1.4.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
+        version: 1.6.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
       '@yudream/plugin-sdk':
         specifier: 'catalog:'
-        version: 1.9.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
+        version: 1.11.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
       vue:
         specifier: 'catalog:'
         version: 3.5.42(typescript@6.0.3)
@@ -987,10 +993,10 @@ importers:
     dependencies:
       '@yudream/components':
         specifier: 'catalog:'
-        version: 1.4.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
+        version: 1.6.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
       '@yudream/plugin-sdk':
         specifier: 'catalog:'
-        version: 1.9.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
+        version: 1.11.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
       vue:
         specifier: 'catalog:'
         version: 3.5.42(typescript@6.0.3)
@@ -1024,10 +1030,10 @@ importers:
         version: 2.58.0(vue@3.5.42(typescript@6.0.3))
       '@yudream/components':
         specifier: 'catalog:'
-        version: 1.4.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
+        version: 1.6.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
       '@yudream/plugin-sdk':
         specifier: 'catalog:'
-        version: 1.9.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
+        version: 1.11.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
       vue:
         specifier: 'catalog:'
         version: 3.5.42(typescript@6.0.3)
@@ -1101,10 +1107,10 @@ importers:
     dependencies:
       '@yudream/components':
         specifier: 'catalog:'
-        version: 1.4.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
+        version: 1.6.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
       '@yudream/plugin-sdk':
         specifier: 'catalog:'
-        version: 1.9.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
+        version: 1.11.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -1120,10 +1126,10 @@ importers:
     dependencies:
       '@yudream/components':
         specifier: 'catalog:'
-        version: 1.4.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
+        version: 1.6.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
       '@yudream/plugin-sdk':
         specifier: 'catalog:'
-        version: 1.9.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
+        version: 1.11.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
       vue:
         specifier: 'catalog:'
         version: 3.5.42(typescript@6.0.3)
@@ -1157,10 +1163,10 @@ importers:
         version: 2.58.0(vue@3.5.42(typescript@6.0.3))
       '@yudream/components':
         specifier: 'catalog:'
-        version: 1.4.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
+        version: 1.6.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
       '@yudream/plugin-sdk':
         specifier: 'catalog:'
-        version: 1.9.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
+        version: 1.11.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
       md-editor-v3:
         specifier: ^6.5.3
         version: 6.5.6(vue@3.5.42(typescript@6.0.3))
@@ -1244,10 +1250,10 @@ importers:
     dependencies:
       '@yudream/components':
         specifier: 'catalog:'
-        version: 1.4.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
+        version: 1.6.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
       '@yudream/plugin-sdk':
         specifier: 'catalog:'
-        version: 1.9.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
+        version: 1.11.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
       md-editor-v3:
         specifier: ^6.5.3
         version: 6.5.6(vue@3.5.42(typescript@6.0.3))
@@ -1318,10 +1324,10 @@ importers:
         version: 2.58.0(vue@3.5.42(typescript@6.0.3))
       '@yudream/components':
         specifier: 'catalog:'
-        version: 1.4.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
+        version: 1.6.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
       '@yudream/plugin-sdk':
         specifier: 'catalog:'
-        version: 1.9.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
+        version: 1.11.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
       md-editor-v3:
         specifier: ^6.5.3
         version: 6.5.6(vue@3.5.42(typescript@6.0.3))
@@ -1410,10 +1416,10 @@ importers:
         version: 0.1.7
       '@yudream/components':
         specifier: 'catalog:'
-        version: 1.4.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
+        version: 1.6.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
       '@yudream/plugin-sdk':
         specifier: 'catalog:'
-        version: 1.9.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
+        version: 1.11.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
       codemirror:
         specifier: ^6.0.2
         version: 6.0.2
@@ -1450,10 +1456,10 @@ importers:
     dependencies:
       '@yudream/components':
         specifier: 'catalog:'
-        version: 1.4.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
+        version: 1.6.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
       '@yudream/plugin-sdk':
         specifier: 'catalog:'
-        version: 1.9.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
+        version: 1.11.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
       vue:
         specifier: 'catalog:'
         version: 3.5.42(typescript@6.0.3)
@@ -1484,10 +1490,10 @@ importers:
     dependencies:
       '@yudream/components':
         specifier: 'catalog:'
-        version: 1.4.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
+        version: 1.6.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
       '@yudream/plugin-sdk':
         specifier: 'catalog:'
-        version: 1.9.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
+        version: 1.11.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
       three:
         specifier: ^0.180.0
         version: 0.180.0
@@ -1530,10 +1536,10 @@ importers:
         version: 2.58.0(vue@3.5.42(typescript@6.0.3))
       '@yudream/components':
         specifier: 'catalog:'
-        version: 1.4.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
+        version: 1.6.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
       '@yudream/plugin-sdk':
         specifier: 'catalog:'
-        version: 1.9.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
+        version: 1.11.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
       vue:
         specifier: 'catalog:'
         version: 3.5.42(typescript@6.0.3)
@@ -1567,10 +1573,10 @@ importers:
         version: 2.58.0(vue@3.5.42(typescript@6.0.3))
       '@yudream/components':
         specifier: 'catalog:'
-        version: 1.4.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
+        version: 1.6.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
       '@yudream/plugin-sdk':
         specifier: 'catalog:'
-        version: 1.9.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
+        version: 1.11.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
       md-editor-v3:
         specifier: ^6.5.6
         version: 6.5.6(vue@3.5.42(typescript@6.0.3))
@@ -1604,10 +1610,10 @@ importers:
     dependencies:
       '@yudream/components':
         specifier: 'catalog:'
-        version: 1.4.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
+        version: 1.6.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
       '@yudream/plugin-sdk':
         specifier: 'catalog:'
-        version: 1.9.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
+        version: 1.11.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
       vue:
         specifier: 'catalog:'
         version: 3.5.42(typescript@6.0.3)
@@ -1638,10 +1644,10 @@ importers:
     dependencies:
       '@yudream/components':
         specifier: 'catalog:'
-        version: 1.4.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
+        version: 1.6.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
       '@yudream/plugin-sdk':
         specifier: 'catalog:'
-        version: 1.9.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
+        version: 1.11.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
       skinview3d:
         specifier: ^3.0.1
         version: 3.4.2
@@ -1718,10 +1724,10 @@ importers:
     dependencies:
       '@yudream/components':
         specifier: 'catalog:'
-        version: 1.4.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
+        version: 1.6.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
       '@yudream/plugin-sdk':
         specifier: 'catalog:'
-        version: 1.9.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
+        version: 1.11.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
       vue:
         specifier: 'catalog:'
         version: 3.5.42(typescript@6.0.3)
@@ -1752,10 +1758,10 @@ importers:
     dependencies:
       '@yudream/components':
         specifier: 'catalog:'
-        version: 1.4.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
+        version: 1.6.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))
       '@yudream/plugin-sdk':
         specifier: 'catalog:'
-        version: 1.9.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
+        version: 1.11.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))
       vue:
         specifier: 'catalog:'
         version: 3.5.42(typescript@6.0.3)
@@ -3598,6 +3604,9 @@ packages:
   '@types/babel__traverse@7.28.0':
     resolution: {integrity: sha512-8PvcXf70gTDZBgt9ptxJ8elBeBjcLOAcOtoO/mPJjtji1+CdGbHgm77om1GrsPxsiE+uXIpNSK64UYaIwQXd4Q==}
 
+  '@types/backbone@1.4.15':
+    resolution: {integrity: sha512-WWeKtYlsIMtDyLbbhkb96taJMEbfQBnuz7yw1u0pkphCOtksemoWhIXhK74VRCY9hbjnsH3rsJu2uUiFtnsEYg==}
+
   '@types/chai@5.2.3':
     resolution: {integrity: sha512-Mw558oeA9fFbv65/y4mHtXDs9bPnFMZAL/jxdPFUpOHHIXX91mcgEHbS5Lahr+pwZFR8A7GQleRWeI6cGFC2UA==}
 
@@ -3624,6 +3633,9 @@ packages:
 
   '@types/istanbul-reports@3.0.4':
     resolution: {integrity: sha512-pk2B1NWalF9toCRu6gjBzR69syFjP4Od8WRAX+0mmf9lAjCRicLOWc+ZrxZHx/0XRjotgkF9t6iaMJ+aXcOdZQ==}
+
+  '@types/jquery@4.0.1':
+    resolution: {integrity: sha512-9a59A/tycXgYuPABcp6/3spSShn0NT2UOM4EfHvMumjYi4lJWTsK5SZWjhx3yRm9IHGCeWXdV2YfNsrWrft/CA==}
 
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
@@ -3676,8 +3688,14 @@ packages:
   '@types/tinycolor2@1.4.6':
     resolution: {integrity: sha512-iEN8J0BoMnsWBqjVbWH/c0G0Hh7O21lpR2/+PrvAVgWdzL7eexIFm4JN/Wn10PTcmNdtS6U67r499mlWMXOxNw==}
 
+  '@types/underscore@1.13.0':
+    resolution: {integrity: sha512-L6LBgy1f0EFQZ+7uSA57+n2g/s4Qs5r06Vwrwn0/nuK1de+adz00NWaztRQ30aEqw5qOaWbPI8u2cGQ52lj6VA==}
+
   '@types/unist@3.0.3':
     resolution: {integrity: sha512-ko/gIFJRv177XgZsZcBwnqJN5x/Gien8qNOn0D5bQU/zAzVf9Zt3BlcUiLqhV9y4ARk0GbT3tnUiPNgnTXzc/Q==}
+
+  '@types/web-bluetooth@0.0.20':
+    resolution: {integrity: sha512-g9gZnnXVq7gM7v3tJCWV/qw7w+KeOlSHAhgF9RytFyifW6AF61hdT2ucrYhPq9hLs5JIryeupHV3qGk95dH9ow==}
 
   '@types/web-bluetooth@0.0.21':
     resolution: {integrity: sha512-oIQLCGWtcFZy2JW77j9k8nHzAOpqMHLQejDA48XXMWH6tjCQHz5RCFz1bzsmROyL6PUm+LLnUiI4BCn221inxA==}
@@ -3780,6 +3798,9 @@ packages:
   '@vavt/markdown-theme@5.0.2':
     resolution: {integrity: sha512-cGYEV2VIUmhT9p8Wua9yXh7sKN1f3cbztTFHlkYyH9SzbpiKUnQrcbDts/0fP6cmvZPOe9SWWsDujmyuHepJdQ==}
 
+  '@vavt/markdown-theme@6.0.1':
+    resolution: {integrity: sha512-S6HClmYtnrBuAm+6aeAKRtMwy6cTv+7QlGQYlpNHwumoFr3x86X6uGtJbvrv3ReoKx40vCOJR7h+1OiflKJOWA==}
+
   '@vavt/util@2.1.2':
     resolution: {integrity: sha512-L3UbSJthJwr3wq0x93O5TrCepimrmVZaIl2ciZbeL18G5++gBhJXNhcH7RcVk/6rr3SavWOvwhig0mqRLoR7dw==}
 
@@ -3832,6 +3853,29 @@ packages:
 
   '@volar/typescript@2.4.28':
     resolution: {integrity: sha512-Ja6yvWrbis2QtN4ClAKreeUZPVYMARDYZl9LMEv1iQ1QdepB6wn0jTRxA9MftYmYa4DQ4k/DaSZpFPUfxl8giw==}
+
+  '@vue-flow/background@1.3.2':
+    resolution: {integrity: sha512-eJPhDcLj1wEo45bBoqTXw1uhl0yK2RaQGnEINqvvBsAFKh/camHJd5NPmOdS1w+M9lggc9igUewxaEd3iCQX2w==}
+    peerDependencies:
+      '@vue-flow/core': ^1.23.0
+      vue: ^3.3.0
+
+  '@vue-flow/controls@1.1.3':
+    resolution: {integrity: sha512-XCf+G+jCvaWURdFlZmOjifZGw3XMhN5hHlfMGkWh9xot+9nH9gdTZtn+ldIJKtarg3B21iyHU8JjKDhYcB6JMw==}
+    peerDependencies:
+      '@vue-flow/core': ^1.23.0
+      vue: ^3.3.0
+
+  '@vue-flow/core@1.48.2':
+    resolution: {integrity: sha512-raxhgKWE+G/mcEvXJjGFUDYW9rAI3GOtiHR3ZkNpwBWuIaCC1EYiBmKGwJOoNzVFgwO7COgErnK7i08i287AFA==}
+    peerDependencies:
+      vue: ^3.3.0
+
+  '@vue-flow/minimap@1.5.4':
+    resolution: {integrity: sha512-l4C+XTAXnRxsRpUdN7cAVFBennC1sVRzq4bDSpVK+ag7tdMczAnhFYGgbLkUw3v3sY6gokyWwMl8CDonp8eB2g==}
+    peerDependencies:
+      '@vue-flow/core': ^1.23.0
+      vue: ^3.3.0
 
   '@vue-macros/common@3.1.4':
     resolution: {integrity: sha512-/5Fv+6DgIcM9ajY05ZmKBv+LMX1M9A0X+IUwDRVdt67ciw8OV9bvG2r34p3RiEadlsQybjhKPRKNXDC8Bp23cw==}
@@ -3897,6 +3941,9 @@ packages:
     peerDependencies:
       vue: ^3.5.0
 
+  '@vueuse/core@10.11.1':
+    resolution: {integrity: sha512-guoy26JQktXPcz+0n3GukWIy/JDNKti9v6VEMu6kV2sYBsWuGiTU8OWdg+ADfUbHg3/3DlqySDe7JmdHrktiww==}
+
   '@vueuse/core@12.8.2':
     resolution: {integrity: sha512-HbvCmZdzAu3VGi/pWYm5Ut+Kd9mn1ZHnn4L5G8kOQTPs/IwIAmJoBrmYk2ckLArgMXZj0AW3n5CAejLUO+PhdQ==}
 
@@ -3905,11 +3952,17 @@ packages:
     peerDependencies:
       vue: ^3.5.0
 
+  '@vueuse/metadata@10.11.1':
+    resolution: {integrity: sha512-IGa5FXd003Ug1qAZmyE8wF3sJ81xGLSqTqtQ6jaVfkeZ4i5kS2mwQF61yhVqojRnenVew5PldLyRgvdl4YYuSw==}
+
   '@vueuse/metadata@12.8.2':
     resolution: {integrity: sha512-rAyLGEuoBJ/Il5AmFHiziCPdQzRt88VxR+Y/A/QhJ1EWtWqPBBAxTAFaSkviwEuOEZNtW8pvkPgoCZQ+HxqW1A==}
 
   '@vueuse/metadata@14.4.0':
     resolution: {integrity: sha512-swx/255R6JyHZFJhx845iz5CRWDZdCfvkZOpACWc5+c5WHcG24mv8gUT1WIdFQaHt6dq79rvILd9QnCWiyVm9g==}
+
+  '@vueuse/shared@10.11.1':
+    resolution: {integrity: sha512-LHpC8711VFZlDaYUXEBbFBCQ7GS3dVU9mjOhhMhXP6txTV4EhYQg/KGnQuvt/sPAtoUKq7VVUnL6mVtFoL42sA==}
 
   '@vueuse/shared@12.8.2':
     resolution: {integrity: sha512-dznP38YzxZoNloI0qpEfpkms8knDtaoQ6Y/sfS0L7Yki4zh40LFHEhur0odJC6xTHG5dxWVPiUWBXn+wCG2s5w==}
@@ -3977,8 +4030,8 @@ packages:
   '@xtuc/long@4.2.2':
     resolution: {integrity: sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==}
 
-  '@yudream/components@1.4.0':
-    resolution: {integrity: sha512-Xw4UffNTjnypkeXSooZIX+qE/xdZZGS39u+ATAr3gTXXXc3FfXm0GI5LchcxpA9GAxzux+NkSqhkjrokjcJKYQ==}
+  '@yudream/components@1.6.0':
+    resolution: {integrity: sha512-f36im/1IyhyeIBfD8sJYuR6KVdVS6rn4hmdsYa6fTVJVGBsXMCWpvF5YWOAcVP9PPDIjmOCXoJ0LjKGQqCFY2w==}
     peerDependencies:
       '@vueuse/components': ^14.3.0
       '@vueuse/core': ^14.3.0
@@ -3998,8 +4051,8 @@ packages:
       '@vueuse/core': ^14.3.0
       vue: ^3.5.38
 
-  '@yudream/plugin-sdk@1.9.0':
-    resolution: {integrity: sha512-ZS+vCDaHe8S5/pP8p16WZzciAOF0piMXX98uu0tqtGGMmhQeDH0BknnkJGU0+isxBVBa4cLUGfknRIAfl0QzgA==}
+  '@yudream/plugin-sdk@1.11.0':
+    resolution: {integrity: sha512-3x7BwXXaH2To2miKgH6m+3V3UZqK+5YkZy3iCtiKtHdPGK0gLsZQZIQZDYdZKZoZD4Hza1h8r6hUspYscKd02w==}
     peerDependencies:
       vue: ^3.5.38
       vue-router: ^5.1.0
@@ -4191,6 +4244,13 @@ packages:
     peerDependencies:
       '@babel/core': ^7.0.0
 
+  backbone-undo@0.2.6:
+    resolution: {integrity: sha512-AsfpNiljLXlk7TcffDUu3EAUq7CxWbyTNwARWrql5XTzN4vh6WzEEBZYaKK4kTTz+iW1tSzqUooaGRIwO83kWA==}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+
+  backbone@1.4.1:
+    resolution: {integrity: sha512-ADy1ztN074YkWbHi8ojJVFe3vAanO/lrzMGZWUClIP7oDD/Pjy2vrASraUP+2EVCfIiTtCW4FChVow01XneivA==}
+
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
 
@@ -4354,6 +4414,12 @@ packages:
   co@4.6.0:
     resolution: {integrity: sha512-QVb0dM5HvG+uaxitm8wONl7jltx8dqhfU33DcqtOZcLSVIKSDDLDi7+0LbAKiyI8hD9u42m2YxXSkMGWThaecQ==}
     engines: {iojs: '>= 1.0.0', node: '>= 0.12.0'}
+
+  codemirror-formatting@1.0.0:
+    resolution: {integrity: sha512-br9yM6eJI3pJHekEnoyHaBEb1B7XxxDjju+vRyBe8QGLp5saTIXXkZ+eFCTqXSAtI8QEZDFVEX2/SOjH2sVWRQ==}
+
+  codemirror@5.63.0:
+    resolution: {integrity: sha512-KlLWRPggDg2rBD1Mx7/EqEhaBdy+ybBCVh/efgjBDsPpMeEu6MbTAJzIT4TuCzvmbTEgvKOGzVT6wdBTNusqrg==}
 
   codemirror@6.0.2:
     resolution: {integrity: sha512-VhydHotNW5w1UGK0Qj96BwSk/Zqbp9WbnyK2W/eVMv4QyF41INRGpjUhFJY7/uDNuudSc33a/PKr4iDqRduvHw==}
@@ -5085,6 +5151,9 @@ packages:
     resolution: {integrity: sha512-rEDCuqUQ4tbD78TpzsMtt5OIf0cBCSDWSJtUDaF6JsAh+k0v9r++NzxNEG87oDZx9ZwGhD8DaezR2L/yrw0Jdw==}
     engines: {node: '>=10'}
 
+  grapesjs@0.23.6:
+    resolution: {integrity: sha512-I8M/sPWjHm6MLIdUtRFNOKsQ3PtDgIDsc2S8ANkJsfHj3ZoH98oNMMWr64Kx22XgjHCQ4xpUx7nvXyQSKV1mrQ==}
+
   graphology-types@0.24.8:
     resolution: {integrity: sha512-hDRKYXa8TsoZHjgEaysSRyPdT6uB78Ci8WnjgbStlQysz7xR52PInxNsmnB7IBOM1BhikxkNyCVEFgmPKnpx3Q==}
 
@@ -5165,6 +5234,9 @@ packages:
 
   hookable@5.5.3:
     resolution: {integrity: sha512-Yc+BQe8SvoXH1643Qez1zqLRmbA5rCL+sSmk6TVos0LWVfNIB7PGncdlId77WzLGSIB5KaWgTaNTs2lNVEI6VQ==}
+
+  html-entities@1.4.0:
+    resolution: {integrity: sha512-8nxjcBcd8wovbeKx7h3wTji4e6+rhaVuPNpMqwWgnHh+N9ToqsCs6XztWRBPQ+UtzsoMAdKZtUENoVzU/EMtZA==}
 
   html-entities@2.6.0:
     resolution: {integrity: sha512-kig+rMn/QOVRvr7c86gQ8lWXq+Hkv6CbAH1hLu+RG338StTpE8Z0b44SDVaqVu7HGKf27frdmUYEs9hTUX/cLQ==}
@@ -5670,13 +5742,13 @@ packages:
     resolution: {integrity: sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==}
     engines: {node: '>= 0.4'}
 
-  md-editor-v3@6.5.3:
-    resolution: {integrity: sha512-hVCgw8OXkGcmAn9jUP+1dg2hOTV1HS8gvmpp3YG7iWZOJ3VjNTUb2U/VCa0TvPK8M/iqLZ7T/Kn9x0Gy6dNuyQ==}
+  md-editor-v3@6.5.6:
+    resolution: {integrity: sha512-bD+xKTpaC9mGDE7W+9x25Y5mEsv21Y735J2Q0dxV+lWQTXH21/sKNdwaUYQ5dhXU2fl+oqrOJsEjSd58FLyNSA==}
     peerDependencies:
       vue: ^3.5.3
 
-  md-editor-v3@6.5.6:
-    resolution: {integrity: sha512-bD+xKTpaC9mGDE7W+9x25Y5mEsv21Y735J2Q0dxV+lWQTXH21/sKNdwaUYQ5dhXU2fl+oqrOJsEjSd58FLyNSA==}
+  md-editor-v3@7.1.0:
+    resolution: {integrity: sha512-+byIdwES9aGEeDDxcxx7LiVX8g31VgwJqETtfFvGjsGuwEAuMeuPZ6vV8/vltNa+SCBrigbwQxLb1R47mxaWfg==}
     peerDependencies:
       vue: ^3.5.3
 
@@ -6213,6 +6285,9 @@ packages:
 
   process-warning@5.1.0:
     resolution: {integrity: sha512-jQSaVHsPgtyw60e1rQ/A+/ArPEj/S8pS/vFnyGa/gYFXrKk/6RuDkoqVDQ5NI5MmS01698ltlAk0NoDBNLujRw==}
+
+  promise-polyfill@8.3.0:
+    resolution: {integrity: sha512-H5oELycFml5yto/atYqmjyigJoAo3+OXwolYiH7OfQuYlAqhxNvTfiNMbV9hsC6Yp83yE5r2KTVmtrG6R9i6Pg==}
 
   promise@8.3.0:
     resolution: {integrity: sha512-rZPNPKTOYVNEEKFaq1HqTgOwZD+4/YHS5ukLzQCypkj+OkYx7iv0mA91lJlpPPZ8vMau3IIGj5Qlwrx+8iiSmg==}
@@ -6838,6 +6913,9 @@ packages:
 
   unconfig@7.5.0:
     resolution: {integrity: sha512-oi8Qy2JV4D3UQ0PsopR28CzdQ3S/5A1zwsUwp/rosSbfhJ5z7b90bIyTwi/F7hCLD4SGcZVjDzd4XoUQcEanvA==}
+
+  underscore@1.13.8:
+    resolution: {integrity: sha512-DXtD3ZtEQzc7M8m4cXotyHR+FAS18C64asBYY5vqZexfYryNNnDc02W4hKg3rdQuqOYas1jkseX0+nZXjTXnvQ==}
 
   undici-types@7.24.6:
     resolution: {integrity: sha512-WRNW+sJgj5OBN4/0JpHFqtqzhpbnV0GuB+OozA9gCL7a993SmU+1JBZCzLNxYsbMfIeDL+lTsphD5jN5N+n0zg==}
@@ -9682,6 +9760,11 @@ snapshots:
     dependencies:
       '@babel/types': 7.29.8
 
+  '@types/backbone@1.4.15':
+    dependencies:
+      '@types/jquery': 4.0.1
+      '@types/underscore': 1.13.0
+
   '@types/chai@5.2.3':
     dependencies:
       '@types/deep-eql': 4.0.2
@@ -9712,6 +9795,8 @@ snapshots:
   '@types/istanbul-reports@3.0.4':
     dependencies:
       '@types/istanbul-lib-report': 3.0.3
+
+  '@types/jquery@4.0.1': {}
 
   '@types/json-schema@7.0.15': {}
 
@@ -9774,7 +9859,11 @@ snapshots:
 
   '@types/tinycolor2@1.4.6': {}
 
+  '@types/underscore@1.13.0': {}
+
   '@types/unist@3.0.3': {}
+
+  '@types/web-bluetooth@0.0.20': {}
 
   '@types/web-bluetooth@0.0.21': {}
 
@@ -9961,6 +10050,8 @@ snapshots:
 
   '@vavt/markdown-theme@5.0.2': {}
 
+  '@vavt/markdown-theme@6.0.1': {}
+
   '@vavt/util@2.1.2': {}
 
   '@vitejs/devtools-kit@0.7.2(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))':
@@ -10038,6 +10129,34 @@ snapshots:
       '@volar/language-core': 2.4.28
       path-browserify: 1.0.1
       vscode-uri: 3.2.0
+
+  '@vue-flow/background@1.3.2(@vue-flow/core@1.48.2(vue@3.5.42(typescript@6.0.3)))(vue@3.5.42(typescript@6.0.3))':
+    dependencies:
+      '@vue-flow/core': 1.48.2(vue@3.5.42(typescript@6.0.3))
+      vue: 3.5.42(typescript@6.0.3)
+
+  '@vue-flow/controls@1.1.3(@vue-flow/core@1.48.2(vue@3.5.42(typescript@6.0.3)))(vue@3.5.42(typescript@6.0.3))':
+    dependencies:
+      '@vue-flow/core': 1.48.2(vue@3.5.42(typescript@6.0.3))
+      vue: 3.5.42(typescript@6.0.3)
+
+  '@vue-flow/core@1.48.2(vue@3.5.42(typescript@6.0.3))':
+    dependencies:
+      '@vueuse/core': 10.11.1(vue@3.5.42(typescript@6.0.3))
+      d3-drag: 3.0.0
+      d3-interpolate: 3.0.1
+      d3-selection: 3.0.0
+      d3-zoom: 3.0.0
+      vue: 3.5.42(typescript@6.0.3)
+    transitivePeerDependencies:
+      - '@vue/composition-api'
+
+  '@vue-flow/minimap@1.5.4(@vue-flow/core@1.48.2(vue@3.5.42(typescript@6.0.3)))(vue@3.5.42(typescript@6.0.3))':
+    dependencies:
+      '@vue-flow/core': 1.48.2(vue@3.5.42(typescript@6.0.3))
+      d3-selection: 3.0.0
+      d3-zoom: 3.0.0
+      vue: 3.5.42(typescript@6.0.3)
 
   '@vue-macros/common@3.1.4(vue@3.5.42(typescript@6.0.3))':
     dependencies:
@@ -10137,6 +10256,16 @@ snapshots:
       '@vueuse/shared': 14.4.0(vue@3.5.42(typescript@6.0.3))
       vue: 3.5.42(typescript@6.0.3)
 
+  '@vueuse/core@10.11.1(vue@3.5.42(typescript@6.0.3))':
+    dependencies:
+      '@types/web-bluetooth': 0.0.20
+      '@vueuse/metadata': 10.11.1
+      '@vueuse/shared': 10.11.1(vue@3.5.42(typescript@6.0.3))
+      vue-demi: 0.14.10(vue@3.5.42(typescript@6.0.3))
+    transitivePeerDependencies:
+      - '@vue/composition-api'
+      - vue
+
   '@vueuse/core@12.8.2(typescript@6.0.3)':
     dependencies:
       '@types/web-bluetooth': 0.0.21
@@ -10153,9 +10282,18 @@ snapshots:
       '@vueuse/shared': 14.4.0(vue@3.5.42(typescript@6.0.3))
       vue: 3.5.42(typescript@6.0.3)
 
+  '@vueuse/metadata@10.11.1': {}
+
   '@vueuse/metadata@12.8.2': {}
 
   '@vueuse/metadata@14.4.0': {}
+
+  '@vueuse/shared@10.11.1(vue@3.5.42(typescript@6.0.3))':
+    dependencies:
+      vue-demi: 0.14.10(vue@3.5.42(typescript@6.0.3))
+    transitivePeerDependencies:
+      - '@vue/composition-api'
+      - vue
 
   '@vueuse/shared@12.8.2(typescript@6.0.3)':
     dependencies:
@@ -10251,15 +10389,28 @@ snapshots:
 
   '@xtuc/long@4.2.2': {}
 
-  '@yudream/components@1.4.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))':
+  '@yudream/components@1.6.0(@vueuse/components@14.4.0(vue@3.5.42(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.42(typescript@6.0.3)))(graphology-types@0.24.8)(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@6.0.3)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))':
     dependencies:
       '@arco-design/web-vue': 2.58.0(vue@3.5.42(typescript@6.0.3))
+      '@codemirror/autocomplete': 6.20.3
+      '@codemirror/commands': 6.11.0
+      '@codemirror/lang-css': 6.3.1
+      '@codemirror/lang-html': 6.4.12
+      '@codemirror/lang-javascript': 6.2.5
+      '@codemirror/lang-json': 6.0.2
+      '@codemirror/language': 6.12.4
+      '@codemirror/state': 6.7.4
+      '@codemirror/view': 6.43.11
       '@iconify/vue': 5.0.1(vue@3.5.42(typescript@6.0.3))
       '@internationalized/date': 3.12.2
       '@lucide/vue': 1.42.0(vue@3.5.42(typescript@6.0.3))
       '@sigma/node-image': 3.0.0(sigma@3.0.3(graphology-types@0.24.8))
       '@tanstack/vue-table': 8.21.3(vue@3.5.42(typescript@6.0.3))
       '@types/qrcode': 1.5.6
+      '@vue-flow/background': 1.3.2(@vue-flow/core@1.48.2(vue@3.5.42(typescript@6.0.3)))(vue@3.5.42(typescript@6.0.3))
+      '@vue-flow/controls': 1.1.3(@vue-flow/core@1.48.2(vue@3.5.42(typescript@6.0.3)))(vue@3.5.42(typescript@6.0.3))
+      '@vue-flow/core': 1.48.2(vue@3.5.42(typescript@6.0.3))
+      '@vue-flow/minimap': 1.5.4(@vue-flow/core@1.48.2(vue@3.5.42(typescript@6.0.3)))(vue@3.5.42(typescript@6.0.3))
       '@vueuse/components': 14.4.0(vue@3.5.42(typescript@6.0.3))
       '@vueuse/core': 14.4.0(vue@3.5.42(typescript@6.0.3))
       axios: 1.20.0
@@ -10268,10 +10419,11 @@ snapshots:
       echarts: 5.5.0
       es-toolkit: 1.52.0
       filesize: 11.0.23
+      grapesjs: 0.23.6
       graphology: 0.26.0(graphology-types@0.24.8)
       highlight.js: 11.12.0
       lucide: 1.55.0
-      md-editor-v3: 6.5.3(vue@3.5.42(typescript@6.0.3))
+      md-editor-v3: 7.1.0(vue@3.5.42(typescript@6.0.3))
       morphicons: 1.7.1(react-native@0.76.6(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(vue@3.5.42(typescript@6.0.3))
       qrcode: 1.5.4
       reka-ui: 2.10.4(vue@3.5.42(typescript@6.0.3))
@@ -10303,7 +10455,7 @@ snapshots:
       echarts: 5.5.0
       vue: 3.5.42(typescript@6.0.3)
 
-  '@yudream/plugin-sdk@1.9.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))':
+  '@yudream/plugin-sdk@1.11.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(@unocss/preset-wind3@66.10.0)(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue-router@5.3.1(@rspack/core@1.7.12(@swc/helpers@0.5.23))(@vue/compiler-sfc@3.5.42)(rolldown@1.2.7)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))(vue@3.5.42(typescript@6.0.3))(webpack@5.111.1))(vue@3.5.42(typescript@6.0.3))':
     dependencies:
       '@iconify/json': 2.2.526
       unocss: 66.10.0(@devframes/hub@0.9.12(crossws@0.4.12(srvx@1.0.5))(devframe@0.9.12(cac@7.0.0)(srvx@1.0.5)))(cac@7.0.0)(crossws@0.4.12(srvx@1.0.5))(rolldown@1.2.7)(srvx@1.0.5)(vite@8.2.2(@types/node@25.9.5)(jiti@2.7.0)(terser@5.51.2))
@@ -10550,6 +10702,15 @@ snapshots:
       babel-plugin-jest-hoist: 29.6.3
       babel-preset-current-node-syntax: 1.2.0(@babel/core@7.29.7)
 
+  backbone-undo@0.2.6:
+    dependencies:
+      backbone: 1.4.1
+      underscore: 1.13.8
+
+  backbone@1.4.1:
+    dependencies:
+      underscore: 1.13.8
+
   balanced-match@1.0.2: {}
 
   base-64@0.1.0: {}
@@ -10709,6 +10870,10 @@ snapshots:
   clsx@2.1.1: {}
 
   co@4.6.0: {}
+
+  codemirror-formatting@1.0.0: {}
+
+  codemirror@5.63.0: {}
 
   codemirror@6.0.2:
     dependencies:
@@ -11426,6 +11591,17 @@ snapshots:
       chalk: 4.1.2
       tinygradient: 1.1.5
 
+  grapesjs@0.23.6:
+    dependencies:
+      '@types/backbone': 1.4.15
+      backbone: 1.4.1
+      backbone-undo: 0.2.6
+      codemirror: 5.63.0
+      codemirror-formatting: 1.0.0
+      html-entities: 1.4.0
+      promise-polyfill: 8.3.0
+      underscore: 1.13.8
+
   graphology-types@0.24.8: {}
 
   graphology-utils@2.5.2(graphology-types@0.24.8):
@@ -11503,6 +11679,8 @@ snapshots:
       parse-passwd: 1.0.0
 
   hookable@5.5.3: {}
+
+  html-entities@1.4.0: {}
 
   html-entities@2.6.0: {}
 
@@ -12073,7 +12251,7 @@ snapshots:
 
   math-intrinsics@1.1.0: {}
 
-  md-editor-v3@6.5.3(vue@3.5.42(typescript@6.0.3)):
+  md-editor-v3@6.5.6(vue@3.5.42(typescript@6.0.3)):
     dependencies:
       '@codemirror/autocomplete': 6.20.3
       '@codemirror/commands': 6.11.0
@@ -12098,7 +12276,7 @@ snapshots:
       vue: 3.5.42(typescript@6.0.3)
       xss: 1.0.15
 
-  md-editor-v3@6.5.6(vue@3.5.42(typescript@6.0.3)):
+  md-editor-v3@7.1.0(vue@3.5.42(typescript@6.0.3)):
     dependencies:
       '@codemirror/autocomplete': 6.20.3
       '@codemirror/commands': 6.11.0
@@ -12112,9 +12290,10 @@ snapshots:
       '@lucide/vue': 1.42.0(vue@3.5.42(typescript@6.0.3))
       '@types/markdown-it': 14.2.0
       '@vavt/copy2clipboard': 1.0.3
-      '@vavt/markdown-theme': 5.0.2
+      '@vavt/markdown-theme': 6.0.1
       '@vavt/util': 2.1.2
       codemirror: 6.0.2
+      json5: 2.2.3
       markdown-it: 14.3.1
       markdown-it-image-figures: 2.1.1(markdown-it@14.3.1)
       markdown-it-sub: 2.0.0
@@ -12707,6 +12886,8 @@ snapshots:
   process-warning@4.0.1: {}
 
   process-warning@5.1.0: {}
+
+  promise-polyfill@8.3.0: {}
 
   promise@8.3.0:
     dependencies:
@@ -13339,6 +13520,8 @@ snapshots:
       jiti: 2.7.0
       quansync: 1.0.0
       unconfig-core: 7.5.0
+
+  underscore@1.13.8: {}
 
   undici-types@7.24.6: {}
 

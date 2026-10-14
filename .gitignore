@@ -21,3 +21,4 @@ yudream-plugins/yudream-plugin-mcguess/tools/.cache/
 # JVM 崩溃转储与本地工具状态，勿入库
 hs_err_pid*.log
 .zcode/
+yudream-frontend/audit-report.json

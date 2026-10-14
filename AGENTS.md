@@ -102,6 +102,8 @@ yudream-frontend/packages/plugin-{code}/
 - 用户 API wrapper 仅调用 `/me/**`，管理员 wrapper 仅调用 `/admin/**`；两者不得共享可混合个人/管理数据的 store/composable cache。
 - 远程包不继承宿主 auto-import。`@yudream/components` 必须显式导入。
 - Vue Web 业务 UI 只使用 `@yudream/components` 公开的 `Yd*` / `useYd*` 入口，经 SDK 宿主共享桥加载。禁止直接使用 `Fa*` / `useFa*`、Arco/TDesign/Reka 等通用 UI 控件或别名，也禁止业务手写通用按钮、输入、选择器、弹层、表格、加载与通知。原生语义内容和纯布局可以保留；代码/Markdown 编辑器、图表、流程画布和可视化构建器必须经有类型的 YD 适配器承载。
+- 宿主与插件已迁移的 Vue Web 规范门禁保持零违规；保留 findings={} 与验收 Git SHA，不得重新放回历史例外。基线只能从明确已提交版本生成。
+- 品牌步骤变量仅可在元数据确认的插件主题资产中声明：唯一 SITE scope 使用 SITE 页面/公开路由锚点，唯一 ADMIN scope 使用 `:root`/`.dark`。变量消费不豁免；未证明隔离的 SITE/ADMIN 双 scope 资产 fail-closed。扫描器从 Java 元数据、入口和构建输出精确定位资产，业务 CSS 不获目录级豁免；详见同步的 `docs/yd-ui-guidelines.md`。
 - 缺少能力时先在宿主共享组件库封装、公开导出、补齐 SDK 共享桥、主题与预览，发布并验签 components/SDK 后再升级本仓 catalog 与 lockfile 消费；不复制宿主源码，不提交本地宿主路径，不伪升未发布版本。禁止只改标签而丢失模型、属性、插槽、事件、实例方法与键盘/焦点能力。
 - 组件选型、三套外观、全状态、动效与维护流程遵循 `docs/yd-ui-guidelines.md`。普通管理使用基础 YD；阶段用 `YdSteps`、顺序异步任务用 `YdMultiStepLoader`、历史用 `YdTimeline`；层级用 `YdTree`、逐级单值用 `YdCascader`、远程分页资源选择用 `YdTablePicker`。少量枚举用 `YdSelect`/`YdRadioGroup`，搜索单选用 `YdCombobox`；多选、异步树与拖拽等需先核对公开契约，缺失就先封装。
 - React Native 移动插件由独立的 `@yudream/plugin-mobile-ui` 适配器承载同类视觉与交互原则，不导入 Vue YD。通用移动能力缺失先扩展共享 mobile UI adapter，不在各页面重复手写。不得以移动适配边界作为 Web 页面继续裸用控件的例外。

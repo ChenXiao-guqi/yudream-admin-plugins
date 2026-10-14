@@ -8,9 +8,12 @@
   },
   "scripts": {
     "build": "pnpm -r --filter=@yudream/plugin-* run build",
-    "watch": "pnpm -r --parallel --filter=@yudream/plugin-* exec vite build --watch"
+    "watch": "pnpm -r --parallel --filter=@yudream/plugin-* exec vite build --watch",
+    "audit:ui": "node scripts/audit-ui.mjs"
   },
   "devDependencies": {
-    "typescript": "^6.0.3"
+    "@yudream/components": "catalog:",
+    "typescript": "^6.0.3",
+    "vue": "catalog:"
   }
 }

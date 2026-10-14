@@ -50,6 +50,7 @@ Add folders only when they carry a clear responsibility. Do not place a complete
 
 - Prefer Composition API with `<script setup lang="ts">`.
 - Vue Web generic controls, forms, overlays, pagination, loading and notifications must come from public `Yd*` / `useYd*` entries in `@yudream/components`; business pages must not hand-build equivalents.
+- After the Vue Web migration reaches zero, retain a findings={} baseline and its accepted Git commit SHA. CI must reject every new finding; generate or shrink baselines only from committed Git revisions, never working-tree changes.
 - Use only released public YD components and composables for Vue Web business UI. Direct Fa/Arco/TDesign/Reka and raw generic interactive controls are forbidden, including aliases. Missing capabilities must be encapsulated in the host YD package, exported through the SDK bridge, published and verified before this repository consumes them; do not fall back in the page.
 - Read repository `docs/yd-ui-guidelines.md` for visual schemes, neutral theme tokens, component selection, motion, states and ongoing maintenance. Specialized editors/engines require typed YD adapters. React Native uses the independent `@yudream/plugin-mobile-ui` adapter rather than importing Vue YD.
 - Keep forms typed, validate before submit, disable duplicate submissions, surface backend errors, and reset transient state when dialogs close.

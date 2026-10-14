@@ -71,6 +71,23 @@ validate:docs:
   script:
     - sh ci/verify-doc-independence.sh
 
+validate:yd-ui:
+  stage: validate
+  image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/node:24.15.0-bookworm
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq --no-install-recommends ripgrep
+    - npm config set registry "$NPM_CONFIG_REGISTRY"
+    - corepack enable && corepack prepare pnpm@11.9.0 --activate
+    - pnpm --dir yudream-frontend install --frozen-lockfile
+  script:
+    - pnpm --dir yudream-frontend exec node --test scripts/ui-source-scanner.test.mjs
+    - sh ci/verify-plugin-development-conformance.sh
+  artifacts:
+    when: always
+    paths:
+      - yudream-frontend/audit-report.json
+    expire_in: 1 week
+
 validate:publish-pipeline:
   stage: validate
   image: alpine:3.20

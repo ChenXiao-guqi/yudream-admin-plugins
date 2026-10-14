@@ -5,6 +5,7 @@
 ## Vue Web 组件边界
 
 - 业务只使用已发布 `@yudream/components` 的公开 `Yd*` / `useYd*`，显式导入并通过 SDK 共享桥消费宿主实例；不继承宿主 auto-import。
+- 宿主与插件已迁移的 Vue Web 规范门禁保持零违规；保留 findings={} 与验收 Git SHA，不得重新放回历史例外。基线只能从明确已提交版本生成。
 - 禁止业务直接使用 Fa、Arco、TDesign、Reka 等通用控件或局部别名，禁止原生通用交互与页面私有加载/通知/选择弹窗。语义内容、真实链接和纯布局元素可以保留；技术引擎必须经 YD adapter。
 - 无组件时先在宿主封装，核对模型、事件、插槽、实例方法、主题与弹层，完成公开导出、SDK 共享桥与预览；components/SDK 发布验签通过后才更新本仓 catalog/lockfile。不得复制宿主代码、依赖本地宿主 workspace 或填写未发布版本。
 - 普通管理使用 `YdPageHeader`/`YdPageMain`、基础表单控件与 `YdResponsiveTable #card`；短编辑/确认用 `YdModal`，上下文详情用 `YdDrawer`，轻量锚点交互用 `YdPopover`，远程分页选人/资源用 `YdTablePicker`，独立长流程使用路由页。

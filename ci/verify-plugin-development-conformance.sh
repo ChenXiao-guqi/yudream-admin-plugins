@@ -3,9 +3,9 @@ set -eu
 
 ROOT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 cd "$ROOT_DIR"
+command -v rg >/dev/null 2>&1 || { echo '[verify-plugin-development-conformance] ripgrep is required' >&2; exit 1; }
 
 failed=0
-
 report_matches() {
   label=$1
   pattern=$2
@@ -21,43 +21,18 @@ report_matches() {
 echo "[verify-plugin-development-conformance] checking shared frontend UI contracts"
 for package_json in yudream-frontend/packages/plugin-*/package.json; do
   [ -f "$package_json" ] || continue
+  # Native React Native UI has a separate adapter contract and does not use Vue components.
+  case "$package_json" in
+    */plugin-mobile-ui/package.json|*/plugin-*-mobile/package.json) continue ;;
+  esac
   if ! grep -q '"@yudream/components"' "$package_json"; then
     echo "[verify-plugin-development-conformance] missing @yudream/components: $package_json" >&2
     failed=1
   fi
 done
 
-report_matches \
-  "management/tabular pages must use FaTable instead of raw HTML tables" \
-  '<table([[:space:]>])' \
-  yudream-frontend/packages -g '*.vue'
-
-report_matches \
-  "plugin forms must use @yudream/components instead of raw HTML controls" \
-  '<(input|select|textarea)([[:space:]>])' \
-  yudream-frontend/packages -g '*.vue'
-
-report_matches \
-  "prefer Fa components when @yudream/components provides an equivalent" \
-  '<a-(table|button|input|input-number|select|textarea|radio|radio-group|checkbox|modal|pagination)([[:space:]>])' \
-  yudream-frontend/packages -g '*.vue'
-
-table_pages=$(rg -l '<FaTable([[:space:]>])' yudream-frontend/packages -g '*.vue' 2>/dev/null || true)
-for table_page in $table_pages; do
-  if ! grep -q 'table-root-class="[^"]*rounded-lg[^"]*overflow-hidden' "$table_page"; then
-    echo "[verify-plugin-development-conformance] FaTable must use the framework management-table container: $table_page" >&2
-    failed=1
-  fi
-done
-
-pagination_pages=$(rg -l '<FaPagination([[:space:]>])' yudream-frontend/packages -g '*.vue' 2>/dev/null || true)
-for pagination_page in $pagination_pages; do
-  pagination_tags=$(sed -n '/<FaPagination/,/\/>/p' "$pagination_page")
-  if ! printf '%s\n' "$pagination_tags" | grep -q 'class="[^"]*mt-3'; then
-    echo "[verify-plugin-development-conformance] FaPagination must be separated from its table with mt-3: $pagination_page" >&2
-    failed=1
-  fi
-done
+node --test yudream-frontend/scripts/brand-token-scanner.test.mjs || failed=1
+node yudream-frontend/scripts/audit-ui.mjs --baseline || failed=1
 
 report_matches \
   "personal HTTP flows must not gain cross-user scope from management permission" \
