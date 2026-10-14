@@ -1,19 +1,20 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { TableColumn } from '@yudream/components'
 import type { NewsArticleView, NewsSourceView, PollStatusView } from '../types'
-import { Tag as ArcoTag } from '@arco-design/web-vue'
-import { FaButton, FaCard, FaIcon, FaInput, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable, FaSearchBar, FaSelect, FaSwitch, FaTag, useFaModal, useFaToast } from '@yudream/components'
+
+import { YdButton, YdCard, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdSelect, YdSwitch, YdTag, useYdModal, useYdToast, YdAction } from '@yudream/components'
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
 import { createMcNewsApi } from '../api/mc-news-api'
 import ClearNewsModal from '../components/ClearNewsModal.vue'
 import PushNewsModal from '../components/PushNewsModal.vue'
-import { errorMessage, nextPollText, PUSH_STATE_META } from '../composables/utils'
+import { errorMessage, nextPollText, PUSH_STATE_META, tagVariant } from '../composables/utils'
 
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 const api = createMcNewsApi(props.sdk)
-const toast = useFaToast()
-const confirm = useFaModal()
+const toast = useYdToast()
+const confirm = useYdModal()
 
 const loading = ref(false)
 const pollBusy = ref(false)
@@ -230,23 +231,23 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <FaPageHeader title="新闻动态" description="已发现的 Minecraft 新闻与版本文章缓存，仅展示最近缓存的条目">
-    <FaButton variant="destructive" :disabled="!canClear" @click="openClear">
-      <FaIcon name="i-ri:delete-bin-line" />清空动态
-    </FaButton>
-    <FaButton :loading="pollDisabled" @click="triggerPoll">
-      <FaIcon name="i-ri:refresh-line" />立即轮询
-    </FaButton>
+  <YdPageHeader title="新闻动态" description="已发现的 Minecraft 新闻与版本文章缓存，仅展示最近缓存的条目">
+    <YdButton variant="destructive" :disabled="!canClear" @click="openClear">
+      <YdIcon name="i-ri:delete-bin-line" />清空动态
+    </YdButton>
+    <YdButton :loading="pollDisabled" @click="triggerPoll">
+      <YdIcon name="i-ri:refresh-line" />立即轮询
+    </YdButton>
     <div class="mc-news-poll-switch" :class="{ 'mc-news-poll-switch-on': pushOnPoll, 'mc-news-poll-switch-disabled': pollDisabled }">
-      <FaSwitch v-model="pushOnPoll" :disabled="pollDisabled" />
-      <span
+      <YdSwitch v-model="pushOnPoll" :disabled="pollDisabled" />
+      <YdAction
         class="mc-news-switch-label"
         :title="pollDisabled ? '轮询进行中，暂不可切换' : pushOnPoll ? '轮询完成后自动推送新内容' : '轮询只回填列表，本次不推送'"
         @click="togglePushOnPoll"
-      >轮询后推送</span>
+      >轮询后推送</YdAction>
     </div>
-  </FaPageHeader>
-  <FaPageMain>
+  </YdPageHeader>
+  <YdPageMain>
     <ClearNewsModal
       v-model:open="clearOpen"
       :sdk="props.sdk"
@@ -268,15 +269,15 @@ onUnmounted(() => {
       <span v-if="ignoredCount > 0" class="mc-news-status-warn">忽略名单：{{ ignoredCount }} 条（被删除的新闻不再推送）</span>
       <span v-if="seenCount > 0" class="mc-news-status-muted">去重记录：{{ seenCount }} 条（标题 + 链接指纹，重复内容不再推送）</span>
       <span v-if="pendingCount > 0" class="mc-news-status-muted">未送达待补推：{{ pendingCount }} 条（下轮轮询自动重试）</span>
-      <FaButton v-if="ignoredCount > 0" size="sm" variant="outline" :loading="clearingIgnored" @click="confirmClearIgnored">
+      <YdButton v-if="ignoredCount > 0" size="sm" variant="outline" :loading="clearingIgnored" @click="confirmClearIgnored">
         清空忽略名单
-      </FaButton>
-      <ArcoTag v-if="pollStatus?.polling" color="arcoblue">轮询进行中</ArcoTag>
-      <ArcoTag v-else-if="pollStatus && !pollStatus.enabled" color="gray">已暂停</ArcoTag>
+      </YdButton>
+      <YdTag v-if="pollStatus?.polling" variant="default">轮询进行中</YdTag>
+      <YdTag v-else-if="pollStatus && !pollStatus.enabled" variant="outline">已暂停</YdTag>
     </div>
 
-    <FaResponsiveTable
-      v-loading="loading"
+    <YdLoadingOverlay :loading="loading"><YdResponsiveTable
+
       :columns="columns"
       :data="rows"
       row-key="id"
@@ -288,9 +289,9 @@ onUnmounted(() => {
       empty-text="暂无新闻，点击右上角立即轮询或等待定时轮询"
     >
       <template #toolbar>
-        <FaSearchBar class="w-full">
+        <YdSearchBar class="w-full">
           <div class="mc-news-toolbar">
-            <FaInput
+            <YdInput
               v-model="filters.keyword"
               class="mc-news-filter-input"
               placeholder="搜索标题、摘要或 AI 正文"
@@ -298,12 +299,12 @@ onUnmounted(() => {
               @keydown.enter="applyFilters"
               @clear="applyFilters"
             />
-            <FaSelect v-model="filters.sourceId" class="mc-news-filter-select" :options="sourceOptions" @change="applyFilters" />
-            <FaButton variant="outline" @click="applyFilters">
-              <FaIcon name="i-ri:search-line" />查询
-            </FaButton>
+            <YdSelect v-model="filters.sourceId" class="mc-news-filter-select" :options="sourceOptions" @change="applyFilters" />
+            <YdButton variant="outline" @click="applyFilters">
+              <YdIcon name="i-ri:search-line" />查询
+            </YdButton>
           </div>
-        </FaSearchBar>
+        </YdSearchBar>
       </template>
       <template #cell-title="{ row }">
         <div class="mc-news-title-cell">
@@ -313,20 +314,20 @@ onUnmounted(() => {
         </div>
       </template>
       <template #cell-pushState="{ row }">
-        <FaTag :color="stateMeta(row.original.pushState).color">{{ stateMeta(row.original.pushState).label }}</FaTag>
+        <YdTag :variant="tagVariant(stateMeta(row.original.pushState).color)">{{ stateMeta(row.original.pushState).label }}</YdTag>
       </template>
       <template #cell-operation="{ row }">
         <div class="flex-center gap-2">
-          <FaButton size="sm" variant="outline" @click="openPush(row.original)">推送</FaButton>
-          <FaButton size="sm" variant="destructive" :loading="deletingId === row.original.id" @click="confirmDelete(row.original)">删除</FaButton>
+          <YdButton size="sm" variant="outline" @click="openPush(row.original)">推送</YdButton>
+          <YdButton size="sm" variant="destructive" :loading="deletingId === row.original.id" @click="confirmDelete(row.original)">删除</YdButton>
         </div>
       </template>
       <template #card="{ row }">
-        <FaCard class="w-full">
+        <YdCard class="w-full">
           <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between gap-2">
               <a class="mc-news-link min-w-0 break-words text-base font-semibold" :href="row.url" target="_blank" rel="noopener">{{ row.title }}</a>
-              <FaTag :color="stateMeta(row.pushState).color">{{ stateMeta(row.pushState).label }}</FaTag>
+              <YdTag :variant="tagVariant(stateMeta(row.pushState).color)">{{ stateMeta(row.pushState).label }}</YdTag>
             </div>
             <div class="flex flex-col gap-1 text-sm">
               <div class="flex gap-2">
@@ -347,15 +348,15 @@ onUnmounted(() => {
               </div>
             </div>
             <div class="flex flex-wrap gap-2 border-t pt-3">
-              <FaButton size="sm" variant="outline" @click="openPush(row)">推送</FaButton>
-              <FaButton size="sm" variant="destructive" :loading="deletingId === row.id" @click="confirmDelete(row)">删除</FaButton>
+              <YdButton size="sm" variant="outline" @click="openPush(row)">推送</YdButton>
+              <YdButton size="sm" variant="destructive" :loading="deletingId === row.id" @click="confirmDelete(row)">删除</YdButton>
             </div>
           </div>
-        </FaCard>
+        </YdCard>
       </template>
-    </FaResponsiveTable>
+    </YdResponsiveTable></YdLoadingOverlay>
 
-    <FaPagination
+    <YdPagination
       v-model:page="pager.page"
       v-model:size="pager.size"
       :total="pager.total"
@@ -363,5 +364,5 @@ onUnmounted(() => {
       @page-change="onPageChange"
       @size-change="onSizeChange"
     />
-  </FaPageMain>
+  </YdPageMain>
 </template>

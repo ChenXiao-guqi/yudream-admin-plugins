@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { FaButton, FaCheckbox, FaModal, useFaToast } from '@yudream/components'
+import { YdButton, YdCheckbox, YdModal, useYdToast } from '@yudream/components'
 import { computed, ref, watch } from 'vue'
 import { createMcNewsApi } from '../api/mc-news-api'
 import { errorMessage } from '../composables/utils'
@@ -22,7 +22,7 @@ const emit = defineEmits<{
 }>()
 
 const api = createMcNewsApi(props.sdk)
-const toast = useFaToast()
+const toast = useYdToast()
 const clearing = ref(false)
 /** 同时清空轮询缓存（默认否） */
 const clearCache = ref(false)
@@ -83,7 +83,7 @@ async function submit() {
 </script>
 
 <template>
-  <FaModal
+  <YdModal
     v-model="modalOpen"
     class="mc-news-clear-modal"
     title="清空动态"
@@ -97,9 +97,9 @@ async function submit() {
       </p>
 
       <div class="mc-news-clear-option">
-        <FaCheckbox v-model="clearCache" :disabled="clearing">
+        <YdCheckbox v-model="clearCache" :disabled="clearing">
           同时清空轮询缓存
-        </FaCheckbox>
+        </YdCheckbox>
         <span class="mc-news-form-hint">
           当前缓存：{{ cacheSummary }}。勾选后这些缓存一并清空（去重记录、未送达队列），
           源里现存内容会被视为新内容；忽略名单不受影响，被删除过的新闻不会回来。
@@ -107,9 +107,9 @@ async function submit() {
       </div>
 
       <div class="mc-news-clear-option" :class="{ 'mc-news-clear-option-muted': !clearCache }">
-        <FaCheckbox v-model="pushOnNextPoll" :disabled="clearing || !clearCache">
+        <YdCheckbox v-model="pushOnNextPoll" :disabled="clearing || !clearCache">
           下次轮询重新推送现有内容
-        </FaCheckbox>
+        </YdCheckbox>
         <span class="mc-news-form-hint">
           不勾（默认）＝下次轮询只回填列表、重建去重记录，一条都不推送；
           勾选＝把源里现有内容重新推送一轮。
@@ -117,12 +117,12 @@ async function submit() {
       </div>
     </div>
     <template #footer>
-      <FaButton variant="outline" :disabled="clearing" @click="modalOpen = false">
+      <YdButton variant="outline" :disabled="clearing" @click="modalOpen = false">
         取消
-      </FaButton>
-      <FaButton variant="destructive" :loading="clearing" @click="submit">
+      </YdButton>
+      <YdButton variant="destructive" :loading="clearing" @click="submit">
         确认清空
-      </FaButton>
+      </YdButton>
     </template>
-  </FaModal>
+  </YdModal>
 </template>

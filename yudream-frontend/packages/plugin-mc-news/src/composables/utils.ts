@@ -22,6 +22,13 @@ export const PUSH_STATE_META: Record<string, { label: string, color: string }> =
   '': { label: '待推送', color: 'arcoblue' },
 }
 
+export function tagVariant(color: string): 'default' | 'destructive' | 'outline' | 'secondary' {
+  if (color === 'red') return 'destructive'
+  if (color === 'gray') return 'outline'
+  if (color === 'orangered') return 'secondary'
+  return 'default'
+}
+
 export const LOG_MODE_META: Record<string, { label: string, color: string }> = {
   poll: { label: '定时轮询', color: 'arcoblue' },
   manual: { label: '手动轮询', color: 'orangered' },

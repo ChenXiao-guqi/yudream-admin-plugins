@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { PushTargetPayload, PushTargetType, PushTargetView, WebhookHeader } from '../types'
-import { Select as ArcoSelect } from '@arco-design/web-vue'
-import { FaButton, FaIcon, FaInput, FaModal, FaSwitch, useFaToast } from '@yudream/components'
+
+import { YdButton, YdIcon, YdInput, YdModal, YdSwitch, useYdToast } from '@yudream/components'
 import { computed, reactive, ref, watch } from 'vue'
 import { createMcNewsApi } from '../api/mc-news-api'
 import { errorMessage } from '../composables/utils'
@@ -18,7 +18,7 @@ const emit = defineEmits<{
 }>()
 
 const api = createMcNewsApi(props.sdk)
-const toast = useFaToast()
+const toast = useYdToast()
 const saving = ref(false)
 
 const modalOpen = computed({
@@ -40,6 +40,8 @@ const form = reactive({
 
 const connections = ref<{ id: string, name: string, platform: string }[]>([])
 const groups = ref<{ id: string, name: string }[]>([])
+const connectionOptions = computed(() => connections.value.map(connection => ({ label: `${connection.name}（${connection.platform}）`, value: connection.id })))
+const groupOptions = computed(() => groups.value.map(group => ({ label: group.name, value: group.id })))
 
 watch(() => props.open, async (open) => {
   if (!open)
@@ -142,22 +144,22 @@ async function save() {
 </script>
 
 <template>
-  <FaModal v-model="modalOpen" :title="props.target ? '编辑推送目标' : '新增推送目标'" :show-confirm-button="false" :close-on-click-overlay="false">
+  <YdModal v-model="modalOpen" :title="props.target ? '编辑推送目标' : '新增推送目标'" :show-confirm-button="false" :close-on-click-overlay="false">
     <div class="mc-news-form">
       <div class="mc-news-form-row">
         <div class="mc-news-form-item">
           <span class="mc-news-form-label">名称</span>
-          <FaInput v-model="form.name" placeholder="如：MC 交流群" />
+          <YdInput v-model="form.name" placeholder="如：MC 交流群" />
         </div>
         <div class="mc-news-form-item">
           <span class="mc-news-form-label">类型</span>
           <div class="mc-news-toolbar">
-            <FaButton :variant="form.type === 'messaging' ? 'secondary' : 'outline'" @click="form.type = 'messaging'">
+            <YdButton :variant="form.type === 'messaging' ? 'secondary' : 'outline'" @click="form.type = 'messaging'">
               机器人群聊
-            </FaButton>
-            <FaButton :variant="form.type === 'webhook' ? 'secondary' : 'outline'" @click="form.type = 'webhook'">
+            </YdButton>
+            <YdButton :variant="form.type === 'webhook' ? 'secondary' : 'outline'" @click="form.type = 'webhook'">
               Webhook
-            </FaButton>
+            </YdButton>
           </div>
         </div>
       </div>
@@ -166,36 +168,16 @@ async function save() {
         <div class="mc-news-form-row mc-news-form-row-2">
           <div class="mc-news-form-item">
             <span class="mc-news-form-label">消息连接</span>
-            <ArcoSelect
-              :model-value="form.connectionId"
-              placeholder="选择机器人连接"
-              allow-clear
-              @change="(value: unknown) => onConnectionChange(String(value ?? ''))"
-            >
-              <ArcoSelect.Option v-for="connection in connections" :key="connection.id" :value="connection.id">
-                {{ connection.name }}（{{ connection.platform }}）
-              </ArcoSelect.Option>
-            </ArcoSelect>
+            <YdCombobox :model-value="form.connectionId || undefined" :options="connectionOptions" placeholder="选择机器人连接" clearable @change="(value: string | number | undefined) => onConnectionChange(String(value ?? ''))" />
           </div>
           <div class="mc-news-form-item">
             <span class="mc-news-form-label">群聊</span>
-            <ArcoSelect
-              :model-value="form.channelId"
-              placeholder="选择群聊"
-              allow-search
-              allow-clear
-              :disabled="!form.connectionId"
-              @change="(value: unknown) => onGroupChange(String(value ?? ''))"
-            >
-              <ArcoSelect.Option v-for="group in groups" :key="group.id" :value="group.id">
-                {{ group.name }}
-              </ArcoSelect.Option>
-            </ArcoSelect>
+            <YdCombobox :model-value="form.channelId || undefined" :options="groupOptions" placeholder="选择群聊" clearable :disabled="!form.connectionId" @change="(value: string | number | undefined) => onGroupChange(String(value ?? ''))" />
           </div>
         </div>
         <div class="mc-news-form-item">
           <span class="mc-news-form-label">Markdown 渲染</span>
-          <FaSwitch v-model="form.markdown" />
+          <YdSwitch v-model="form.markdown" />
           <span class="mc-news-form-hint">官方 QQ 机器人协议支持 Markdown；其他协议建议关闭，按纯文本发送。</span>
         </div>
       </template>
@@ -203,36 +185,36 @@ async function save() {
       <template v-else>
         <div class="mc-news-form-item">
           <span class="mc-news-form-label">Webhook 地址</span>
-          <FaInput v-model="form.webhookUrl" placeholder="https://..." />
+          <YdInput v-model="form.webhookUrl" placeholder="https://..." />
           <span class="mc-news-form-hint">POST JSON 载荷：title / content / body / sourceName / category / url / imageUrl / timestamp 等。</span>
         </div>
         <div class="mc-news-form-item">
           <div class="mc-news-toolbar">
             <span class="mc-news-form-label">自定义 Header</span>
-            <FaButton size="sm" variant="outline" @click="addHeader">
-              <FaIcon name="i-ri:add-line" />添加 Header
-            </FaButton>
+            <YdButton size="sm" variant="outline" @click="addHeader">
+              <YdIcon name="i-ri:add-line" />添加 Header
+            </YdButton>
           </div>
           <div v-for="(header, index) in form.headers" :key="index" class="mc-news-toolbar">
-            <FaInput :model-value="header.key" class="mc-news-grow" placeholder="Header 名，如 Authorization" @update:model-value="(value?: string) => updateHeader(index, { key: value ?? '' })" />
-            <FaInput :model-value="header.value" class="mc-news-grow" placeholder="Header 值" @update:model-value="(value?: string) => updateHeader(index, { value: value ?? '' })" />
-            <FaButton size="sm" variant="destructive" @click="removeHeader(index)">移除</FaButton>
+            <YdInput :model-value="header.key" class="mc-news-grow" placeholder="Header 名，如 Authorization" @update:model-value="(value?: string) => updateHeader(index, { key: value ?? '' })" />
+            <YdInput :model-value="header.value" class="mc-news-grow" placeholder="Header 值" @update:model-value="(value?: string) => updateHeader(index, { value: value ?? '' })" />
+            <YdButton size="sm" variant="destructive" @click="removeHeader(index)">移除</YdButton>
           </div>
         </div>
       </template>
 
       <div class="mc-news-form-item">
         <span class="mc-news-form-label">启用</span>
-        <FaSwitch v-model="form.enabled" />
+        <YdSwitch v-model="form.enabled" />
       </div>
     </div>
     <template #footer>
-      <FaButton variant="outline" :disabled="saving" @click="modalOpen = false">
+      <YdButton variant="outline" :disabled="saving" @click="modalOpen = false">
         取消
-      </FaButton>
-      <FaButton :loading="saving" @click="save">
+      </YdButton>
+      <YdButton :loading="saving" @click="save">
         保存
-      </FaButton>
+      </YdButton>
     </template>
-  </FaModal>
+  </YdModal>
 </template>

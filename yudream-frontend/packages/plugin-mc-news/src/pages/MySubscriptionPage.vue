@@ -1,16 +1,17 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { TableColumn } from '@yudream/components'
 import type { MySubscriptionView, PushTargetView, WebhookHeader } from '../types'
-import { FaButton, FaCard, FaIcon, FaInput, FaModal, FaPageHeader, FaPageMain, FaResponsiveTable, FaSwitch, FaTag, useFaModal, useFaToast } from '@yudream/components'
+import { YdButton, YdCard, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdResponsiveTable, YdSwitch, YdTag, useYdModal, useYdToast } from '@yudream/components'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { createMcNewsApi } from '../api/mc-news-api'
 import { errorMessage } from '../composables/utils'
 
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 const api = createMcNewsApi(props.sdk)
-const toast = useFaToast()
-const confirm = useFaModal()
+const toast = useYdToast()
+const confirm = useYdModal()
 
 const loading = ref(false)
 const view = ref<MySubscriptionView | null>(null)
@@ -179,20 +180,20 @@ onMounted(() => {
 </script>
 
 <template>
-  <FaPageHeader title="我的新闻订阅" description="订阅 Minecraft 新闻：绑定私信推送或配置个人 Webhook" />
-  <FaPageMain>
-    <div v-loading="loading" class="mc-news-form">
+  <YdPageHeader title="我的新闻订阅" description="订阅 Minecraft 新闻：绑定私信推送或配置个人 Webhook" />
+  <YdPageMain>
+    <YdLoadingOverlay :loading="loading"><div  class="mc-news-form">
       <div class="mc-news-form-item">
         <div class="mc-news-toolbar">
           <span class="mc-news-form-label">私信推送</span>
-          <FaSwitch
+          <YdSwitch
             :model-value="view?.directEnabled ?? false"
             :disabled="directBusy"
             @update:model-value="(value?: boolean) => toggleDirect(value === true)"
           />
-          <FaButton size="sm" variant="outline" :loading="testingId === 'direct'" @click="testDirect">
+          <YdButton size="sm" variant="outline" :loading="testingId === 'direct'" @click="testDirect">
             发送测试私信
-          </FaButton>
+          </YdButton>
         </div>
         <span class="mc-news-form-hint">开启后，每条新新闻都会通过平台消息绑定（如 QQ 绑定）私信发送给你。</span>
       </div>
@@ -201,11 +202,11 @@ onMounted(() => {
         <div class="mc-news-toolbar">
           <span class="mc-news-form-label">我的 Webhook（{{ view?.webhooks.length ?? 0 }}/{{ view?.maxWebhooks ?? 5 }}）</span>
           <span style="flex: 1" />
-          <FaButton :disabled="!canAddMore" @click="openCreate">
-            <FaIcon name="i-ri:add-line" />新增 Webhook
-          </FaButton>
+          <YdButton :disabled="!canAddMore" @click="openCreate">
+            <YdIcon name="i-ri:add-line" />新增 Webhook
+          </YdButton>
         </div>
-        <FaResponsiveTable
+        <YdResponsiveTable
           :columns="columns"
           :data="view?.webhooks ?? []"
           row-key="id"
@@ -219,21 +220,21 @@ onMounted(() => {
             <span class="mc-news-url" :title="row.original.webhookUrl">{{ row.original.webhookUrl || '-' }}</span>
           </template>
           <template #cell-enabled="{ row }">
-            <FaTag :color="row.original.enabled ? 'green' : 'gray'">{{ row.original.enabled ? '启用' : '停用' }}</FaTag>
+            <YdTag :color="row.original.enabled ? 'green' : 'gray'">{{ row.original.enabled ? '启用' : '停用' }}</YdTag>
           </template>
           <template #cell-operation="{ row }">
             <div class="flex-center gap-2">
-              <FaButton size="sm" variant="outline" :loading="testingId === row.original.id" @click="testWebhook(row.original)">测试</FaButton>
-              <FaButton size="sm" variant="outline" @click="openEdit(row.original)">编辑</FaButton>
-              <FaButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</FaButton>
+              <YdButton size="sm" variant="outline" :loading="testingId === row.original.id" @click="testWebhook(row.original)">测试</YdButton>
+              <YdButton size="sm" variant="outline" @click="openEdit(row.original)">编辑</YdButton>
+              <YdButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</YdButton>
             </div>
           </template>
           <template #card="{ row }">
-            <FaCard class="w-full">
+            <YdCard class="w-full">
               <div class="flex flex-col gap-3">
                 <div class="flex items-center justify-between gap-2">
                   <span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span>
-                  <FaTag :color="row.enabled ? 'green' : 'gray'">{{ row.enabled ? '启用' : '停用' }}</FaTag>
+                  <YdTag :color="row.enabled ? 'green' : 'gray'">{{ row.enabled ? '启用' : '停用' }}</YdTag>
                 </div>
                 <div class="flex flex-col gap-1 text-sm">
                   <div class="flex gap-2">
@@ -242,54 +243,54 @@ onMounted(() => {
                   </div>
                 </div>
                 <div class="flex flex-wrap gap-2 border-t pt-3">
-                  <FaButton size="sm" variant="outline" :loading="testingId === row.id" @click="testWebhook(row)">测试</FaButton>
-                  <FaButton size="sm" variant="outline" @click="openEdit(row)">编辑</FaButton>
-                  <FaButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</FaButton>
+                  <YdButton size="sm" variant="outline" :loading="testingId === row.id" @click="testWebhook(row)">测试</YdButton>
+                  <YdButton size="sm" variant="outline" @click="openEdit(row)">编辑</YdButton>
+                  <YdButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</YdButton>
                 </div>
               </div>
-            </FaCard>
+            </YdCard>
           </template>
-        </FaResponsiveTable>
+        </YdResponsiveTable>
       </div>
-    </div>
+    </div></YdLoadingOverlay>
 
-    <FaModal v-model="editorOpen" :title="editing ? '编辑 Webhook' : '新增 Webhook'" :show-confirm-button="false" :close-on-click-overlay="false">
+    <YdModal v-model="editorOpen" :title="editing ? '编辑 Webhook' : '新增 Webhook'" :show-confirm-button="false" :close-on-click-overlay="false">
       <div class="mc-news-form">
         <div class="mc-news-form-item">
           <span class="mc-news-form-label">名称</span>
-          <FaInput v-model="webhookForm.name" placeholder="如：我的频道通知" />
+          <YdInput v-model="webhookForm.name" placeholder="如：我的频道通知" />
         </div>
         <div class="mc-news-form-item">
           <span class="mc-news-form-label">Webhook 地址</span>
-          <FaInput v-model="webhookForm.url" placeholder="https://..." />
+          <YdInput v-model="webhookForm.url" placeholder="https://..." />
           <span class="mc-news-form-hint">新新闻时会 POST JSON：title / content / body / sourceName / category / url / timestamp 等。</span>
         </div>
         <div class="mc-news-form-item">
           <div class="mc-news-toolbar">
             <span class="mc-news-form-label">自定义 Header</span>
-            <FaButton size="sm" variant="outline" @click="addHeader">
-              <FaIcon name="i-ri:add-line" />添加
-            </FaButton>
+            <YdButton size="sm" variant="outline" @click="addHeader">
+              <YdIcon name="i-ri:add-line" />添加
+            </YdButton>
           </div>
           <div v-for="(header, index) in webhookForm.headers" :key="index" class="mc-news-toolbar">
-            <FaInput :model-value="header.key" class="mc-news-grow" placeholder="Header 名" @update:model-value="(value?: string) => updateHeader(index, { key: value ?? '' })" />
-            <FaInput :model-value="header.value" class="mc-news-grow" placeholder="Header 值" @update:model-value="(value?: string) => updateHeader(index, { value: value ?? '' })" />
-            <FaButton size="sm" variant="destructive" @click="removeHeader(index)">移除</FaButton>
+            <YdInput :model-value="header.key" class="mc-news-grow" placeholder="Header 名" @update:model-value="(value?: string) => updateHeader(index, { key: value ?? '' })" />
+            <YdInput :model-value="header.value" class="mc-news-grow" placeholder="Header 值" @update:model-value="(value?: string) => updateHeader(index, { value: value ?? '' })" />
+            <YdButton size="sm" variant="destructive" @click="removeHeader(index)">移除</YdButton>
           </div>
         </div>
         <div class="mc-news-form-item">
           <span class="mc-news-form-label">启用</span>
-          <FaSwitch v-model="webhookForm.enabled" />
+          <YdSwitch v-model="webhookForm.enabled" />
         </div>
       </div>
       <template #footer>
-        <FaButton variant="outline" :disabled="saving" @click="editorOpen = false">
+        <YdButton variant="outline" :disabled="saving" @click="editorOpen = false">
           取消
-        </FaButton>
-        <FaButton :loading="saving" @click="saveWebhook">
+        </YdButton>
+        <YdButton :loading="saving" @click="saveWebhook">
           保存
-        </FaButton>
+        </YdButton>
       </template>
-    </FaModal>
-  </FaPageMain>
+    </YdModal>
+  </YdPageMain>
 </template>

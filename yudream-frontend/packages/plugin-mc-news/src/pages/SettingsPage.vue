@@ -1,16 +1,16 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginAiProviderOption, YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { McNewsSettingsView, PollStatusView, TemplateMeta, TemplateVariable } from '../types'
-import { Select as ArcoSelect, Tag as ArcoTag } from '@arco-design/web-vue'
 import { MdPreview } from 'md-editor-v3'
-import { FaButton, FaIcon, FaNumberField, FaPageHeader, FaPageMain, FaSwitch, FaTextarea, useFaToast } from '@yudream/components'
+import { YdButton, YdIcon, YdNumberField, YdPageHeader, YdPageMain, YdSwitch, YdTextarea, YdCombobox, useYdToast, YdAction } from '@yudream/components'
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import { createMcNewsApi } from '../api/mc-news-api'
 import { errorMessage, nextPollText } from '../composables/utils'
 
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 const api = createMcNewsApi(props.sdk)
-const toast = useFaToast()
+const toast = useYdToast()
 
 const loading = ref(false)
 const saving = ref(false)
@@ -209,40 +209,40 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <FaPageHeader title="推送设置" description="轮询节奏、AI 整合与推送消息模板">
-    <FaButton :loading="saving" @click="save">
-      <FaIcon name="i-ri:save-3-line" />保存设置
-    </FaButton>
-  </FaPageHeader>
-  <FaPageMain>
-    <div v-loading="loading" class="mc-news-form">
+  <YdPageHeader title="推送设置" description="轮询节奏、AI 整合与推送消息模板">
+    <YdButton :loading="saving" @click="save">
+      <YdIcon name="i-ri:save-3-line" />保存设置
+    </YdButton>
+  </YdPageHeader>
+  <YdPageMain>
+    <YdLoadingOverlay :loading="loading"><div  class="mc-news-form">
       <div class="mc-news-poll-status">
         <span>上次轮询：{{ pollStatus?.lastPollAtLabel || '尚未轮询' }}</span>
         <span v-if="pollStatus?.lastPollSummary">{{ pollStatus.lastPollSummary }}</span>
         <span>下次轮询：{{ nextPollText(pollStatus, remainSeconds) || '加载中' }}</span>
-        <ArcoTag v-if="pollStatus?.polling" color="arcoblue">轮询进行中</ArcoTag>
-        <ArcoTag v-else-if="pollStatus && !pollStatus.enabled" color="gray">已暂停</ArcoTag>
+        <YdTag v-if="pollStatus?.polling" variant="default">轮询进行中</YdTag>
+        <YdTag v-else-if="pollStatus && !pollStatus.enabled" variant="outline">已暂停</YdTag>
       </div>
 
       <div class="mc-news-form-row">
         <div class="mc-news-form-item">
           <span class="mc-news-form-label">定时轮询</span>
-          <FaSwitch v-model="form.enabled" />
+          <YdSwitch v-model="form.enabled" />
           <span class="mc-news-form-hint">关闭后暂停自动轮询，手动轮询仍可用。</span>
         </div>
         <div class="mc-news-form-item">
           <span class="mc-news-form-label">轮询间隔（分钟）</span>
-          <FaNumberField v-model="form.pollIntervalMinutes" :min="5" :max="1440" />
+          <YdNumberField v-model="form.pollIntervalMinutes" :min="5" :max="1440" />
           <span class="mc-news-form-hint">最小 5 分钟，修改后下一轮生效。</span>
         </div>
         <div class="mc-news-form-item">
           <span class="mc-news-form-label">新闻缓存条数</span>
-          <FaNumberField v-model="form.cacheSize" :min="5" :max="200" />
+          <YdNumberField v-model="form.cacheSize" :min="5" :max="200" />
           <span class="mc-news-form-hint">缓存最近 N 条已见新闻用于对比，超出自动淘汰。</span>
         </div>
         <div class="mc-news-form-item">
           <span class="mc-news-form-label">首次运行即推送</span>
-          <FaSwitch v-model="form.pushOnFirstPoll" />
+          <YdSwitch v-model="form.pushOnFirstPoll" />
           <span class="mc-news-form-hint">默认首次运行只建立缓存基线不推送，避免刚启用即轰炸群聊。</span>
         </div>
       </div>
@@ -250,44 +250,38 @@ onUnmounted(() => {
       <div class="mc-news-form-row">
         <div class="mc-news-form-item">
           <span class="mc-news-form-label">AI 整合</span>
-          <FaSwitch v-model="form.aiEnabled" />
+          <YdSwitch v-model="form.aiEnabled" />
           <span class="mc-news-form-hint">抓取文章正文，让推送保留修复项、变更点等具体信息；AI 不可用时回退官方摘要。</span>
         </div>
         <div class="mc-news-form-item">
           <span class="mc-news-form-label">AI 供应商</span>
-          <ArcoSelect
+          <YdCombobox
             :model-value="form.aiProviderCode || undefined"
+            :options="providerOptions"
             placeholder="留空走宿主默认"
-            allow-clear
-            allow-search
+            clearable
             allow-create
-            @change="(value: unknown) => onProviderChange(typeof value === 'string' ? value : '')"
-          >
-            <ArcoSelect.Option v-for="option in providerOptions" :key="option.value" :value="option.value">
-              {{ option.label }}
-            </ArcoSelect.Option>
-          </ArcoSelect>
+            @change="value => onProviderChange(typeof value === 'string' ? value : '')"
+            @create="onProviderChange"
+           />
           <span class="mc-news-form-hint">选项来自宿主 AI 配置，也可手动输入编码。</span>
         </div>
         <div class="mc-news-form-item">
           <span class="mc-news-form-label">AI 模型</span>
-          <ArcoSelect
+          <YdCombobox
             :model-value="form.aiModelCode || undefined"
+            :options="modelOptions"
             placeholder="留空走宿主默认"
-            allow-clear
-            allow-search
+            clearable
             allow-create
-            @change="(value: unknown) => (form.aiModelCode = String(value ?? ''))"
-          >
-            <ArcoSelect.Option v-for="option in modelOptions" :key="option.value" :value="option.value">
-              {{ option.label }}
-            </ArcoSelect.Option>
-          </ArcoSelect>
+            @change="value => (form.aiModelCode = String(value ?? ''))"
+            @create="value => (form.aiModelCode = value)"
+           />
           <span class="mc-news-form-hint">按所选供应商联动；未选供应商时列出全部模型。</span>
         </div>
         <div class="mc-news-form-item">
           <span class="mc-news-form-label">单轮 AI 整合条数上限</span>
-          <FaNumberField v-model="form.aiMaxItems" :min="0" :max="50" />
+          <YdNumberField v-model="form.aiMaxItems" :min="0" :max="50" />
           <span class="mc-news-form-hint">超出部分直接使用官方摘要，控制 AI 消耗。</span>
         </div>
       </div>
@@ -295,7 +289,7 @@ onUnmounted(() => {
       <div class="mc-news-form-row">
         <div class="mc-news-form-item">
           <span class="mc-news-form-label">正文截取长度（字符）</span>
-          <FaNumberField v-model="form.aiContentMaxChars" :min="500" :max="20000" />
+          <YdNumberField v-model="form.aiContentMaxChars" :min="500" :max="20000" />
           <span class="mc-news-form-hint">AI 整合时抓取的文章正文上限，越长保留的细节越多，默认 6000。</span>
         </div>
       </div>
@@ -303,11 +297,11 @@ onUnmounted(() => {
       <div class="mc-news-form-item">
         <div class="mc-news-toolbar">
           <span class="mc-news-form-label">AI 系统提示词</span>
-          <FaButton size="sm" variant="outline" @click="resetPrompt">
+          <YdButton size="sm" variant="outline" @click="resetPrompt">
             恢复默认
-          </FaButton>
+          </YdButton>
         </div>
-        <FaTextarea v-model="form.aiSystemPrompt" :auto-size="{ minRows: 3, maxRows: 8 }" placeholder="内置默认提示词" />
+        <YdTextarea v-model="form.aiSystemPrompt" :auto-size="{ minRows: 3, maxRows: 8 }" placeholder="内置默认提示词" />
         <span class="mc-news-form-hint">当前显示内置默认提示词，可直接修改；与默认完全一致时保存后仍跟随内置默认。</span>
       </div>
 
@@ -315,23 +309,23 @@ onUnmounted(() => {
         <div class="mc-news-toolbar">
           <span class="mc-news-form-label">推送消息模板</span>
           <span style="flex: 1" />
-          <FaButton size="sm" variant="outline" @click="refreshPreview">
+          <YdButton size="sm" variant="outline" @click="refreshPreview">
             预览
-          </FaButton>
-          <FaButton size="sm" variant="outline" @click="resetTemplate">
+          </YdButton>
+          <YdButton size="sm" variant="outline" @click="resetTemplate">
             恢复默认模板
-          </FaButton>
+          </YdButton>
         </div>
-        <FaTextarea v-model="form.messageTemplate" :auto-size="{ minRows: 5, maxRows: 12 }" placeholder="内置默认模板" />
+        <YdTextarea v-model="form.messageTemplate" :auto-size="{ minRows: 5, maxRows: 12 }" placeholder="内置默认模板" />
         <span class="mc-news-form-hint">当前显示内置默认模板，可直接修改；与默认完全一致时保存后仍跟随内置默认。点击参量插入：</span>
         <div class="mc-news-variables">
-          <span
+          <YdAction
             v-for="variable in variableList()"
             :key="variable.name"
             class="mc-news-variable-chip"
             :title="variable.description"
             @click="insertVariable(variable.name)"
-          >{{ variable.name }}</span>
+          >{{ variable.name }}</YdAction>
         </div>
       </div>
 
@@ -348,7 +342,7 @@ onUnmounted(() => {
         </div>
         <span class="mc-news-form-hint">群聊推送使用 Markdown 渲染时，QQ 官方机器人将呈现与预览一致的标题、引用与链接效果；纯文本协议则按原文发送。</span>
       </div>
-    </div>
-  </FaPageMain>
+    </div></YdLoadingOverlay>
+  </YdPageMain>
 </template>
 

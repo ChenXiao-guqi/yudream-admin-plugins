@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { TableColumn } from '@yudream/components'
 import type { PushTargetView } from '../types'
-import { FaButton, FaCard, FaIcon, FaPageHeader, FaPageMain, FaResponsiveTable, FaSwitch, FaTag, useFaModal, useFaToast } from '@yudream/components'
+import { YdButton, YdCard, YdIcon, YdPageHeader, YdPageMain, YdResponsiveTable, YdSwitch, YdTag, useYdModal, useYdToast } from '@yudream/components'
 import { onMounted, ref } from 'vue'
 import { createMcNewsApi } from '../api/mc-news-api'
 import { errorMessage } from '../composables/utils'
@@ -10,8 +11,8 @@ import TargetEditorModal from '../components/TargetEditorModal.vue'
 
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 const api = createMcNewsApi(props.sdk)
-const toast = useFaToast()
-const confirm = useFaModal()
+const toast = useYdToast()
+const confirm = useYdModal()
 
 const loading = ref(false)
 const testingId = ref('')
@@ -109,14 +110,14 @@ onMounted(() => {
 </script>
 
 <template>
-  <FaPageHeader title="推送目标" description="配置新新闻的推送目的地：机器人群聊或通用 Webhook">
-    <FaButton @click="openCreate">
-      <FaIcon name="i-ri:add-line" />新增目标
-    </FaButton>
-  </FaPageHeader>
-  <FaPageMain>
-    <FaResponsiveTable
-      v-loading="loading"
+  <YdPageHeader title="推送目标" description="配置新新闻的推送目的地：机器人群聊或通用 Webhook">
+    <YdButton @click="openCreate">
+      <YdIcon name="i-ri:add-line" />新增目标
+    </YdButton>
+  </YdPageHeader>
+  <YdPageMain>
+    <YdLoadingOverlay :loading="loading"><YdResponsiveTable
+
       :columns="columns"
       :data="rows"
       row-key="id"
@@ -128,15 +129,15 @@ onMounted(() => {
       empty-text="暂无推送目标，点击右上角新增"
     >
       <template #cell-type="{ row }">
-        <FaTag :color="row.original.type === 'messaging' ? 'arcoblue' : 'green'">
+        <YdTag :variant="row.original.type === 'messaging' ? 'default' : 'secondary'">
           {{ row.original.type === 'messaging' ? '机器人群聊' : 'Webhook' }}
-        </FaTag>
+        </YdTag>
       </template>
       <template #cell-target="{ row }">
         <span class="mc-news-url" :title="targetLabel(row.original)">{{ targetLabel(row.original) || '-' }}</span>
       </template>
       <template #cell-enabled="{ row }">
-        <FaSwitch :model-value="row.original.enabled" @update:model-value="(value?: boolean) => toggleEnabled(row.original, value === true)" />
+        <YdSwitch :model-value="row.original.enabled" @update:model-value="(value?: boolean) => toggleEnabled(row.original, value === true)" />
       </template>
       <template #cell-markdown="{ row }">
         <span v-if="row.original.type === 'messaging'">{{ row.original.markdown ? '开' : '关' }}</span>
@@ -144,21 +145,21 @@ onMounted(() => {
       </template>
       <template #cell-operation="{ row }">
         <div class="flex-center gap-2">
-          <FaButton size="sm" variant="outline" :loading="testingId === row.original.id" @click="test(row.original)">测试</FaButton>
-          <FaButton size="sm" variant="outline" @click="openEdit(row.original)">编辑</FaButton>
-          <FaButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</FaButton>
+          <YdButton size="sm" variant="outline" :loading="testingId === row.original.id" @click="test(row.original)">测试</YdButton>
+          <YdButton size="sm" variant="outline" @click="openEdit(row.original)">编辑</YdButton>
+          <YdButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</YdButton>
         </div>
       </template>
       <template #card="{ row }">
-        <FaCard class="w-full">
+        <YdCard class="w-full">
           <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between gap-2">
               <span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span>
               <div class="flex shrink-0 items-center gap-2">
-                <FaTag :color="row.type === 'messaging' ? 'arcoblue' : 'green'">
+                <YdTag :variant="row.type === 'messaging' ? 'default' : 'secondary'">
                   {{ row.type === 'messaging' ? '机器人群聊' : 'Webhook' }}
-                </FaTag>
-                <FaSwitch :model-value="row.enabled" @update:model-value="(value?: boolean) => toggleEnabled(row, value === true)" />
+                </YdTag>
+                <YdSwitch :model-value="row.enabled" @update:model-value="(value?: boolean) => toggleEnabled(row, value === true)" />
               </div>
             </div>
             <div class="flex flex-col gap-1 text-sm">
@@ -172,15 +173,15 @@ onMounted(() => {
               </div>
             </div>
             <div class="flex flex-wrap gap-2 border-t pt-3">
-              <FaButton size="sm" variant="outline" :loading="testingId === row.id" @click="test(row)">测试</FaButton>
-              <FaButton size="sm" variant="outline" @click="openEdit(row)">编辑</FaButton>
-              <FaButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</FaButton>
+              <YdButton size="sm" variant="outline" :loading="testingId === row.id" @click="test(row)">测试</YdButton>
+              <YdButton size="sm" variant="outline" @click="openEdit(row)">编辑</YdButton>
+              <YdButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</YdButton>
             </div>
           </div>
-        </FaCard>
+        </YdCard>
       </template>
-    </FaResponsiveTable>
+    </YdResponsiveTable></YdLoadingOverlay>
 
     <TargetEditorModal v-model:open="editorOpen" :sdk="props.sdk" :target="editing" @saved="load" />
-  </FaPageMain>
+  </YdPageMain>
 </template>

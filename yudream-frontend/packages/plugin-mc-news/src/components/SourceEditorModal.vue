@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { KeywordRuleCheck, KeywordRuleDraft } from '../composables/utils'
 import type { NewsSourcePayload, NewsSourceView, NewsSourceType } from '../types'
-import { FaButton, FaIcon, FaInput, FaModal, FaSelect, FaSwitch, useFaToast } from '@yudream/components'
+import { YdButton, YdIcon, YdInput, YdModal, YdSelect, YdSwitch, useYdToast, YdAction } from '@yudream/components'
 import { computed, reactive, ref, watch } from 'vue'
 import { createMcNewsApi } from '../api/mc-news-api'
 import {
@@ -36,7 +36,7 @@ interface KeywordRow extends KeywordRuleDraft {
 }
 
 const api = createMcNewsApi(props.sdk)
-const toast = useFaToast()
+const toast = useYdToast()
 const saving = ref(false)
 const showHelp = ref(false)
 
@@ -154,38 +154,38 @@ async function save() {
 </script>
 
 <template>
-  <FaModal v-model="modalOpen" class="mc-news-source-modal" :title="props.source ? '编辑新闻源' : '新增新闻源'" :show-confirm-button="false" :close-on-click-overlay="false">
+  <YdModal v-model="modalOpen" class="mc-news-source-modal" :title="props.source ? '编辑新闻源' : '新增新闻源'" :show-confirm-button="false" :close-on-click-overlay="false">
     <div class="mc-news-form">
       <div class="mc-news-form-item">
         <span class="mc-news-form-label">名称</span>
-        <FaInput v-model="form.name" placeholder="如：Minecraft 官网新闻" />
+        <YdInput v-model="form.name" placeholder="如：Minecraft 官网新闻" />
       </div>
       <div class="mc-news-form-item">
         <span class="mc-news-form-label">类型</span>
         <div class="mc-news-toolbar">
-          <FaButton
+          <YdButton
             v-for="option in SOURCE_TYPE_OPTIONS"
             :key="option.value"
             :variant="form.type === option.value ? 'secondary' : 'outline'"
             @click="form.type = option.value as NewsSourceType"
           >
             {{ option.label }}
-          </FaButton>
+          </YdButton>
         </div>
         <span class="mc-news-form-hint">mcnet 解析 minecraft.net 文章列表 JSON；zendesk 解析 Minecraft 反馈隧道帮助中心文章 API。</span>
       </div>
       <div class="mc-news-form-item">
         <span class="mc-news-form-label">地址</span>
-        <FaInput v-model="form.url" placeholder="https://..." />
+        <YdInput v-model="form.url" placeholder="https://..." />
       </div>
 
       <div class="mc-news-form-item">
         <div class="mc-news-toolbar">
           <span class="mc-news-form-label">关键词规则（可选）</span>
           <span style="flex: 1" />
-          <FaButton size="sm" variant="outline" :disabled="saving" @click="clearRules">
+          <YdButton size="sm" variant="outline" :disabled="saving" @click="clearRules">
             全部清空
-          </FaButton>
+          </YdButton>
         </div>
         <span class="mc-news-form-hint">
           每格填一个关键词，不用懂正则：默认「标题或摘要里出现这几个字就收录」。一格都不填就是全部收录，不过滤。
@@ -199,20 +199,20 @@ async function save() {
             :class="{ 'mc-news-rule-card-error': !checkOf(index).ok }"
           >
             <div class="mc-news-rule-head">
-              <FaInput v-model="row.pattern" class="mc-news-rule-input" :placeholder="placeholderFor(row)" />
-              <FaButton size="sm" variant="outline" :disabled="saving" @click="removeRule(index)">
+              <YdInput v-model="row.pattern" class="mc-news-rule-input" :placeholder="placeholderFor(row)" />
+              <YdButton size="sm" variant="outline" :disabled="saving" @click="removeRule(index)">
                 删除
-              </FaButton>
+              </YdButton>
             </div>
             <div class="mc-news-rule-ctrl">
-              <FaSelect v-model="row.action" class="mc-news-rule-action" :options="KEYWORD_ACTION_OPTIONS" />
+              <YdSelect v-model="row.action" class="mc-news-rule-action" :options="KEYWORD_ACTION_OPTIONS" />
               <span class="mc-news-form-hint">在</span>
-              <FaSelect v-model="row.scope" class="mc-news-rule-scope" :options="KEYWORD_SCOPE_OPTIONS" />
+              <YdSelect v-model="row.scope" class="mc-news-rule-scope" :options="KEYWORD_SCOPE_OPTIONS" />
               <span class="mc-news-form-hint">里</span>
-              <FaSelect v-model="row.mode" class="mc-news-rule-mode" :options="KEYWORD_MODE_OPTIONS" />
+              <YdSelect v-model="row.mode" class="mc-news-rule-mode" :options="KEYWORD_MODE_OPTIONS" />
               <template v-if="row.mode === 'regex'">
                 <span class="mc-news-form-hint">标志</span>
-                <FaInput v-model="row.flags" class="mc-news-rule-flags" placeholder="留空" />
+                <YdInput v-model="row.flags" class="mc-news-rule-flags" placeholder="留空" />
               </template>
             </div>
             <div
@@ -230,17 +230,17 @@ async function save() {
         </div>
 
         <div class="mc-news-toolbar">
-          <FaButton size="sm" variant="outline" :disabled="saving || rules.length >= MAX_KEYWORD_RULES" @click="addRule()">
-            <FaIcon name="i-ri:add-line" />添加一格
-          </FaButton>
+          <YdButton size="sm" variant="outline" :disabled="saving || rules.length >= MAX_KEYWORD_RULES" @click="addRule()">
+            <YdIcon name="i-ri:add-line" />添加一格
+          </YdButton>
           <span class="mc-news-form-hint">常用规则：</span>
-          <span
+          <YdAction
             v-for="preset in KEYWORD_PRESETS"
             :key="preset.label"
             class="mc-news-variable-chip"
             :title="`${preset.description}｜点击添加一格`"
             @click="addRule(preset.draft)"
-          >{{ preset.label }}</span>
+          >{{ preset.label }}</YdAction>
         </div>
 
         <div v-if="ruleSummary" class="mc-news-keyword-summary" :class="{ 'mc-news-keyword-summary-error': invalidCount > 0 }">
@@ -248,9 +248,9 @@ async function save() {
           <template v-if="invalidCount">· <strong>{{ invalidCount }} 格填写有误</strong></template>
         </div>
 
-        <span class="mc-news-rule-helptoggle" @click="showHelp = !showHelp">
+        <YdAction class="mc-news-rule-helptoggle" @click="showHelp = !showHelp">
           {{ showHelp ? '收起写法说明' : '「通配符」「正则」是什么？保存后为什么会变成 title: / re: 这样的文字？' }}
-        </span>
+        </YdAction>
         <div v-if="showHelp" class="mc-news-rule-help">
           <p>三个下拉就是这条规则的全部设置，保存后拼成一行文字存在新闻源上，所以列表里会看到 <code>title:re:^Version</code> 这类写法：</p>
           <p>
@@ -265,16 +265,16 @@ async function save() {
 
       <div class="mc-news-form-item">
         <span class="mc-news-form-label">启用</span>
-        <FaSwitch v-model="form.enabled" />
+        <YdSwitch v-model="form.enabled" />
       </div>
     </div>
     <template #footer>
-      <FaButton variant="outline" :disabled="saving" @click="modalOpen = false">
+      <YdButton variant="outline" :disabled="saving" @click="modalOpen = false">
         取消
-      </FaButton>
-      <FaButton :loading="saving" :disabled="invalidCount > 0" @click="save">
+      </YdButton>
+      <YdButton :loading="saving" :disabled="invalidCount > 0" @click="save">
         保存
-      </FaButton>
+      </YdButton>
     </template>
-  </FaModal>
+  </YdModal>
 </template>

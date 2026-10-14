@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { NewsArticleView, PushLogResult, PushTargetOption } from '../types'
-import { FaButton, FaCheckbox, FaCheckboxGroup, FaModal, FaTag, useFaToast } from '@yudream/components'
+import { YdButton, YdCheckbox, YdCheckboxGroup, YdModal, YdTag, useYdToast } from '@yudream/components'
 import { computed, ref, watch } from 'vue'
 import { createMcNewsApi } from '../api/mc-news-api'
 import { errorMessage, PUSH_STATE_META } from '../composables/utils'
@@ -19,7 +19,7 @@ const emit = defineEmits<{
 }>()
 
 const api = createMcNewsApi(props.sdk)
-const toast = useFaToast()
+const toast = useYdToast()
 const pushing = ref(false)
 const loadingTargets = ref(false)
 /** 可推送目标（已按端点去重）与私信订阅人数，弹窗打开时实时拉取 */
@@ -124,7 +124,7 @@ async function submit() {
 </script>
 
 <template>
-  <FaModal
+  <YdModal
     v-model="modalOpen"
     class="mc-news-push-modal"
     title="手动推送"
@@ -135,7 +135,7 @@ async function submit() {
       <div class="mc-news-push-intro">
         <div class="mc-news-push-head">
           <span class="mc-news-push-title" :title="props.article?.title">{{ props.article?.title }}</span>
-          <FaTag variant="secondary">{{ stateMeta.label }}</FaTag>
+          <YdTag variant="secondary">{{ stateMeta.label }}</YdTag>
         </div>
         <p class="mc-news-form-hint">推送结果写回本条状态，不计为新内容，去重记录与列表顺序不变。</p>
       </div>
@@ -145,9 +145,9 @@ async function submit() {
           <span>推送目标</span>
           <span class="mc-news-target-actions-side">
             <span v-if="mergedTotal > 0" class="mc-news-form-hint">同一端点已合并 {{ mergedTotal }} 个目标</span>
-            <FaButton size="sm" variant="outline" :disabled="pushing || loadingTargets || !targets.length" @click="toggleAll">
+            <YdButton size="sm" variant="outline" :disabled="pushing || loadingTargets || !targets.length" @click="toggleAll">
               {{ allSelected ? '全不选' : '全选' }}
-            </FaButton>
+            </YdButton>
           </span>
         </div>
         <div v-if="loadingTargets" class="mc-news-form-hint">
@@ -157,27 +157,27 @@ async function submit() {
           没有启用的推送目标，请先到「推送目标」启用。
         </div>
         <div v-else class="mc-news-target-picker">
-          <FaCheckboxGroup v-model="selected" :options="targetOptions" :disabled="pushing" />
+          <YdCheckboxGroup v-model="selected" :options="targetOptions" :disabled="pushing" />
         </div>
         <span class="mc-news-form-hint">未勾选的目标本次不会收到；自动推送不受影响。</span>
       </div>
 
       <div class="mc-news-clear-option" :class="{ 'mc-news-clear-option-muted': subscribers <= 0 }">
-        <FaCheckbox v-model="includeSubscribers" :disabled="pushing || subscribers <= 0">
+        <YdCheckbox v-model="includeSubscribers" :disabled="pushing || subscribers <= 0">
           同时发送给私信订阅用户
-        </FaCheckbox>
+        </YdCheckbox>
         <span class="mc-news-form-hint">
           {{ subscribers > 0 ? `${subscribers} 人已开启私信订阅` : '暂无用户开启私信订阅' }}
         </span>
       </div>
     </div>
     <template #footer>
-      <FaButton variant="outline" :disabled="pushing" @click="modalOpen = false">
+      <YdButton variant="outline" :disabled="pushing" @click="modalOpen = false">
         取消
-      </FaButton>
-      <FaButton :disabled="!canSubmit" :loading="pushing" @click="submit">
+      </YdButton>
+      <YdButton :disabled="!canSubmit" :loading="pushing" @click="submit">
         确认推送
-      </FaButton>
+      </YdButton>
     </template>
-  </FaModal>
+  </YdModal>
 </template>

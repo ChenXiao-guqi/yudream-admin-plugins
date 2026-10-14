@@ -1,15 +1,16 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { TableColumn } from '@yudream/components'
 import type { PushLogView } from '../types'
-import { FaButton, FaCard, FaDrawer, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable, FaTag, useFaToast } from '@yudream/components'
+import { YdButton, YdCard, YdDrawer, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdTag, useYdToast } from '@yudream/components'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { createMcNewsApi } from '../api/mc-news-api'
-import { errorMessage, LOG_MODE_META } from '../composables/utils'
+import { errorMessage, LOG_MODE_META, tagVariant } from '../composables/utils'
 
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 const api = createMcNewsApi(props.sdk)
-const toast = useFaToast()
+const toast = useYdToast()
 
 const loading = ref(false)
 const rows = ref<PushLogView[]>([])
@@ -67,10 +68,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <FaPageHeader title="推送记录" description="每条新新闻的推送明细：目标、成功与失败原因" />
-  <FaPageMain>
-    <FaResponsiveTable
-      v-loading="loading"
+  <YdPageHeader title="推送记录" description="每条新新闻的推送明细：目标、成功与失败原因" />
+  <YdPageMain>
+    <YdLoadingOverlay :loading="loading"><YdResponsiveTable
+
       :columns="columns"
       :data="rows"
       row-key="id"
@@ -82,27 +83,27 @@ onMounted(() => {
       empty-text="暂无推送记录"
     >
       <template #cell-mode="{ row }">
-        <FaTag :color="modeMeta(row.original.mode).color">{{ modeMeta(row.original.mode).label }}</FaTag>
+        <YdTag :variant="tagVariant(modeMeta(row.original.mode).color)">{{ modeMeta(row.original.mode).label }}</YdTag>
       </template>
       <template #cell-title="{ row }">
         <a v-if="row.original.url" class="mc-news-link" :href="row.original.url" target="_blank" rel="noopener">{{ row.original.title }}</a>
         <span v-else>{{ row.original.title }}</span>
       </template>
       <template #cell-result="{ row }">
-        <FaTag :color="row.original.okCount > 0 ? 'green' : 'red'">{{ row.original.okCount }}/{{ row.original.total }}</FaTag>
+        <YdTag :variant="row.original.okCount > 0 ? 'default' : 'destructive'">{{ row.original.okCount }}/{{ row.original.total }}</YdTag>
       </template>
       <template #cell-operation="{ row }">
         <div class="flex-center gap-2">
-          <FaButton size="sm" variant="outline" @click="openDetail(row.original)">详情</FaButton>
+          <YdButton size="sm" variant="outline" @click="openDetail(row.original)">详情</YdButton>
         </div>
       </template>
       <template #card="{ row }">
-        <FaCard class="w-full">
+        <YdCard class="w-full">
           <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between gap-2">
               <a v-if="row.url" class="mc-news-link min-w-0 break-words text-base font-semibold" :href="row.url" target="_blank" rel="noopener">{{ row.title }}</a>
               <span v-else class="min-w-0 break-words text-base font-semibold">{{ row.title }}</span>
-              <FaTag :color="modeMeta(row.mode).color">{{ modeMeta(row.mode).label }}</FaTag>
+              <YdTag :variant="tagVariant(modeMeta(row.mode).color)">{{ modeMeta(row.mode).label }}</YdTag>
             </div>
             <div class="flex flex-col gap-1 text-sm">
               <div class="flex gap-2">
@@ -115,18 +116,18 @@ onMounted(() => {
               </div>
               <div class="flex gap-2">
                 <span class="shrink-0 text-secondary-foreground/60">结果</span>
-                <FaTag :color="row.okCount > 0 ? 'green' : 'red'">{{ row.okCount }}/{{ row.total }}</FaTag>
+                <YdTag :variant="row.okCount > 0 ? 'default' : 'destructive'">{{ row.okCount }}/{{ row.total }}</YdTag>
               </div>
             </div>
             <div class="flex flex-wrap gap-2 border-t pt-3">
-              <FaButton size="sm" variant="outline" @click="openDetail(row)">详情</FaButton>
+              <YdButton size="sm" variant="outline" @click="openDetail(row)">详情</YdButton>
             </div>
           </div>
-        </FaCard>
+        </YdCard>
       </template>
-    </FaResponsiveTable>
+    </YdResponsiveTable></YdLoadingOverlay>
 
-    <FaPagination
+    <YdPagination
       v-model:page="pager.page"
       v-model:size="pager.size"
       :total="pager.total"
@@ -135,7 +136,7 @@ onMounted(() => {
       @size-change="onSizeChange"
     />
 
-    <FaDrawer v-model="detailOpen" title="推送明细" side="right" :show-confirm-button="false" :footer="false" content-class="mc-news-drawer-body">
+    <YdDrawer v-model="detailOpen" title="推送明细" side="right" :show-confirm-button="false" :footer="false" content-class="mc-news-drawer-body">
       <div v-if="detail" class="mc-news-form">
         <div class="mc-news-form-item">
           <span class="mc-news-form-label">{{ detail.title }}</span>
@@ -143,7 +144,7 @@ onMounted(() => {
         </div>
         <div class="mc-news-result-list">
           <div v-for="result in detailResults" :key="result.targetId" class="mc-news-result-row">
-            <FaTag :color="result.ok ? 'green' : 'red'">{{ result.ok ? '成功' : '失败' }}</FaTag>
+            <YdTag :variant="result.ok ? 'default' : 'destructive'">{{ result.ok ? '成功' : '失败' }}</YdTag>
             <span>{{ result.targetName }}</span>
             <span class="mc-news-form-hint">{{ result.targetType }}</span>
             <span v-if="result.error" class="mc-news-form-hint">{{ result.error }}</span>
@@ -151,6 +152,6 @@ onMounted(() => {
           <span v-if="!detailResults.length" class="mc-news-form-hint">无推送目标</span>
         </div>
       </div>
-    </FaDrawer>
-  </FaPageMain>
+    </YdDrawer>
+  </YdPageMain>
 </template>

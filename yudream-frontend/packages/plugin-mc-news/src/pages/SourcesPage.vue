@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { TableColumn } from '@yudream/components'
 import type { NewsSourceView } from '../types'
-import { Tooltip as ArcoTooltip } from '@arco-design/web-vue'
-import { FaButton, FaCard, FaIcon, FaPageHeader, FaPageMain, FaResponsiveTable, FaSwitch, FaTag, useFaModal, useFaToast } from '@yudream/components'
+
+import { YdButton, YdCard, YdIcon, YdPageHeader, YdPageMain, YdResponsiveTable, YdSwitch, YdTag, YdTooltip, useYdModal, useYdToast } from '@yudream/components'
 import { onMounted, ref } from 'vue'
 import { createMcNewsApi } from '../api/mc-news-api'
 import { checkKeywordDraft, describeKeywordDraft, errorMessage, parseKeywordDraft, SOURCE_TYPE_OPTIONS } from '../composables/utils'
@@ -11,8 +12,8 @@ import SourceEditorModal from '../components/SourceEditorModal.vue'
 
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 const api = createMcNewsApi(props.sdk)
-const toast = useFaToast()
-const confirm = useFaModal()
+const toast = useYdToast()
+const confirm = useYdModal()
 
 const loading = ref(false)
 const rows = ref<NewsSourceView[]>([])
@@ -155,14 +156,14 @@ onMounted(() => {
 </script>
 
 <template>
-  <FaPageHeader title="新闻源" description="维护轮询的新闻来源：官网新闻 JSON 与反馈隧道文章 API；可用关键词规则筛选（包含这几个字 / 通配符 / 正则，支持排除）">
-    <FaButton @click="openCreate">
-      <FaIcon name="i-ri:add-line" />新增源
-    </FaButton>
-  </FaPageHeader>
-  <FaPageMain>
-    <FaResponsiveTable
-      v-loading="loading"
+  <YdPageHeader title="新闻源" description="维护轮询的新闻来源：官网新闻 JSON 与反馈隧道文章 API；可用关键词规则筛选（包含这几个字 / 通配符 / 正则，支持排除）">
+    <YdButton @click="openCreate">
+      <YdIcon name="i-ri:add-line" />新增源
+    </YdButton>
+  </YdPageHeader>
+  <YdPageMain>
+    <YdLoadingOverlay :loading="loading"><YdResponsiveTable
+
       :columns="columns"
       :data="rows"
       row-key="id"
@@ -174,7 +175,7 @@ onMounted(() => {
       empty-text="暂无新闻源"
     >
       <template #cell-type="{ row }">
-        <FaTag>{{ typeLabel(row.original.type) }}</FaTag>
+        <YdTag>{{ typeLabel(row.original.type) }}</YdTag>
       </template>
       <template #cell-url="{ row }">
         <span class="mc-news-url" :title="row.original.url">{{ row.original.url }}</span>
@@ -192,29 +193,29 @@ onMounted(() => {
         </div>
       </template>
       <template #cell-enabled="{ row }">
-        <FaSwitch :model-value="row.original.enabled" @update:model-value="(value?: boolean) => toggleEnabled(row.original, value === true)" />
+        <YdSwitch :model-value="row.original.enabled" @update:model-value="(value?: boolean) => toggleEnabled(row.original, value === true)" />
       </template>
       <template #cell-operation="{ row }">
         <div class="flex-center gap-2">
-          <FaButton size="sm" variant="outline" :loading="testingId === row.original.id" @click="test(row.original)">测试</FaButton>
-          <FaButton size="sm" variant="outline" @click="openEdit(row.original)">编辑</FaButton>
-          <FaButton v-if="!row.original.builtin" size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</FaButton>
-          <ArcoTooltip v-else content="内置源不可删除，可停用">
-            <FaButton size="sm" variant="outline" disabled>删除</FaButton>
-          </ArcoTooltip>
+          <YdButton size="sm" variant="outline" :loading="testingId === row.original.id" @click="test(row.original)">测试</YdButton>
+          <YdButton size="sm" variant="outline" @click="openEdit(row.original)">编辑</YdButton>
+          <YdButton v-if="!row.original.builtin" size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</YdButton>
+          <YdTooltip v-else text="内置源不可删除，可停用">
+            <YdButton size="sm" variant="outline" disabled>删除</YdButton>
+          </YdTooltip>
         </div>
       </template>
       <template #card="{ row }">
-        <FaCard class="w-full">
+        <YdCard class="w-full">
           <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between gap-2">
               <span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span>
-              <FaSwitch :model-value="row.enabled" @update:model-value="(value?: boolean) => toggleEnabled(row, value === true)" />
+              <YdSwitch :model-value="row.enabled" @update:model-value="(value?: boolean) => toggleEnabled(row, value === true)" />
             </div>
             <div class="flex flex-col gap-1 text-sm">
               <div class="flex gap-2">
                 <span class="shrink-0 text-secondary-foreground/60">类型</span>
-                <span><FaTag>{{ typeLabel(row.type) }}</FaTag></span>
+                <span><YdTag>{{ typeLabel(row.type) }}</YdTag></span>
               </div>
               <div class="flex gap-2">
                 <span class="shrink-0 text-secondary-foreground/60">地址</span>
@@ -239,19 +240,19 @@ onMounted(() => {
               </div>
             </div>
             <div class="flex flex-wrap gap-2 border-t pt-3">
-              <FaButton size="sm" variant="outline" :loading="testingId === row.id" @click="test(row)">测试</FaButton>
-              <FaButton size="sm" variant="outline" @click="openEdit(row)">编辑</FaButton>
-              <FaButton v-if="!row.builtin" size="sm" variant="destructive" @click="confirmDelete(row)">删除</FaButton>
-              <ArcoTooltip v-else content="内置源不可删除，可停用">
-                <FaButton size="sm" variant="outline" disabled>删除</FaButton>
-              </ArcoTooltip>
+              <YdButton size="sm" variant="outline" :loading="testingId === row.id" @click="test(row)">测试</YdButton>
+              <YdButton size="sm" variant="outline" @click="openEdit(row)">编辑</YdButton>
+              <YdButton v-if="!row.builtin" size="sm" variant="destructive" @click="confirmDelete(row)">删除</YdButton>
+              <YdTooltip v-else text="内置源不可删除，可停用">
+                <YdButton size="sm" variant="outline" disabled>删除</YdButton>
+              </YdTooltip>
             </div>
           </div>
-        </FaCard>
+        </YdCard>
       </template>
-    </FaResponsiveTable>
+    </YdResponsiveTable></YdLoadingOverlay>
 
     <SourceEditorModal v-model:open="editorOpen" :sdk="props.sdk" :source="editing" @saved="load" />
-  </FaPageMain>
+  </YdPageMain>
 </template>
 
