@@ -78,6 +78,12 @@ validate:yd-ui:
     - apt-get update -qq && apt-get install -y -qq --no-install-recommends git ripgrep
     - npm config set registry "$NPM_CONFIG_REGISTRY"
     - corepack enable && corepack prepare pnpm@11.9.0 --activate
+    # .npmrc 被 gitignore（本机可能含凭据），CI 安装前须自写 @yudream scope 映射：
+    # components/sdk 等私有包只发布在 Nexus npm-public，默认 npmmirror 会 404
+    - |
+      printf '%s\n' \
+        "registry=$NPM_CONFIG_REGISTRY" \
+        "@yudream:registry=$NEXUS_NPM_PUBLIC_URL" > yudream-frontend/.npmrc
     - pnpm --dir yudream-frontend install --frozen-lockfile
   script:
     - pnpm --dir yudream-frontend exec node --test scripts/ui-source-scanner.test.mjs
