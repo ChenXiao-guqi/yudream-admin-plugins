@@ -1,1 +1,13 @@
+yudream-plugin-forum
+yudream-plugin-mcpanel
 yudream-plugin-wallet
+yudream-plugin-mc-wiki
+yudream-plugin-minecraft-server
+yudream-plugin-project-progress
+yudream-plugin-questionbank
+yudream-plugin-shop
+yudream-plugin-timeline
+yudream-plugin-world-map
+yudream-plugin-neco-pixel
+yudream-plugin-mc-pet
+yudream-plugin-yudream-skin
