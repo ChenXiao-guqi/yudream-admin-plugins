@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { WikiRecipe } from '../types'
-import { FaIcon } from '@yudream/components'
+import { YdIcon } from '@yudream/components'
 import { computed } from 'vue'
 import WikiIcon from './WikiIcon.vue'
 import { fallbackRecipeCells, parseRecipeCells, plainIngredientId, type RecipeCell } from '../utils/recipeCells'
@@ -55,7 +55,7 @@ function displayCells(): RecipeCell[] {
         </span>
       </div>
     </template>
-    <FaIcon name="i-ri:arrow-right-line" class="mc-wiki-craft-arrow" />
+    <YdIcon name="i-ri:arrow-right-line" class="mc-wiki-craft-arrow" />
     <span class="mc-wiki-craft-cell mc-wiki-craft-result">
       <WikiIcon :src="recipe.resultId ? iconUrl(recipe.resultId) : null" :label="recipe.resultId" :size="32" />
       <span v-if="recipe.resultCount > 1" class="mc-wiki-craft-count">{{ recipe.resultCount }}</span>

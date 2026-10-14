@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { McWikiApi } from '../api/mc-wiki-api'
 import type { WikiItemDetail, WikiItemTextures, WikiRecipe } from '../types'
-import { FaButton, FaDrawer, FaIcon, FaInput, FaTag } from '@yudream/components'
+import { YdButton, YdDrawer, YdIcon, YdInput, YdTag, YdAction } from '@yudream/components'
 import { computed, ref, watch } from 'vue'
 import { itemDisplayName, recipeTypeLabel } from '../types'
 import WikiIcon from './WikiIcon.vue'
@@ -83,8 +84,8 @@ function downloadName(): string {
 </script>
 
 <template>
-  <FaDrawer :model-value="modelValue" :title="itemName || '物品详情'" side="right" :show-confirm-button="false" :footer="false" :content-class="drawerClass" @update:model-value="value => emit('update:modelValue', value)">
-    <div v-loading="loading" :class="publicTheme ? 'mc-wiki-public-drawer__body' : 'flex flex-col gap-4'">
+  <YdDrawer :model-value="modelValue" :title="itemName || '物品详情'" side="right" :show-confirm-button="false" :footer="false" :content-class="drawerClass" @update:model-value="value => emit('update:modelValue', value)">
+    <YdLoadingOverlay :loading="loading"><div  :class="publicTheme ? 'mc-wiki-public-drawer__body' : 'flex flex-col gap-4'">
       <p v-if="failed" class="m-0 text-sm text-destructive">物品详情加载失败，可能尚未发布百科版本。</p>
       <template v-if="detail">
         <div class="flex items-center gap-3">
@@ -94,7 +95,7 @@ function downloadName(): string {
             <span v-if="detail.item.nameEn && detail.item.nameEn !== itemName" class="break-all text-sm text-secondary-foreground/60">{{ detail.item.nameEn }}</span>
             <span class="break-all text-sm text-secondary-foreground/60">{{ detail.item.namespacedId }}</span>
           </div>
-          <FaTag class="ml-auto shrink-0" variant="outline">{{ KIND_LABELS[detail.item.kind] ?? detail.item.kind }}</FaTag>
+          <YdTag class="ml-auto shrink-0" variant="outline">{{ KIND_LABELS[detail.item.kind] ?? detail.item.kind }}</YdTag>
         </div>
         <section class="flex flex-col gap-3">
           <h4 class="m-0 text-sm font-semibold">渲染图</h4>
@@ -104,17 +105,17 @@ function downloadName(): string {
               <span v-if="textures?.renderAvailable" class="text-sm text-secondary-foreground/60">3D 等轴渲染图，可自定义像素尺寸下载</span>
               <span v-else class="text-sm text-secondary-foreground/60">该物品暂无渲染图（{{ textures?.renderName || detail.item.namespacedId }}），请在「百科版本」页一键更新渲染资产</span>
               <div class="mc-wiki-size-bar">
-                <FaInput v-model="customSize" type="number" min="1" max="1024" class="w-24" />
-                <FaButton v-for="preset in SIZE_PRESETS" :key="preset" size="sm" :variant="downloadSize === preset ? 'default' : 'outline'" @click="customSize = preset">{{ preset }}px</FaButton>
+                <YdInput v-model="customSize" type="number" min="1" max="1024" class="w-24" />
+                <YdButton v-for="preset in SIZE_PRESETS" :key="preset" size="sm" :variant="downloadSize === preset ? 'default' : 'outline'" @click="customSize = preset">{{ preset }}px</YdButton>
               </div>
-              <a class="mc-wiki-download" :href="iconUrl(detail.item.namespacedId, downloadSize)" :download="downloadName()"><FaIcon name="i-ri:download-line" />下载 {{ downloadSize }}px 渲染图</a>
+              <a class="mc-wiki-download" :href="iconUrl(detail.item.namespacedId, downloadSize)" :download="downloadName()"><YdIcon name="i-ri:download-line" />下载 {{ downloadSize }}px 渲染图</a>
             </div>
           </div>
         </section>
         <section v-if="detail.item.tags.length" class="flex flex-col gap-2">
           <h4 class="m-0 text-sm font-semibold">标签</h4>
           <div class="flex flex-wrap gap-2">
-            <FaTag v-for="tag in detail.item.tags" :key="tag" variant="secondary">{{ tag }}</FaTag>
+            <YdTag v-for="tag in detail.item.tags" :key="tag" variant="secondary">{{ tag }}</YdTag>
           </div>
         </section>
         <section v-if="blockstatePretty" class="flex flex-col gap-2">
@@ -124,22 +125,22 @@ function downloadName(): string {
         <section class="flex flex-col gap-2">
           <h4 class="m-0 text-sm font-semibold">产出它的配方（{{ detail.producing.length }}）</h4>
           <p v-if="!detail.producing.length" class="m-0 text-sm text-secondary-foreground/60">该物品无法通过配方合成。</p>
-          <div v-for="recipe in detail.producing" :key="recipe.id" class="mc-wiki-recipe-link" @click="emit('view-recipe', recipe)">
+          <YdAction v-for="recipe in detail.producing" :key="recipe.id" class="mc-wiki-recipe-link" @click="emit('view-recipe', recipe)">
             <WikiIcon :src="iconUrl(recipe.resultId)" :label="recipeName(recipe)" :size="24" />
             <span class="min-w-0 flex-1 break-all text-sm">{{ recipeName(recipe) }}<template v-if="recipe.resultCount > 1"> × {{ recipe.resultCount }}</template></span>
-            <FaTag variant="outline">{{ recipeTypeLabel(recipe.type) }}</FaTag>
-          </div>
+            <YdTag variant="outline">{{ recipeTypeLabel(recipe.type) }}</YdTag>
+          </YdAction>
         </section>
         <section class="flex flex-col gap-2">
           <h4 class="m-0 text-sm font-semibold">用到它的配方（{{ detail.using.length }}）</h4>
           <p v-if="!detail.using.length" class="m-0 text-sm text-secondary-foreground/60">没有配方使用该物品作为原料。</p>
-          <div v-for="recipe in detail.using" :key="recipe.id" class="mc-wiki-recipe-link" @click="emit('view-recipe', recipe)">
+          <YdAction v-for="recipe in detail.using" :key="recipe.id" class="mc-wiki-recipe-link" @click="emit('view-recipe', recipe)">
             <WikiIcon :src="iconUrl(recipe.resultId)" :label="recipeName(recipe)" :size="24" />
             <span class="min-w-0 flex-1 break-all text-sm">{{ recipeName(recipe) }}<template v-if="recipe.resultCount > 1"> × {{ recipe.resultCount }}</template></span>
-            <FaTag variant="outline">{{ recipeTypeLabel(recipe.type) }}</FaTag>
-          </div>
+            <YdTag variant="outline">{{ recipeTypeLabel(recipe.type) }}</YdTag>
+          </YdAction>
         </section>
       </template>
-    </div>
-  </FaDrawer>
+    </div></YdLoadingOverlay>
+  </YdDrawer>
 </template>

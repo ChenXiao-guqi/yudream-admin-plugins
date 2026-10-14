@@ -1,14 +1,15 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { McWikiPluginModel } from '../composables/useMcWikiPlugin'
 import type { WikiJob } from '../types'
-import { FaButton, FaIcon, FaPageHeader, FaPageMain, FaPagination, FaProgress, FaResponsiveTable, FaTag, useFaModal } from '@yudream/components'
+import { YdButton, YdIcon, YdPageHeader, YdPageMain, YdPagination, YdProgress, YdResponsiveTable, YdTag, useYdModal } from '@yudream/components'
 import { computed, onMounted, ref } from 'vue'
 import JobLogModal from '../components/JobLogModal.vue'
 import { jobStatusLabel, jobVersionLabel } from '../types'
 
 const props = defineProps<{ model: McWikiPluginModel }>()
-const confirm = useFaModal()
+const confirm = useYdModal()
 
 const columns: TableColumn<WikiJob>[] = [
   { accessorKey: 'version', header: '版本', minWidth: 110, fixed: 'left' },
@@ -54,12 +55,12 @@ onMounted(() => props.model.loadJobs())
 </script>
 
 <template>
-  <FaPageHeader title="导入任务" description="查看版本导入进度、诊断日志与历史任务">
-    <FaButton variant="outline" :loading="model.loading" @click="model.loadJobs"><FaIcon name="i-ri:refresh-line" />刷新</FaButton>
-  </FaPageHeader>
-  <FaPageMain>
-    <FaResponsiveTable
-      v-loading="model.loading"
+  <YdPageHeader title="导入任务" description="查看版本导入进度、诊断日志与历史任务">
+    <YdButton variant="outline" :loading="model.loading" @click="model.loadJobs"><YdIcon name="i-ri:refresh-line" />刷新</YdButton>
+  </YdPageHeader>
+  <YdPageMain>
+    <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable
+
       :columns="columns"
       :data="model.jobs"
       row-key="jobId"
@@ -72,37 +73,37 @@ onMounted(() => props.model.loadJobs())
       <template #cell-phase="{ row }">{{ row.original.phase }}</template>
       <template #cell-progress="{ row }">
         <div class="flex items-center gap-2">
-          <FaProgress class="w-24" :model-value="percent(row.original)" />
+          <YdProgress class="w-24" :model-value="percent(row.original)" />
           <span class="text-xs text-secondary-foreground/60">{{ row.original.done }} / {{ row.original.total }}</span>
         </div>
       </template>
-      <template #cell-status="{ row }"><FaTag :variant="statusVariant(row.original.status)">{{ jobStatusLabel(row.original.status) }}</FaTag></template>
+      <template #cell-status="{ row }"><YdTag :variant="statusVariant(row.original.status)">{{ jobStatusLabel(row.original.status) }}</YdTag></template>
       <template #cell-updatedAt="{ row }">{{ formatTime(row.original.updatedAt) }}</template>
       <template #cell-operation="{ row }">
         <div class="flex-center gap-2">
-          <FaButton size="sm" variant="outline" @click="openLog(row.original)">日志</FaButton>
-          <FaButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</FaButton>
+          <YdButton size="sm" variant="outline" @click="openLog(row.original)">日志</YdButton>
+          <YdButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</YdButton>
         </div>
       </template>
       <template #card="{ row }">
         <div class="flex flex-col gap-3">
           <div class="flex items-center justify-between gap-2">
             <strong class="text-base">{{ jobVersionLabel(row.version) }}</strong>
-            <FaTag :variant="statusVariant(row.status)">{{ jobStatusLabel(row.status) }}</FaTag>
+            <YdTag :variant="statusVariant(row.status)">{{ jobStatusLabel(row.status) }}</YdTag>
           </div>
           <div class="flex flex-col gap-1 text-sm">
             <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">阶段</span><span>{{ row.phase }}</span></div>
-            <div class="flex items-center gap-2"><span class="shrink-0 text-secondary-foreground/60">进度</span><FaProgress class="w-28" :model-value="percent(row)" /><span class="text-xs">{{ row.done }} / {{ row.total }}</span></div>
+            <div class="flex items-center gap-2"><span class="shrink-0 text-secondary-foreground/60">进度</span><YdProgress class="w-28" :model-value="percent(row)" /><span class="text-xs">{{ row.done }} / {{ row.total }}</span></div>
             <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">更新时间</span><span>{{ formatTime(row.updatedAt) }}</span></div>
           </div>
           <div class="flex flex-wrap gap-2">
-            <FaButton size="sm" variant="outline" @click="openLog(row)">日志</FaButton>
-            <FaButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</FaButton>
+            <YdButton size="sm" variant="outline" @click="openLog(row)">日志</YdButton>
+            <YdButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</YdButton>
           </div>
         </div>
       </template>
-    </FaResponsiveTable>
-    <FaPagination v-model:page="model.jobPager.page" v-model:size="model.jobPager.size" :total="model.jobPager.total" class="mt-3" @page-change="model.loadJobs" @size-change="model.loadJobs" />
+    </YdResponsiveTable></YdLoadingOverlay>
+    <YdPagination v-model:page="model.jobPager.page" v-model:size="model.jobPager.size" :total="model.jobPager.total" class="mt-3" @page-change="model.loadJobs" @size-change="model.loadJobs" />
     <JobLogModal v-model="logOpen" :job="selectedJob" :api="model.api" />
-  </FaPageMain>
+  </YdPageMain>
 </template>

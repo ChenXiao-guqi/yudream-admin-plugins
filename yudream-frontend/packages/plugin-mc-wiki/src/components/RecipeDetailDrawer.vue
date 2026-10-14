@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { WikiRecipe } from '../types'
-import { FaDrawer, FaTag } from '@yudream/components'
+import { YdDrawer, YdTag } from '@yudream/components'
 import { computed } from 'vue'
 import { recipeTypeLabel } from '../types'
 import RecipeGrid from './RecipeGrid.vue'
@@ -58,7 +58,7 @@ function close(value: boolean) {
 </script>
 
 <template>
-  <FaDrawer :model-value="modelValue" :title="title" side="right" :show-confirm-button="false" :footer="false" :content-class="drawerClass" @update:model-value="close">
+  <YdDrawer :model-value="modelValue" :title="title" side="right" :show-confirm-button="false" :footer="false" :content-class="drawerClass" @update:model-value="close">
     <div v-if="recipe" :class="publicTheme ? 'mc-wiki-public-drawer__body' : 'flex flex-col gap-4'">
       <div class="flex items-center gap-3">
         <WikiIcon :src="iconUrl(recipe.resultId)" :label="title" :size="48" />
@@ -66,7 +66,7 @@ function close(value: boolean) {
           <strong class="break-all text-base">{{ title }}</strong>
           <span class="break-all text-sm text-secondary-foreground/60">{{ recipe.resultId }}</span>
         </div>
-        <FaTag class="ml-auto shrink-0">{{ recipeTypeLabel(recipe.type) }}</FaTag>
+        <YdTag class="ml-auto shrink-0">{{ recipeTypeLabel(recipe.type) }}</YdTag>
       </div>
       <section class="flex flex-col gap-2">
         <h4 class="m-0 text-sm font-semibold">合成方式</h4>
@@ -89,5 +89,5 @@ function close(value: boolean) {
         <span class="text-sm">{{ recipe.resultCount }}</span>
       </section>
     </div>
-  </FaDrawer>
+  </YdDrawer>
 </template>
