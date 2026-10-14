@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ProjectProgressModel } from '../composables/useProjectProgress'
 import type { ProjectDeptOption, ProjectUserOption } from '../types'
-import { FaButton, FaCheckbox, FaIcon, FaInput, FaModal, FaPagination, FaTag } from '@yudream/components'
+import { YdButton, YdCheckbox, YdIcon, YdInput, YdModal, YdPagination, YdTag } from '@yudream/components'
 import { computed, ref, watch } from 'vue'
 
 const props = withDefaults(defineProps<{
@@ -153,23 +153,23 @@ function userDepartmentText(user: ProjectUserOption) {
   <div class="pp-picker">
     <div class="pp-picker-field">
       <div class="pp-chip-list">
-        <FaTag
+        <YdTag
           v-for="user in selectedUsers"
           :key="user.id"
           closable
           @close="removeUser(user.id)"
         >
           {{ model.userLabel(user) }}
-        </FaTag>
+        </YdTag>
         <span v-if="!selectedUsers.length" class="pp-muted">{{ placeholder }}</span>
       </div>
-      <FaButton variant="outline" @click="showPicker">
-        <FaIcon name="i-ri:user-search-line" />
+      <YdButton variant="outline" @click="showPicker">
+        <YdIcon name="i-ri:user-search-line" />
         {{ selectedUsers.length ? '调整人员' : placeholder }}
-      </FaButton>
+      </YdButton>
     </div>
 
-    <FaModal
+    <YdModal
       v-model="open"
       :title="title"
       class="pp-picker-modal"
@@ -186,34 +186,34 @@ function userDepartmentText(user: ProjectUserOption) {
           <strong>{{ activeDeptName }}</strong>
           <span>可搜索姓名、用户名、邮箱或按部门筛选</span>
         </div>
-        <FaTag>已选 {{ selectedUsers.length }} 人</FaTag>
+        <YdTag>已选 {{ selectedUsers.length }} 人</YdTag>
       </div>
 
       <div class="pp-picker-layout">
         <aside v-if="allowDepartments" class="pp-dept-pane">
           <div class="pp-pane-title">
-            <FaIcon name="i-ri:organization-chart" />
+            <YdIcon name="i-ri:organization-chart" />
             <span>部门</span>
           </div>
           <div class="pp-search">
-            <FaInput
+            <YdInput
               v-model="departmentKeyword"
               clearable
               placeholder="搜索部门"
               class="w-full"
               @keyup.enter="refreshDepartments"
             />
-            <FaButton :loading="loadingDepartments" @click="refreshDepartments">
+            <YdButton :loading="loadingDepartments" @click="refreshDepartments">
               搜索
-            </FaButton>
+            </YdButton>
           </div>
-          <FaButton
+          <YdButton
             class="pp-dept-all"
             :variant="!selectedDeptId ? 'default' : 'ghost'"
             @click="chooseDepartment('')"
           >
             全部人员
-          </FaButton>
+          </YdButton>
           <div class="pp-dept-list">
             <div
               v-for="item in departments"
@@ -221,40 +221,40 @@ function userDepartmentText(user: ProjectUserOption) {
               class="pp-dept-row"
               :style="{ paddingLeft: `${item.level * 14}px` }"
             >
-              <FaButton
+              <YdButton
                 :variant="selectedDeptId === item.dept.id ? 'default' : 'ghost'"
                 class="pp-dept-name"
                 @click="chooseDepartment(item.dept.id)"
               >
                 {{ item.dept.name }}
-              </FaButton>
-              <FaButton variant="outline" size="sm" @click="addDepartment(item.dept)">
+              </YdButton>
+              <YdButton variant="outline" size="sm" @click="addDepartment(item.dept)">
                 全选
-              </FaButton>
+              </YdButton>
             </div>
           </div>
         </aside>
 
         <main class="pp-user-pane">
           <div class="pp-pane-title">
-            <FaIcon name="i-ri:user-3-line" />
+            <YdIcon name="i-ri:user-3-line" />
             <span>人员</span>
           </div>
           <div class="pp-search">
-            <FaInput
+            <YdInput
               v-model="keyword"
               clearable
               placeholder="搜索姓名、用户名或邮箱"
               class="w-full"
               @keyup.enter="refreshUsers(true)"
             />
-            <FaButton :loading="loadingUsers" @click="refreshUsers(true)">
+            <YdButton :loading="loadingUsers" @click="refreshUsers(true)">
               搜索
-            </FaButton>
+            </YdButton>
           </div>
 
           <div class="pp-user-list">
-            <FaButton
+            <YdButton
               v-for="user in searchResults"
               :key="user.id"
               variant="ghost"
@@ -262,7 +262,7 @@ function userDepartmentText(user: ProjectUserOption) {
               :class="{ active: selectedSet.has(user.id) }"
               @click="toggleUser(user)"
             >
-              <FaCheckbox
+              <YdCheckbox
                 :model-value="selectedSet.has(user.id)"
                 @click.stop
                 @update:model-value="toggleUser(user)"
@@ -274,7 +274,7 @@ function userDepartmentText(user: ProjectUserOption) {
               <div class="pp-user-depts">
                 {{ userDepartmentText(user) }}
               </div>
-            </FaButton>
+            </YdButton>
             <div v-if="!loadingUsers && !searchResults.length" class="pp-empty">
               没有找到匹配人员
             </div>
@@ -283,7 +283,7 @@ function userDepartmentText(user: ProjectUserOption) {
             </div>
           </div>
 
-          <FaPagination
+          <YdPagination
             v-model:page="page"
             v-model:size="pageSize"
             :total="paginationTotal"
@@ -296,6 +296,6 @@ function userDepartmentText(user: ProjectUserOption) {
           />
         </main>
       </div>
-    </FaModal>
+    </YdModal>
   </div>
 </template>

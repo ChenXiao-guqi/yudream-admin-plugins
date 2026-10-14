@@ -2,7 +2,7 @@
 import type { TableColumn } from '@yudream/components'
 import type { ProjectProgressModel } from '../composables/useProjectProgress'
 import type { ProjectWorkDetail } from '../types'
-import { FaButton, FaCard, FaFileUpload, FaModal, FaPagination, FaResponsiveTable, FaTag, FaTextarea } from '@yudream/components'
+import { YdButton, YdCard, YdFileUpload, YdModal, YdPagination, YdResponsiveTable, YdTag, YdTextarea } from '@yudream/components'
 import { computed, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import EvidenceFileList from '../components/EvidenceFileList.vue'
@@ -62,7 +62,7 @@ function localUploadRequest() {
         <span>个人任务</span>
         <h2>我的任务</h2>
       </div>
-      <FaButton variant="outline" :loading="model.loading" @click="model.loadMyTasks">刷新</FaButton>
+      <YdButton variant="outline" :loading="model.loading" @click="model.loadMyTasks">刷新</YdButton>
     </section>
 
     <section class="pp-panel">
@@ -101,21 +101,21 @@ function localUploadRequest() {
           <span>完成任务后提交验收，通过后才计入完成进度</span>
         </div>
       </header>
-      <FaResponsiveTable row-key="id" table-root-class="max-w-full overflow-x-auto rounded-lg" table-class="min-w-[1310px]" border stripe column-visibility :columns="columns" :data="pagedTasks" empty-text="暂无分配给你的任务">
+      <YdResponsiveTable row-key="id" table-root-class="max-w-full overflow-x-auto rounded-lg" table-class="min-w-[1310px]" border stripe column-visibility :columns="columns" :data="pagedTasks" empty-text="暂无分配给你的任务">
         <template #cell-project="{ row }">{{ model.projectName(row.original.projectId) }}</template>
         <template #cell-task="{ row }"><strong>{{ row.original.title }}</strong><div class="pp-table-sub">{{ row.original.description || '暂无说明' }}</div><div v-if="row.original.acceptanceSummary || row.original.acceptanceFiles.length" class="pp-material-box mt-3"><p>{{ row.original.acceptanceSummary || '暂无验收说明' }}</p><EvidenceFileList :model="model" :files="row.original.acceptanceFiles" compact /></div></template>
-        <template #cell-status="{ row }"><div class="pp-chip-list"><FaTag variant="secondary">{{ model.detailStatusLabel(row.original) }}</FaTag><FaTag v-if="row.original.pendingAcceptance">待验收</FaTag></div></template>
+        <template #cell-status="{ row }"><div class="pp-chip-list"><YdTag variant="secondary">{{ model.detailStatusLabel(row.original) }}</YdTag><YdTag v-if="row.original.pendingAcceptance">待验收</YdTag></div></template>
         <template #cell-assignment="{ row }">{{ model.assignmentLabel(row.original) }}</template>
         <template #cell-dueAt="{ row }">{{ model.formatTime(row.original.dueAt) }}</template>
-        <template #cell-operation="{ row }"><div class="pp-actions"><FaButton size="sm" variant="outline" @click="goCheckIn(row.original.projectId)">项目打卡</FaButton><FaButton v-if="model.canMinecraftCheckIn(row.original)" size="sm" variant="outline" @click="model.minecraftCheckIn(row.original.projectId)">MC 打卡</FaButton><FaButton size="sm" :disabled="!model.canSubmitAcceptance(row.original)" :loading="model.saving" @click="openSubmitAcceptance(row.original)">提交验收</FaButton></div></template>
+        <template #cell-operation="{ row }"><div class="pp-actions"><YdButton size="sm" variant="outline" @click="goCheckIn(row.original.projectId)">项目打卡</YdButton><YdButton v-if="model.canMinecraftCheckIn(row.original)" size="sm" variant="outline" @click="model.minecraftCheckIn(row.original.projectId)">MC 打卡</YdButton><YdButton size="sm" :disabled="!model.canSubmitAcceptance(row.original)" :loading="model.saving" @click="openSubmitAcceptance(row.original)">提交验收</YdButton></div></template>
         <template #card="{ row }">
-          <FaCard class="w-full">
+          <YdCard class="w-full">
             <div class="flex flex-col gap-3">
               <div class="flex items-center justify-between gap-2">
                 <span class="min-w-0 break-words text-base font-semibold">{{ row.title }}</span>
                 <div class="flex gap-1">
-                  <FaTag variant="secondary">{{ model.detailStatusLabel(row) }}</FaTag>
-                  <FaTag v-if="row.pendingAcceptance">待验收</FaTag>
+                  <YdTag variant="secondary">{{ model.detailStatusLabel(row) }}</YdTag>
+                  <YdTag v-if="row.pendingAcceptance">待验收</YdTag>
                 </div>
               </div>
               <div class="flex flex-col gap-1 text-sm">
@@ -125,18 +125,18 @@ function localUploadRequest() {
                 <div v-if="row.description" class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">说明</span><span class="break-all">{{ row.description }}</span></div>
               </div>
               <div class="flex flex-wrap gap-2 border-t pt-3">
-                <FaButton size="sm" variant="outline" @click="goCheckIn(row.projectId)">项目打卡</FaButton>
-                <FaButton v-if="model.canMinecraftCheckIn(row)" size="sm" variant="outline" @click="model.minecraftCheckIn(row.projectId)">MC 打卡</FaButton>
-                <FaButton size="sm" :disabled="!model.canSubmitAcceptance(row)" :loading="model.saving" @click="openSubmitAcceptance(row)">提交验收</FaButton>
+                <YdButton size="sm" variant="outline" @click="goCheckIn(row.projectId)">项目打卡</YdButton>
+                <YdButton v-if="model.canMinecraftCheckIn(row)" size="sm" variant="outline" @click="model.minecraftCheckIn(row.projectId)">MC 打卡</YdButton>
+                <YdButton size="sm" :disabled="!model.canSubmitAcceptance(row)" :loading="model.saving" @click="openSubmitAcceptance(row)">提交验收</YdButton>
               </div>
             </div>
-          </FaCard>
+          </YdCard>
         </template>
-      </FaResponsiveTable>
-      <FaPagination v-model:page="pagination.page" v-model:size="pagination.size" :total="model.myTasks.length" class="mt-3" />
+      </YdResponsiveTable>
+      <YdPagination v-model:page="pagination.page" v-model:size="pagination.size" :total="model.myTasks.length" class="mt-3" />
     </section>
 
-    <FaModal
+    <YdModal
       v-model="submitVisible"
       title="提交验收"
       class="max-w-[640px]"
@@ -147,11 +147,11 @@ function localUploadRequest() {
       <div class="pp-form">
         <label>
           <span>验收说明</span>
-          <FaTextarea v-model="model.acceptanceSubmitForm.summary" placeholder="说明完成内容、交付位置或需要验收的重点" class="w-full" />
+          <YdTextarea v-model="model.acceptanceSubmitForm.summary" placeholder="说明完成内容、交付位置或需要验收的重点" class="w-full" />
         </label>
         <label>
           <span>验收附件</span>
-          <FaFileUpload
+          <YdFileUpload
             v-model="model.acceptanceFiles"
             multiple
             :max="6"
@@ -161,9 +161,9 @@ function localUploadRequest() {
         </label>
       </div>
       <template #footer>
-        <FaButton variant="outline" @click="submitVisible = false">取消</FaButton>
-        <FaButton :loading="model.saving" @click="confirmSubmitAcceptance">提交验收</FaButton>
+        <YdButton variant="outline" @click="submitVisible = false">取消</YdButton>
+        <YdButton :loading="model.saving" @click="confirmSubmitAcceptance">提交验收</YdButton>
       </template>
-    </FaModal>
+    </YdModal>
   </section>
 </template>

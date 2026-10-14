@@ -3,7 +3,7 @@ import type { TableColumn } from '@yudream/components'
 import type { ProjectProgressModel } from '../composables/useProjectProgress'
 import type { ProjectMemberStats } from '../types'
 import { computed } from 'vue'
-import { FaButton, FaCard, FaIcon, FaResponsiveTable, FaSelect } from '@yudream/components'
+import { YdButton, YdCard, YdIcon, YdResponsiveTable, YdSelect } from '@yudream/components'
 
 const props = defineProps<{
   model: ProjectProgressModel
@@ -44,17 +44,17 @@ function userFor(userId: string) {
         <h2>成员统计</h2>
       </div>
       <div class="pp-actions">
-        <FaSelect
+        <YdSelect
           :model-value="model.selectedProjectId"
           :options="projectOptions"
           placeholder="选择项目"
           class="pp-project-select"
           @update:model-value="selectProject"
         />
-        <FaButton :loading="model.loading" @click="model.loadMemberStats()">
-          <FaIcon name="i-ri:refresh-line" />
+        <YdButton :loading="model.loading" @click="model.loadMemberStats()">
+          <YdIcon name="i-ri:refresh-line" />
           刷新
-        </FaButton>
+        </YdButton>
       </div>
     </section>
 
@@ -94,7 +94,7 @@ function userFor(userId: string) {
           <span>统计口径：完成按细分当前完成状态，通过/退回按验收处理记录计数</span>
         </div>
       </header>
-      <FaResponsiveTable
+      <YdResponsiveTable
         row-key="userId"
         table-root-class="pp-fa-table-root"
         table-class="pp-fa-table"
@@ -112,7 +112,7 @@ function userFor(userId: string) {
           {{ model.formatTime(row.original.lastActivityAt) }}
         </template>
         <template #card="{ row }">
-          <FaCard class="w-full">
+          <YdCard class="w-full">
             <div class="flex flex-col gap-3">
               <div class="flex items-center justify-between gap-2">
                 <span class="min-w-0 break-words text-base font-semibold">{{ model.userLabel(userFor(row.userId)) }}</span>
@@ -124,9 +124,9 @@ function userFor(userId: string) {
                 <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">最近活动</span><span class="break-all">{{ model.formatTime(row.lastActivityAt) }}</span></div>
               </div>
             </div>
-          </FaCard>
+          </YdCard>
         </template>
-      </FaResponsiveTable>
+      </YdResponsiveTable>
     </section>
   </section>
 </template>

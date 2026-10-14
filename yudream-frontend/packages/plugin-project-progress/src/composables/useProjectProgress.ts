@@ -17,7 +17,7 @@ import type {
   ProjectWorkDetail,
 } from '../types'
 import type { YuDreamPluginBlobResponse, YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { useFaToast } from '@yudream/components'
+import { useYdToast } from '@yudream/components'
 import { computed, reactive, ref } from 'vue'
 import { createProjectProgressApi } from '../api/project-progress-api'
 
@@ -25,7 +25,7 @@ const DEFAULT_STATUSES_TEXT = 'TODO,未完成,false,10\nREVIEWING,复审中,fals
 
 export function useProjectProgress(sdk: YuDreamPluginSdk) {
   const api = createProjectProgressApi(sdk)
-  const toast = useFaToast()
+  const toast = useYdToast()
   const loading = ref(false)
   const saving = ref(false)
   const status = ref<ProjectProgressStatus | null>(null)

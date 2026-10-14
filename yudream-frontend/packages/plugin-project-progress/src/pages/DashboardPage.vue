@@ -2,8 +2,8 @@
 import type { TableColumn } from '@yudream/components'
 import type { ProjectProgressModel } from '../composables/useProjectProgress'
 import type { ProjectWorkDetail } from '../types'
-import { computed } from 'vue'
-import { FaButton, FaCard, FaResponsiveTable, FaTag } from '@yudream/components'
+import {computed } from 'vue'
+import { YdAction, YdButton, YdCard, YdResponsiveTable, YdTag } from '@yudream/components'
 import ProgressPanel from '../components/ProgressPanel.vue'
 
 defineProps<{
@@ -25,7 +25,7 @@ const detailColumns = computed<TableColumn<ProjectWorkDetail>[]>(() => [
         <span>实时进度</span>
         <h2>项目进度看板</h2>
       </div>
-      <FaButton variant="outline" @click="model.load">刷新</FaButton>
+      <YdButton variant="outline" @click="model.load">刷新</YdButton>
     </section>
 
     <section class="pp-metrics">
@@ -50,7 +50,7 @@ const detailColumns = computed<TableColumn<ProjectWorkDetail>[]>(() => [
     <section class="pp-grid">
       <ProgressPanel title="项目列表" subtle="选择一个项目查看细节">
         <div class="pp-list">
-          <button
+          <YdAction
             v-for="project in model.projects"
             :key="project.id"
             type="button"
@@ -59,7 +59,7 @@ const detailColumns = computed<TableColumn<ProjectWorkDetail>[]>(() => [
           >
             <strong>{{ project.name }}</strong>
             <span>{{ project.enabled ? '启用' : '停用' }} · {{ model.projectMemberCount(project) }} 名成员</span>
-          </button>
+          </YdAction>
           <div v-if="!model.projects.length" class="pp-empty">暂无项目</div>
         </div>
       </ProgressPanel>
@@ -68,7 +68,7 @@ const detailColumns = computed<TableColumn<ProjectWorkDetail>[]>(() => [
         <div class="pp-progress-line">
           <span :style="{ width: `${model.completion}%` }" />
         </div>
-        <FaResponsiveTable
+        <YdResponsiveTable
           row-key="id"
           table-root-class="max-w-full overflow-x-auto rounded-lg"
           table-class="min-w-[760px]"
@@ -80,7 +80,7 @@ const detailColumns = computed<TableColumn<ProjectWorkDetail>[]>(() => [
           empty-text="暂无工作细节"
         >
           <template #cell-status="{ row }">
-            <FaTag variant="secondary">{{ model.statusLabel(row.original.statusCode) }}</FaTag>
+            <YdTag variant="secondary">{{ model.statusLabel(row.original.statusCode) }}</YdTag>
           </template>
           <template #cell-assignees="{ row }">
             <div class="pp-chip-list">
@@ -99,12 +99,12 @@ const detailColumns = computed<TableColumn<ProjectWorkDetail>[]>(() => [
             </div>
           </template>
           <template #card="{ row }">
-            <FaCard class="w-full">
+            <YdCard class="w-full">
               <div class="flex flex-col gap-3">
                 <div class="flex items-center justify-between gap-2">
                   <span class="min-w-0 break-words text-base font-semibold">{{ row.title }}</span>
                   <div class="flex gap-1">
-                    <FaTag variant="secondary">{{ model.statusLabel(row.statusCode) }}</FaTag>
+                    <YdTag variant="secondary">{{ model.statusLabel(row.statusCode) }}</YdTag>
                   </div>
                 </div>
                 <div class="flex flex-col gap-1 text-sm">
@@ -112,9 +112,9 @@ const detailColumns = computed<TableColumn<ProjectWorkDetail>[]>(() => [
                   <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">验收人</span><span class="break-all">{{ model.userOptionsForIds(row.acceptorUserIds).map(user => model.userLabel(user)).join('、') || '项目负责人' }}</span></div>
                 </div>
               </div>
-            </FaCard>
+            </YdCard>
           </template>
-        </FaResponsiveTable>
+        </YdResponsiveTable>
       </ProgressPanel>
     </section>
 

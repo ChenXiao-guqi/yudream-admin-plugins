@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ProjectProgressModel } from '../composables/useProjectProgress'
 import type { ProjectFileEvidence } from '../types'
-import { FaButton, FaIcon, FaModal, FaTag } from '@yudream/components'
+import { YdButton, YdIcon, YdModal, YdTag } from '@yudream/components'
 import { computed, ref, watch } from 'vue'
 
 const props = defineProps<{
@@ -58,13 +58,13 @@ function isText(file: ProjectFileEvidence) {
 
 <template>
   <div v-if="files.length" class="pp-evidence-trigger">
-    <FaButton :size="compact ? 'sm' : 'default'" variant="outline" @click="open = true">
-      <FaIcon name="i-ri:attachment-2" />
+    <YdButton :size="compact ? 'sm' : 'default'" variant="outline" @click="open = true">
+      <YdIcon name="i-ri:attachment-2" />
       查看附件 ({{ files.length }})
-    </FaButton>
-    <FaTag v-if="imageCount" variant="secondary">{{ imageCount }} 张图片</FaTag>
+    </YdButton>
+    <YdTag v-if="imageCount" variant="secondary">{{ imageCount }} 张图片</YdTag>
 
-    <FaModal
+    <YdModal
       v-model="open"
       title="附件预览"
       class="pp-evidence-modal"
@@ -85,20 +85,20 @@ function isText(file: ProjectFileEvidence) {
               <span>{{ file.contentType || 'application/octet-stream' }} / {{ model.formatFileSize(file.size) }}</span>
             </div>
             <div class="pp-file-actions">
-              <FaTag v-if="isImage(file)">图片</FaTag>
-              <FaButton
+              <YdTag v-if="isImage(file)">图片</YdTag>
+              <YdButton
                 v-if="model.canPreviewEvidence(file) && !isImage(file)"
                 variant="outline"
                 size="sm"
                 @click="model.previewEvidence(file)"
               >
-                <FaIcon name="i-ri:eye-line" />
+                <YdIcon name="i-ri:eye-line" />
                 新窗预览
-              </FaButton>
-              <FaButton variant="outline" size="sm" :loading="model.saving" @click="model.downloadEvidence(file)">
-                <FaIcon name="i-ri:download-2-line" />
+              </YdButton>
+              <YdButton variant="outline" size="sm" :loading="model.saving" @click="model.downloadEvidence(file)">
+                <YdIcon name="i-ri:download-2-line" />
                 下载
-              </FaButton>
+              </YdButton>
             </div>
           </div>
 
@@ -132,7 +132,7 @@ function isText(file: ProjectFileEvidence) {
           </div>
         </article>
       </div>
-    </FaModal>
+    </YdModal>
   </div>
   <span v-else class="pp-muted">暂无附件</span>
 </template>

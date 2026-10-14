@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { ProjectProgressModel } from '../composables/useProjectProgress'
 import type { ProjectProgressProject } from '../types'
-import { FaButton, FaCard, FaCheckboxGroup, FaInput, FaModal, FaNumberField, FaPagination, FaResponsiveTable, FaSelect, FaSwitch, FaTag, FaTextarea, useFaModal } from '@yudream/components'
+import { YdButton, YdCard, YdCheckboxGroup, YdInput, YdModal, YdNumberField, YdPagination, YdResponsiveTable, YdSelect, YdSwitch, YdTag, YdTextarea, useYdModal } from '@yudream/components'
 import { computed, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import PeoplePicker from '../components/PeoplePicker.vue'
@@ -10,7 +11,7 @@ import PeoplePicker from '../components/PeoplePicker.vue'
 const props = defineProps<{ model: ProjectProgressModel }>()
 const modalVisible = ref(false)
 const router = useRouter()
-const confirm = useFaModal()
+const confirm = useYdModal()
 const pagination = reactive({ page: 1, size: 10 })
 const modalTitle = computed(() => props.model.selectedProjectId ? '编辑项目' : '新建项目')
 const checkInTypeOptions = [
@@ -22,7 +23,7 @@ const serverOptions = computed(() => [{ label: '未选择', value: '' }, ...prop
 /**
  * 子服选项；默认入口与未装传感器的子服在标签里标出来。
  *
- * 首项是空值的「整服」：FaSelect 没有 clearable，如果把「整服」只写成 placeholder，一旦选了
+ * 首项是空值的「整服」：YdSelect 没有 clearable，如果把「整服」只写成 placeholder，一旦选了
  * 某台子服就再也回不到整服口径——placeholder 只在无值时显示，点不到。
  */
 const minecraftSubServerOptions = computed(() => [
@@ -53,24 +54,24 @@ function confirmDelete(project: ProjectProgressProject) { confirm.confirm({ titl
 
 <template>
   <section class="pp-page">
-    <section class="pp-toolbar"><div><span>项目配置</span><h2>项目管理</h2></div><div class="pp-actions"><FaButton variant="outline" :loading="model.loading" @click="model.load">刷新</FaButton><FaButton @click="createProject">新建项目</FaButton></div></section>
+    <section class="pp-toolbar"><div><span>项目配置</span><h2>项目管理</h2></div><div class="pp-actions"><YdButton variant="outline" :loading="model.loading" @click="model.load">刷新</YdButton><YdButton @click="createProject">新建项目</YdButton></div></section>
     <section class="pp-panel">
-      <FaResponsiveTable v-loading="model.loading" row-key="id" table-root-class="max-w-full overflow-x-auto rounded-lg" table-class="min-w-[1530px]" border stripe column-visibility :columns="columns" :data="pagedRows" empty-text="暂无项目">
+      <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable  row-key="id" table-root-class="max-w-full overflow-x-auto rounded-lg" table-class="min-w-[1530px]" border stripe column-visibility :columns="columns" :data="pagedRows" empty-text="暂无项目">
         <template #cell-project="{ row }"><strong>{{ row.original.name }}</strong><div class="pp-table-sub">{{ row.original.description || '暂无描述' }}</div></template>
-        <template #cell-status="{ row }"><FaTag :variant="row.original.enabled ? 'default' : 'secondary'">{{ row.original.enabled ? '启用中' : '已停用' }}</FaTag></template>
-        <template #cell-managers="{ row }"><div class="pp-chip-list"><FaTag v-for="user in model.userOptionsForIds(row.original.managerUserIds)" :key="user.id" variant="secondary">{{ model.userLabel(user) }}</FaTag></div></template>
+        <template #cell-status="{ row }"><YdTag :variant="row.original.enabled ? 'default' : 'secondary'">{{ row.original.enabled ? '启用中' : '已停用' }}</YdTag></template>
+        <template #cell-managers="{ row }"><div class="pp-chip-list"><YdTag v-for="user in model.userOptionsForIds(row.original.managerUserIds)" :key="user.id" variant="secondary">{{ model.userLabel(user) }}</YdTag></div></template>
         <template #cell-members="{ row }">{{ model.projectMemberCount(row.original) }} 人</template>
-        <template #cell-checkInTypes="{ row }"><div class="pp-chip-list"><FaTag v-for="type in row.original.allowedCheckInTypes" :key="type" variant="secondary">{{ typeLabel(type) }}</FaTag></div></template>
+        <template #cell-checkInTypes="{ row }"><div class="pp-chip-list"><YdTag v-for="type in row.original.allowedCheckInTypes" :key="type" variant="secondary">{{ typeLabel(type) }}</YdTag></div></template>
         <template #cell-server="{ row }">{{ row.original.minecraftPolicy.enabled ? model.serverLabel(row.original.minecraftPolicy.serverId) : '未启用' }}</template>
         <template #cell-updatedAt="{ row }">{{ model.formatTime(row.original.updatedAt) }}</template>
-        <template #cell-operation="{ row }"><div class="pp-actions"><FaButton size="sm" variant="outline" @click="openProject(row.original)">查看</FaButton><FaButton size="sm" variant="outline" @click="editProject(row.original)">编辑</FaButton><FaButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</FaButton></div></template>
+        <template #cell-operation="{ row }"><div class="pp-actions"><YdButton size="sm" variant="outline" @click="openProject(row.original)">查看</YdButton><YdButton size="sm" variant="outline" @click="editProject(row.original)">编辑</YdButton><YdButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</YdButton></div></template>
         <template #card="{ row }">
-          <FaCard class="w-full">
+          <YdCard class="w-full">
             <div class="flex flex-col gap-3">
               <div class="flex items-center justify-between gap-2">
                 <span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span>
                 <div class="flex gap-1">
-                  <FaTag :variant="row.enabled ? 'default' : 'secondary'">{{ row.enabled ? '启用中' : '已停用' }}</FaTag>
+                  <YdTag :variant="row.enabled ? 'default' : 'secondary'">{{ row.enabled ? '启用中' : '已停用' }}</YdTag>
                 </div>
               </div>
               <div class="flex flex-col gap-1 text-sm">
@@ -80,32 +81,32 @@ function confirmDelete(project: ProjectProgressProject) { confirm.confirm({ titl
                 <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">更新时间</span><span class="break-all">{{ model.formatTime(row.updatedAt) }}</span></div>
               </div>
               <div class="flex flex-wrap gap-2 border-t pt-3">
-                <FaButton size="sm" variant="outline" @click="openProject(row)">查看</FaButton>
-                <FaButton size="sm" variant="outline" @click="editProject(row)">编辑</FaButton>
-                <FaButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</FaButton>
+                <YdButton size="sm" variant="outline" @click="openProject(row)">查看</YdButton>
+                <YdButton size="sm" variant="outline" @click="editProject(row)">编辑</YdButton>
+                <YdButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</YdButton>
               </div>
             </div>
-          </FaCard>
+          </YdCard>
         </template>
-      </FaResponsiveTable>
-      <FaPagination v-model:page="pagination.page" v-model:size="pagination.size" :total="model.projects.length" class="mt-3" />
+      </YdResponsiveTable></YdLoadingOverlay>
+      <YdPagination v-model:page="pagination.page" v-model:size="pagination.size" :total="model.projects.length" class="mt-3" />
     </section>
 
-    <FaModal v-model="modalVisible" :title="modalTitle" class="max-w-[860px]" :show-confirm-button="false" :show-cancel-button="false">
+    <YdModal v-model="modalVisible" :title="modalTitle" class="max-w-[860px]" :show-confirm-button="false" :show-cancel-button="false">
       <div class="pp-form">
-        <div class="pp-form-grid two"><label><span>项目名称</span><FaInput v-model="model.projectForm.name" class="w-full" placeholder="例如：主城建设一期" /></label><label><span>启用状态</span><FaSwitch v-model="model.projectForm.enabled" /></label></div>
-        <label><span>项目描述</span><FaTextarea v-model="model.projectForm.description" class="w-full" /></label>
+        <div class="pp-form-grid two"><label><span>项目名称</span><YdInput v-model="model.projectForm.name" class="w-full" placeholder="例如：主城建设一期" /></label><label><span>启用状态</span><YdSwitch v-model="model.projectForm.enabled" /></label></div>
+        <label><span>项目描述</span><YdTextarea v-model="model.projectForm.description" class="w-full" /></label>
         <label><span>协同管理员</span><PeoplePicker v-model="model.projectForm.managerUserIds" :model="model" title="选择协同管理员" placeholder="添加协同管理员" /><p class="pp-help">发布人会自动成为项目负责人，这里只需要选择额外协同管理员。</p></label>
         <label><span>项目成员</span><PeoplePicker v-model="model.projectForm.memberUserIds" :model="model" title="选择项目成员" placeholder="添加成员或按部门全选" /></label>
-        <label><span>进度状态</span><FaTextarea v-model="model.projectForm.statusesText" class="w-full" placeholder="每行一个状态：编码,显示名称,是否完成,排序" /></label>
-        <div class="pp-form-grid three"><label><span>默认状态</span><FaSelect v-model="model.projectForm.defaultStatusCode" :options="statusOptions" class="w-full" /></label><label><span>完成状态</span><FaSelect v-model="model.projectForm.doneStatusCode" :options="statusOptions" class="w-full" /></label><label><span>返工状态</span><FaSelect v-model="model.projectForm.reworkStatusCode" :options="[{ label: '未设置', value: '' }, ...statusOptions]" class="w-full" /></label></div>
-        <div class="pp-form-grid two"><label><span>打卡周期（分钟）</span><FaNumberField v-model="model.projectForm.minCheckInIntervalMinutes" :min="0" class="w-full" /><p class="pp-help">1440 表示每天至少打卡一次，0 表示不限制周期。</p></label><label><span>允许打卡方式</span><FaCheckboxGroup v-model="model.projectForm.allowedCheckInTypes" :options="checkInTypeOptions" class="pp-checkbox-grid" /></label></div>
-        <div class="pp-form-grid three"><label><span>本项目 MC 打卡</span><FaSwitch v-model="model.projectForm.minecraftPolicy.enabled" /></label><label><span>满足时长自动打卡</span><FaSwitch v-model="model.projectForm.minecraftPolicy.autoCheckInEnabled" /></label><label><span>AFK 计入在线时长</span><FaSwitch v-model="model.projectForm.minecraftPolicy.includeAfk" /></label></div>
-        <div class="pp-form-grid two"><label><span>Minecraft 服务器</span><FaSelect :model-value="model.projectForm.minecraftPolicy.serverId" :options="serverOptions" class="w-full" :disabled="!model.projectForm.minecraftPolicy.enabled" @update:model-value="value => model.changeMinecraftServer(String(value || ''))" /></label><label><span>要求在线分钟</span><FaNumberField v-model="model.projectForm.minecraftPolicy.requiredOnlineMinutes" :min="1" class="w-full" :disabled="!model.projectForm.minecraftPolicy.enabled" /></label></div>
-        <div v-if="model.projectForm.minecraftPolicy.enabled && model.subServersOf(model.projectForm.minecraftPolicy.serverId).length" class="pp-form-grid two"><label><span>子服</span><FaSelect v-model="model.projectForm.minecraftPolicy.subServer" :options="minecraftSubServerOptions" placeholder="整服（不限子服）" class="w-full" /><p class="pp-help">留空表示整服口径：把该玩家在这台服务器全部子服上的时长相加。选择某一台后只按那台计时长。</p></label></div>
-        <div class="pp-form-grid two"><label><span>发布通知连接</span><FaSelect v-model="model.projectForm.notificationConnectionId" :options="model.notificationConnections.map(item => ({ label: `${item.name}（${item.protocol === 'official' ? '官方 QQ' : item.protocol === 'milky' ? 'Milky' : item.platform || '未知平台'}）`, value: item.id }))" class="w-full" clearable /></label><label><span>发布通知群号</span><FaInput v-model="model.projectForm.notificationChannelId" class="w-full" placeholder="Milky 群号或官方群 openid" /></label></div>
+        <label><span>进度状态</span><YdTextarea v-model="model.projectForm.statusesText" class="w-full" placeholder="每行一个状态：编码,显示名称,是否完成,排序" /></label>
+        <div class="pp-form-grid three"><label><span>默认状态</span><YdSelect v-model="model.projectForm.defaultStatusCode" :options="statusOptions" class="w-full" /></label><label><span>完成状态</span><YdSelect v-model="model.projectForm.doneStatusCode" :options="statusOptions" class="w-full" /></label><label><span>返工状态</span><YdSelect v-model="model.projectForm.reworkStatusCode" :options="[{ label: '未设置', value: '' }, ...statusOptions]" class="w-full" /></label></div>
+        <div class="pp-form-grid two"><label><span>打卡周期（分钟）</span><YdNumberField v-model="model.projectForm.minCheckInIntervalMinutes" :min="0" class="w-full" /><p class="pp-help">1440 表示每天至少打卡一次，0 表示不限制周期。</p></label><label><span>允许打卡方式</span><YdCheckboxGroup v-model="model.projectForm.allowedCheckInTypes" :options="checkInTypeOptions" class="pp-checkbox-grid" /></label></div>
+        <div class="pp-form-grid three"><label><span>本项目 MC 打卡</span><YdSwitch v-model="model.projectForm.minecraftPolicy.enabled" /></label><label><span>满足时长自动打卡</span><YdSwitch v-model="model.projectForm.minecraftPolicy.autoCheckInEnabled" /></label><label><span>AFK 计入在线时长</span><YdSwitch v-model="model.projectForm.minecraftPolicy.includeAfk" /></label></div>
+        <div class="pp-form-grid two"><label><span>Minecraft 服务器</span><YdSelect :model-value="model.projectForm.minecraftPolicy.serverId" :options="serverOptions" class="w-full" :disabled="!model.projectForm.minecraftPolicy.enabled" @update:model-value="value => model.changeMinecraftServer(String(value || ''))" /></label><label><span>要求在线分钟</span><YdNumberField v-model="model.projectForm.minecraftPolicy.requiredOnlineMinutes" :min="1" class="w-full" :disabled="!model.projectForm.minecraftPolicy.enabled" /></label></div>
+        <div v-if="model.projectForm.minecraftPolicy.enabled && model.subServersOf(model.projectForm.minecraftPolicy.serverId).length" class="pp-form-grid two"><label><span>子服</span><YdSelect v-model="model.projectForm.minecraftPolicy.subServer" :options="minecraftSubServerOptions" placeholder="整服（不限子服）" class="w-full" /><p class="pp-help">留空表示整服口径：把该玩家在这台服务器全部子服上的时长相加。选择某一台后只按那台计时长。</p></label></div>
+        <div class="pp-form-grid two"><label><span>发布通知连接</span><YdSelect v-model="model.projectForm.notificationConnectionId" :options="model.notificationConnections.map(item => ({ label: `${item.name}（${item.protocol === 'official' ? '官方 QQ' : item.protocol === 'milky' ? 'Milky' : item.platform || '未知平台'}）`, value: item.id }))" class="w-full" clearable /></label><label><span>发布通知群号</span><YdInput v-model="model.projectForm.notificationChannelId" class="w-full" placeholder="Milky 群号或官方群 openid" /></label></div>
       </div>
-      <template #footer><FaButton variant="outline" @click="modalVisible = false">取消</FaButton><FaButton :loading="model.saving" @click="saveProject">保存项目</FaButton></template>
-    </FaModal>
+      <template #footer><YdButton variant="outline" @click="modalVisible = false">取消</YdButton><YdButton :loading="model.saving" @click="saveProject">保存项目</YdButton></template>
+    </YdModal>
   </section>
 </template>
