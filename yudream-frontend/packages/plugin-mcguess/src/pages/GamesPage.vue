@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { McguessPluginModel } from '../composables/useMcguessPlugin'
 import type { McguessGameView } from '../types'
-import { FaButton, FaCard, FaIcon, FaPageHeader, FaPageMain, FaPagination, FaSearchBar, FaSelect, FaResponsiveTable, FaTag } from '@yudream/components'
+import { YdButton, YdCard, YdIcon, YdPageHeader, YdPageMain, YdPagination, YdSearchBar, YdSelect, YdResponsiveTable, YdTag } from '@yudream/components'
 
 defineProps<{ model: McguessPluginModel }>()
 const modeOptions = [
@@ -36,12 +37,12 @@ function statusVariant(status: string) { return status === 'WON' ? 'default' : '
 </script>
 
 <template>
-  <FaPageHeader title="对局记录" class="mb-0">
-    <FaButton variant="outline" :loading="model.loading" @click="model.loadGames"><FaIcon name="i-ri:refresh-line" />刷新</FaButton>
-  </FaPageHeader>
-  <FaPageMain>
-    <FaResponsiveTable
-      v-loading="model.loading"
+  <YdPageHeader title="对局记录" class="mb-0">
+    <YdButton variant="outline" :loading="model.loading" @click="model.loadGames"><YdIcon name="i-ri:refresh-line" />刷新</YdButton>
+  </YdPageHeader>
+  <YdPageMain>
+    <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable
+
       :columns="columns"
       :data="model.games"
       row-key="id"
@@ -51,27 +52,27 @@ function statusVariant(status: string) { return status === 'WON' ? 'default' : '
       empty-text="暂无对局记录"
     >
       <template #toolbar>
-        <FaSearchBar class="w-full">
+        <YdSearchBar class="w-full">
           <div class="mcguess-filter-bar">
-            <FaSelect v-model="model.gameFilters.mode" :options="modeOptions" @change="model.applyGameFilters" />
-            <FaSelect v-model="model.gameFilters.status" :options="statusOptions" @change="model.applyGameFilters" />
+            <YdSelect v-model="model.gameFilters.mode" :options="modeOptions" @change="model.applyGameFilters" />
+            <YdSelect v-model="model.gameFilters.status" :options="statusOptions" @change="model.applyGameFilters" />
           </div>
-        </FaSearchBar>
+        </YdSearchBar>
       </template>
       <template #cell-channel="{ row }">{{ row.original.channelId }}</template>
       <template #cell-mode="{ row }">{{ row.original.modeZh }}</template>
       <template #cell-target="{ row }"><strong>{{ row.original.target }}</strong></template>
       <template #cell-progress="{ row }">{{ row.original.guessCount }}</template>
-      <template #cell-status="{ row }"><FaTag :variant="statusVariant(row.original.status)">{{ model.gameStatusLabel(row.original.status) }}</FaTag></template>
+      <template #cell-status="{ row }"><YdTag :variant="statusVariant(row.original.status)">{{ model.gameStatusLabel(row.original.status) }}</YdTag></template>
       <template #cell-winner="{ row }">{{ row.original.winnerQq || '-' }}</template>
       <template #cell-startedAt="{ row }">{{ model.formatTime(row.original.startedAt) }}</template>
       <template #cell-endedAt="{ row }">{{ model.formatTime(row.original.endedAt) }}</template>
       <template #card="{ row }">
-        <FaCard class="w-full">
+        <YdCard class="w-full">
           <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between gap-2">
               <span class="min-w-0 break-words text-base font-semibold">{{ row.target }}</span>
-              <FaTag :variant="statusVariant(row.status)">{{ model.gameStatusLabel(row.status) }}</FaTag>
+              <YdTag :variant="statusVariant(row.status)">{{ model.gameStatusLabel(row.status) }}</YdTag>
             </div>
             <div class="flex flex-col gap-1 text-sm">
               <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">群聊</span><span class="break-all">{{ row.channelId }}</span></div>
@@ -81,9 +82,9 @@ function statusVariant(status: string) { return status === 'WON' ? 'default' : '
               <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">开始时间</span><span>{{ model.formatTime(row.startedAt) }}</span></div>
             </div>
           </div>
-        </FaCard>
+        </YdCard>
       </template>
-    </FaResponsiveTable>
-    <FaPagination v-model:page="model.gamePager.page" v-model:size="model.gamePager.size" :total="model.gamePager.total" class="mt-3" @page-change="model.loadGames" @size-change="model.applyGameFilters" />
-  </FaPageMain>
+    </YdResponsiveTable></YdLoadingOverlay>
+    <YdPagination v-model:page="model.gamePager.page" v-model:size="model.gamePager.size" :total="model.gamePager.total" class="mt-3" @page-change="model.loadGames" @size-change="model.applyGameFilters" />
+  </YdPageMain>
 </template>

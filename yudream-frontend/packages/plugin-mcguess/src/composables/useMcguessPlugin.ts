@@ -1,12 +1,12 @@
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { GameFilters, McguessGameView, McguessMyStats, McguessOverview, McguessPlayerView, McguessSettings } from '../types'
-import { useFaToast } from '@yudream/components'
+import { useYdToast } from '@yudream/components'
 import { computed, reactive, ref } from 'vue'
 import { createMcguessApi } from '../api/mcguess-api'
 
 export function useMcguessPlugin(sdk: YuDreamPluginSdk) {
   const api = createMcguessApi(sdk)
-  const toast = useFaToast()
+  const toast = useYdToast()
   const loading = ref(false)
   const overview = ref<McguessOverview | null>(null)
   const games = ref<McguessGameView[]>([])
