@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { TableColumn } from '@yudream/components'
-import { FaAlert, FaButton, FaCard, FaIcon, FaInput, FaModal, FaPageHeader, FaPageMain, FaPagination, FaProgress, FaResponsiveTable, FaTag, useFaModal, useFaToast } from '@yudream/components'
+import { YdAction, YdAlert, YdButton, YdCard, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdProgress, YdResponsiveTable, YdTag, useYdModal, useYdToast } from '@yudream/components'
 import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createNodeOpsApi } from '../../api/node-ops-api.ts'
@@ -19,8 +20,8 @@ const api = createNodeOpsApi(props.sdk)
 const panel = createMcPanelApi(props.sdk)
 const route = useRoute()
 const router = useRouter()
-const toast = useFaToast()
-const modal = useFaModal()
+const toast = useYdToast()
+const modal = useYdModal()
 const nodeId = computed(() => String(route.params.id ?? ''))
 const canManage = computed(() => accountHasPermission(props.sdk.account, MCPANEL_PERMISSION.manage))
 const name = ref('')
@@ -195,47 +196,47 @@ onBeforeUnmount(() => { generation++; request++; download.cancel() })
 </script>
 
 <template>
-  <FaPageHeader :title="`${name || '节点'} · 文件管理`" description="白名单内的节点文件 · 在线编辑与安全传输" class="mb-0">
-    <FaButton variant="outline" @click="router.push(`/platform/plugins/mcpanel/admin/nodes/${nodeId}`)"><FaIcon name="i-ri:arrow-left-line" />节点详情</FaButton>
-    <FaButton v-if="canManage" variant="outline" :loading="ftpBusy" @click="enableFtp"><FaIcon name="i-ri:key-2-line" />SFTP 连接</FaButton>
-    <FaButton v-if="canManage" @click="openForm()"><FaIcon name="i-ri:folder-add-line" />新建目录</FaButton>
-  </FaPageHeader>
-  <FaPageMain class="mcp-file-page">
+  <YdPageHeader :title="`${name || '节点'} · 文件管理`" description="白名单内的节点文件 · 在线编辑与安全传输" class="mb-0">
+    <YdButton variant="outline" @click="router.push(`/platform/plugins/mcpanel/admin/nodes/${nodeId}`)"><YdIcon name="i-ri:arrow-left-line" />节点详情</YdButton>
+    <YdButton v-if="canManage" variant="outline" :loading="ftpBusy" @click="enableFtp"><YdIcon name="i-ri:key-2-line" />SFTP 连接</YdButton>
+    <YdButton v-if="canManage" @click="openForm()"><YdIcon name="i-ri:folder-add-line" />新建目录</YdButton>
+  </YdPageHeader>
+  <YdPageMain class="mcp-file-page">
     <div class="mcp-file-location">
-      <FaButton size="sm" variant="outline" :aria-expanded="sideOpen" @click="sideOpen = !sideOpen"><FaIcon name="i-ri:side-bar-line" />目录</FaButton>
+      <YdButton size="sm" variant="outline" :aria-expanded="sideOpen" @click="sideOpen = !sideOpen"><YdIcon name="i-ri:side-bar-line" />目录</YdButton>
       <nav class="mcp-file-path" aria-label="当前文件目录">
-        <template v-for="(crumb, index) in crumbs" :key="crumb.path"><span v-if="index" class="mcp-muted">/</span><FaButton size="sm" variant="ghost" @click="navigate(crumb.path)">{{ crumb.label }}</FaButton></template>
+        <template v-for="(crumb, index) in crumbs" :key="crumb.path"><span v-if="index" class="mcp-muted">/</span><YdButton size="sm" variant="ghost" @click="navigate(crumb.path)">{{ crumb.label }}</YdButton></template>
       </nav>
-      <FaTag variant="outline">{{ root || '默认根目录' }}</FaTag>
+      <YdTag variant="outline">{{ root || '默认根目录' }}</YdTag>
     </div>
     <div class="mcp-files-split" :class="{ 'is-side-open': sideOpen }">
       <aside v-if="sideOpen" class="mcp-files-side"><FileBrowserPanel :key="`${nodeId}:${root}`" :list="listSide" :open-file="edit" title="文件浏览" /></aside>
       <div class="mcp-files-main">
-        <div class="mcp-file-search"><FaInput v-model="keyword" clearable placeholder="搜索当前目录" @keydown.enter="search" @clear="search" /><FaButton variant="outline" :loading="loading" @click="search"><FaIcon name="i-ri:refresh-line" />刷新</FaButton></div>
-        <FaAlert v-if="error" variant="destructive" title="目录加载失败" class="mb-4">{{ error }}</FaAlert>
-        <div v-if="download.active.value" class="mcp-download-status"><FaIcon name="i-ri:download-line" /><span>{{ download.fileName.value }}</span><FaProgress :model-value="download.progress.value" /><span>{{ download.progress.value }}%</span><FaButton size="sm" variant="outline" @click="download.cancel">取消</FaButton></div>
-        <FaResponsiveTable v-loading="loading" :data="rows" :columns="columns" row-key="name" table-root-class="rounded-lg overflow-hidden" table-class="min-w-[800px]" border stripe column-visibility :empty-text="error ? '未能读取目录' : keyword ? '没有匹配的文件' : '此目录为空'">
-          <template #cell-name="{ row }"><FaButton variant="ghost" class="mcp-file-name" @click="enter(row.original)"><FaIcon :name="row.original.isDir ? 'i-ri:folder-3-line' : 'i-ri:file-text-line'" />{{ row.original.name }}</FaButton></template>
+        <div class="mcp-file-search"><YdInput v-model="keyword" clearable placeholder="搜索当前目录" @keydown.enter="search" @clear="search" /><YdButton variant="outline" :loading="loading" @click="search"><YdIcon name="i-ri:refresh-line" />刷新</YdButton></div>
+        <YdAlert v-if="error" variant="destructive" title="目录加载失败" class="mb-4">{{ error }}</YdAlert>
+        <div v-if="download.active.value" class="mcp-download-status"><YdIcon name="i-ri:download-line" /><span>{{ download.fileName.value }}</span><YdProgress :model-value="download.progress.value" /><span>{{ download.progress.value }}%</span><YdButton size="sm" variant="outline" @click="download.cancel">取消</YdButton></div>
+        <YdLoadingOverlay :loading="loading"><YdResponsiveTable  :data="rows" :columns="columns" row-key="name" table-root-class="rounded-lg overflow-hidden" table-class="min-w-[800px]" border stripe column-visibility :empty-text="error ? '未能读取目录' : keyword ? '没有匹配的文件' : '此目录为空'">
+          <template #cell-name="{ row }"><YdButton variant="ghost" class="mcp-file-name" @click="enter(row.original)"><YdIcon :name="row.original.isDir ? 'i-ri:folder-3-line' : 'i-ri:file-text-line'" />{{ row.original.name }}</YdButton></template>
           <template #cell-type="{ row }">{{ row.original.isDir ? '目录' : '文件' }}</template>
           <template #cell-size="{ row }">{{ row.original.isDir ? '—' : formatSize(row.original.size) }}</template>
           <template #cell-modTime="{ row }">{{ formatDateTime(row.original.modTime as number | string) }}</template>
           <template #cell-operation="{ row }"><div class="mcp-op-cell">
-            <FaButton v-if="!row.original.isDir" size="sm" variant="outline" @click="edit(filePath(row.original))">打开</FaButton>
-            <FaButton v-if="!row.original.isDir" size="icon-sm" variant="ghost" title="下载文件" :disabled="download.active.value" @click="downloadRow(row.original)"><FaIcon name="i-ri:download-2-line" /></FaButton>
-            <FaButton v-if="canManage" size="icon-sm" variant="ghost" title="重命名或移动" :disabled="busy" @click="openForm(row.original)"><FaIcon name="i-ri:edit-line" /></FaButton>
-            <FaButton v-if="canManage" size="icon-sm" variant="ghost" title="删除" class="text-destructive" :disabled="busy" @click="remove(row.original)"><FaIcon name="i-ri:delete-bin-line" /></FaButton>
+            <YdButton v-if="!row.original.isDir" size="sm" variant="outline" @click="edit(filePath(row.original))">打开</YdButton>
+            <YdButton v-if="!row.original.isDir" size="icon-sm" variant="ghost" title="下载文件" :disabled="download.active.value" @click="downloadRow(row.original)"><YdIcon name="i-ri:download-2-line" /></YdButton>
+            <YdButton v-if="canManage" size="icon-sm" variant="ghost" title="重命名或移动" :disabled="busy" @click="openForm(row.original)"><YdIcon name="i-ri:edit-line" /></YdButton>
+            <YdButton v-if="canManage" size="icon-sm" variant="ghost" title="删除" class="text-destructive" :disabled="busy" @click="remove(row.original)"><YdIcon name="i-ri:delete-bin-line" /></YdButton>
           </div></template>
           <template #card="{ row }">
-            <FaCard class="w-full">
+            <YdCard class="w-full">
               <div class="flex flex-col gap-3">
                 <div class="flex items-center justify-between gap-2">
-                  <button type="button" class="mcp-file-name min-w-0" @click="enter(row)">
-                    <FaIcon :name="row.isDir ? 'i-ri:folder-3-line' : 'i-ri:file-text-line'" />
+                  <YdAction type="button" class="mcp-file-name min-w-0" @click="enter(row)">
+                    <YdIcon :name="row.isDir ? 'i-ri:folder-3-line' : 'i-ri:file-text-line'" />
                     <span class="min-w-0 break-all">{{ row.name }}</span>
-                  </button>
-                  <FaTag :variant="row.isDir ? 'secondary' : 'outline'">
+                  </YdAction>
+                  <YdTag :variant="row.isDir ? 'secondary' : 'outline'">
                     {{ row.isDir ? '目录' : '文件' }}
-                  </FaTag>
+                  </YdTag>
                 </div>
                 <div class="flex flex-col gap-1 text-sm">
                   <div class="flex gap-2">
@@ -248,32 +249,32 @@ onBeforeUnmount(() => { generation++; request++; download.cancel() })
                   </div>
                 </div>
                 <div class="flex flex-wrap gap-2 border-t pt-3">
-                  <FaButton v-if="!row.isDir" size="sm" variant="outline" @click="edit(filePath(row))">
+                  <YdButton v-if="!row.isDir" size="sm" variant="outline" @click="edit(filePath(row))">
                     打开
-                  </FaButton>
-                  <FaButton v-if="!row.isDir" size="sm" variant="outline" :disabled="download.active.value" @click="downloadRow(row)">
+                  </YdButton>
+                  <YdButton v-if="!row.isDir" size="sm" variant="outline" :disabled="download.active.value" @click="downloadRow(row)">
                     下载
-                  </FaButton>
-                  <FaButton v-if="canManage" size="sm" variant="outline" :disabled="busy" @click="openForm(row)">
+                  </YdButton>
+                  <YdButton v-if="canManage" size="sm" variant="outline" :disabled="busy" @click="openForm(row)">
                     重命名
-                  </FaButton>
-                  <FaButton v-if="canManage" size="sm" variant="ghost" class="text-destructive" :disabled="busy" @click="remove(row)">
+                  </YdButton>
+                  <YdButton v-if="canManage" size="sm" variant="ghost" class="text-destructive" :disabled="busy" @click="remove(row)">
                     删除
-                  </FaButton>
+                  </YdButton>
                 </div>
               </div>
-            </FaCard>
+            </YdCard>
           </template>
-        </FaResponsiveTable>
-        <FaPagination v-model:page="pager.page" v-model:size="pager.size" :sizes="[10, 20, 50, 100]" :total="pager.total" class="mt-3" @page-change="() => load()" @size-change="search" />
+        </YdResponsiveTable></YdLoadingOverlay>
+        <YdPagination v-model:page="pager.page" v-model:size="pager.size" :sizes="[10, 20, 50, 100]" :total="pager.total" class="mt-3" @page-change="() => load()" @size-change="search" />
       </div>
     </div>
-    <FaModal v-model="formOpen" :title="formKind === 'mkdir' ? '新建目录' : '重命名 / 移动'" :confirm-button-loading="busy" :before-close="(action, done) => action === 'confirm' ? submit(done) : busy ? undefined : done()">
-      <div class="mcp-form"><label class="mcp-form-item"><span>{{ formKind === 'mkdir' ? `在 /${directory} 下创建` : '目标路径（相对根目录）' }}</span><FaInput v-model="target" placeholder="请输入名称或相对路径" /></label><FaAlert v-if="formError" title="无法保存" variant="destructive">{{ formError }}</FaAlert></div>
-    </FaModal>
-    <FaModal v-model="ftpOpen" title="SFTP 临时连接" :footer="false">
-      <template v-if="ftp"><p class="mcp-form-hint">凭据仅用于当前白名单目录，到期自动失效，请勿外传。</p><div class="mcp-ftp-box"><div>主机：{{ ftp.host || '节点地址' }}</div><div>端口：{{ ftp.port }}</div><div>用户：{{ ftp.user }}</div><div>密码：{{ ftp.password }}</div><div>到期：{{ formatDateTime(ftp.expiresAt as number | string) }}</div></div><FaButton variant="destructive" :loading="ftpBusy" class="mt-4" @click="disableFtp">关闭 SFTP 会话</FaButton></template>
-    </FaModal>
+    <YdModal v-model="formOpen" :title="formKind === 'mkdir' ? '新建目录' : '重命名 / 移动'" :confirm-button-loading="busy" :before-close="(action, done) => action === 'confirm' ? submit(done) : busy ? undefined : done()">
+      <div class="mcp-form"><label class="mcp-form-item"><span>{{ formKind === 'mkdir' ? `在 /${directory} 下创建` : '目标路径（相对根目录）' }}</span><YdInput v-model="target" placeholder="请输入名称或相对路径" /></label><YdAlert v-if="formError" title="无法保存" variant="destructive">{{ formError }}</YdAlert></div>
+    </YdModal>
+    <YdModal v-model="ftpOpen" title="SFTP 临时连接" :footer="false">
+      <template v-if="ftp"><p class="mcp-form-hint">凭据仅用于当前白名单目录，到期自动失效，请勿外传。</p><div class="mcp-ftp-box"><div>主机：{{ ftp.host || '节点地址' }}</div><div>端口：{{ ftp.port }}</div><div>用户：{{ ftp.user }}</div><div>密码：{{ ftp.password }}</div><div>到期：{{ formatDateTime(ftp.expiresAt as number | string) }}</div></div><YdButton variant="destructive" :loading="ftpBusy" class="mt-4" @click="disableFtp">关闭 SFTP 会话</YdButton></template>
+    </YdModal>
     <FileEditorModal
       v-model="editorOpen"
       title="节点文件编辑"
@@ -285,5 +286,5 @@ onBeforeUnmount(() => { generation++; request++; download.cancel() })
       :initial-directory="editorDirectory"
       @saved="() => load()"
     />
-  </FaPageMain>
+  </YdPageMain>
 </template>

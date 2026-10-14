@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { FaAlert, FaButton, FaCard, FaDescriptions, FaIcon, FaPageHeader, FaPageMain, FaSwitch, FaTag, useFaModal, useFaToast } from '@yudream/components'
+import { YdAlert, YdButton, YdCard, YdDescriptions, YdIcon, YdPageHeader, YdPageMain, YdSwitch, YdTag, useYdModal, useYdToast } from '@yudream/components'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createMcPanelExtra } from '../../api/api-extra.ts'
@@ -16,8 +17,8 @@ import { errorMessage } from '../../composables/utils.ts'
  */
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 const extra = createMcPanelExtra(props.sdk)
-const toast = useFaToast()
-const modal = useFaModal()
+const toast = useYdToast()
+const modal = useYdModal()
 const route = useRoute()
 const router = useRouter()
 
@@ -272,54 +273,54 @@ watch(instanceId, (now, was) => {
 </script>
 
 <template>
-  <FaPageHeader
+  <YdPageHeader
     :title="`实例域名 · ${instanceName || instanceId}`"
     description="按面板配置的云解析自动写入 A / SRV 记录，玩家免端口直连"
   >
-    <FaButton variant="outline" @click="router.push(detailPath)">
+    <YdButton variant="outline" @click="router.push(detailPath)">
       返回控制台
-    </FaButton>
-    <FaButton variant="outline" @click="router.push(filesPath)">
+    </YdButton>
+    <YdButton variant="outline" @click="router.push(filesPath)">
       文件管理
-    </FaButton>
-  </FaPageHeader>
+    </YdButton>
+  </YdPageHeader>
 
-  <FaPageMain v-loading="loading" class="flex flex-col gap-4">
-    <FaAlert v-if="loadError" variant="destructive" title="无法加载域名状态">
+  <YdLoadingOverlay :loading="loading"><YdPageMain  class="flex flex-col gap-4">
+    <YdAlert v-if="loadError" variant="destructive" title="无法加载域名状态">
       <template #description>
         {{ loadError }}
       </template>
-    </FaAlert>
+    </YdAlert>
 
-    <FaAlert v-else-if="view && !view.available" variant="default" title="域名自动解析不可用">
+    <YdAlert v-else-if="view && !view.available" variant="default" title="域名自动解析不可用">
       <template #description>
         {{ view.reason || '面板未配置云解析驱动。' }}
         <span>可由管理员在「面板设置 → 实例域名」选择驱动（Cloudflare / 阿里云 / 腾讯云）并填写凭据。</span>
       </template>
-    </FaAlert>
+    </YdAlert>
 
-    <FaCard
+    <YdCard
       v-else-if="view"
       title="自动解析"
       :description="view.assigned
         ? `已分配：${view.fqdn}`
         : `未分配；将使用 ${view.suggestedSlug || '-'}.${view.suffix || '-'}`"
     >
-      <FaDescriptions :items="basicItems" :column="2" border />
+      <YdDescriptions :items="basicItems" :column="2" border />
 
-      <FaAlert v-if="view.blockReason" variant="default" title="当前节点的接入方式无法写公网解析" class="mcp-page-gap">
+      <YdAlert v-if="view.blockReason" variant="default" title="当前节点的接入方式无法写公网解析" class="mcp-page-gap">
         <template #description>
           {{ view.blockReason }}
           <span>如需公网域名，可在「节点管理 → 编辑节点」把玩家接入方式改为「自定义解析地址」或「FRP 入口」。</span>
         </template>
-      </FaAlert>
+      </YdAlert>
 
       <div
         v-if="view.entryHint"
         class="mcp-page-gap rounded-xl border px-4 py-2 text-xs"
         :class="view.entryApiReady ? 'text-muted-foreground' : 'border-amber-500/40 bg-amber-500/5 text-amber-700 dark:text-amber-400'"
       >
-        <FaIcon name="i-ri:git-branch-line" class="mr-1" />
+        <YdIcon name="i-ri:git-branch-line" class="mr-1" />
         {{ view.entryHint }}
         <span v-if="view.entryApiReady">
           变更后可在「面板设置 → 单端口入口」点「立即对账」补齐；入口侧需开 PROXY protocol 才能让实例看到真实玩家 IP。
@@ -333,11 +334,11 @@ watch(instanceId, (now, was) => {
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div class="min-w-0">
             <div class="flex flex-wrap items-center gap-2 text-sm font-medium">
-              <FaIcon name="i-ri:shield-user-line" class="text-primary" />
+              <YdIcon name="i-ri:shield-user-line" class="text-primary" />
               PROXY protocol（真实玩家 IP）
-              <FaTag :variant="proxyProtocol.enabled ? 'default' : 'secondary'">
+              <YdTag :variant="proxyProtocol.enabled ? 'default' : 'secondary'">
                 {{ proxyProtocol.enabled ? '已开启' : '未开启' }}
-              </FaTag>
+              </YdTag>
             </div>
             <p class="mt-1 text-xs text-muted-foreground">
               经入口转发的连接必须让实例接收 PROXY 头，否则玩家 IP 会显示为入口机地址（封禁/日志/白名单都会失真）。
@@ -351,7 +352,7 @@ watch(instanceId, (now, was) => {
               {{ proxyProtocol.reason }}
             </p>
           </div>
-          <FaButton
+          <YdButton
             v-if="canManage"
             :variant="proxyProtocol.enabled ? 'outline' : 'default'"
             :loading="proxyBusy"
@@ -359,46 +360,46 @@ watch(instanceId, (now, was) => {
             @click="toggleProxyProtocol(!proxyProtocol.enabled)"
           >
             {{ proxyProtocol.enabled ? '关闭 PROXY protocol' : '一键开启' }}
-          </FaButton>
+          </YdButton>
         </div>
       </div>
 
       <div class="mcp-toolbar-row mcp-page-gap">
         <label class="flex items-center gap-2 text-sm">
-          <FaSwitch v-model="withSrv" />
+          <YdSwitch v-model="withSrv" />
           <span>同时写 SRV（{{ view.srvName || '-' }}）</span>
         </label>
         <div class="mcp-spacer mcp-row">
-          <FaButton v-if="canManage" variant="outline" :disabled="!!busy || !!view.blockReason" @click="verify">
-            <FaIcon name="i-ri:shield-check-line" />
+          <YdButton v-if="canManage" variant="outline" :disabled="!!busy || !!view.blockReason" @click="verify">
+            <YdIcon name="i-ri:shield-check-line" />
             校验解析
-          </FaButton>
-          <FaButton
+          </YdButton>
+          <YdButton
             v-if="view.assigned"
             variant="outline"
             :disabled="!view.connectAddress"
             @click="copyAddress"
           >
-            <FaIcon name="i-ri:file-copy-line" />
+            <YdIcon name="i-ri:file-copy-line" />
             复制连接地址
-          </FaButton>
-          <FaButton
+          </YdButton>
+          <YdButton
             v-if="canManage"
             :loading="busy === 'assign'"
             :disabled="!!busy || !!view.blockReason"
             @click="assign"
           >
-            <FaIcon name="i-ri:link" />
+            <YdIcon name="i-ri:link" />
             {{ view.assigned ? '重新同步' : '分配域名' }}
-          </FaButton>
-          <FaButton
+          </YdButton>
+          <YdButton
             v-if="canManage && view.assigned"
             variant="destructive"
             :disabled="!!busy"
             @click="release"
           >
             解除域名
-          </FaButton>
+          </YdButton>
         </div>
       </div>
 
@@ -411,18 +412,18 @@ watch(instanceId, (now, was) => {
         分配后玩家可用 <code class="rounded bg-muted px-1 font-mono">{{ view.fqdn }}</code>
         {{ view.port ? `（SRV 生效后免端口，否则为 ${view.fqdn}:${view.port}）` : '' }} 连接；解析生效通常需数十秒。
       </p>
-    </FaCard>
+    </YdCard>
 
-    <FaCard v-if="verified" title="解析校验">
+    <YdCard v-if="verified" title="解析校验">
       <div class="mb-3 flex flex-wrap items-center gap-2">
-        <FaTag :variant="verified.ok ? 'default' : 'destructive'">
+        <YdTag :variant="verified.ok ? 'default' : 'destructive'">
           {{ verified.ok ? '已生效' : '与期望值不一致' }}
-        </FaTag>
+        </YdTag>
         <span class="text-xs text-muted-foreground">
           实时回读云商记录（不依赖本地缓存）
         </span>
       </div>
-      <FaDescriptions
+      <YdDescriptions
         :column="2"
         border
         :items="[
@@ -436,6 +437,6 @@ watch(instanceId, (now, was) => {
           { label: 'SRV 记录结论', value: verified.srvOk ? '一致' : '不一致或未启用' },
         ]"
       />
-    </FaCard>
-  </FaPageMain>
+    </YdCard>
+  </YdPageMain></YdLoadingOverlay>
 </template>

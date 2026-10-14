@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { TableColumn } from '@yudream/components'
 import type { DescriptionItem } from '@yudream/components'
 import type { McpEnrollCredential, McpNode, McpNodeContainerStat, McpNodeStateEvent } from '../../types'
-import { FaAlert, FaButton, FaCard, FaDescriptions, FaIcon, FaPageHeader, FaPageMain, FaProgress, FaResponsiveTable, FaTag, useFaModal, useFaToast } from '@yudream/components'
+import { YdAlert, YdButton, YdCard, YdDescriptions, YdIcon, YdPageHeader, YdPageMain, YdProgress, YdResponsiveTable, YdTag, useYdModal, useYdToast } from '@yudream/components'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createMcPanelApi } from '../../api/mcpanel-api'
@@ -25,8 +26,8 @@ const props = defineProps<{
 }>()
 
 const api = createMcPanelApi(props.sdk)
-const toast = useFaToast()
-const modal = useFaModal()
+const toast = useYdToast()
+const modal = useYdModal()
 const router = useRouter()
 const route = useRoute()
 
@@ -279,91 +280,91 @@ onMounted(() => {
 </script>
 
 <template>
-  <FaPageHeader :title="node?.name || '节点详情'" class="mb-0">
-    <FaButton variant="outline" @click="goList">
-      <FaIcon name="i-ri:arrow-left-line" />
+  <YdPageHeader :title="node?.name || '节点详情'" class="mb-0">
+    <YdButton variant="outline" @click="goList">
+      <YdIcon name="i-ri:arrow-left-line" />
       返回列表
-    </FaButton>
+    </YdButton>
     <template v-if="node">
-      <FaButton v-if="canUse && node.hasSecret" variant="outline" @click="router.push(`/platform/plugins/mcpanel/admin/nodes/${nodeId}/terminal`)">
-        <FaIcon name="i-ri:terminal-line" />
+      <YdButton v-if="canUse && node.hasSecret" variant="outline" @click="router.push(`/platform/plugins/mcpanel/admin/nodes/${nodeId}/terminal`)">
+        <YdIcon name="i-ri:terminal-line" />
         终端
-      </FaButton>
-      <FaButton v-if="canManage && node.hasSecret" variant="outline" @click="router.push(`/platform/plugins/mcpanel/admin/nodes/${nodeId}/files`)">
-        <FaIcon name="i-ri:folder-line" />
+      </YdButton>
+      <YdButton v-if="canManage && node.hasSecret" variant="outline" @click="router.push(`/platform/plugins/mcpanel/admin/nodes/${nodeId}/files`)">
+        <YdIcon name="i-ri:folder-line" />
         文件
-      </FaButton>
-      <FaButton v-if="canManage" variant="outline" :loading="reconnecting" @click="reconnect">
-        <FaIcon name="i-ri:refresh-line" />
+      </YdButton>
+      <YdButton v-if="canManage" variant="outline" :loading="reconnecting" @click="reconnect">
+        <YdIcon name="i-ri:refresh-line" />
         重连
-      </FaButton>
-      <FaButton v-if="canManage && node.hasSecret === false" variant="outline" :loading="issuing" @click="issueEnrollment">
-        <FaIcon name="i-ri:key-2-line" />
+      </YdButton>
+      <YdButton v-if="canManage && node.hasSecret === false" variant="outline" :loading="issuing" @click="issueEnrollment">
+        <YdIcon name="i-ri:key-2-line" />
         签发注册凭据
-      </FaButton>
-      <FaButton v-if="canManage" variant="outline" @click="formOpen = true">
-        <FaIcon name="i-ri:edit-line" />
+      </YdButton>
+      <YdButton v-if="canManage" variant="outline" @click="formOpen = true">
+        <YdIcon name="i-ri:edit-line" />
         编辑
-      </FaButton>
-      <FaButton v-if="canDelete" variant="destructive" :loading="deleting" @click="confirmDelete">
-        <FaIcon name="i-ri:delete-bin-line" />
+      </YdButton>
+      <YdButton v-if="canDelete" variant="destructive" :loading="deleting" @click="confirmDelete">
+        <YdIcon name="i-ri:delete-bin-line" />
         删除
-      </FaButton>
+      </YdButton>
     </template>
-  </FaPageHeader>
+  </YdPageHeader>
 
-  <FaAlert v-if="loadError" variant="destructive" title="无法加载节点" class="mt-4">
+  <YdAlert v-if="loadError" variant="destructive" title="无法加载节点" class="mt-4">
   <template #description>
     {{ loadError }}
   </template>
-  </FaAlert>
+  </YdAlert>
 
-  <FaPageMain v-else v-loading="loading">
+  <YdLoadingOverlay :loading="loading" v-else><YdPageMain  >
     <div class="mcp-status-row">
       <NodeStatusTag :status="displayStatus" />
-      <FaTag v-if="node?.enabled === false" variant="secondary">
+      <YdTag v-if="node?.enabled === false" variant="secondary">
         已停用
-      </FaTag>
-      <FaTag v-else-if="node?.connected" variant="secondary">
+      </YdTag>
+      <YdTag v-else-if="node?.connected" variant="secondary">
         控制信道已连接
-      </FaTag>
+      </YdTag>
       <span class="mcp-status-meta">最近心跳：{{ relativeSeenText(node?.lastSeenAt) }}</span>
-      <FaTag v-if="liveReason" variant="secondary">{{ liveReason }}</FaTag>
+      <YdTag v-if="liveReason" variant="secondary">{{ liveReason }}</YdTag>
       <span class="mcp-stream-state" :class="`is-${streamState}`">{{ streamText }}</span>
     </div>
 
-    <FaAlert v-if="displayStatus === 'enrolling'" class="mt-4" title="节点尚未完成注册">
+    <YdAlert v-if="displayStatus === 'enrolling'" class="mt-4" title="节点尚未完成注册">
   <template #description>
       点击「签发注册凭据」获取一次性 token 并配置到节点；token 仅签发当次展示，遗失可重新签发。
   </template>
-    </FaAlert>
+    </YdAlert>
 
-    <FaCard title="节点信息" class="mt-4">
-      <FaDescriptions :items="descriptions" :column="2" border />
-    </FaCard>
+    <YdCard title="节点信息" class="mt-4">
+      <YdDescriptions :items="descriptions" :column="2" border />
+    </YdCard>
 
-    <FaCard title="实时资源（node.stats）" class="mt-4">
+    <YdCard title="实时资源（node.stats）" class="mt-4">
       <div v-if="stats" class="grid grid-cols-1 gap-4 md:grid-cols-3">
         <div class="mcp-stat">
           <div class="mcp-stat-head">
             <span>CPU</span>
             <strong>{{ formatPercent(cpuPercent) }}</strong>
           </div>
-          <FaProgress v-model="cpuPercent" class="mt-2" />
+          <YdProgress v-model="cpuPercent" class="mt-2" />
         </div>
         <div class="mcp-stat">
           <div class="mcp-stat-head">
             <span>内存</span>
             <strong>{{ formatMib(stats.memUsedMb) }} / {{ formatMib(stats.memTotalMb) }}</strong>
           </div>
-          <FaProgress v-model="memPercent" class="mt-2" />
+          <YdProgress v-model="memPercent" class="mt-2" />
         </div>
         <div class="mcp-stat">
           <div class="mcp-stat-head">
             <span>磁盘</span>
             <strong>{{ formatGib(stats.diskUsedGb) }} / {{ formatGib(stats.diskTotalGb) }}</strong>
           </div>
-          <FaProgress v-model="diskPercent" class="mt-2" />
+          <YdProgress v-model="diskPercent" class="mt-2" />
         </div>
       </div>
       <div v-else class="mcp-empty-hint">
@@ -378,7 +379,7 @@ onMounted(() => {
           <span>实例容器</span>
           <span class="mcp-status-meta">负载：{{ stats?.load ?? '-' }}</span>
         </div>
-        <FaResponsiveTable
+        <YdResponsiveTable
           :columns="containerColumns"
           :data="containers"
           row-key="instanceId"
@@ -395,13 +396,13 @@ onMounted(() => {
             {{ formatMib(toNumberOr(row.original.memUsedMb)) }}
           </template>
           <template #card="{ row }">
-            <FaCard class="w-full">
+            <YdCard class="w-full">
               <div class="flex flex-col gap-3">
                 <div class="flex items-center justify-between gap-2">
                   <span class="mcp-mono min-w-0 break-all text-sm font-semibold">{{ row.instanceId }}</span>
-                  <FaTag :variant="row.state === 'running' ? 'default' : 'secondary'">
+                  <YdTag :variant="row.state === 'running' ? 'default' : 'secondary'">
                     {{ row.state || '-' }}
-                  </FaTag>
+                  </YdTag>
                 </div>
                 <div class="flex flex-col gap-1 text-sm">
                   <div class="flex gap-2">
@@ -414,13 +415,13 @@ onMounted(() => {
                   </div>
                 </div>
               </div>
-            </FaCard>
+            </YdCard>
           </template>
-        </FaResponsiveTable>
+        </YdResponsiveTable>
       </div>
-    </FaCard>
+    </YdCard>
 
     <NodeFormModal v-model:open="formOpen" :api="api" :node="node" @saved="onSaved" />
     <EnrollCredentialModal v-model:open="credentialOpen" :credential="credential" />
-  </FaPageMain>
+  </YdPageMain></YdLoadingOverlay>
 </template>

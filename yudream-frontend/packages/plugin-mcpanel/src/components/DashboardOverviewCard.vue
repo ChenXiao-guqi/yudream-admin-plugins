@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { FaButton, FaIcon } from '@yudream/components'
+import { YdButton, YdIcon } from '@yudream/components'
 import { computed, onMounted, ref } from 'vue'
 import { createMcPanelExtra } from '../api/api-extra'
 import { errorMessage } from '../composables/utils'
@@ -35,8 +35,8 @@ async function load() {
 
 <template>
   <div class="dashboard-card__content mcp-dash-card">
-    <div v-if="loading" class="mcp-dash-card__state"><FaIcon name="i-ri:loader-4-line" class="animate-spin" />正在读取监控数据</div>
-    <div v-else-if="error" class="mcp-dash-card__state"><span>{{ error }}</span><FaButton size="sm" variant="ghost" @click="load">重试</FaButton></div>
+    <div v-if="loading" class="mcp-dash-card__state"><YdIcon name="i-ri:loader-4-line" class="animate-spin" />正在读取监控数据</div>
+    <div v-else-if="error" class="mcp-dash-card__state"><span>{{ error }}</span><YdButton size="sm" variant="ghost" @click="load">重试</YdButton></div>
     <template v-else>
       <div class="mcp-dash-card__readout" :class="{ 'mcp-dash-card__readout--empty': total === 0 }">
         <div class="mcp-dash-card__figure" :title="`${current} / ${total}`"><strong>{{ currentLabel }}</strong><span>/ {{ totalLabel }}</span><p>{{ instanceMode ? '运行中的实例' : '在线节点' }}</p></div>
@@ -48,7 +48,7 @@ async function load() {
       </div>
       <div class="mcp-dash-card__actions">
         <span>{{ total === 0 ? (instanceMode ? '还没有部署实例' : '还没有接入节点') : (instanceMode ? `${Math.max(0, total - current)} 个实例未运行` : `运行实例 ${instances.running ?? 0} / ${instances.total ?? 0}`) }}</span>
-        <FaButton v-if="card?.actionPath" size="sm" variant="ghost" class="mcp-dash-card__action shrink-0" @click="onOpen?.(card)">{{ instanceMode ? '实例管理' : '监控详情' }}<FaIcon name="i-ri:arrow-right-up-line" /></FaButton>
+        <YdButton v-if="card?.actionPath" size="sm" variant="ghost" class="mcp-dash-card__action shrink-0" @click="onOpen?.(card)">{{ instanceMode ? '实例管理' : '监控详情' }}<YdIcon name="i-ri:arrow-right-up-line" /></YdButton>
       </div>
     </template>
   </div>

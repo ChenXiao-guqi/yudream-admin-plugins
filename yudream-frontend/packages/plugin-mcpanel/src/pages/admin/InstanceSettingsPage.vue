@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { FaAlert, FaButton, FaCard, FaInput, FaModal, FaPageHeader, FaPageMain, FaSelect, FaSwitch, FaTag, FaTextarea, useFaToast } from '@yudream/components'
+import { YdAlert, YdButton, YdCard, YdInput, YdModal, YdPageHeader, YdPageMain, YdSelect, YdSwitch, YdTag, YdTextarea, useYdToast } from '@yudream/components'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createMcPanelExtra } from '../../api/api-extra'
@@ -13,7 +14,7 @@ import { errorMessage } from '../../composables/utils'
  */
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 const extra = createMcPanelExtra(props.sdk)
-const toast = useFaToast()
+const toast = useYdToast()
 const route = useRoute()
 const router = useRouter()
 
@@ -331,38 +332,38 @@ onMounted(() => {
 </script>
 
 <template>
-  <FaPageHeader :title="`实例设置 · ${instance?.name || instanceId}`" description="启动命令、环境变量、RCON / Ping、终端展示（对标 MCSM 实例设置）">
-    <FaButton variant="outline" @click="router.push(`/platform/plugins/mcpanel/admin/instances/${instanceId}`)">
+  <YdPageHeader :title="`实例设置 · ${instance?.name || instanceId}`" description="启动命令、环境变量、RCON / Ping、终端展示（对标 MCSM 实例设置）">
+    <YdButton variant="outline" @click="router.push(`/platform/plugins/mcpanel/admin/instances/${instanceId}`)">
       返回终端
-    </FaButton>
-    <FaButton v-if="canManage" :loading="saving" @click="save">
+    </YdButton>
+    <YdButton v-if="canManage" :loading="saving" @click="save">
       保存设置
-    </FaButton>
-  </FaPageHeader>
-  <FaPageMain v-loading="loading">
-    <FaAlert v-if="error" variant="destructive" class="mb-4">
+    </YdButton>
+  </YdPageHeader>
+  <YdLoadingOverlay :loading="loading"><YdPageMain >
+    <YdAlert v-if="error" variant="destructive" class="mb-4">
   <template #description>
       {{ error }}
   </template>
-    </FaAlert>
+    </YdAlert>
     <div class="mcp-grid-2">
-      <FaCard title="基础与启动">
+      <YdCard title="基础与启动">
         <div class="mcp-form">
-          <label class="mcp-form-item"><span class="mcp-form-label">名称</span><FaInput v-model="form.name" class="mcp-w-full" /></label>
-          <label class="mcp-form-item"><span class="mcp-form-label">启动命令</span><FaTextarea v-model="form.command" :rows="2" class="mcp-w-full mcp-mono" /></label>
+          <label class="mcp-form-item"><span class="mcp-form-label">名称</span><YdInput v-model="form.name" class="mcp-w-full" /></label>
+          <label class="mcp-form-item"><span class="mcp-form-label">启动命令</span><YdTextarea v-model="form.command" :rows="2" class="mcp-w-full mcp-mono" /></label>
           <div class="mcp-grid-3">
-            <label class="mcp-form-item"><span class="mcp-form-label">内存 MB</span><FaInput v-model="form.memoryMb" type="number" class="mcp-w-full" /></label>
-            <label class="mcp-form-item"><span class="mcp-form-label">CPU mCPU</span><FaInput v-model="form.cpuMillis" type="number" class="mcp-w-full" /></label>
-            <label class="mcp-form-item"><span class="mcp-form-label">磁盘 MB</span><FaInput v-model="form.diskMb" type="number" class="mcp-w-full" /></label>
+            <label class="mcp-form-item"><span class="mcp-form-label">内存 MB</span><YdInput v-model="form.memoryMb" type="number" class="mcp-w-full" /></label>
+            <label class="mcp-form-item"><span class="mcp-form-label">CPU mCPU</span><YdInput v-model="form.cpuMillis" type="number" class="mcp-w-full" /></label>
+            <label class="mcp-form-item"><span class="mcp-form-label">磁盘 MB</span><YdInput v-model="form.diskMb" type="number" class="mcp-w-full" /></label>
           </div>
-          <label class="mcp-form-item"><span class="mcp-form-label">环境变量（每行 KEY=VALUE）</span><FaTextarea v-model="form.envText" :rows="4" class="mcp-w-full mcp-mono" /></label>
-          <label class="mcp-form-item"><span class="mcp-form-label">备注</span><FaInput v-model="form.remark" class="mcp-w-full" /></label>
+          <label class="mcp-form-item"><span class="mcp-form-label">环境变量（每行 KEY=VALUE）</span><YdTextarea v-model="form.envText" :rows="4" class="mcp-w-full mcp-mono" /></label>
+          <label class="mcp-form-item"><span class="mcp-form-label">备注</span><YdInput v-model="form.remark" class="mcp-w-full" /></label>
         </div>
-      </FaCard>
-      <FaCard title="事件触发型任务">
+      </YdCard>
+      <YdCard title="事件触发型任务">
         <div class="mcp-form">
           <label class="flex items-start gap-3 text-sm">
-            <FaSwitch v-model="eventTask.autoRestart" />
+            <YdSwitch v-model="eventTask.autoRestart" />
             <span>
               <b>自动重启</b>
               <span class="mcp-form-hint block">
@@ -372,7 +373,7 @@ onMounted(() => {
             </span>
           </label>
           <label class="flex items-start gap-3 text-sm">
-            <FaSwitch v-model="eventTask.autoStart" />
+            <YdSwitch v-model="eventTask.autoStart" />
             <span>
               <b>自动启动</b>
               <span class="mcp-form-hint block">
@@ -385,29 +386,29 @@ onMounted(() => {
             自动拉起后若实例持续快速崩溃（60 秒内连续 3 次），会暂停自动重启并在审计中提示；手动启动一次即恢复。
           </span>
           <div v-if="canManage" class="flex justify-end">
-            <FaButton :loading="savingEventTask" @click="saveEventTask">
+            <YdButton :loading="savingEventTask" @click="saveEventTask">
               保存事件任务
-            </FaButton>
+            </YdButton>
           </div>
         </div>
-      </FaCard>
-      <FaCard title="Java 运行时（换版本 / 镜像源）">
+      </YdCard>
+      <YdCard title="Java 运行时（换版本 / 镜像源）">
         <div class="mcp-form">
           <label class="mcp-form-item">
             <span class="mcp-form-label">运行时目录</span>
-            <FaSelect v-model="imageDirectoryId" :options="imageDirectoryOptions" class="mcp-w-full" placeholder="选择 Java 版本对应的运行时" />
+            <YdSelect v-model="imageDirectoryId" :options="imageDirectoryOptions" class="mcp-w-full" placeholder="选择 Java 版本对应的运行时" />
           </label>
           <label v-if="selectedDirectory?.tags?.length" class="mcp-form-item">
             <span class="mcp-form-label">标签 / 拉取地址</span>
-            <FaSelect v-model="imageTag" :options="imageTagOptions" class="mcp-w-full" />
+            <YdSelect v-model="imageTag" :options="imageTagOptions" class="mcp-w-full" />
           </label>
           <div class="mcp-form-item">
             <span class="mcp-form-label">生效镜像</span>
             <div class="rounded-lg border bg-muted/40 px-3 py-2 font-mono text-xs break-all">
               {{ resolvedImage || String(instance?.image ?? '-') }}
-              <FaTag v-if="imageDirty" variant="secondary" class="ml-2">
+              <YdTag v-if="imageDirty" variant="secondary" class="ml-2">
                 已修改
-              </FaTag>
+              </YdTag>
             </div>
             <p class="mcp-form-hint">
               换 Java 版本 = 换 JRE 镜像。运行中的实例需先停止，保存后下次启动按新镜像重建容器；
@@ -415,33 +416,33 @@ onMounted(() => {
             </p>
           </div>
         </div>
-      </FaCard>
-      <FaCard title="端口管理（附加端口开放/回收）">
+      </YdCard>
+      <YdCard title="端口管理（附加端口开放/回收）">
         <div class="mcp-form">
-          <FaAlert v-if="running" icon="i-lucide:info" title="实例运行中">
+          <YdAlert v-if="running" icon="i-lucide:info" title="实例运行中">
             <template #description>
               开放或回收端口会重建容器，需先停止实例再操作。
             </template>
-          </FaAlert>
+          </YdAlert>
           <div
             v-for="row in portsView?.ports ?? []"
             :key="`${row.proto}-${row.hostPort}`"
             class="flex flex-wrap items-center gap-2 rounded-lg border px-3 py-2 text-sm sm:gap-3"
           >
-            <FaTag :variant="row.primary ? 'default' : 'secondary'">
+            <YdTag :variant="row.primary ? 'default' : 'secondary'">
               {{ row.primary ? '主端口' : '附加端口' }}
-            </FaTag>
+            </YdTag>
             <span class="font-mono">{{ row.hostPort }}/{{ row.proto }}</span>
             <span class="ml-auto font-mono text-xs text-muted-foreground">
               {{ row.address || '节点未配置对外地址' }}
             </span>
-            <FaButton
+            <YdButton
               v-if="canManage && !row.primary && !running"
               variant="outline"
               @click="removeTarget = row"
             >
               回收
-            </FaButton>
+            </YdButton>
           </div>
           <div v-if="!portsView?.ports?.length" class="mcp-form-hint">
             尚未分配端口。
@@ -449,7 +450,7 @@ onMounted(() => {
           <div v-if="canManage && !running" class="flex flex-wrap items-end gap-3">
             <label class="mcp-form-item w-32">
               <span class="mcp-form-label">协议</span>
-              <FaSelect
+              <YdSelect
                 v-model="portProto"
                 :options="[{ label: 'TCP', value: 'tcp' }, { label: 'UDP', value: 'udp' }]"
                 class="mcp-w-full"
@@ -457,11 +458,11 @@ onMounted(() => {
             </label>
             <label class="mcp-form-item min-w-40 flex-1">
               <span class="mcp-form-label">端口号（留空自动分配）</span>
-              <FaInput v-model="portInput" type="number" placeholder="自动分配" class="mcp-w-full" />
+              <YdInput v-model="portInput" type="number" placeholder="自动分配" class="mcp-w-full" />
             </label>
-            <FaButton :loading="portBusy" @click="addPort">
+            <YdButton :loading="portBusy" @click="addPort">
               开放端口
-            </FaButton>
+            </YdButton>
           </div>
           <span class="mcp-form-hint">
             {{ portRangeHint }}。开放/回收后节点会按新端口重建容器（存档与配置不受影响，实例保持停止态）。
@@ -469,19 +470,19 @@ onMounted(() => {
             访问地址按「节点直连地址:端口」计算，域名与单端口入口模式仅服务游戏主端口。
           </span>
         </div>
-      </FaCard>
+      </YdCard>
 
-      <FaCard title="P2P 直连（启动器无感接入）">
+      <YdCard title="P2P 直连（启动器无感接入）">
         <div class="mcp-form">
           <label class="flex items-start gap-3 text-sm">
-            <FaSwitch v-model="form.p2pEnabled" />
+            <YdSwitch v-model="form.p2pEnabled" />
             <span>
               允许玩家经启动器 P2P 直连本实例（面板不中转玩家流量）
             </span>
           </label>
           <label class="mcp-form-item">
             <span class="mcp-form-label">白名单（选填，每行或逗号分隔用户 ID）</span>
-            <FaTextarea v-model="form.p2pWhitelistText" :rows="2" class="w-full" placeholder="留空 = 所有玩家可连" />
+            <YdTextarea v-model="form.p2pWhitelistText" :rows="2" class="w-full" placeholder="留空 = 所有玩家可连" />
           </label>
           <span class="mcp-form-hint">
             前置条件：① 面板设置 →「启动器 P2P 直连」已开启并签发票据；② 节点程序支持 p2p.* 能力；
@@ -489,31 +490,31 @@ onMounted(() => {
             当前传输为直连（节点公网可达或已做端口映射），打洞落地后 NAT 场景自动可用。
           </span>
         </div>
-      </FaCard>
+      </YdCard>
 
-      <FaCard title="RCON / Ping / 终端">
+      <YdCard title="RCON / Ping / 终端">
         <div class="mcp-form">
-          <label class="mcp-form-item"><span class="mcp-form-label">RCON 主机</span><FaInput v-model="form.rconHost" class="mcp-w-full" placeholder="127.0.0.1" /></label>
+          <label class="mcp-form-item"><span class="mcp-form-label">RCON 主机</span><YdInput v-model="form.rconHost" class="mcp-w-full" placeholder="127.0.0.1" /></label>
           <div class="mcp-grid-2">
-            <label class="mcp-form-item"><span class="mcp-form-label">RCON 端口</span><FaInput v-model="form.rconPort" type="number" class="mcp-w-full" /></label>
-            <label class="mcp-form-item"><span class="mcp-form-label">RCON 密码</span><FaInput v-model="form.rconPassword" type="password" class="mcp-w-full" /></label>
+            <label class="mcp-form-item"><span class="mcp-form-label">RCON 端口</span><YdInput v-model="form.rconPort" type="number" class="mcp-w-full" /></label>
+            <label class="mcp-form-item"><span class="mcp-form-label">RCON 密码</span><YdInput v-model="form.rconPassword" type="password" class="mcp-w-full" /></label>
           </div>
           <div class="mcp-grid-2">
-            <label class="mcp-form-item"><span class="mcp-form-label">Ping 地址</span><FaInput v-model="form.pingAddress" class="mcp-w-full" /></label>
-            <label class="mcp-form-item"><span class="mcp-form-label">Ping 端口</span><FaInput v-model="form.pingPort" type="number" class="mcp-w-full" /></label>
+            <label class="mcp-form-item"><span class="mcp-form-label">Ping 地址</span><YdInput v-model="form.pingAddress" class="mcp-w-full" /></label>
+            <label class="mcp-form-item"><span class="mcp-form-label">Ping 端口</span><YdInput v-model="form.pingPort" type="number" class="mcp-w-full" /></label>
           </div>
           <div class="mcp-grid-2">
-            <label class="mcp-form-item"><span class="mcp-form-label">终端字号</span><FaInput v-model="form.terminalFontSize" type="number" class="mcp-w-full" /></label>
-            <label class="mcp-form-item"><span class="mcp-form-label">时间戳</span><FaSwitch v-model="form.terminalTimestamp" /></label>
+            <label class="mcp-form-item"><span class="mcp-form-label">终端字号</span><YdInput v-model="form.terminalFontSize" type="number" class="mcp-w-full" /></label>
+            <label class="mcp-form-item"><span class="mcp-form-label">时间戳</span><YdSwitch v-model="form.terminalTimestamp" /></label>
           </div>
           <p class="mcp-form-hint">
             RCON/Ping 为实例级配置存储；面板侧 RCON 协议发送可在节点能力具备后接入。当前控制台命令仍走容器 stdin。
           </p>
         </div>
-      </FaCard>
+      </YdCard>
     </div>
-  </FaPageMain>
-  <FaModal
+  </YdPageMain></YdLoadingOverlay>
+  <YdModal
     v-model="removeOpen"
     title="回收端口"
     confirm-button-text="确认回收"
@@ -524,5 +525,5 @@ onMounted(() => {
       确认回收端口 <span class="font-mono">{{ removeTarget.hostPort }}/{{ removeTarget.proto }}</span>？
       节点会按剩余端口重建容器，实例保持停止态；该端口随之释放回节点端口池。
     </p>
-  </FaModal>
+  </YdModal>
 </template>

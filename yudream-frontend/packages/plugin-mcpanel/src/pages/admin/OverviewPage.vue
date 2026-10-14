@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { TableColumn } from '@yudream/components'
-import { FaAlert, FaButton, FaCard, FaIcon, FaPageHeader, FaPageMain, FaProgress, FaResponsiveTable, FaTag } from '@yudream/components'
+import { YdAction, YdAlert, YdButton, YdCard, YdIcon, YdPageHeader, YdPageMain, YdProgress, YdResponsiveTable, YdTag } from '@yudream/components'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { createMcPanelExtra } from '../../api/api-extra'
@@ -136,22 +137,22 @@ onMounted(() => void load())
 </script>
 
 <template>
-  <FaPageHeader title="数据监控" description="节点在线、实例运行状态与资源总览">
-    <FaButton variant="outline" @click="load">
-      <FaIcon name="i-ri:refresh-line" />
+  <YdPageHeader title="数据监控" description="节点在线、实例运行状态与资源总览">
+    <YdButton variant="outline" @click="load">
+      <YdIcon name="i-ri:refresh-line" />
       刷新
-    </FaButton>
-  </FaPageHeader>
-  <FaPageMain v-loading="loading">
+    </YdButton>
+  </YdPageHeader>
+  <YdLoadingOverlay :loading="loading"><YdPageMain >
     <div class="space-y-6">
-      <FaAlert v-if="error" variant="destructive" title="无法加载">
+      <YdAlert v-if="error" variant="destructive" title="无法加载">
   <template #description>
         {{ error }}
   </template>
-      </FaAlert>
+      </YdAlert>
 
       <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <FaCard title="节点在线数">
+        <YdCard title="节点在线数">
           <div class="mt-1 text-3xl font-semibold">
             {{ nodes.online ?? 0 }}
             <span class="text-base font-normal text-muted-foreground">/ {{ nodes.total ?? 0 }}</span>
@@ -159,8 +160,8 @@ onMounted(() => void load())
           <div class="mt-1 text-xs text-muted-foreground">
             在线 / 全部节点
           </div>
-        </FaCard>
-        <FaCard title="实例运行状态">
+        </YdCard>
+        <YdCard title="实例运行状态">
           <div class="mt-1 text-3xl font-semibold">
             {{ instances.running ?? 0 }}
             <span class="text-base font-normal text-muted-foreground">/ {{ instances.total ?? 0 }}</span>
@@ -168,23 +169,23 @@ onMounted(() => void load())
           <div class="mt-1 text-xs text-muted-foreground">
             运行中 / 全部 · 退出 {{ instances.exited ?? 0 }} · 其他 {{ instances.other ?? 0 }}
           </div>
-        </FaCard>
-        <FaCard title="面板版本">
+        </YdCard>
+        <YdCard title="面板版本">
           <div class="mt-1 text-lg font-semibold">
             mcpanel {{ data?.pluginVersion || '-' }}
           </div>
           <div class="mt-1 text-xs text-muted-foreground">
             生成时间 {{ formatDateTime(data?.generatedAt as number) }}
           </div>
-        </FaCard>
-        <FaCard title="最近活跃实例">
+        </YdCard>
+        <YdCard title="最近活跃实例">
           <div class="mt-1 truncate text-lg font-semibold" :title="String(recentInstances[0]?.name ?? '')">
             {{ recentInstances[0]?.name || '—' }}
           </div>
           <div class="mt-1 text-xs text-muted-foreground">
             {{ recentInstances[0] ? `${STATE_LABEL[String(recentInstances[0].state)] || recentInstances[0].state} · ${formatDateTime(recentInstances[0].updatedAt as number)}` : '暂无' }}
           </div>
-        </FaCard>
+        </YdCard>
       </div>
 
       <section>
@@ -192,10 +193,10 @@ onMounted(() => void load())
           <h2 class="text-base font-semibold">
             节点状态总览
           </h2>
-          <FaButton variant="ghost" size="sm" @click="router.push('/platform/plugins/mcpanel/admin/nodes')">
+          <YdButton variant="ghost" size="sm" @click="router.push('/platform/plugins/mcpanel/admin/nodes')">
             全部节点
-            <FaIcon name="i-ri:arrow-right-s-line" />
-          </FaButton>
+            <YdIcon name="i-ri:arrow-right-s-line" />
+          </YdButton>
         </div>
         <div v-if="!nodeDetails.length" class="rounded-lg border border-dashed py-10 text-center text-sm text-muted-foreground">
           暂无节点，请到「节点管理」接入第一台运行 Docker Agent 的机器
@@ -208,16 +209,16 @@ onMounted(() => void load())
           >
             <div class="flex items-start justify-between gap-2">
               <div class="min-w-0">
-                <button type="button" class="max-w-full truncate text-left font-medium text-primary hover:underline" @click="openNode(row)">
+                <YdAction type="button" class="max-w-full truncate text-left font-medium text-primary hover:underline" @click="openNode(row)">
                   {{ row.name }}
-                </button>
+                </YdAction>
                 <div class="mt-0.5 truncate text-xs text-muted-foreground" :title="String(row.endpoint ?? '')">
                   {{ row.endpoint || '未配置控制信道' }}
                 </div>
               </div>
-              <FaTag :variant="row.status === 'online' ? 'default' : 'secondary'">
+              <YdTag :variant="row.status === 'online' ? 'default' : 'secondary'">
                 {{ row.status === 'online' ? '在线' : row.status === 'offline' ? '离线' : row.status || '-' }}
-              </FaTag>
+              </YdTag>
             </div>
             <div class="text-xs text-muted-foreground">
               Agent {{ row.agentVersion || '-' }} · Docker {{ row.dockerVersion || '-' }} · 容器 {{ row.containers ?? 0 }}
@@ -227,14 +228,14 @@ onMounted(() => void load())
                 <span class="text-muted-foreground">CPU</span>
                 <span>{{ cpuPercent(row) }}%</span>
               </div>
-              <FaProgress :model-value="cpuPercent(row)" />
+              <YdProgress :model-value="cpuPercent(row)" />
             </div>
             <div>
               <div class="mb-1 flex items-center justify-between text-xs">
                 <span class="text-muted-foreground">内存</span>
                 <span>{{ memPercent(row) }}% · {{ row.memUsedMb ?? '-' }} / {{ row.memTotalMb ?? '-' }} MB</span>
               </div>
-              <FaProgress :model-value="memPercent(row)" />
+              <YdProgress :model-value="memPercent(row)" />
             </div>
             <div v-if="historyOf(row).length" class="mcp-card-metrics">
               <div class="mcp-metric">
@@ -261,12 +262,12 @@ onMounted(() => void load())
           <h2 class="text-base font-semibold">
             最近实例
           </h2>
-          <FaButton variant="ghost" size="sm" @click="router.push('/platform/plugins/mcpanel/admin/instances')">
+          <YdButton variant="ghost" size="sm" @click="router.push('/platform/plugins/mcpanel/admin/instances')">
             全部实例
-            <FaIcon name="i-ri:arrow-right-s-line" />
-          </FaButton>
+            <YdIcon name="i-ri:arrow-right-s-line" />
+          </YdButton>
         </div>
-        <FaResponsiveTable
+        <YdResponsiveTable
           :columns="instanceColumns"
           :data="recentInstances"
           row-key="id"
@@ -277,14 +278,14 @@ onMounted(() => void load())
           empty-text="暂无实例"
         >
           <template #cell-name="{ row }">
-            <button type="button" class="text-left font-medium text-primary hover:underline" @click="openInstance(row.original)">
+            <YdAction type="button" class="text-left font-medium text-primary hover:underline" @click="openInstance(row.original)">
               {{ row.original.name }}
-            </button>
+            </YdAction>
           </template>
           <template #cell-state="{ row }">
-            <FaTag :variant="stateTagVariant(String(row.original.state ?? ''))">
+            <YdTag :variant="stateTagVariant(String(row.original.state ?? ''))">
               {{ STATE_LABEL[String(row.original.state)] || row.original.state || '-' }}
-            </FaTag>
+            </YdTag>
           </template>
           <template #cell-cpu="{ row }">
             {{ row.original.cpuPercent == null ? '-' : `${cpuPercent(row.original)}%` }}
@@ -296,15 +297,15 @@ onMounted(() => void load())
             {{ formatDateTime(row.original.updatedAt as number) }}
           </template>
           <template #card="{ row }">
-            <FaCard class="w-full">
+            <YdCard class="w-full">
               <div class="flex flex-col gap-3">
                 <div class="flex items-center justify-between gap-2">
-                  <button type="button" class="min-w-0 break-words text-left text-base font-semibold text-primary hover:underline" @click="openInstance(row)">
+                  <YdAction type="button" class="min-w-0 break-words text-left text-base font-semibold text-primary hover:underline" @click="openInstance(row)">
                     {{ row.name }}
-                  </button>
-                  <FaTag :variant="stateTagVariant(String(row.state ?? ''))">
+                  </YdAction>
+                  <YdTag :variant="stateTagVariant(String(row.state ?? ''))">
                     {{ STATE_LABEL[String(row.state)] || row.state || '-' }}
-                  </FaTag>
+                  </YdTag>
                 </div>
                 <div class="flex flex-col gap-1 text-sm">
                   <div class="flex gap-2">
@@ -325,10 +326,10 @@ onMounted(() => void load())
                   </div>
                 </div>
               </div>
-            </FaCard>
+            </YdCard>
           </template>
-        </FaResponsiveTable>
+        </YdResponsiveTable>
       </section>
     </div>
-  </FaPageMain>
+  </YdPageMain></YdLoadingOverlay>
 </template>

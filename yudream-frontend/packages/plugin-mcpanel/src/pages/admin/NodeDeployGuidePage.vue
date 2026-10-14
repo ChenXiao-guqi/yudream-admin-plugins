@@ -2,7 +2,7 @@
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { FaAlert, FaButton, FaCard, FaInput, FaPageHeader, FaPageMain } from '@yudream/components'
+import { YdAlert, YdButton, YdCard, YdInput, YdPageHeader, YdPageMain } from '@yudream/components'
 import CodeBlock from '../../components/CodeBlock.vue'
 
 /**
@@ -116,14 +116,14 @@ const composeUpCommand = [
 </script>
 
 <template>
-  <FaPageHeader title="节点部署指南" description="把一台装好 Docker 的机器接入面板成为节点：二进制 / Docker / Docker Compose 三种方式">
-    <FaButton variant="outline" @click="router.push('/platform/plugins/mcpanel/admin/nodes')">
+  <YdPageHeader title="节点部署指南" description="把一台装好 Docker 的机器接入面板成为节点：二进制 / Docker / Docker Compose 三种方式">
+    <YdButton variant="outline" @click="router.push('/platform/plugins/mcpanel/admin/nodes')">
       前往节点管理
-    </FaButton>
-  </FaPageHeader>
-  <FaPageMain>
+    </YdButton>
+  </YdPageHeader>
+  <YdPageMain>
     <div class="mcp-page-stack">
-      <FaCard title="部署前准备">
+      <YdCard title="部署前准备">
         <ul class="mcp-step-list">
           <li>一台 Linux 机器（amd64 / arm64），已安装 Docker——面板上的 MC 实例都以容器跑在节点上。</li>
           <li>面板服务器能访问节点的 <code class="mcp-inline-code">7443</code> 端口（控制信道 wss；建议防火墙只放行面板出口地址）。</li>
@@ -131,13 +131,13 @@ const composeUpCommand = [
           <li>节点能访问面板站点地址（注册时节点程序要回调面板 HTTPS 接口）。</li>
           <li>账号具备面板管理权限（新增节点与签发注册凭据用）。</li>
         </ul>
-      </FaCard>
+      </YdCard>
 
-      <FaCard title="接入流程" description="无论用哪种部署方式，面板侧的准备工作相同">
+      <YdCard title="接入流程" description="无论用哪种部署方式，面板侧的准备工作相同">
         <div class="mcp-form">
           <label class="mcp-form-item">
             <span class="mcp-form-label">面板地址（用于生成下方命令）</span>
-            <FaInput v-model="panelUrl" clearable placeholder="https://panel.example.com" class="w-full" />
+            <YdInput v-model="panelUrl" clearable placeholder="https://panel.example.com" class="w-full" />
             <span class="mcp-form-hint">默认取当前站点地址；节点经其它域名或端口访问面板时，请改成节点实际使用的地址。</span>
           </label>
           <ol class="mcp-step-list">
@@ -147,9 +147,9 @@ const composeUpCommand = [
             <li>回到「节点管理」，节点状态变「在线」即接入完成；之后可在该节点上创建实例。</li>
           </ol>
         </div>
-      </FaCard>
+      </YdCard>
 
-          <FaCard title="方式一：二进制部署（systemd 托管）" description="单二进制直接跑在宿主机，systemd 负责开机自启与崩溃拉起">
+          <YdCard title="方式一：二进制部署（systemd 托管）" description="单二进制直接跑在宿主机，systemd 负责开机自启与崩溃拉起">
             <div class="mcp-form">
               <CodeBlock label="① 安装二进制并准备数据目录" :code="binaryInstallCommand" />
               <CodeBlock label="② 注册并试运行（粘贴 token）" :code="joinCommand" />
@@ -158,63 +158,63 @@ const composeUpCommand = [
               <span class="mcp-form-hint">Windows 机器可用 <code class="mcp-inline-code">mcpanel-node-windows-amd64.exe</code> 以相同参数手动运行（不含 systemd 托管）。</span>
               <span class="mcp-form-hint">二进制直接跑在宿主机：节点自身与它创建的实例容器天然继承宿主 <code class="mcp-inline-code">/etc/hosts</code> 域名映射（节点 0.7.4+）。</span>
             </div>
-          </FaCard>
+          </YdCard>
 
-      <FaCard title="方式二：Docker 单命令运行" description="镜像已托管在私有仓库；实例数据落在宿主机目录，升级只换镜像">
+      <YdCard title="方式二：Docker 单命令运行" description="镜像已托管在私有仓库；实例数据落在宿主机目录，升级只换镜像">
         <div class="mcp-form">
           <CodeBlock label="① 写入注册凭据文件（0600 权限）" :code="dockerEnvFileCommand" />
           <CodeBlock label="② 运行节点容器（serve 启动时自动注册）" :code="dockerRunCommand" />
           <CodeBlock label="③ 注册成功后清理 token" :code="dockerTokenCleanupCommand" />
         </div>
-      </FaCard>
+      </YdCard>
 
-      <FaCard title="方式三：Docker Compose" description="与方式二等价，适合和其他服务一起用 compose 统一管理">
+      <YdCard title="方式三：Docker Compose" description="与方式二等价，适合和其他服务一起用 compose 统一管理">
         <div class="mcp-form">
           <CodeBlock label="① docker-compose.yml" :code="composeFile" />
           <CodeBlock label="② 启动并完成注册" :code="composeUpCommand" />
           <span class="mcp-form-hint">compose 文件里含 token 时注意文件权限（建议 600）；注册完成后删除 token 行再 <code class="mcp-inline-code">docker compose up -d</code>。</span>
         </div>
-      </FaCard>
+      </YdCard>
 
-      <FaCard title="常见问题与注意事项">
+      <YdCard title="常见问题与注意事项">
         <div class="mcp-form">
-          <FaAlert title="面板地址必须 https" variant="default">
+          <YdAlert title="面板地址必须 https" variant="default">
             <template #description>
               明文 http 仅放行 loopback、host.docker.internal 与私网地址；公网 / 域名面板一律 https。Docker 部署且面板只有 http（如开发环境 :9002）时：把 <code class="mcp-inline-code">MCNODE_PANEL_URL</code> 写成 <code class="mcp-inline-code">http://host.docker.internal:9002</code>，并在 <code class="mcp-inline-code">docker run</code> 加 <code class="mcp-inline-code">--add-host=host.docker.internal:host-gateway</code>。该错误发生在配置校验阶段、注册请求发出之前，token 未被消费，修正后无需重签。
             </template>
-          </FaAlert>
-          <FaAlert title="注册 token 是一次性凭据" variant="default">
+          </YdAlert>
+          <YdAlert title="注册 token 是一次性凭据" variant="default">
             <template #description>
               10 分钟有效、注册成功或过期即失效；只应通过 stdin 或 0600 env 文件进入进程，不要写进命令行参数（会落入 shell history）。注册请求已发出后的失败需要重新签发。
             </template>
-          </FaAlert>
-          <FaAlert title="容器化部署必须 bind-mount /data 并设置 MCNODE_DATA_HOST_ROOT" variant="default">
+          </YdAlert>
+          <YdAlert title="容器化部署必须 bind-mount /data 并设置 MCNODE_DATA_HOST_ROOT" variant="default">
             <template #description>
               节点创建实例时要把实例数据目录以<b>宿主真实路径</b>挂给实例容器；named volume 的宿主路径不可控，会导致实例创建失败。<code class="mcp-inline-code">MCNODE_DATA_HOST_ROOT</code> 固定填宿主侧 <code class="mcp-inline-code">/data</code> 挂载的源目录。
             </template>
-          </FaAlert>
-          <FaAlert title="SFTP 端口池：容器部署必须发布 2121-2136" variant="default">
+          </YdAlert>
+          <YdAlert title="SFTP 端口池：容器部署必须发布 2121-2136" variant="default">
             <template #description>
               节点为每次「开通 SFTP」在 2121-2136 段内按实例哈希选端口监听（基点可用 <code class="mcp-inline-code">MCNODE_FTP_BASE_PORT</code> 调整）。二进制部署直接监听宿主网络无需处理；容器部署必须 <code class="mcp-inline-code">-p 2121-2136:2121-2136</code> 发布，并在防火墙/安全组放行、保证面板服务器可达——SFTP 网关认证通过后面板会回源拨该端口段，缺发布会表现为「登录成功后连接被断开」。
             </template>
-          </FaAlert>
-          <FaAlert title="实例容器继承宿主 /etc/hosts（节点 0.7.4+）" variant="default">
+          </YdAlert>
+          <YdAlert title="实例容器继承宿主 /etc/hosts（节点 0.7.4+）" variant="default">
             <template #description>
               节点会把它看到的 <code class="mcp-inline-code">/etc/hosts</code> 注入自己创建的实例容器（实例内域名解析与宿主一致）。容器部署需按上方模板只读挂载宿主 hosts（<code class="mcp-inline-code">-v /etc/hosts:/etc/hosts:ro</code>，节点自身也因此继承）；二进制部署天然生效。hosts 变更只对之后新创建的实例容器生效——已存在的实例需删除容器（数据不受影响）后从面板重新启动一次才会注入。注意 loopback（127.x / ::1）条目在实例容器内指向的是容器自身而非宿主。
             </template>
-          </FaAlert>
-          <FaAlert title="升级节点" variant="default">
+          </YdAlert>
+          <YdAlert title="升级节点" variant="default">
             <template #description>
               Docker 部署：<code class="mcp-inline-code">docker pull</code> 新版本镜像 → <code class="mcp-inline-code">docker rm -f mcpanel-node</code> → 按原命令重建，数据与凭据都在 /data，升级不影响已注册状态与实例。二进制部署：替换可执行文件后 <code class="mcp-inline-code">systemctl restart mcpanel-node</code>。节点版本需满足面板功能要求（回收站等能力需节点 0.4.0+；安装文件级明细需 0.5.0+；安装停滞自愈与自动重试需 0.5.1+；MR/CF 换源下载回退需 0.6.0+；大整合包安装（帧上限协商）需 0.6.1+；存量实例容器策略自动对齐（旧节点创建的容器升级后自动重建修复 EACCES 启动失败）需 0.6.3+；启动中状态、启动成功检测与启动阶段实时输出需 0.7.0+；实例数据目录权限自动修复（启动前自动放开节点侧写入与容器内非 root 用户的属主错位，根治模组写 config 报 EACCES 启动即崩）需 0.7.1+；SFTP 网关标准 sftp subsystem 契约需 0.7.2+；实例 SFTP 目录钉死在实例数据目录（安全修复，此前客户端可见节点宿主机全部文件，强烈建议所有节点立即升级）需 0.7.3+；实例容器继承宿主 /etc/hosts（容器部署同时需按模板只读挂载 /etc/hosts）需 0.7.4+）。
             </template>
-          </FaAlert>
-          <FaAlert title="控制信道地址怎么填" variant="default">
+          </YdAlert>
+          <YdAlert title="控制信道地址怎么填" variant="default">
             <template #description>
               面板侧节点表单的地址填面板服务器可达的 <code class="mcp-inline-code">wss://host[:port]</code>，不带 /control 路径；节点在内网或无公网映射时，先做端口映射或内网穿透（frp、tailscale 等），填穿透后的地址。节点使用自签证书时，面板侧 TLS 校验选「指纹钉住」并把指纹留空——注册时节点上报的证书指纹会自动登记。
             </template>
-          </FaAlert>
+          </YdAlert>
         </div>
-      </FaCard>
+      </YdCard>
     </div>
-  </FaPageMain>
+  </YdPageMain>
 </template>

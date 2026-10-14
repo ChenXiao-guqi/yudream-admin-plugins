@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { FileItem, FileUploadRequestOptions, TableColumn, YdTablePickerQuery, YdTablePickerResult } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { McpNode } from '../../types'
-import { FaAlert, FaButton, FaDescriptions, FaFileUpload, FaIcon, FaInput, FaPageHeader, FaPageMain, FaProgress, FaSelect, FaSwitch, FaTabs, FaTag, FaTextarea, YdTablePicker, useFaToast } from '@yudream/components'
+import { YdAction, YdAlert, YdButton, YdDescriptions, YdFileUpload, YdIcon, YdInput, YdPageHeader, YdPageMain, YdProgress, YdSelect, YdSwitch, YdTabs, YdTag, YdTextarea, YdTablePicker, useYdToast } from '@yudream/components'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createMcPanelApi } from '../../api/mcpanel-api'
@@ -18,7 +19,7 @@ import { sha256HexOfFile } from '../../utils/sha256'
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 
 const api = createMcPanelApi(props.sdk)
-const toast = useFaToast()
+const toast = useYdToast()
 const extra = createMcPanelExtra(props.sdk)
 const router = useRouter()
 const route = useRoute()
@@ -857,25 +858,25 @@ onMounted(() => {
 </script>
 
 <template>
-  <FaPageHeader title="创建服务器" description="引导式：节点 → 核心/版本（选择器）→ 镜像（内部名+标签）→ 资源；核心 FastMirror 优先、官方兜底">
-    <FaButton variant="outline" @click="router.push('/platform/plugins/mcpanel/admin/instances')">
-      <FaIcon name="i-ri:arrow-left-line" />
+  <YdPageHeader title="创建服务器" description="引导式：节点 → 核心/版本（选择器）→ 镜像（内部名+标签）→ 资源；核心 FastMirror 优先、官方兜底">
+    <YdButton variant="outline" @click="router.push('/platform/plugins/mcpanel/admin/instances')">
+      <YdIcon name="i-ri:arrow-left-line" />
       返回实例
-    </FaButton>
-  </FaPageHeader>
+    </YdButton>
+  </YdPageHeader>
 
-  <FaPageMain v-loading="loading">
-    <FaAlert v-if="pageError" variant="destructive" title="无法加载向导" class="mb-4">
+  <YdLoadingOverlay :loading="loading"><YdPageMain >
+    <YdAlert v-if="pageError" variant="destructive" title="无法加载向导" class="mb-4">
   <template #description>
       {{ pageError }}
   </template>
-    </FaAlert>
+    </YdAlert>
 
     <div class="rounded-xl border bg-card p-4 sm:p-6">
       <nav aria-label="创建步骤">
         <ol class="flex flex-wrap items-center gap-x-2 gap-y-3">
           <li v-for="(step, index) in steps" :key="step.key" class="flex items-center gap-2">
-            <button
+            <YdAction
               type="button"
               class="flex items-center gap-2 rounded-lg px-2 py-1 text-sm transition-colors"
               :class="[
@@ -893,13 +894,13 @@ onMounted(() => {
                     ? 'border-primary text-primary'
                     : 'border-border text-muted-foreground'"
               >
-                <FaIcon v-if="index < stepIndex" name="i-ri:check-line" />
+                <YdIcon v-if="index < stepIndex" name="i-ri:check-line" />
                 <template v-else>
                   {{ index + 1 }}
                 </template>
               </span>
               <span :class="index === stepIndex ? 'font-medium' : ''">{{ step.title }}</span>
-            </button>
+            </YdAction>
             <span v-if="index < steps.length - 1" class="hidden h-px w-8 bg-border sm:block" />
           </li>
         </ol>
@@ -929,9 +930,9 @@ onMounted(() => {
               :initial-labels="form.nodeId && nodeLabelCache[form.nodeId] ? { [form.nodeId]: nodeLabelCache[form.nodeId] } : {}"
             >
               <template #cell-status="{ row }">
-                <FaTag :variant="row.original.status === 'online' ? 'default' : row.original.status === 'offline' ? 'destructive' : 'secondary'">
+                <YdTag :variant="row.original.status === 'online' ? 'default' : row.original.status === 'offline' ? 'destructive' : 'secondary'">
                   {{ row.original.status === 'online' ? '在线' : row.original.status === 'offline' ? '离线' : '连接中' }}
-                </FaTag>
+                </YdTag>
               </template>
             </YdTablePicker>
           </div>
@@ -947,7 +948,7 @@ onMounted(() => {
             </p>
           </div>
 
-          <FaTabs v-model="form.mode" :list="modeTabs" class="w-full" content-class="pt-4">
+          <YdTabs v-model="form.mode" :list="modeTabs" class="w-full" content-class="pt-4">
             <template #empty>
               <div class="grid gap-3">
                 <p class="text-sm text-muted-foreground">
@@ -966,7 +967,7 @@ onMounted(() => {
               <div class="grid gap-4">
                 <label class="grid gap-2">
                   <span class="text-sm font-medium">核心类型</span>
-                  <FaSelect v-model="form.coreKind" :options="coreOptions" class="w-full" />
+                  <YdSelect v-model="form.coreKind" :options="coreOptions" class="w-full" />
                 </label>
                 <div class="grid gap-2">
                   <span class="text-sm font-medium">MC 版本</span>
@@ -987,7 +988,7 @@ onMounted(() => {
                   </p>
                 </div>
                 <label class="flex items-center gap-3 text-sm">
-                  <FaSwitch v-model="form.autoDownloadCore" @update:model-value="resolveDownload" />
+                  <YdSwitch v-model="form.autoDownloadCore" @update:model-value="resolveDownload" />
                   创建后自动下载核心（FastMirror → 官方兜底）
                 </label>
                 <p v-if="resolving" class="text-xs text-muted-foreground">
@@ -1016,7 +1017,7 @@ onMounted(() => {
                   />
                 </div>
                 <label class="flex items-center gap-3 text-sm">
-                  <FaSwitch v-model="form.autoDownloadCore" />
+                  <YdSwitch v-model="form.autoDownloadCore" />
                   按模板 installer 自动下载核心
                 </label>
               </div>
@@ -1025,7 +1026,7 @@ onMounted(() => {
             <template #jar>
               <div class="grid gap-2">
                 <span class="text-sm font-medium">服务端核心 JAR</span>
-                <FaFileUpload
+                <YdFileUpload
                   v-model="jarFileList"
                   :max="1"
                   accept=".jar"
@@ -1043,7 +1044,7 @@ onMounted(() => {
               <div class="grid gap-3">
                 <div class="grid gap-2">
                   <span class="text-sm font-medium">整合包（mrpack / CurseForge zip）</span>
-                  <FaFileUpload
+                  <YdFileUpload
                     v-model="modpackFileList"
                     :max="1"
                     accept=".mrpack,.zip"
@@ -1055,26 +1056,26 @@ onMounted(() => {
                 <div v-if="modpackUpload.active" class="grid gap-2 rounded-lg border p-3 text-sm">
                   <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
                     <span class="flex items-center gap-1">
-                      <FaIcon name="i-ri:loader-4-line" class="animate-spin" />
+                      <YdIcon name="i-ri:loader-4-line" class="animate-spin" />
                       {{ MODPACK_PHASE_LABEL[modpackUpload.phase] }}
                     </span>
                     <span v-if="modpackUpload.phase !== 'parsing'">
                       {{ modpackPercent }}%（{{ modpackMb(modpackUpload.uploaded) }} / {{ modpackMb(modpackUpload.size) }}）
                     </span>
                   </div>
-                  <FaProgress v-if="modpackUpload.phase !== 'parsing'" :model-value="modpackPercent" />
+                  <YdProgress v-if="modpackUpload.phase !== 'parsing'" :model-value="modpackPercent" />
                   <div class="flex justify-end">
-                    <FaButton size="sm" variant="outline" @click="cancelModpackUploadAction">取消</FaButton>
+                    <YdButton size="sm" variant="outline" @click="cancelModpackUploadAction">取消</YdButton>
                   </div>
                 </div>
                 <div v-else-if="modpackInfo" class="grid gap-2 rounded-lg border p-3 text-sm">
                   <div class="flex flex-wrap items-center gap-2">
                     <span class="font-medium">{{ modpackInfo.name || '整合包' }}</span>
-                    <FaTag variant="outline">{{ modpackInfo.loader || '未知加载器' }}</FaTag>
-                    <FaTag variant="secondary">MC {{ modpackInfo.mcVersion || '?' }}</FaTag>
-                    <FaTag :variant="modpackInfo.coreSupported === false ? 'destructive' : 'default'">
+                    <YdTag variant="outline">{{ modpackInfo.loader || '未知加载器' }}</YdTag>
+                    <YdTag variant="secondary">MC {{ modpackInfo.mcVersion || '?' }}</YdTag>
+                    <YdTag :variant="modpackInfo.coreSupported === false ? 'destructive' : 'default'">
                       {{ modpackInfo.coreSupported === false ? '不支持自动开服' : '可自动开服' }}
-                    </FaTag>
+                    </YdTag>
                   </div>
                   <p class="text-xs text-muted-foreground">
                     服务端文件 {{ modpackInfo.fileCount ?? 0 }} 个 · 配置覆盖 {{ modpackInfo.overrideCount ?? 0 }} 个 ·
@@ -1096,7 +1097,7 @@ onMounted(() => {
             <template #zip>
               <div class="grid gap-2">
                 <span class="text-sm font-medium">服务端 ZIP</span>
-                <FaFileUpload
+                <YdFileUpload
                   v-model="zipFileList"
                   :max="1"
                   :before-upload="checkZip"
@@ -1105,7 +1106,7 @@ onMounted(() => {
                 />
               </div>
             </template>
-          </FaTabs>
+          </YdTabs>
         </template>
 
         <template v-else-if="stepIndex === 2">
@@ -1136,7 +1137,7 @@ onMounted(() => {
           </div>
           <label v-if="selectedImage?.tags?.length" class="grid gap-2">
             <span class="text-sm font-medium">标签 / 拉取地址</span>
-            <FaSelect
+            <YdSelect
               v-model="form.imageTag"
               :options="selectedImage.tags.map(tag => ({ label: tag, value: tag }))"
               class="w-full"
@@ -1153,25 +1154,25 @@ onMounted(() => {
           </div>
           <label class="grid gap-2">
             <span class="text-sm font-medium">实例名称</span>
-            <FaInput v-model="form.name" clearable placeholder="例如：生存服-01" class="w-full" />
+            <YdInput v-model="form.name" clearable placeholder="例如：生存服-01" class="w-full" />
           </label>
           <div class="grid gap-4 sm:grid-cols-3">
             <label class="grid gap-2">
               <span class="text-sm font-medium">内存（MB）</span>
-              <FaInput v-model="form.memoryMb" type="number" class="w-full" />
+              <YdInput v-model="form.memoryMb" type="number" class="w-full" />
             </label>
             <label class="grid gap-2">
               <span class="text-sm font-medium">CPU（毫核）</span>
-              <FaInput v-model="form.cpuMillis" type="number" class="w-full" />
+              <YdInput v-model="form.cpuMillis" type="number" class="w-full" />
             </label>
             <label class="grid gap-2">
               <span class="text-sm font-medium">磁盘（MB）</span>
-              <FaInput v-model="form.diskMb" type="number" class="w-full" />
+              <YdInput v-model="form.diskMb" type="number" class="w-full" />
             </label>
           </div>
           <label class="grid gap-2">
             <span class="text-sm font-medium">启动命令（按核心预填，可改）</span>
-            <FaTextarea v-model="form.command" :rows="2" class="w-full font-mono" />
+            <YdTextarea v-model="form.command" :rows="2" class="w-full font-mono" />
           </label>
           <div v-if="linkAvailable" class="grid gap-2">
             <span class="text-sm font-medium">绑定子服（可选）</span>
@@ -1206,7 +1207,7 @@ onMounted(() => {
           </div>
           <div class="grid gap-2">
             <span class="text-sm font-medium">数据模式</span>
-            <FaSelect v-model="form.dataMode" :options="DATA_MODES" class="w-full" />
+            <YdSelect v-model="form.dataMode" :options="DATA_MODES" class="w-full" />
             <template v-if="form.dataMode === 'softlink'">
               <YdTablePicker
                 v-model="form.syncSourceKeys"
@@ -1225,12 +1226,12 @@ onMounted(() => {
             </template>
           </div>
           <label v-if="domainAvailable" class="flex items-start gap-3 text-sm">
-            <FaSwitch v-model="form.domainEnabled" />
+            <YdSwitch v-model="form.domainEnabled" />
             <span class="grid gap-2">
               <span>
                 自动分配域名（创建成功即写入 A 记录{{ showEula ? ' 与 SRV，玩家免端口直连' : '' }}）
               </span>
-              <FaInput
+              <YdInput
                 v-if="form.domainEnabled"
                 v-model="form.domainSlug"
                 placeholder="子域名前缀（留空按实例名推导）"
@@ -1244,14 +1245,14 @@ onMounted(() => {
             </span>
           </label>
           <label v-if="showEula" class="flex items-start gap-3 text-sm">
-            <FaSwitch v-model="form.agreeEula" />
+            <YdSwitch v-model="form.agreeEula" />
             <span>
               同意 <a href="https://aka.ms/MinecraftEULA" target="_blank" rel="noopener" class="text-primary hover:underline">Minecraft EULA</a>（创建后自动写入 eula=true，服务端才能启动）
             </span>
           </label>
           <label class="grid gap-2">
             <span class="text-sm font-medium">备注</span>
-            <FaTextarea v-model="form.remark" :rows="2" class="w-full" />
+            <YdTextarea v-model="form.remark" :rows="2" class="w-full" />
           </label>
         </template>
 
@@ -1264,41 +1265,41 @@ onMounted(() => {
               全部关键项来自选择器；创建后可进入终端与文件管理。
             </p>
           </div>
-          <FaDescriptions :items="reviewItems" :column="2" border size="sm" />
+          <YdDescriptions :items="reviewItems" :column="2" border size="sm" />
         </template>
 
-        <FaAlert v-if="formError" variant="destructive" title="无法继续">
+        <YdAlert v-if="formError" variant="destructive" title="无法继续">
   <template #description>
           {{ formError }}
   </template>
-        </FaAlert>
+        </YdAlert>
         <div v-if="bigUpload.active" class="mb-2 grid gap-2 rounded-lg border p-3 text-sm">
           <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
             <span class="flex items-center gap-1">
-              <FaIcon name="i-ri:loader-4-line" class="animate-spin" />
+              <YdIcon name="i-ri:loader-4-line" class="animate-spin" />
               {{ bigUpload.label }}：{{ BIG_PHASE_LABEL[bigUpload.phase] }}
             </span>
             <span>{{ bigUploadPercent }}%（{{ bigMb(bigUpload.uploaded) }} / {{ bigMb(bigUpload.size) }}）</span>
           </div>
-          <FaProgress :model-value="bigUploadPercent" />
+          <YdProgress :model-value="bigUploadPercent" />
         </div>
         <p v-if="importProgress" class="text-xs text-muted-foreground">
           {{ importProgress }}
         </p>
 
         <footer class="flex items-center justify-between border-t pt-4">
-          <FaButton variant="outline" :disabled="stepIndex === 0 || submitting" @click="prev">
+          <YdButton variant="outline" :disabled="stepIndex === 0 || submitting" @click="prev">
             上一步
-          </FaButton>
-          <FaButton v-if="stepIndex < steps.length - 1" @click="next">
+          </YdButton>
+          <YdButton v-if="stepIndex < steps.length - 1" @click="next">
             下一步
-          </FaButton>
-          <FaButton v-else :loading="submitting" @click="submit">
-            <FaIcon name="i-ri:rocket-2-line" />
+          </YdButton>
+          <YdButton v-else :loading="submitting" @click="submit">
+            <YdIcon name="i-ri:rocket-2-line" />
             创建实例
-          </FaButton>
+          </YdButton>
         </footer>
       </section>
     </div>
-  </FaPageMain>
+  </YdPageMain></YdLoadingOverlay>
 </template>

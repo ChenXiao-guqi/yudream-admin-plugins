@@ -1,23 +1,24 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { FileItem, FileUploadRequestOptions, TableColumn } from '@yudream/components'
 import {
-  FaAlert,
-  FaButton,
-  FaCard,
-  FaCheckboxGroup,
-  FaFileUpload,
-  FaInput,
-  FaModal,
-  FaPageHeader,
-  FaPageMain,
-  FaRadioGroup,
-  FaResponsiveTable,
-  FaSelect,
-  FaSwitch,
-  FaTag,
-  useFaModal,
-  useFaToast,
+  YdAlert,
+  YdButton,
+  YdCard,
+  YdCheckboxGroup,
+  YdFileUpload,
+  YdInput,
+  YdModal,
+  YdPageHeader,
+  YdPageMain,
+  YdRadioGroup,
+  YdResponsiveTable,
+  YdSelect,
+  YdSwitch,
+  YdTag,
+  useYdModal,
+  useYdToast,
 } from '@yudream/components'
 import { computed, onMounted, reactive, ref } from 'vue'
 import type { McpInjectArtifact } from '../../types'
@@ -33,8 +34,8 @@ import { errorMessage } from '../../composables/utils'
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 
 const extra = createMcPanelExtra(props.sdk)
-const toast = useFaToast()
-const modal = useFaModal()
+const toast = useYdToast()
+const modal = useYdModal()
 
 const loading = ref(false)
 const loadError = ref('')
@@ -337,7 +338,7 @@ function openArtifactEdit(index: number) {
   artifactOpen.value = true
 }
 
-// FaTable 的行模型按 data 数组引用缓存，必须整组替换而非原地增删，否则表格不刷新
+// YdTable 的行模型按 data 数组引用缓存，必须整组替换而非原地增删，否则表格不刷新
 function removeArtifact(index: number) {
   artifacts.value = artifacts.value.filter((_, i) => i !== index)
 }
@@ -810,25 +811,25 @@ onMounted(() => void load())
 </script>
 
 <template>
-  <FaPageHeader title="面板设置" description="注入下载源、下载与导入、DNS、租户、节点贡献与 P2P 全局配置" />
-  <FaPageMain v-loading="loading">
-    <FaAlert v-if="loadError" variant="destructive" title="无法加载设置" class="mb-4">
+  <YdPageHeader title="面板设置" description="注入下载源、下载与导入、DNS、租户、节点贡献与 P2P 全局配置" />
+  <YdLoadingOverlay :loading="loading"><YdPageMain >
+    <YdAlert v-if="loadError" variant="destructive" title="无法加载设置" class="mb-4">
   <template #description>
       {{ loadError }}
   </template>
-    </FaAlert>
+    </YdAlert>
 
     <div class="grid grid-cols-1 items-start gap-4 xl:grid-cols-2">
-      <FaCard title="注入下载源（authlib-injector / 时长统计）" class="xl:col-span-2">
+      <YdCard title="注入下载源（authlib-injector / 时长统计）" class="xl:col-span-2">
         <div class="mcp-form">
           <label class="flex items-center gap-3 text-sm">
-            <FaSwitch v-model="form.authlibEnabled" />
+            <YdSwitch v-model="form.authlibEnabled" />
             启用 authlib-injector 注入（Java 系核心以 -javaagent 注入）
           </label>
           <template v-if="form.authlibEnabled">
             <div class="mcp-form-item">
               <span class="mcp-form-label">authlib jar 来源</span>
-              <FaRadioGroup v-model="form.authlibSource" :options="SOURCE_OPTIONS" class="flex flex-wrap gap-3" />
+              <YdRadioGroup v-model="form.authlibSource" :options="SOURCE_OPTIONS" class="flex flex-wrap gap-3" />
             </div>
             <div v-if="form.authlibSource === 'file'" class="mcp-form-item">
               <span class="mcp-form-label">authlib jar 制品</span>
@@ -842,15 +843,15 @@ onMounted(() => void load())
                   </div>
                 </div>
                 <div class="flex shrink-0 items-center gap-2">
-                  <FaButton size="sm" variant="outline" as="a" :href="extra.artifactDownloadUrl(authlibFile.fileId)" target="_blank">
+                  <YdButton size="sm" variant="outline" as="a" :href="extra.artifactDownloadUrl(authlibFile.fileId)" target="_blank">
                     下载
-                  </FaButton>
-                  <FaButton size="sm" variant="ghost" @click="removeAuthlibFile">
+                  </YdButton>
+                  <YdButton size="sm" variant="ghost" @click="removeAuthlibFile">
                     移除
-                  </FaButton>
+                  </YdButton>
                 </div>
               </div>
-              <FaFileUpload
+              <YdFileUpload
                 v-else
                 v-model="authlibFileList"
                 :max="1"
@@ -862,11 +863,11 @@ onMounted(() => void load())
             </div>
             <label v-else class="mcp-form-item">
               <span class="mcp-form-label">authlib jar 外部下载地址</span>
-              <FaInput v-model="form.authlibJarUrl" clearable placeholder="https://…/authlib-injector.jar" class="mcp-w-full mcp-mono" />
+              <YdInput v-model="form.authlibJarUrl" clearable placeholder="https://…/authlib-injector.jar" class="mcp-w-full mcp-mono" />
             </label>
             <div class="mcp-form-item">
               <span class="mcp-form-label">验证服 API 根</span>
-              <FaInput
+              <YdInput
                 v-model="form.authlibApiRoot"
                 clearable
                 :placeholder="authlibApiRootAvailable ? `留空使用联动值：${authlibApiRootAuto}` : 'https://authlib 验证服地址'"
@@ -875,29 +876,29 @@ onMounted(() => void load())
               <span v-if="authlibApiRootAvailable" class="mcp-form-hint">
                 已从 authlib-injector 插件自动获取：{{ authlibApiRootAuto }}；留空即使用该值，手填则覆盖。
               </span>
-              <FaAlert v-else variant="destructive" title="未检测到 authlib-injector 插件" class="mt-1">
+              <YdAlert v-else variant="destructive" title="未检测到 authlib-injector 插件" class="mt-1">
   <template #description>
                 无法自动获取验证服 API 根，请手动填写；或先在宿主安装并启用 authlib-injector 插件。
   </template>
-              </FaAlert>
+              </YdAlert>
             </div>
           </template>
 
           <div class="mcp-divider" />
 
           <label class="flex items-center gap-3 text-sm">
-            <FaSwitch v-model="form.playtimeEnabled" />
+            <YdSwitch v-model="form.playtimeEnabled" />
             启用时长统计注入（Bukkit 系插件 / 模组两种形态）
           </label>
           <template v-if="form.playtimeEnabled">
             <div class="mcp-form-item">
               <div class="mb-2 flex items-center justify-between gap-2">
                 <span class="mcp-form-label">制品矩阵（按实例核心类型与 MC 版本匹配）</span>
-                <FaButton size="sm" variant="outline" @click="openArtifactCreate">
+                <YdButton size="sm" variant="outline" @click="openArtifactCreate">
                   添加制品
-                </FaButton>
+                </YdButton>
               </div>
-              <FaResponsiveTable
+              <YdResponsiveTable
                 :columns="artifactColumns"
                 :data="artifacts"
                 row-key="name"
@@ -907,9 +908,9 @@ onMounted(() => void load())
                 empty-text="尚未添加制品；启用后至少需要一个制品"
               >
                 <template #cell-kind="{ row }">
-                  <FaTag :variant="row.original.kind === 'mod' ? 'secondary' : 'default'">
+                  <YdTag :variant="row.original.kind === 'mod' ? 'secondary' : 'default'">
                     {{ row.original.kind === 'mod' ? '模组' : '插件' }}
-                  </FaTag>
+                  </YdTag>
                 </template>
                 <template #cell-loaders="{ row }">
                   <span v-if="row.original.kind === 'mod'">{{ (row.original.loaders ?? []).join(' / ') || '—' }}</span>
@@ -921,30 +922,30 @@ onMounted(() => void load())
                 <template #cell-source="{ row }">
                   <div v-if="row.original.fileId" class="flex min-w-0 items-center gap-2">
                     <span class="truncate text-sm">{{ artifactNameFromFileId(row.original.fileId) }}</span>
-                    <FaButton size="sm" variant="ghost" as="a" :href="extra.artifactDownloadUrl(row.original.fileId)" target="_blank" class="shrink-0">
+                    <YdButton size="sm" variant="ghost" as="a" :href="extra.artifactDownloadUrl(row.original.fileId)" target="_blank" class="shrink-0">
                       下载
-                    </FaButton>
+                    </YdButton>
                   </div>
                   <span v-else class="mcp-mono block truncate text-xs" :title="row.original.url">{{ row.original.url }}</span>
                 </template>
                 <template #cell-operation="{ row }">
                   <div class="mcp-op-cell">
-                    <FaButton size="sm" variant="outline" @click="openArtifactEdit(row.index)">
+                    <YdButton size="sm" variant="outline" @click="openArtifactEdit(row.index)">
                       编辑
-                    </FaButton>
-                    <FaButton size="sm" variant="destructive" @click="removeArtifact(row.index)">
+                    </YdButton>
+                    <YdButton size="sm" variant="destructive" @click="removeArtifact(row.index)">
                       删除
-                    </FaButton>
+                    </YdButton>
                   </div>
                 </template>
                 <template #card="{ row, index }">
-                  <FaCard class="w-full">
+                  <YdCard class="w-full">
                     <div class="flex flex-col gap-3">
                       <div class="flex items-center justify-between gap-2">
                         <span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span>
-                        <FaTag :variant="row.kind === 'mod' ? 'secondary' : 'default'">
+                        <YdTag :variant="row.kind === 'mod' ? 'secondary' : 'default'">
                           {{ row.kind === 'mod' ? '模组' : '插件' }}
-                        </FaTag>
+                        </YdTag>
                       </div>
                       <div class="flex flex-col gap-1 text-sm">
                         <div class="flex gap-2">
@@ -964,28 +965,28 @@ onMounted(() => void load())
                         </div>
                       </div>
                       <div class="flex flex-wrap gap-2 border-t pt-3">
-                        <FaButton size="sm" variant="outline" @click="openArtifactEdit(index)">
+                        <YdButton size="sm" variant="outline" @click="openArtifactEdit(index)">
                           编辑
-                        </FaButton>
-                        <FaButton size="sm" variant="destructive" @click="removeArtifact(index)">
+                        </YdButton>
+                        <YdButton size="sm" variant="destructive" @click="removeArtifact(index)">
                           删除
-                        </FaButton>
+                        </YdButton>
                       </div>
                     </div>
-                  </FaCard>
+                  </YdCard>
                 </template>
-              </FaResponsiveTable>
+              </YdResponsiveTable>
               <span class="mcp-form-hint">插件形态按 MC 版本区分（如 Paper 多版本）；模组形态按加载器（Fabric/Forge/NeoForge/Quilt）与 MC 版本细分。注入链路上线后按实例环境自动挑选匹配制品。</span>
             </div>
           </template>
         </div>
-      </FaCard>
+      </YdCard>
 
-      <FaCard title="下载与导入">
+      <YdCard title="下载与导入">
         <div class="mcp-form">
           <label class="mcp-form-item">
             <span class="mcp-form-label">FastMirror 基址</span>
-            <FaInput v-model="form.fastMirrorBase" clearable placeholder="https://download.fastmirror.net" class="mcp-w-full mcp-mono" />
+            <YdInput v-model="form.fastMirrorBase" clearable placeholder="https://download.fastmirror.net" class="mcp-w-full mcp-mono" />
             <span class="mcp-form-hint">创建服务器自动下载核心时优先走该镜像站；失败自动回退官方 Fill / Purpur / Piston / Fabric。</span>
           </label>
           <div class="mcp-form-item">
@@ -996,14 +997,14 @@ onMounted(() => void load())
                 :key="`mr-${index}`"
                 class="flex flex-wrap items-center gap-2"
               >
-                <FaInput v-model="row.name" placeholder="名称" class="w-28 shrink-0" />
-                <FaInput v-model="row.apiBase" placeholder="API 前缀（如 https://mod.mcimirror.top/modrinth/v2）" class="min-w-0 flex-1 mcp-mono" />
-                <FaInput v-model="row.cdnBase" placeholder="文件前缀（如 https://mod.mcimirror.top）" class="min-w-0 flex-1 mcp-mono" />
-                <FaButton size="sm" variant="outline" :disabled="index === 0" @click="moveSourceRow(modrinthSources, index, -1)">↑</FaButton>
-                <FaButton size="sm" variant="outline" :disabled="index === modrinthSources.length - 1" @click="moveSourceRow(modrinthSources, index, 1)">↓</FaButton>
-                <FaButton size="sm" variant="outline" @click="removeSourceRow(modrinthSources, index)">删除</FaButton>
+                <YdInput v-model="row.name" placeholder="名称" class="w-28 shrink-0" />
+                <YdInput v-model="row.apiBase" placeholder="API 前缀（如 https://mod.mcimirror.top/modrinth/v2）" class="min-w-0 flex-1 mcp-mono" />
+                <YdInput v-model="row.cdnBase" placeholder="文件前缀（如 https://mod.mcimirror.top）" class="min-w-0 flex-1 mcp-mono" />
+                <YdButton size="sm" variant="outline" :disabled="index === 0" @click="moveSourceRow(modrinthSources, index, -1)">↑</YdButton>
+                <YdButton size="sm" variant="outline" :disabled="index === modrinthSources.length - 1" @click="moveSourceRow(modrinthSources, index, 1)">↓</YdButton>
+                <YdButton size="sm" variant="outline" @click="removeSourceRow(modrinthSources, index)">删除</YdButton>
               </div>
-              <FaButton size="sm" variant="outline" @click="addSourceRow(modrinthSources)">添加 Modrinth 源</FaButton>
+              <YdButton size="sm" variant="outline" @click="addSourceRow(modrinthSources)">添加 Modrinth 源</YdButton>
             </div>
             <span class="mcp-form-hint">检索与文件下载按此顺序尝试、失败自动切换下一个；文件前缀替换官方 CDN 主机、路径保持原样。</span>
           </div>
@@ -1015,65 +1016,65 @@ onMounted(() => void load())
                 :key="`cf-${index}`"
                 class="flex flex-wrap items-center gap-2"
               >
-                <FaInput v-model="row.name" placeholder="名称" class="w-28 shrink-0" />
-                <FaInput v-model="row.apiBase" placeholder="API 前缀（如 https://mod.mcimirror.top/curseforge/v1，可留空）" class="min-w-0 flex-1 mcp-mono" />
-                <FaInput v-model="row.cdnBase" placeholder="文件前缀（如 https://mod.mcimirror.top）" class="min-w-0 flex-1 mcp-mono" />
-                <FaButton size="sm" variant="outline" :disabled="index === 0" @click="moveSourceRow(curseforgeSources, index, -1)">↑</FaButton>
-                <FaButton size="sm" variant="outline" :disabled="index === curseforgeSources.length - 1" @click="moveSourceRow(curseforgeSources, index, 1)">↓</FaButton>
-                <FaButton size="sm" variant="outline" @click="removeSourceRow(curseforgeSources, index)">删除</FaButton>
+                <YdInput v-model="row.name" placeholder="名称" class="w-28 shrink-0" />
+                <YdInput v-model="row.apiBase" placeholder="API 前缀（如 https://mod.mcimirror.top/curseforge/v1，可留空）" class="min-w-0 flex-1 mcp-mono" />
+                <YdInput v-model="row.cdnBase" placeholder="文件前缀（如 https://mod.mcimirror.top）" class="min-w-0 flex-1 mcp-mono" />
+                <YdButton size="sm" variant="outline" :disabled="index === 0" @click="moveSourceRow(curseforgeSources, index, -1)">↑</YdButton>
+                <YdButton size="sm" variant="outline" :disabled="index === curseforgeSources.length - 1" @click="moveSourceRow(curseforgeSources, index, 1)">↓</YdButton>
+                <YdButton size="sm" variant="outline" @click="removeSourceRow(curseforgeSources, index)">删除</YdButton>
               </div>
-              <FaButton size="sm" variant="outline" @click="addSourceRow(curseforgeSources)">添加 CurseForge 源</FaButton>
+              <YdButton size="sm" variant="outline" @click="addSourceRow(curseforgeSources)">添加 CurseForge 源</YdButton>
             </div>
             <span class="mcp-form-hint">文件前缀替换 edge.forgecdn.net 主机（mediafilez 原链保留为末位兜底）；API 前缀用于持有 API key 时的文件解析。</span>
           </div>
           <label class="flex items-center gap-3 text-sm">
-            <FaSwitch v-model="form.modpackAllowCurseforge" />
+            <YdSwitch v-model="form.modpackAllowCurseforge" />
             允许 CurseForge 整合包导入（需下方 API key）
           </label>
           <label class="mcp-form-item">
             <span class="mcp-form-label">CurseForge API Key（只写不读{{ cfConfigured ? '，已配置，留空保持不变' : '，未配置' }}）</span>
-            <FaInput v-model="form.cfApiKey" type="password" :disabled="!form.modpackAllowCurseforge" clearable class="mcp-w-full mcp-mono" />
+            <YdInput v-model="form.cfApiKey" type="password" :disabled="!form.modpackAllowCurseforge" clearable class="mcp-w-full mcp-mono" />
           </label>
         </div>
-      </FaCard>
+      </YdCard>
 
-      <FaCard title="实例域名（DNS 自动解析）">
+      <YdCard title="实例域名（DNS 自动解析）">
         <div class="mcp-form">
           <label class="mcp-form-item">
             <span class="mcp-form-label">驱动</span>
-            <FaSelect v-model="form.dnsMode" :options="DNS_MODES" class="mcp-w-full" />
+            <YdSelect v-model="form.dnsMode" :options="DNS_MODES" class="mcp-w-full" />
           </label>
           <template v-if="form.dnsMode !== 'off'">
             <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
               <label class="mcp-form-item">
                 <span class="mcp-form-label">游戏域后缀（如 mc.example.com）</span>
-                <FaInput v-model="form.dnsSuffix" clearable class="mcp-w-full mcp-mono" />
+                <YdInput v-model="form.dnsSuffix" clearable class="mcp-w-full mcp-mono" />
               </label>
               <label class="mcp-form-item">
                 <span class="mcp-form-label">{{ dnsMeta.zoneLabel }}</span>
-                <FaInput v-model="form.dnsZone" clearable class="mcp-w-full mcp-mono" />
+                <YdInput v-model="form.dnsZone" clearable class="mcp-w-full mcp-mono" />
               </label>
             </div>
             <span class="mcp-form-hint">{{ dnsMeta.zoneHint }}</span>
             <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
               <label class="mcp-form-item">
                 <span class="mcp-form-label">TTL（秒，本驱动下限 {{ dnsMeta.minTtl }}）</span>
-                <FaInput v-model="form.dnsTtl" type="number" class="mcp-w-full" />
+                <YdInput v-model="form.dnsTtl" type="number" class="mcp-w-full" />
               </label>
               <label class="mcp-form-item">
                 <span class="mcp-form-label">API Base（留空默认）</span>
-                <FaInput v-model="form.dnsApiBase" clearable class="mcp-w-full mcp-mono" />
+                <YdInput v-model="form.dnsApiBase" clearable class="mcp-w-full mcp-mono" />
               </label>
             </div>
 
             <label v-for="field in dnsCredentialFields" :key="field.key" class="mcp-form-item">
               <span class="mcp-form-label">
                 {{ field.label }}
-                <FaTag v-if="field.configured" variant="default" class="ml-2">
+                <YdTag v-if="field.configured" variant="default" class="ml-2">
                   已配置
-                </FaTag>
+                </YdTag>
               </span>
-              <FaInput
+              <YdInput
                 v-model="form[field.key]"
                 type="password"
                 :placeholder="field.configured ? '留空 = 保持不变' : '必填'"
@@ -1092,19 +1093,19 @@ onMounted(() => void load())
               关闭后不再分配域名，实例页也不显示域名入口（已写入的解析记录不会被删除）。
             </span>
             <div v-if="dnsAnyCredentialConfigured" class="mcp-row">
-              <FaButton size="sm" variant="outline" :disabled="saving" @click="clearDnsCredentials">
+              <YdButton size="sm" variant="outline" :disabled="saving" @click="clearDnsCredentials">
                 清除已保存的 DNS 凭据
-              </FaButton>
+              </YdButton>
             </div>
           </template>
         </div>
-      </FaCard>
+      </YdCard>
 
-      <FaCard title="单端口入口（mc-router）">
+      <YdCard title="单端口入口（mc-router）">
         <div class="mcp-form">
           <label class="mcp-form-item">
             <span class="mcp-form-label">入口 API 地址</span>
-            <FaInput v-model="form.entryApiBase" clearable placeholder="http://127.0.0.1:8080" class="mcp-w-full mcp-mono" />
+            <YdInput v-model="form.entryApiBase" clearable placeholder="http://127.0.0.1:8080" class="mcp-w-full mcp-mono" />
             <span class="mcp-form-hint">
               mc-router 的 REST API（容器启动参数 API_BINDING）。<b>该 API 无鉴权</b>：只在内网/防火墙后暴露，
               面板与它同机或同内网可达即可。留空 = 不启用入口（面板完全不碰 router）。
@@ -1113,11 +1114,11 @@ onMounted(() => void load())
           <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
             <label class="mcp-form-item">
               <span class="mcp-form-label">入口对外地址（域名解析指向它）</span>
-              <FaInput v-model="form.entryHost" clearable placeholder="如 1.2.3.4 / entry.example.com" class="mcp-w-full mcp-mono" />
+              <YdInput v-model="form.entryHost" clearable placeholder="如 1.2.3.4 / entry.example.com" class="mcp-w-full mcp-mono" />
             </label>
             <label class="mcp-form-item">
               <span class="mcp-form-label">入口端口</span>
-              <FaInput v-model="form.entryPort" type="number" class="mcp-w-full" />
+              <YdInput v-model="form.entryPort" type="number" class="mcp-w-full" />
             </label>
           </div>
           <span class="mcp-form-hint">
@@ -1128,19 +1129,19 @@ onMounted(() => void load())
           </span>
 
           <div class="mcp-row">
-            <FaButton size="sm" variant="outline" :loading="entryBusy" @click="loadEntryStatus">
+            <YdButton size="sm" variant="outline" :loading="entryBusy" @click="loadEntryStatus">
               测试连接
-            </FaButton>
-            <FaButton size="sm" variant="outline" :loading="entryBusy" :disabled="!form.entryApiBase.trim()" @click="reconcileEntry">
+            </YdButton>
+            <YdButton size="sm" variant="outline" :loading="entryBusy" :disabled="!form.entryApiBase.trim()" @click="reconcileEntry">
               立即对账
-            </FaButton>
+            </YdButton>
           </div>
 
           <template v-if="entryStatus">
             <div class="flex flex-wrap items-center gap-2 text-sm">
-              <FaTag :variant="entryStatus.reachable ? 'default' : 'secondary'">
+              <YdTag :variant="entryStatus.reachable ? 'default' : 'secondary'">
                 {{ entryStatus.reachable ? '入口可达' : '未连通' }}
-              </FaTag>
+              </YdTag>
               <span v-if="entryStatus.reachable" class="text-xs text-muted-foreground">
                 期望路由 {{ entryStatus.expectedRoutes ?? 0 }} 条 · 入口现有 {{ entryStatus.routerRoutes ?? 0 }} 条 · 差异 {{ (entryStatus.drift ?? []).length }} 条
               </span>
@@ -1156,71 +1157,71 @@ onMounted(() => void load())
             </div>
           </template>
         </div>
-      </FaCard>
+      </YdCard>
 
-      <FaCard title="多租户与配额">
+      <YdCard title="多租户与配额">
         <div class="mcp-form">
           <label class="flex items-center gap-3 text-sm">
-            <FaSwitch v-model="form.tenancyEnabled" />
+            <YdSwitch v-model="form.tenancyEnabled" />
             启用租户数据范围（按部门/角色绑定；关闭 = 全局管理员直管）
           </label>
           <label class="mcp-form-item">
             <span class="mcp-form-label">平台管理角色 ID（逗号分隔，命中即不受租户约束）</span>
-            <FaInput v-model="form.tenancyPlatformRoles" :disabled="!form.tenancyEnabled" clearable class="mcp-w-full mcp-mono" />
+            <YdInput v-model="form.tenancyPlatformRoles" :disabled="!form.tenancyEnabled" clearable class="mcp-w-full mcp-mono" />
           </label>
           <label class="flex items-center gap-3 text-sm">
-            <FaSwitch v-model="form.tenancyBilling" :disabled="!form.tenancyEnabled" />
+            <YdSwitch v-model="form.tenancyBilling" :disabled="!form.tenancyEnabled" />
             配额计费（钱包软联动；钱包插件未安装时仅记账）
           </label>
         </div>
-      </FaCard>
+      </YdCard>
 
-      <FaCard title="节点贡献（玩家侧）">
+      <YdCard title="节点贡献（玩家侧）">
         <div class="mcp-form">
           <label class="flex items-center gap-3 text-sm">
-            <FaSwitch v-model="form.contributionEnabled" />
+            <YdSwitch v-model="form.contributionEnabled" />
             开放玩家贡献节点申请（/me/contributions）
           </label>
           <label class="flex items-center gap-3 text-sm">
-            <FaSwitch v-model="form.contributionReviewRequired" :disabled="!form.contributionEnabled" />
+            <YdSwitch v-model="form.contributionReviewRequired" :disabled="!form.contributionEnabled" />
             申请需管理员审核
           </label>
           <div class="grid grid-cols-1 gap-3 md:grid-cols-4">
             <label class="mcp-form-item">
               <span class="mcp-form-label">每人上限</span>
-              <FaInput v-model="form.contributionMaxPerUser" type="number" :disabled="!form.contributionEnabled" class="mcp-w-full" />
+              <YdInput v-model="form.contributionMaxPerUser" type="number" :disabled="!form.contributionEnabled" class="mcp-w-full" />
             </label>
             <label class="mcp-form-item">
               <span class="mcp-form-label">实例数上限</span>
-              <FaInput v-model="form.contributionMaxInstances" type="number" :disabled="!form.contributionEnabled" class="mcp-w-full" />
+              <YdInput v-model="form.contributionMaxInstances" type="number" :disabled="!form.contributionEnabled" class="mcp-w-full" />
             </label>
             <label class="mcp-form-item">
               <span class="mcp-form-label">CPU 上限（毫核）</span>
-              <FaInput v-model="form.contributionMaxCpuMillis" type="number" :disabled="!form.contributionEnabled" class="mcp-w-full" />
+              <YdInput v-model="form.contributionMaxCpuMillis" type="number" :disabled="!form.contributionEnabled" class="mcp-w-full" />
             </label>
             <label class="mcp-form-item">
               <span class="mcp-form-label">内存上限（MB）</span>
-              <FaInput v-model="form.contributionMaxMemoryMb" type="number" :disabled="!form.contributionEnabled" class="mcp-w-full" />
+              <YdInput v-model="form.contributionMaxMemoryMb" type="number" :disabled="!form.contributionEnabled" class="mcp-w-full" />
             </label>
           </div>
           <span class="mcp-form-hint">贡献节点为半可信：正式实例默认不调度其上，平台级秘密从不下发。</span>
         </div>
-      </FaCard>
+      </YdCard>
 
-      <FaCard title="启动器 P2P 直连">
+      <YdCard title="启动器 P2P 直连">
         <div class="mcp-form">
           <label class="flex items-center gap-3 text-sm">
-            <FaSwitch v-model="form.p2pEnabled" />
+            <YdSwitch v-model="form.p2pEnabled" />
             开启 P2P 信令端点（启动器域插件据此为玩家开「无感直连」会话；玩家流量不经面板）
           </label>
           <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
             <label class="mcp-form-item">
               <span class="mcp-form-label">默认带宽档（KB/s）</span>
-              <FaInput v-model="form.p2pDefaultRateKbps" type="number" :disabled="!form.p2pEnabled" class="mcp-w-full" />
+              <YdInput v-model="form.p2pDefaultRateKbps" type="number" :disabled="!form.p2pEnabled" class="mcp-w-full" />
             </label>
             <label class="mcp-form-item">
               <span class="mcp-form-label">每人并发会话上限</span>
-              <FaInput v-model="form.p2pMaxSessions" type="number" :disabled="!form.p2pEnabled" class="mcp-w-full" />
+              <YdInput v-model="form.p2pMaxSessions" type="number" :disabled="!form.p2pEnabled" class="mcp-w-full" />
             </label>
           </div>
           <span class="mcp-form-hint">
@@ -1229,38 +1230,38 @@ onMounted(() => void load())
             节点程序需支持 p2p.* 能力（面板会如实显示能力缺口）。当前传输为 TCP 直连，节点需公网可达或已做端口映射。
           </span>
         </div>
-      </FaCard>
+      </YdCard>
 
-      <FaCard title="SFTP 网关">
+      <YdCard title="SFTP 网关">
         <div class="mcp-form">
           <label class="flex items-center gap-3 text-sm">
-            <FaSwitch v-model="form.sftpGatewayEnabled" />
+            <YdSwitch v-model="form.sftpGatewayEnabled" />
             开启后桌面 SFTP 客户端（WinSCP 等）经面板单端口中转，节点端口不再对使用方暴露
           </label>
           <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
             <label class="mcp-form-item">
               <span class="mcp-form-label">监听端口</span>
-              <FaInput v-model="form.sftpGatewayPort" type="number" :disabled="!form.sftpGatewayEnabled" class="mcp-w-full" />
+              <YdInput v-model="form.sftpGatewayPort" type="number" :disabled="!form.sftpGatewayEnabled" class="mcp-w-full" />
             </label>
             <label class="mcp-form-item">
               <span class="mcp-form-label">对外展示主机名/IP（留空按站点主机名展示）</span>
-              <FaInput v-model="form.sftpGatewayHost" clearable placeholder="panel.example.com" :disabled="!form.sftpGatewayEnabled" class="mcp-w-full" />
+              <YdInput v-model="form.sftpGatewayHost" clearable placeholder="panel.example.com" :disabled="!form.sftpGatewayEnabled" class="mcp-w-full" />
             </label>
           </div>
           <p class="text-xs opacity-60">
             需在防火墙/容器映射中放行该端口；凭据为面板签发的 mc-短别名 + 随机密码，TTL 与节点侧一致（≤2 小时）。
           </p>
         </div>
-      </FaCard>
+      </YdCard>
     </div>
 
     <div class="mt-4 flex justify-end">
-      <FaButton :loading="saving" @click="save">
+      <YdButton :loading="saving" @click="save">
         保存设置
-      </FaButton>
+      </YdButton>
     </div>
 
-    <FaModal
+    <YdModal
       v-model="artifactOpen"
       :title="artifactEditingIndex === null ? '添加制品' : '编辑制品'"
       :show-cancel-button="true"
@@ -1271,27 +1272,27 @@ onMounted(() => void load())
       <div class="mcp-form">
         <label class="mcp-form-item">
           <span class="mcp-form-label">制品名称</span>
-          <FaInput v-model="artifactForm.name" clearable placeholder="如 playtime-paper-1.20" class="mcp-w-full" />
+          <YdInput v-model="artifactForm.name" clearable placeholder="如 playtime-paper-1.20" class="mcp-w-full" />
         </label>
         <div class="mcp-form-item">
           <span class="mcp-form-label">形态</span>
-          <FaRadioGroup v-model="artifactForm.kind" :options="KIND_OPTIONS" class="flex flex-col gap-2" />
+          <YdRadioGroup v-model="artifactForm.kind" :options="KIND_OPTIONS" class="flex flex-col gap-2" />
         </div>
         <div v-if="artifactForm.kind === 'mod'" class="mcp-form-item">
           <span class="mcp-form-label">适用加载器（可多选）</span>
-          <FaCheckboxGroup v-model="artifactForm.loaders" :options="LOADER_OPTIONS" class="flex flex-wrap gap-3" />
+          <YdCheckboxGroup v-model="artifactForm.loaders" :options="LOADER_OPTIONS" class="flex flex-wrap gap-3" />
         </div>
         <div class="mcp-form-item">
           <span class="mcp-form-label">适用 MC 版本范围（留空不限）</span>
           <div class="flex items-center gap-2">
-            <FaInput v-model="artifactForm.mcMin" clearable placeholder="下限，如 1.20" class="mcp-w-full" />
+            <YdInput v-model="artifactForm.mcMin" clearable placeholder="下限，如 1.20" class="mcp-w-full" />
             <span class="shrink-0 text-sm opacity-60">–</span>
-            <FaInput v-model="artifactForm.mcMax" clearable placeholder="上限，如 1.21.1" class="mcp-w-full" />
+            <YdInput v-model="artifactForm.mcMax" clearable placeholder="上限，如 1.21.1" class="mcp-w-full" />
           </div>
         </div>
         <div class="mcp-form-item">
           <span class="mcp-form-label">制品来源</span>
-          <FaRadioGroup v-model="artifactForm.source" :options="SOURCE_OPTIONS" class="flex flex-wrap gap-3" />
+          <YdRadioGroup v-model="artifactForm.source" :options="SOURCE_OPTIONS" class="flex flex-wrap gap-3" />
         </div>
         <div v-if="artifactForm.source === 'file'" class="mcp-form-item">
           <span class="mcp-form-label">制品 jar</span>
@@ -1304,11 +1305,11 @@ onMounted(() => void load())
                 {{ formatSize(artifactForm.file.size) }}{{ artifactForm.file.size ? ' · ' : '' }}sha256 {{ shortSha(artifactForm.file.sha256) || '（历史制品未记录）' }}
               </div>
             </div>
-            <FaButton size="sm" variant="ghost" class="shrink-0" @click="artifactForm.file = null">
+            <YdButton size="sm" variant="ghost" class="shrink-0" @click="artifactForm.file = null">
               重新选择
-            </FaButton>
+            </YdButton>
           </div>
-          <FaFileUpload
+          <YdFileUpload
             v-else
             v-model="artifactFileList"
             :max="1"
@@ -1319,14 +1320,14 @@ onMounted(() => void load())
         </div>
         <label v-else class="mcp-form-item">
           <span class="mcp-form-label">外部下载地址</span>
-          <FaInput v-model="artifactForm.url" clearable placeholder="https://…/playtime.jar" class="mcp-w-full mcp-mono" />
+          <YdInput v-model="artifactForm.url" clearable placeholder="https://…/playtime.jar" class="mcp-w-full mcp-mono" />
         </label>
-        <FaAlert v-if="artifactError" variant="destructive" title="无法保存制品">
+        <YdAlert v-if="artifactError" variant="destructive" title="无法保存制品">
   <template #description>
           {{ artifactError }}
   </template>
-        </FaAlert>
+        </YdAlert>
       </div>
-    </FaModal>
-  </FaPageMain>
+    </YdModal>
+  </YdPageMain></YdLoadingOverlay>
 </template>

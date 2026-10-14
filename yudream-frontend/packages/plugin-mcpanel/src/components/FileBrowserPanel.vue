@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { FaButton, FaIcon, FaInput } from '@yudream/components'
+import { YdAction, YdButton, YdIcon, YdInput } from '@yudream/components'
 import { computed, onMounted, ref } from 'vue'
 import { errorMessage, formatSize } from '../composables/utils'
 
@@ -113,23 +113,23 @@ onMounted(() => void load(props.initialPath))
     <div class="mcp-fbp-head">
       <span class="mcp-fbp-title">{{ title }}</span>
       <span class="mcp-spacer" />
-      <FaButton size="icon-sm" variant="ghost" :disabled="!currentPath || loading" title="上一级" @click="load(parentPath())">
-        <FaIcon name="i-ri:arrow-up-line" />
-      </FaButton>
-      <FaButton size="icon-sm" variant="ghost" :disabled="loading" title="刷新" @click="load(currentPath)">
-        <FaIcon name="i-ri:refresh-line" />
-      </FaButton>
+      <YdButton size="icon-sm" variant="ghost" :disabled="!currentPath || loading" title="上一级" @click="load(parentPath())">
+        <YdIcon name="i-ri:arrow-up-line" />
+      </YdButton>
+      <YdButton size="icon-sm" variant="ghost" :disabled="loading" title="刷新" @click="load(currentPath)">
+        <YdIcon name="i-ri:refresh-line" />
+      </YdButton>
     </div>
 
     <div class="mcp-fbp-crumbs" :title="`/${currentPath}`">
       <template v-for="(crumb, index) in crumbs" :key="crumb.path || '/'">
-        <a class="mcp-fbp-crumb" :class="{ 'is-active': index === crumbs.length - 1 }" @click.prevent="load(crumb.path)">{{ crumb.label }}</a>
+        <YdAction class="mcp-fbp-crumb" :class="{ 'is-active': index === crumbs.length - 1 }" @click="load(crumb.path)">{{ crumb.label }}</YdAction>
         <span v-if="index < crumbs.length - 1" class="mcp-fbp-sep">/</span>
       </template>
     </div>
 
     <div class="mcp-fbp-filter">
-      <FaInput v-model="keyword" placeholder="按名称过滤（回车）" clearable class="mcp-w-full" @keydown.enter="onKeywordEnter" />
+      <YdInput v-model="keyword" placeholder="按名称过滤（回车）" clearable class="mcp-w-full" @keydown.enter="onKeywordEnter" />
     </div>
 
     <div v-if="error" class="mcp-fbp-msg is-error">
@@ -143,7 +143,7 @@ onMounted(() => void load(props.initialPath))
     </div>
     <template v-else>
       <div class="mcp-fbp-list" :class="{ 'is-loading': loading }">
-        <button
+        <YdAction
           v-for="entry in sortedEntries"
           :key="entryPath(entry)"
           type="button"
@@ -151,10 +151,10 @@ onMounted(() => void load(props.initialPath))
           :title="entryPath(entry)"
           @click="open(entry)"
         >
-          <FaIcon :name="entry.isDir ? 'i-ri:folder-line' : 'i-ri:file-line'" class="mcp-fbp-icon" :class="{ 'is-dir': entry.isDir }" />
+          <YdIcon :name="entry.isDir ? 'i-ri:folder-line' : 'i-ri:file-line'" class="mcp-fbp-icon" :class="{ 'is-dir': entry.isDir }" />
           <span class="mcp-fbp-name">{{ entry.name }}</span>
           <span v-if="!entry.isDir" class="mcp-fbp-size">{{ formatSize(entry.size) }}</span>
-        </button>
+        </YdAction>
       </div>
       <div v-if="truncated" class="mcp-fbp-msg">
         仅显示前 {{ entries.length }} 项（共 {{ total }}）——可用上方名称过滤缩小范围。

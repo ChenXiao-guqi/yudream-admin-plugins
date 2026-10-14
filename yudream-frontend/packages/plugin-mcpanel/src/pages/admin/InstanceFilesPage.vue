@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { FileItem, TableColumn } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { FaAlert, FaButton, FaCard, FaContextMenu, FaFileUpload, FaIcon, FaInput, FaModal, FaPageHeader, FaPageMain, FaPagination, FaProgress, FaResponsiveTable, FaSelect, FaTag, FaTooltip, useFaModal, useFaToast } from '@yudream/components'
+import { YdAction, YdAlert, YdButton, YdCard, YdContextMenu, YdFileUpload, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdProgress, YdResponsiveTable, YdSelect, YdTag, YdTooltip, useYdModal, useYdToast } from '@yudream/components'
 import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { withTimeout } from '../../utils/fileContent.ts'
 import { relativeFilePath } from '../../utils/textFileAccess.ts'
@@ -26,8 +27,8 @@ const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 
 const api = createMcPanelApi(props.sdk)
 const extra = createMcPanelExtra(props.sdk)
-const toast = useFaToast()
-const modal = useFaModal()
+const toast = useYdToast()
+const modal = useYdModal()
 const router = useRouter()
 const route = useRoute()
 
@@ -681,30 +682,30 @@ onBeforeUnmount(() => { listRequest++; download.cancel() })
 </script>
 
 <template>
-  <FaPageHeader
+  <YdPageHeader
     :title="`文件 / SFTP：${instanceName || instanceId}`"
     description="面板代理的实例数据通道 + 可选临时 SFTP（随机口令，TTL 自动关闭）"
     class="mb-0"
   >
-    <FaButton variant="outline" @click="router.push(detailPath)">
-      <FaIcon name="i-ri:terminal-line" />
+    <YdButton variant="outline" @click="router.push(detailPath)">
+      <YdIcon name="i-ri:terminal-line" />
       返回终端
-    </FaButton>
-    <FaButton v-if="canManage" variant="outline" @click="uploadOpen = true">
-      <FaIcon name="i-ri:upload-line" />
+    </YdButton>
+    <YdButton v-if="canManage" variant="outline" @click="uploadOpen = true">
+      <YdIcon name="i-ri:upload-line" />
       上传
-    </FaButton>
-    <FaButton v-if="canUse" variant="outline" :loading="ftpBusy" @click="openFtp">
-      <FaIcon name="i-ri:key-2-line" />
+    </YdButton>
+    <YdButton v-if="canUse" variant="outline" :loading="ftpBusy" @click="openFtp">
+      <YdIcon name="i-ri:key-2-line" />
       开通 SFTP
-    </FaButton>
-    <FaButton variant="outline" @click="() => load(currentPath)">
-      <FaIcon name="i-ri:refresh-line" />
+    </YdButton>
+    <YdButton variant="outline" @click="() => load(currentPath)">
+      <YdIcon name="i-ri:refresh-line" />
       刷新
-    </FaButton>
-  </FaPageHeader>
+    </YdButton>
+  </YdPageHeader>
 
-  <FaPageMain class="mt-4">
+  <YdPageMain class="mt-4">
     <div v-if="uploadTaskItems.length" class="mb-4">
       <UploadTasksPanel
         :tasks="uploadTaskItems"
@@ -713,7 +714,7 @@ onBeforeUnmount(() => { listRequest++; download.cancel() })
         @cancel="taskId => void cancelUploadTask(taskId)"
       />
     </div>
-    <FaAlert
+    <YdAlert
       v-if="!canManage"
       title="当前账号为只读模式"
       class="mb-4"
@@ -721,21 +722,21 @@ onBeforeUnmount(() => { listRequest++; download.cancel() })
   <template #description>
       缺少 plugin:mcpanel:manage 权限：编辑 / 压缩 / 移动 / 删除 / 上传入口不可用（部分以 toast 提示拦截）。请在「角色管理」中为当前角色勾选该权限后刷新页面。
   </template>
-    </FaAlert>
-    <FaAlert v-if="loadError" variant="destructive" title="无法加载文件列表" class="mb-4">
+    </YdAlert>
+    <YdAlert v-if="loadError" variant="destructive" title="无法加载文件列表" class="mb-4">
   <template #description>
       {{ loadError }}
   </template>
-    </FaAlert>
-    <FaAlert v-else-if="rows.length === 0 && !loading" class="mb-4" title="目录为空">
+    </YdAlert>
+    <YdAlert v-else-if="rows.length === 0 && !loading" class="mb-4" title="目录为空">
   <template #description>
       实例数据根目录下还没有文件。若刚创建且勾选了自动下载核心，请稍等节点完成 server.jar 下载；
       也可在终端启动一次，或手动上传服务端文件。大文件建议用「开通 SFTP」。
   </template>
-    </FaAlert>
+    </YdAlert>
 
-    <div class="mcp-file-location"><FaButton size="sm" variant="outline" :aria-expanded="treeOpen" @click="treeOpen = !treeOpen"><FaIcon name="i-ri:side-bar-line" />目录浏览</FaButton><span class="mcp-muted">{{ pager.total }} 项 · 文件仅在点击保存后写入</span></div>
-    <div v-if="download.active.value" class="mcp-download-status"><FaIcon name="i-ri:download-line" /><span>{{ download.fileName.value }}</span><FaProgress :model-value="download.progress.value" /><span>{{ download.progress.value }}%</span><FaButton size="sm" variant="outline" @click="download.cancel">取消</FaButton></div>
+    <div class="mcp-file-location"><YdButton size="sm" variant="outline" :aria-expanded="treeOpen" @click="treeOpen = !treeOpen"><YdIcon name="i-ri:side-bar-line" />目录浏览</YdButton><span class="mcp-muted">{{ pager.total }} 项 · 文件仅在点击保存后写入</span></div>
+    <div v-if="download.active.value" class="mcp-download-status"><YdIcon name="i-ri:download-line" /><span>{{ download.fileName.value }}</span><YdProgress :model-value="download.progress.value" /><span>{{ download.progress.value }}%</span><YdButton size="sm" variant="outline" @click="download.cancel">取消</YdButton></div>
     <div class="mcp-files-split" :class="{ 'is-side-open': treeOpen }">
       <div v-if="treeOpen" class="mcp-files-side">
         <DirTreePanel
@@ -748,15 +749,15 @@ onBeforeUnmount(() => { listRequest++; download.cancel() })
 
       <!-- 右栏：磁盘监控条 + 当前目录表格 -->
       <div class="mcp-files-main">
-        <FaCard title="远程主机文件" :description="`实例数据根：/${currentPath || ''}（路径钉死在实例卷内）`">
+        <YdCard title="远程主机文件" :description="`实例数据根：/${currentPath || ''}（路径钉死在实例卷内）`">
           <div class="mcp-disk-strip">
-            <FaTag :variant="instanceState === 'running' ? 'default' : 'secondary'">
+            <YdTag :variant="instanceState === 'running' ? 'default' : 'secondary'">
               {{ STATE_LABEL[instanceState] || instanceState || '未知状态' }}
-            </FaTag>
+            </YdTag>
             <span>实例内存 {{ instanceMemoryMb ? `${instanceMemoryMb} MB` : '-' }}</span>
             <div class="mcp-disk-bar">
               <span>节点磁盘</span>
-              <FaProgress :model-value="diskPercent" class="min-w-0 flex-1" />
+              <YdProgress :model-value="diskPercent" class="min-w-0 flex-1" />
               <span>{{ nodeStats ? `${formatGib(nodeStats.diskUsedGb)} / ${formatGib(nodeStats.diskTotalGb)}（${diskPercent}%）` : '-' }}</span>
             </div>
           </div>
@@ -764,34 +765,34 @@ onBeforeUnmount(() => { listRequest++; download.cancel() })
           <div class="mcp-file-toolbar">
             <div class="mcp-file-path">
               <template v-for="(crumb, index) in breadcrumbs()" :key="crumb.path">
-                <a class="mcp-link" @click.prevent="load(crumb.path)">{{ crumb.label }}</a>
+                <YdAction class="mcp-link" @click="load(crumb.path)">{{ crumb.label }}</YdAction>
                 <span v-if="index < breadcrumbs().length - 1" class="mcp-muted">/</span>
               </template>
             </div>
             <div class="mcp-spacer mcp-row">
-              <FaInput v-model="keyword" placeholder="按名称过滤（回车）" clearable class="mcp-search-input" @keydown.enter="() => load(currentPath)" />
-              <FaInput v-model="newName" placeholder="新目录名" class="mcp-search-input" @keydown.enter="doMkdir" />
-              <FaButton v-if="canManage" size="sm" variant="outline" :disabled="!selectedRows.length" @click="promptBatchZip">
+              <YdInput v-model="keyword" placeholder="按名称过滤（回车）" clearable class="mcp-search-input" @keydown.enter="() => load(currentPath)" />
+              <YdInput v-model="newName" placeholder="新目录名" class="mcp-search-input" @keydown.enter="doMkdir" />
+              <YdButton v-if="canManage" size="sm" variant="outline" :disabled="!selectedRows.length" @click="promptBatchZip">
                 批量压缩{{ selectedRows.length ? `（${selectedRows.length}）` : '' }}
-              </FaButton>
-              <FaButton v-if="canManage" size="sm" variant="outline" :disabled="!selectedRows.length" @click="promptBatchMove">
+              </YdButton>
+              <YdButton v-if="canManage" size="sm" variant="outline" :disabled="!selectedRows.length" @click="promptBatchMove">
                 批量移动{{ selectedRows.length ? `（${selectedRows.length}）` : '' }}
-              </FaButton>
-              <FaButton v-if="canManage" size="sm" variant="destructive" :loading="deleteBusy" :disabled="!selectedRows.length" @click="batchDelete">
+              </YdButton>
+              <YdButton v-if="canManage" size="sm" variant="destructive" :loading="deleteBusy" :disabled="!selectedRows.length" @click="batchDelete">
                 批量删除{{ selectedRows.length ? `（${selectedRows.length}）` : '' }}
-              </FaButton>
-              <FaButton v-if="canManage" size="sm" variant="outline" :loading="mkdirBusy" :disabled="!newName.trim()" @click="doMkdir">
+              </YdButton>
+              <YdButton v-if="canManage" size="sm" variant="outline" :loading="mkdirBusy" :disabled="!newName.trim()" @click="doMkdir">
                 新建目录
-              </FaButton>
-              <FaButton size="sm" variant="outline" @click="() => fetchList()">
+              </YdButton>
+              <YdButton size="sm" variant="outline" @click="() => fetchList()">
                 刷新
-              </FaButton>
+              </YdButton>
             </div>
           </div>
 
-          <FaResponsiveTable
+          <YdLoadingOverlay :loading="loading"><YdResponsiveTable
             ref="tableRef"
-            v-loading="loading"
+
             :columns="columns"
             :data="rows"
             row-key="path"
@@ -805,12 +806,12 @@ onBeforeUnmount(() => { listRequest++; download.cancel() })
             @selection-change="onSelectionChange"
           >
             <template #cell-name="{ row }">
-              <FaContextMenu :items="ctxGroups(row.original)">
-                <a class="mcp-link" @click.prevent="enter(row.original)">
-                  <FaIcon :name="row.original.isDir ? 'i-ri:folder-line' : 'i-ri:file-line'" class="mr-1" />
+              <YdContextMenu :items="ctxGroups(row.original)">
+                <YdAction type="button" class="mcp-link" @click="enter(row.original)">
+                  <YdIcon :name="row.original.isDir ? 'i-ri:folder-line' : 'i-ri:file-line'" class="mr-1" />
                   {{ row.original.name }}
-                </a>
-              </FaContextMenu>
+                </YdAction>
+              </YdContextMenu>
             </template>
             <template #cell-type="{ row }">
               {{ row.original.isDir ? '目录' : (row.original.mode === 'symlink' ? '链接' : '文件') }}
@@ -823,47 +824,47 @@ onBeforeUnmount(() => { listRequest++; download.cancel() })
             </template>
             <template #cell-operation="{ row }">
               <div class="mcp-op-cell">
-                <FaTooltip v-if="canManage && !row.original.isDir" text="编辑">
-                  <FaButton size="icon-sm" variant="outline" @click="openFileFromBrowser(String(row.original.path ?? row.original.name))">
-                    <FaIcon name="i-ri:file-edit-line" />
-                  </FaButton>
-                </FaTooltip>
-                <FaTooltip v-if="!row.original.isDir" text="下载">
-                  <FaButton size="icon-sm" variant="outline" :disabled="download.active.value" @click="downloadRow(row.original)"><FaIcon name="i-ri:download-2-line" /></FaButton>
-                </FaTooltip>
-                <FaTooltip v-if="canManage" text="重命名 / 移动">
-                  <FaButton size="icon-sm" variant="outline" @click="promptRename(row.original)">
-                    <FaIcon name="i-ri:edit-2-line" />
-                  </FaButton>
-                </FaTooltip>
-                <FaTooltip v-if="canManage && String(row.original.name).toLowerCase().endsWith('.zip')" text="解压">
-                  <FaButton size="icon-sm" variant="outline" @click="doUnzip(row.original)">
-                    <FaIcon name="i-ri:file-reduce-line" />
-                  </FaButton>
-                </FaTooltip>
-                <FaTooltip v-if="canManage" :text="row.original.isDir ? '压缩目录为 zip' : '压缩为 zip'">
-                  <FaButton size="icon-sm" variant="outline" @click="doZip(row.original)">
-                    <FaIcon name="i-ri:file-zip-line" />
-                  </FaButton>
-                </FaTooltip>
-                <FaTooltip v-if="canManage" text="删除">
-                  <FaButton size="icon-sm" variant="destructive" @click="confirmDelete(row.original)">
-                    <FaIcon name="i-ri:delete-bin-line" />
-                  </FaButton>
-                </FaTooltip>
+                <YdTooltip v-if="canManage && !row.original.isDir" text="编辑">
+                  <YdButton size="icon-sm" variant="outline" @click="openFileFromBrowser(String(row.original.path ?? row.original.name))">
+                    <YdIcon name="i-ri:file-edit-line" />
+                  </YdButton>
+                </YdTooltip>
+                <YdTooltip v-if="!row.original.isDir" text="下载">
+                  <YdButton size="icon-sm" variant="outline" :disabled="download.active.value" @click="downloadRow(row.original)"><YdIcon name="i-ri:download-2-line" /></YdButton>
+                </YdTooltip>
+                <YdTooltip v-if="canManage" text="重命名 / 移动">
+                  <YdButton size="icon-sm" variant="outline" @click="promptRename(row.original)">
+                    <YdIcon name="i-ri:edit-2-line" />
+                  </YdButton>
+                </YdTooltip>
+                <YdTooltip v-if="canManage && String(row.original.name).toLowerCase().endsWith('.zip')" text="解压">
+                  <YdButton size="icon-sm" variant="outline" @click="doUnzip(row.original)">
+                    <YdIcon name="i-ri:file-reduce-line" />
+                  </YdButton>
+                </YdTooltip>
+                <YdTooltip v-if="canManage" :text="row.original.isDir ? '压缩目录为 zip' : '压缩为 zip'">
+                  <YdButton size="icon-sm" variant="outline" @click="doZip(row.original)">
+                    <YdIcon name="i-ri:file-zip-line" />
+                  </YdButton>
+                </YdTooltip>
+                <YdTooltip v-if="canManage" text="删除">
+                  <YdButton size="icon-sm" variant="destructive" @click="confirmDelete(row.original)">
+                    <YdIcon name="i-ri:delete-bin-line" />
+                  </YdButton>
+                </YdTooltip>
               </div>
             </template>
             <template #card="{ row }">
-              <FaCard class="w-full">
+              <YdCard class="w-full">
                 <div class="flex flex-col gap-3">
                   <div class="flex items-center justify-between gap-2">
-                    <button type="button" class="mcp-link flex min-w-0 items-center gap-1" @click.prevent="enter(row)">
-                      <FaIcon :name="row.isDir ? 'i-ri:folder-line' : 'i-ri:file-line'" class="shrink-0" />
+                    <YdAction type="button" class="mcp-link flex min-w-0 items-center gap-1" @click.prevent="enter(row)">
+                      <YdIcon :name="row.isDir ? 'i-ri:folder-line' : 'i-ri:file-line'" class="shrink-0" />
                       <span class="min-w-0 break-all text-left text-base font-semibold">{{ row.name }}</span>
-                    </button>
-                    <FaTag :variant="row.isDir ? 'secondary' : 'outline'">
+                    </YdAction>
+                    <YdTag :variant="row.isDir ? 'secondary' : 'outline'">
                       {{ row.isDir ? '目录' : (row.mode === 'symlink' ? '链接' : '文件') }}
-                    </FaTag>
+                    </YdTag>
                   </div>
                   <div class="flex flex-col gap-1 text-sm">
                     <div class="flex gap-2">
@@ -876,30 +877,30 @@ onBeforeUnmount(() => { listRequest++; download.cancel() })
                     </div>
                   </div>
                   <div class="flex flex-wrap gap-2 border-t pt-3">
-                    <FaButton v-if="canManage && !row.isDir" size="sm" variant="outline" @click="openFileFromBrowser(String(row.path ?? row.name))">
+                    <YdButton v-if="canManage && !row.isDir" size="sm" variant="outline" @click="openFileFromBrowser(String(row.path ?? row.name))">
                       编辑
-                    </FaButton>
-                    <FaButton v-if="!row.isDir" size="sm" variant="outline" :disabled="download.active.value" @click="downloadRow(row)">
+                    </YdButton>
+                    <YdButton v-if="!row.isDir" size="sm" variant="outline" :disabled="download.active.value" @click="downloadRow(row)">
                       下载
-                    </FaButton>
-                    <FaButton v-if="canManage" size="sm" variant="outline" @click="promptRename(row)">
+                    </YdButton>
+                    <YdButton v-if="canManage" size="sm" variant="outline" @click="promptRename(row)">
                       重命名
-                    </FaButton>
-                    <FaButton v-if="canManage && String(row.name).toLowerCase().endsWith('.zip')" size="sm" variant="outline" @click="doUnzip(row)">
+                    </YdButton>
+                    <YdButton v-if="canManage && String(row.name).toLowerCase().endsWith('.zip')" size="sm" variant="outline" @click="doUnzip(row)">
                       解压
-                    </FaButton>
-                    <FaButton v-if="canManage" size="sm" variant="outline" @click="doZip(row)">
+                    </YdButton>
+                    <YdButton v-if="canManage" size="sm" variant="outline" @click="doZip(row)">
                       压缩
-                    </FaButton>
-                    <FaButton v-if="canManage" size="sm" variant="destructive" @click="confirmDelete(row)">
+                    </YdButton>
+                    <YdButton v-if="canManage" size="sm" variant="destructive" @click="confirmDelete(row)">
                       删除
-                    </FaButton>
+                    </YdButton>
                   </div>
                 </div>
-              </FaCard>
+              </YdCard>
             </template>
-          </FaResponsiveTable>
-          <FaPagination
+          </YdResponsiveTable></YdLoadingOverlay>
+          <YdPagination
             v-model:page="pager.page"
             v-model:size="pager.size"
             :sizes="[10, 20, 50, 100]"
@@ -908,25 +909,25 @@ onBeforeUnmount(() => { listRequest++; download.cancel() })
             @page-change="() => fetchList()"
             @size-change="() => { pager.page = 1; fetchList() }"
           />
-        </FaCard>
+        </YdCard>
       </div>
     </div>
 
-    <FaCard title="SFTP 临时通道" description="随机账号/密码、根目录钉死实例数据内、到期自动关闭；启用网关后经面板单端口中转，节点无需对外可达。" class="mcp-page-gap">
+    <YdCard title="SFTP 临时通道" description="随机账号/密码、根目录钉死实例数据内、到期自动关闭；启用网关后经面板单端口中转，节点无需对外可达。" class="mcp-page-gap">
       <div class="mcp-toolbar-row mb-3">
         <span class="mcp-status-meta">有效期（分钟）</span>
-        <FaSelect
+        <YdSelect
           v-model="ftpTtl"
           :options="[{ label: '30 分钟', value: 30 }, { label: '60 分钟', value: 60 }, { label: '120 分钟', value: 120 }]"
           class="mcp-search-select"
         />
         <div class="mcp-spacer mcp-row">
-          <FaButton v-if="canUse" size="sm" :loading="ftpBusy" @click="openFtp">
+          <YdButton v-if="canUse" size="sm" :loading="ftpBusy" @click="openFtp">
             开通 / 重置
-          </FaButton>
-          <FaButton v-if="ftpInfo && canUse" size="sm" variant="outline" @click="closeFtp">
+          </YdButton>
+          <YdButton v-if="ftpInfo && canUse" size="sm" variant="outline" @click="closeFtp">
             关闭
-          </FaButton>
+          </YdButton>
         </div>
       </div>
       <div v-if="ftpInfo" class="mcp-ftp-box">
@@ -938,19 +939,19 @@ onBeforeUnmount(() => { listRequest++; download.cancel() })
         <div>密码：{{ ftpInfo.password }}</div>
         <div>到期：{{ formatDateTime(ftpInfo.expiresAt as number) }}</div>
         <div class="mcp-row mt-2">
-          <FaButton size="sm" @click="openSftpClient">
+          <YdButton size="sm" @click="openSftpClient">
             一键打开客户端
-          </FaButton>
-          <FaButton size="sm" variant="outline" @click="copyWinScpCommand">
+          </YdButton>
+          <YdButton size="sm" variant="outline" @click="copyWinScpCommand">
             复制 WinSCP 命令
-          </FaButton>
-          <FaButton size="sm" variant="outline" @click="copyPsftpCommand">
+          </YdButton>
+          <YdButton size="sm" variant="outline" @click="copyPsftpCommand">
             复制 psftp 命令
-          </FaButton>
+          </YdButton>
         </div>
-        <FaButton size="sm" variant="outline" class="mt-2" @click="copyFtp">
+        <YdButton size="sm" variant="outline" class="mt-2" @click="copyFtp">
           复制连接信息
-        </FaButton>
+        </YdButton>
         <div class="mcp-empty-hint mt-1">
           「一键打开」依赖本机已注册 sftp:// 协议的客户端（WinSCP 安装时勾选协议注册；FileZilla 不支持，请手动填入上方凭据）。命令需本机装有对应工具，含临时口令，请勿外传。
         </div>
@@ -958,7 +959,7 @@ onBeforeUnmount(() => { listRequest++; download.cancel() })
       <div v-else class="mcp-empty-hint">
         尚未开通。大文件传输、批量备份建议使用 SFTP；网页端适合小文件与配置编辑。
       </div>
-    </FaCard>
+    </YdCard>
 
     <FileEditorModal
       v-model="editorOpen"
@@ -975,7 +976,7 @@ onBeforeUnmount(() => { listRequest++; download.cancel() })
       @saved="() => fetchList()"
     />
 
-    <FaModal
+    <YdModal
       v-model="uploadOpen"
       title="上传文件"
       :show-cancel-button="true"
@@ -987,16 +988,16 @@ onBeforeUnmount(() => { listRequest++; download.cancel() })
       <div class="mcp-form">
         <label class="mcp-form-item">
           <span class="mcp-form-label">保存到：/{{ currentPath || '根目录' }} 下的文件名</span>
-          <FaInput v-model="uploadPath" :placeholder="uploadItems[0]?.name ?? 'server.jar'" class="mcp-w-full" />
+          <YdInput v-model="uploadPath" :placeholder="uploadItems[0]?.name ?? 'server.jar'" class="mcp-w-full" />
         </label>
         <label class="mcp-form-item">
           <span class="mcp-form-label">选择文件（≤ 2GB；异步分片上传，完成后自动出现在目录）</span>
-          <FaFileUpload v-model="uploadItems" :max="1" :http-request="customUpload" description="拖放或点击选择" />
+          <YdFileUpload v-model="uploadItems" :max="1" :http-request="customUpload" description="拖放或点击选择" />
         </label>
       </div>
-    </FaModal>
+    </YdModal>
 
-    <FaModal
+    <YdModal
       v-model="renameOpen"
       title="重命名 / 移动"
       :show-cancel-button="true"
@@ -1008,16 +1009,16 @@ onBeforeUnmount(() => { listRequest++; download.cancel() })
       <div class="mcp-form">
         <label class="mcp-form-item">
           <span class="mcp-form-label">当前路径</span>
-          <FaInput :model-value="renameFrom" disabled class="mcp-w-full mcp-mono" />
+          <YdInput :model-value="renameFrom" disabled class="mcp-w-full mcp-mono" />
         </label>
         <label class="mcp-form-item">
           <span class="mcp-form-label">目标路径</span>
-          <FaInput v-model="renameTo" class="mcp-w-full mcp-mono" />
+          <YdInput v-model="renameTo" class="mcp-w-full mcp-mono" />
         </label>
       </div>
-    </FaModal>
+    </YdModal>
 
-    <FaModal
+    <YdModal
       v-model="moveOpen"
       :title="`批量移动（${selectedRows.length} 项）`"
       :show-cancel-button="true"
@@ -1035,12 +1036,12 @@ onBeforeUnmount(() => { listRequest++; download.cancel() })
         </label>
         <label class="mcp-form-item">
           <span class="mcp-form-label">目标目录（实例根内相对路径，留空 = 根目录；不存在会报错）</span>
-          <FaInput v-model="moveTarget" placeholder="如 world/datapacks" class="mcp-w-full mcp-mono" />
+          <YdInput v-model="moveTarget" placeholder="如 world/datapacks" class="mcp-w-full mcp-mono" />
         </label>
       </div>
-    </FaModal>
+    </YdModal>
 
-    <FaModal
+    <YdModal
       v-model="zipMultiOpen"
       :title="`批量压缩（${selectedRows.length} 项）`"
       :show-cancel-button="true"
@@ -1058,10 +1059,10 @@ onBeforeUnmount(() => { listRequest++; download.cancel() })
         </label>
         <label class="mcp-form-item">
           <span class="mcp-form-label">zip 文件名（生成在当前目录）</span>
-          <FaInput v-model="zipMultiName" class="mcp-w-full mcp-mono" />
+          <YdInput v-model="zipMultiName" class="mcp-w-full mcp-mono" />
         </label>
       </div>
-    </FaModal>
+    </YdModal>
 
-  </FaPageMain>
+  </YdPageMain>
 </template>

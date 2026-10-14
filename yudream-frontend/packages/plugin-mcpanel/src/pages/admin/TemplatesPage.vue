@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { TableColumn } from '@yudream/components'
-import { FaButton, FaCard, FaIcon, FaInput, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable, FaSearchBar, FaSelect, FaTag, useFaModal, useFaToast } from '@yudream/components'
+import { YdButton, YdCard, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdSelect, YdTag, useYdModal, useYdToast } from '@yudream/components'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { createMcPanelExtra } from '../../api/api-extra'
 import { MCPANEL_PERMISSION, accountHasPermission } from '../../composables/permissions'
@@ -14,8 +15,8 @@ import TemplateFormModal from '../../components/TemplateFormModal.vue'
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 
 const extra = createMcPanelExtra(props.sdk)
-const toast = useFaToast()
-const modal = useFaModal()
+const toast = useYdToast()
+const modal = useYdModal()
 
 const canManage = computed(() => accountHasPermission(props.sdk.account, MCPANEL_PERMISSION.manage))
 const canDelete = computed(() => accountHasPermission(props.sdk.account, MCPANEL_PERMISSION.delete))
@@ -93,15 +94,15 @@ onMounted(() => void load())
 </script>
 
 <template>
-  <FaPageHeader title="服务端模板" description="镜像与服务端模板：安装源、启动命令形态、配置重写与注入开关">
-    <FaButton v-if="canManage" @click="editing = null; formOpen = true">
-      <FaIcon name="i-ri:add-line" />
+  <YdPageHeader title="服务端模板" description="镜像与服务端模板：安装源、启动命令形态、配置重写与注入开关">
+    <YdButton v-if="canManage" @click="editing = null; formOpen = true">
+      <YdIcon name="i-ri:add-line" />
       新建模板
-    </FaButton>
-  </FaPageHeader>
-  <FaPageMain>
-    <FaResponsiveTable
-      v-loading="loading"
+    </YdButton>
+  </YdPageHeader>
+  <YdPageMain>
+    <YdLoadingOverlay :loading="loading"><YdResponsiveTable
+
       :columns="columns"
       :data="rows"
       row-key="key"
@@ -113,48 +114,48 @@ onMounted(() => void load())
       empty-text="暂无模板，点击右上角「新建模板」创建"
     >
       <template #toolbar>
-        <FaSearchBar class="w-full">
+        <YdSearchBar class="w-full">
           <div class="mcp-filter-grid">
-            <FaInput v-model="filters.keyword" clearable placeholder="Key / 名称" class="w-full" @keydown.enter="search" @clear="search" />
-            <FaSelect v-model="filters.kind" :options="KIND_OPTIONS" class="w-full" @change="search" />
+            <YdInput v-model="filters.keyword" clearable placeholder="Key / 名称" class="w-full" @keydown.enter="search" @clear="search" />
+            <YdSelect v-model="filters.kind" :options="KIND_OPTIONS" class="w-full" @change="search" />
             <div class="flex flex-wrap items-center justify-end gap-2">
-              <FaButton variant="outline" @click="() => { filters.keyword = ''; filters.kind = 'all'; search() }">
+              <YdButton variant="outline" @click="() => { filters.keyword = ''; filters.kind = 'all'; search() }">
                 重置
-              </FaButton>
-              <FaButton @click="search">
-                <FaIcon name="i-ri:search-line" />
+              </YdButton>
+              <YdButton @click="search">
+                <YdIcon name="i-ri:search-line" />
                 查询
-              </FaButton>
+              </YdButton>
             </div>
           </div>
-        </FaSearchBar>
+        </YdSearchBar>
       </template>
       <template #cell-kind="{ row }">
-        <FaTag :variant="row.original.kind === 'image' ? 'secondary' : 'default'">
+        <YdTag :variant="row.original.kind === 'image' ? 'secondary' : 'default'">
           {{ row.original.kind === 'image' ? '镜像' : '服务端' }}
-        </FaTag>
+        </YdTag>
       </template>
       <template #cell-updatedAt="{ row }">
         {{ formatDateTime(row.original.updatedAt as number | undefined) }}
       </template>
       <template #cell-operation="{ row }">
         <div class="mcp-op-cell">
-          <FaButton v-if="canManage" size="sm" variant="outline" @click="editing = row.original; formOpen = true">
+          <YdButton v-if="canManage" size="sm" variant="outline" @click="editing = row.original; formOpen = true">
             编辑
-          </FaButton>
-          <FaButton v-if="canDelete" size="sm" variant="destructive" @click="confirmDelete(row.original)">
+          </YdButton>
+          <YdButton v-if="canDelete" size="sm" variant="destructive" @click="confirmDelete(row.original)">
             删除
-          </FaButton>
+          </YdButton>
         </div>
       </template>
       <template #card="{ row }">
-        <FaCard class="w-full">
+        <YdCard class="w-full">
           <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between gap-2">
               <span class="min-w-0 break-words text-base font-semibold">{{ row.name || row.key }}</span>
-              <FaTag :variant="row.kind === 'image' ? 'secondary' : 'default'">
+              <YdTag :variant="row.kind === 'image' ? 'secondary' : 'default'">
                 {{ row.kind === 'image' ? '镜像' : '服务端' }}
-              </FaTag>
+              </YdTag>
             </div>
             <div class="flex flex-col gap-1 text-sm">
               <div class="flex gap-2">
@@ -175,18 +176,18 @@ onMounted(() => void load())
               </div>
             </div>
             <div class="flex flex-wrap gap-2 border-t pt-3">
-              <FaButton v-if="canManage" size="sm" variant="outline" @click="editing = row; formOpen = true">
+              <YdButton v-if="canManage" size="sm" variant="outline" @click="editing = row; formOpen = true">
                 编辑
-              </FaButton>
-              <FaButton v-if="canDelete" size="sm" variant="destructive" @click="confirmDelete(row)">
+              </YdButton>
+              <YdButton v-if="canDelete" size="sm" variant="destructive" @click="confirmDelete(row)">
                 删除
-              </FaButton>
+              </YdButton>
             </div>
           </div>
-        </FaCard>
+        </YdCard>
       </template>
-    </FaResponsiveTable>
-    <FaPagination
+    </YdResponsiveTable></YdLoadingOverlay>
+    <YdPagination
       v-model:page="pager.page"
       v-model:size="pager.size"
       :total="pager.total"
@@ -195,5 +196,5 @@ onMounted(() => void load())
       @size-change="() => { pager.page = 1; load() }"
     />
     <TemplateFormModal v-model:open="formOpen" :sdk="sdk" :template="editing" @saved="() => { toast.success('模板已保存'); load() }" />
-  </FaPageMain>
+  </YdPageMain>
 </template>

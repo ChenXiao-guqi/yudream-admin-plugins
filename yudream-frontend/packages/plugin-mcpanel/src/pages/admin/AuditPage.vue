@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { FaAlert, FaButton, FaCard, FaIcon, FaInput, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable, FaSearchBar, FaSelect, FaTag, useFaModal, useFaToast } from '@yudream/components'
+import { YdAlert, YdButton, YdCard, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdSelect, YdTag, useYdModal, useYdToast } from '@yudream/components'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { createMcPanelExtra } from '../../api/api-extra'
 import { MCPANEL_PERMISSION, accountHasPermission } from '../../composables/permissions'
@@ -14,8 +15,8 @@ import { errorMessage, formatDateTime } from '../../composables/utils'
  */
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 const extra = createMcPanelExtra(props.sdk)
-const toast = useFaToast()
-const modal = useFaModal()
+const toast = useYdToast()
+const modal = useYdModal()
 
 const canDelete = computed(() => accountHasPermission(props.sdk.account, MCPANEL_PERMISSION.delete))
 
@@ -231,22 +232,22 @@ onMounted(() => void load())
 </script>
 
 <template>
-  <FaPageHeader title="操作审计" description="启停、命令、文件变更、备份、SFTP 等敏感操作；纯浏览不入审计。支持筛选、CSV 导出与单条删除">
-    <FaButton variant="outline" @click="load">
+  <YdPageHeader title="操作审计" description="启停、命令、文件变更、备份、SFTP 等敏感操作；纯浏览不入审计。支持筛选、CSV 导出与单条删除">
+    <YdButton variant="outline" @click="load">
       刷新
-    </FaButton>
-    <FaButton :loading="exporting" @click="exportCsv">
+    </YdButton>
+    <YdButton :loading="exporting" @click="exportCsv">
       导出 CSV
-    </FaButton>
-    <FaButton v-if="canDelete" variant="destructive" :loading="clearing" :disabled="pager.total <= 0" @click="confirmClear">
-      <FaIcon name="i-ri:delete-bin-2-line" />
+    </YdButton>
+    <YdButton v-if="canDelete" variant="destructive" :loading="clearing" :disabled="pager.total <= 0" @click="confirmClear">
+      <YdIcon name="i-ri:delete-bin-2-line" />
       一键清理
-    </FaButton>
-  </FaPageHeader>
-  <FaPageMain>
-    <FaAlert v-if="error" variant="destructive" title="无法加载审计日志" :description="error" class="mb-4" />
-    <FaResponsiveTable
-      v-loading="loading"
+    </YdButton>
+  </YdPageHeader>
+  <YdPageMain>
+    <YdAlert v-if="error" variant="destructive" title="无法加载审计日志" :description="error" class="mb-4" />
+    <YdLoadingOverlay :loading="loading"><YdResponsiveTable
+
       :columns="columns"
       :data="rows"
       row-key="logId"
@@ -258,23 +259,23 @@ onMounted(() => void load())
       empty-text="暂无审计记录"
     >
       <template #toolbar>
-        <FaSearchBar :show-toggle="false" class="w-full">
+        <YdSearchBar :show-toggle="false" class="w-full">
           <div class="grid w-full gap-2 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_170px_minmax(0,1fr)_auto]">
-            <FaInput v-model="filters.action" clearable placeholder="动作，如 instance.start" class="w-full" @keydown.enter="() => { pager.page = 1; load() }" />
-            <FaInput v-model="filters.actor" clearable placeholder="操作者" class="w-full" @keydown.enter="() => { pager.page = 1; load() }" />
-            <FaSelect v-model="filters.targetType" :options="TARGET_TYPES" class="w-full" @change="() => { pager.page = 1; load() }" />
-            <FaInput v-model="filters.targetId" clearable placeholder="对象 ID" class="w-full" @keydown.enter="() => { pager.page = 1; load() }" />
+            <YdInput v-model="filters.action" clearable placeholder="动作，如 instance.start" class="w-full" @keydown.enter="() => { pager.page = 1; load() }" />
+            <YdInput v-model="filters.actor" clearable placeholder="操作者" class="w-full" @keydown.enter="() => { pager.page = 1; load() }" />
+            <YdSelect v-model="filters.targetType" :options="TARGET_TYPES" class="w-full" @change="() => { pager.page = 1; load() }" />
+            <YdInput v-model="filters.targetId" clearable placeholder="对象 ID" class="w-full" @keydown.enter="() => { pager.page = 1; load() }" />
             <div class="flex items-center justify-end gap-2">
-              <FaButton variant="outline" @click="reset">
+              <YdButton variant="outline" @click="reset">
                 重置
-              </FaButton>
-              <FaButton @click="() => { pager.page = 1; load() }">
-                <FaIcon name="i-ri:search-line" />
+              </YdButton>
+              <YdButton @click="() => { pager.page = 1; load() }">
+                <YdIcon name="i-ri:search-line" />
                 查询
-              </FaButton>
+              </YdButton>
             </div>
           </div>
-        </FaSearchBar>
+        </YdSearchBar>
       </template>
       <template #cell-at="{ row }">
         <span class="mcp-status-meta">{{ formatDateTime(row.original.at as number) }}</span>
@@ -290,15 +291,15 @@ onMounted(() => void load())
       </template>
       <template #cell-target="{ row }">
         <div class="mcp-row" style="flex-wrap: nowrap;">
-          <FaTag variant="secondary">
+          <YdTag variant="secondary">
             {{ targetTypeLabel(row.original.targetType) }}
-          </FaTag>
+          </YdTag>
           <span v-if="row.original.targetName" class="mcp-audit-target-name">{{ row.original.targetName }}</span>
           <span class="mcp-inline-code" :title="String(row.original.targetId ?? '')">{{ row.original.targetId }}</span>
         </div>
       </template>
       <template #cell-operation="{ row }">
-        <FaButton
+        <YdButton
           v-if="canDelete"
           size="sm"
           variant="ghost"
@@ -306,17 +307,17 @@ onMounted(() => void load())
           :loading="deleting === row.original.logId"
           @click="confirmDelete(row.original)"
         >
-          <FaIcon name="i-ri:delete-bin-line" class="mcp-audit-del" />
-        </FaButton>
+          <YdIcon name="i-ri:delete-bin-line" class="mcp-audit-del" />
+        </YdButton>
       </template>
       <template #card="{ row }">
-        <FaCard class="w-full">
+        <YdCard class="w-full">
           <div class="flex flex-col gap-3">
             <div class="flex items-start justify-between gap-2">
               <span class="min-w-0 break-words text-base font-semibold">{{ actionLabel(row.action) || row.action }}</span>
-              <FaTag variant="secondary">
+              <YdTag variant="secondary">
                 {{ targetTypeLabel(row.targetType) }}
-              </FaTag>
+              </YdTag>
             </div>
             <div class="flex flex-col gap-1 text-sm">
               <div class="flex gap-2">
@@ -340,20 +341,20 @@ onMounted(() => void load())
               </div>
             </div>
             <div v-if="canDelete" class="flex flex-wrap gap-2 border-t pt-3">
-              <FaButton
+              <YdButton
                 size="sm"
                 variant="ghost"
                 :loading="deleting === row.logId"
                 @click="confirmDelete(row)"
               >
                 删除
-              </FaButton>
+              </YdButton>
             </div>
           </div>
-        </FaCard>
+        </YdCard>
       </template>
-    </FaResponsiveTable>
-    <FaPagination
+    </YdResponsiveTable></YdLoadingOverlay>
+    <YdPagination
       v-model:page="pager.page"
       v-model:size="pager.size"
       :total="pager.total"
@@ -361,6 +362,6 @@ onMounted(() => void load())
       @page-change="() => load()"
       @size-change="() => { pager.page = 1; load() }"
     />
-  </FaPageMain>
+  </YdPageMain>
 </template>
 

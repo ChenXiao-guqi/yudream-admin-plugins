@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { TableColumn } from '@yudream/components'
 import type { McpNode, McpNodeHistorySample } from '../../types'
-import { FaButton, FaButtonGroup, FaCard, FaIcon, FaInput, FaPageHeader, FaPageMain, FaPagination, FaProgress, FaResponsiveTable, FaSearchBar, FaSelect, FaTag, FaTooltip, useFaModal, useFaToast } from '@yudream/components'
+import { YdAction, YdButton, YdButtonGroup, YdCard, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdProgress, YdResponsiveTable, YdSearchBar, YdSelect, YdTag, YdTooltip, useYdModal, useYdToast } from '@yudream/components'
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createMcPanelApi } from '../../api/mcpanel-api'
@@ -23,8 +24,8 @@ import { MCPANEL_PERMISSION, accountHasPermission } from '../../composables/perm
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 
 const api = createMcPanelApi(props.sdk)
-const toast = useFaToast()
-const modal = useFaModal()
+const toast = useYdToast()
+const modal = useYdModal()
 const router = useRouter()
 const route = useRoute()
 
@@ -316,34 +317,34 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <FaPageHeader title="节点管理" description="远程节点控制面：接入、状态、资源与容器概览">
-    <FaButtonGroup class="mr-1">
-      <FaTooltip text="表格视图">
-        <FaButton size="sm" :variant="viewMode === 'table' ? 'default' : 'outline'" @click="viewMode = 'table'">
-          <FaIcon name="i-ri:table-line" />
-        </FaButton>
-      </FaTooltip>
-      <FaTooltip text="卡片视图（实时监控）">
-        <FaButton size="sm" :variant="viewMode === 'card' ? 'default' : 'outline'" @click="viewMode = 'card'">
-          <FaIcon name="i-ri:layout-grid-line" />
-        </FaButton>
-      </FaTooltip>
-    </FaButtonGroup>
-    <FaButton variant="outline" class="mr-1" @click="router.push('/platform/plugins/mcpanel/admin/node-deploy')">
-      <FaIcon name="i-ri:book-open-line" />
+  <YdPageHeader title="节点管理" description="远程节点控制面：接入、状态、资源与容器概览">
+    <YdButtonGroup class="mr-1">
+      <YdTooltip text="表格视图">
+        <YdButton size="sm" :variant="viewMode === 'table' ? 'default' : 'outline'" @click="viewMode = 'table'">
+          <YdIcon name="i-ri:table-line" />
+        </YdButton>
+      </YdTooltip>
+      <YdTooltip text="卡片视图（实时监控）">
+        <YdButton size="sm" :variant="viewMode === 'card' ? 'default' : 'outline'" @click="viewMode = 'card'">
+          <YdIcon name="i-ri:layout-grid-line" />
+        </YdButton>
+      </YdTooltip>
+    </YdButtonGroup>
+    <YdButton variant="outline" class="mr-1" @click="router.push('/platform/plugins/mcpanel/admin/node-deploy')">
+      <YdIcon name="i-ri:book-open-line" />
       部署指南
-    </FaButton>
-    <FaButton v-if="canManage" @click="openCreate">
-      <FaIcon name="i-ri:add-line" />
+    </YdButton>
+    <YdButton v-if="canManage" @click="openCreate">
+      <YdIcon name="i-ri:add-line" />
       新增节点
-    </FaButton>
-  </FaPageHeader>
-  <FaPageMain>
+    </YdButton>
+  </YdPageHeader>
+  <YdPageMain>
     <!-- 共用筛选工具栏：表格 / 卡片视图切换时保持不消失 -->
     <div class="mcp-list-toolbar">
-      <FaSearchBar :show-toggle="false" class="w-full">
+      <YdSearchBar :show-toggle="false" class="w-full">
         <div class="mcp-filter-grid mcp-filter-grid--2">
-          <FaInput
+          <YdInput
             v-model="filters.keyword"
             clearable
             placeholder="节点名称 / 地址"
@@ -351,22 +352,22 @@ onBeforeUnmount(() => {
             @keydown.enter="search"
             @clear="search"
           />
-          <FaSelect v-model="filters.status" :options="STATUS_OPTIONS" class="w-full" @change="search" />
+          <YdSelect v-model="filters.status" :options="STATUS_OPTIONS" class="w-full" @change="search" />
           <div class="mcp-filter-actions">
-            <FaButton variant="outline" @click="resetFilters">
+            <YdButton variant="outline" @click="resetFilters">
               重置
-            </FaButton>
-            <FaButton variant="outline" :loading="loading" @click="manualRefresh">
-              <FaIcon name="i-ri:refresh-line" />
+            </YdButton>
+            <YdButton variant="outline" :loading="loading" @click="manualRefresh">
+              <YdIcon name="i-ri:refresh-line" />
               刷新
-            </FaButton>
-            <FaButton @click="search">
-              <FaIcon name="i-ri:search-line" />
+            </YdButton>
+            <YdButton @click="search">
+              <YdIcon name="i-ri:search-line" />
               查询
-            </FaButton>
+            </YdButton>
           </div>
         </div>
-      </FaSearchBar>
+      </YdSearchBar>
       <div class="mcp-row">
         <span v-if="refreshError" class="mcp-refresh-meta is-error" title="保留上次加载的数据，可点击刷新重试">
           刷新失败，展示上次数据 · {{ refreshError }}
@@ -385,14 +386,14 @@ onBeforeUnmount(() => {
       <div v-else class="mcp-card-grid">
         <div v-for="node in rows" :key="node.id" class="mcp-card">
           <div class="mcp-card-head">
-            <button type="button" class="mcp-card-title" :title="node.name" @click="openDetail(node)">
+            <YdAction type="button" class="mcp-card-title" :title="node.name" @click="openDetail(node)">
               {{ node.name }}
-            </button>
+            </YdAction>
             <span class="mcp-spacer" />
             <NodeStatusTag :status="node.status" />
-            <FaTag v-if="node.enabled === false" variant="secondary">
+            <YdTag v-if="node.enabled === false" variant="secondary">
               已停用
-            </FaTag>
+            </YdTag>
           </div>
           <div class="mcp-card-sub" :title="node.endpoint">
             {{ node.endpoint || '未配置控制信道' }}
@@ -420,31 +421,31 @@ onBeforeUnmount(() => {
             </div>
           </div>
           <div class="mcp-card-ops">
-            <FaTooltip text="详情">
-              <FaButton size="icon-sm" variant="ghost" @click="openDetail(node)">
-                <FaIcon name="i-ri:eye-line" />
-              </FaButton>
-            </FaTooltip>
-            <FaTooltip v-if="canManage" text="编辑">
-              <FaButton size="icon-sm" variant="ghost" @click="openEdit(node)">
-                <FaIcon name="i-ri:edit-line" />
-              </FaButton>
-            </FaTooltip>
-            <FaTooltip v-if="canManage" text="重连">
-              <FaButton size="icon-sm" variant="ghost" :disabled="reconnectBusy[node.id]" @click="reconnect(node)">
-                <FaIcon name="i-ri:refresh-line" />
-              </FaButton>
-            </FaTooltip>
-            <FaTooltip v-if="canDelete" text="删除">
-              <FaButton size="icon-sm" variant="ghost" class="text-destructive" @click="confirmDelete(node)">
-                <FaIcon name="i-ri:delete-bin-line" />
-              </FaButton>
-            </FaTooltip>
+            <YdTooltip text="详情">
+              <YdButton size="icon-sm" variant="ghost" @click="openDetail(node)">
+                <YdIcon name="i-ri:eye-line" />
+              </YdButton>
+            </YdTooltip>
+            <YdTooltip v-if="canManage" text="编辑">
+              <YdButton size="icon-sm" variant="ghost" @click="openEdit(node)">
+                <YdIcon name="i-ri:edit-line" />
+              </YdButton>
+            </YdTooltip>
+            <YdTooltip v-if="canManage" text="重连">
+              <YdButton size="icon-sm" variant="ghost" :disabled="reconnectBusy[node.id]" @click="reconnect(node)">
+                <YdIcon name="i-ri:refresh-line" />
+              </YdButton>
+            </YdTooltip>
+            <YdTooltip v-if="canDelete" text="删除">
+              <YdButton size="icon-sm" variant="ghost" class="text-destructive" @click="confirmDelete(node)">
+                <YdIcon name="i-ri:delete-bin-line" />
+              </YdButton>
+            </YdTooltip>
           </div>
         </div>
       </div>
 
-      <FaPagination
+      <YdPagination
         v-model:page="pager.page"
         v-model:size="pager.size"
         :total="pager.total"
@@ -454,11 +455,11 @@ onBeforeUnmount(() => {
       />
     </div>
 
-    <!-- 表格视图：标准 FaTable 管理页 -->
+    <!-- 表格视图：标准 YdTable 管理页 -->
     <template v-else>
-      <FaResponsiveTable
+      <YdLoadingOverlay :loading="loading"><YdResponsiveTable
         class="mcp-page-gap"
-        v-loading="loading"
+
         :columns="columns"
         :data="rows"
         row-key="id"
@@ -471,9 +472,9 @@ onBeforeUnmount(() => {
       >
         <template #cell-name="{ row }">
           <div class="flex min-w-0 flex-col">
-            <span class="cursor-pointer truncate font-medium text-primary hover:underline" @click="openDetail(row.original)">
+            <YdAction type="button" class="truncate font-medium text-primary hover:underline" @click="openDetail(row.original)">
               {{ row.original.name }}
-            </span>
+            </YdAction>
             <span class="truncate text-xs text-muted-foreground" :title="row.original.endpoint">
               {{ row.original.endpoint || '未配置控制信道' }}
             </span>
@@ -482,14 +483,14 @@ onBeforeUnmount(() => {
         <template #cell-status="{ row }">
           <div class="flex flex-wrap items-center justify-center gap-1">
             <NodeStatusTag :status="row.original.status" />
-            <FaTag v-if="row.original.enabled === false" variant="secondary">
+            <YdTag v-if="row.original.enabled === false" variant="secondary">
               已停用
-            </FaTag>
+            </YdTag>
           </div>
         </template>
         <template #cell-cpu="{ row }">
           <div v-if="row.original.stats && freshnessOf(row.original) !== 'offline'" class="flex items-center gap-2">
-            <FaProgress :model-value="cpuPercentOf(row.original)" class="min-w-0 flex-1" />
+            <YdProgress :model-value="cpuPercentOf(row.original)" class="min-w-0 flex-1" />
             <span
               class="w-14 shrink-0 text-right text-xs text-muted-foreground"
               :title="freshnessOf(row.original) === 'stale' ? `最后快照 ${relativeSeenText(row.original.stats?.reportedAt ?? row.original.lastSeenAt)}` : undefined"
@@ -501,7 +502,7 @@ onBeforeUnmount(() => {
         </template>
         <template #cell-memory="{ row }">
           <div v-if="row.original.stats && freshnessOf(row.original) !== 'offline'" class="flex items-center gap-2">
-            <FaProgress :model-value="memPercentOf(row.original)" class="min-w-0 flex-1" />
+            <YdProgress :model-value="memPercentOf(row.original)" class="min-w-0 flex-1" />
             <span class="shrink-0 text-right text-xs text-muted-foreground">
               {{ metricTextOf(row.original, memPercentOf(row.original)) }} · {{ formatMib(row.original.stats.memUsedMb) }}/{{ formatMib(row.original.stats.memTotalMb) }}
             </span>
@@ -522,38 +523,38 @@ onBeforeUnmount(() => {
         </template>
         <template #cell-operation="{ row }">
           <div class="mcp-op-cell">
-            <FaTooltip text="详情">
-              <FaButton size="icon-sm" variant="outline" @click="openDetail(row.original)">
-                <FaIcon name="i-ri:eye-line" />
-              </FaButton>
-            </FaTooltip>
-            <FaTooltip v-if="canManage" text="编辑">
-              <FaButton size="icon-sm" variant="outline" @click="openEdit(row.original)">
-                <FaIcon name="i-ri:edit-line" />
-              </FaButton>
-            </FaTooltip>
-            <FaTooltip v-if="canManage" text="重连">
-              <FaButton size="icon-sm" variant="outline" :disabled="reconnectBusy[row.original.id]" @click="reconnect(row.original)">
-                <FaIcon name="i-ri:refresh-line" />
-              </FaButton>
-            </FaTooltip>
-            <FaTooltip v-if="canDelete" text="删除">
-              <FaButton size="icon-sm" variant="destructive" @click="confirmDelete(row.original)">
-                <FaIcon name="i-ri:delete-bin-line" />
-              </FaButton>
-            </FaTooltip>
+            <YdTooltip text="详情">
+              <YdButton size="icon-sm" variant="outline" @click="openDetail(row.original)">
+                <YdIcon name="i-ri:eye-line" />
+              </YdButton>
+            </YdTooltip>
+            <YdTooltip v-if="canManage" text="编辑">
+              <YdButton size="icon-sm" variant="outline" @click="openEdit(row.original)">
+                <YdIcon name="i-ri:edit-line" />
+              </YdButton>
+            </YdTooltip>
+            <YdTooltip v-if="canManage" text="重连">
+              <YdButton size="icon-sm" variant="outline" :disabled="reconnectBusy[row.original.id]" @click="reconnect(row.original)">
+                <YdIcon name="i-ri:refresh-line" />
+              </YdButton>
+            </YdTooltip>
+            <YdTooltip v-if="canDelete" text="删除">
+              <YdButton size="icon-sm" variant="destructive" @click="confirmDelete(row.original)">
+                <YdIcon name="i-ri:delete-bin-line" />
+              </YdButton>
+            </YdTooltip>
           </div>
         </template>
         <template #card="{ row }">
-          <FaCard class="w-full">
+          <YdCard class="w-full">
             <div class="flex flex-col gap-3">
               <div class="flex items-center justify-between gap-2">
                 <span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span>
                 <div class="flex gap-1">
                   <NodeStatusTag :status="row.status" />
-                  <FaTag v-if="row.enabled === false" variant="secondary">
+                  <YdTag v-if="row.enabled === false" variant="secondary">
                     已停用
-                  </FaTag>
+                  </YdTag>
                 </div>
               </div>
               <div class="flex flex-col gap-1 text-sm">
@@ -579,25 +580,25 @@ onBeforeUnmount(() => {
                 </div>
               </div>
               <div class="flex flex-wrap gap-2 border-t pt-3">
-                <FaButton size="sm" variant="outline" @click="openDetail(row)">
+                <YdButton size="sm" variant="outline" @click="openDetail(row)">
                   详情
-                </FaButton>
-                <FaButton v-if="canManage" size="sm" variant="outline" @click="openEdit(row)">
+                </YdButton>
+                <YdButton v-if="canManage" size="sm" variant="outline" @click="openEdit(row)">
                   编辑
-                </FaButton>
-                <FaButton v-if="canManage" size="sm" variant="outline" :disabled="reconnectBusy[row.id]" @click="reconnect(row)">
+                </YdButton>
+                <YdButton v-if="canManage" size="sm" variant="outline" :disabled="reconnectBusy[row.id]" @click="reconnect(row)">
                   重连
-                </FaButton>
-                <FaButton v-if="canDelete" size="sm" variant="destructive" @click="confirmDelete(row)">
+                </YdButton>
+                <YdButton v-if="canDelete" size="sm" variant="destructive" @click="confirmDelete(row)">
                   删除
-                </FaButton>
+                </YdButton>
               </div>
             </div>
-          </FaCard>
+          </YdCard>
         </template>
-      </FaResponsiveTable>
+      </YdResponsiveTable></YdLoadingOverlay>
 
-      <FaPagination
+      <YdPagination
         v-model:page="pager.page"
         v-model:size="pager.size"
         :total="pager.total"
@@ -614,5 +615,5 @@ onBeforeUnmount(() => {
       @created="onCreated"
       @saved="() => { toast.success('节点已保存'); load() }"
     />
-  </FaPageMain>
+  </YdPageMain>
 </template>

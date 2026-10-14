@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { McpNodeStatus } from '../types'
 import { computed } from 'vue'
-import { FaTag } from '@yudream/components'
+import { YdTag } from '@yudream/components'
 
 const props = defineProps<{ status?: string | null }>()
 
@@ -19,7 +19,7 @@ const meta = computed(() => {
 </script>
 
 <template>
-  <FaTag :variant="meta.variant">
+  <YdTag :variant="meta.variant">
     {{ meta.label }}
-  </FaTag>
+  </YdTag>
 </template>

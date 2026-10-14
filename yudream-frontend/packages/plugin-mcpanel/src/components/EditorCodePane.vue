@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { FaButton, FaIcon, FaTextarea } from '@yudream/components'
+import { YdButton, YdIcon, YdTextarea } from '@yudream/components'
 import { computed, nextTick, ref, watch } from 'vue'
 import { indentLine, indentUnitsFor, newlineIndent, outdentLine, suggest, wordBefore } from '../utils/editorAssist.ts'
 import type { EditorTab } from '../composables/useEditorTabs.ts'
@@ -73,16 +73,16 @@ watch(() => props.wrap, () => nextTick(syncScroll))
 </script>
 
 <template>
-  <section class="mced-code" :class="{ 'is-wrapped': wrap }" @keydown.capture="onKeydown">
-    <div v-if="tab.truncated || tab.readOnly" class="mced-notice"><FaIcon name="i-ri:lock-line" />{{ tab.truncated ? '只读预览 · 当前内容不完整，完整文件请下载或使用 SFTP。' : '只读模式 · 当前账号没有文件修改权限。' }}</div>
+  <section class="mced-code" :class="{ 'is-wrapped': wrap }">
+    <div v-if="tab.truncated || tab.readOnly" class="mced-notice"><YdIcon name="i-ri:lock-line" />{{ tab.truncated ? '只读预览 · 当前内容不完整，完整文件请下载或使用 SFTP。' : '只读模式 · 当前账号没有文件修改权限。' }}</div>
     <div class="mced-code-scroll">
       <div v-if="!wrap" class="mced-gutter" aria-hidden="true"><div :style="{ transform: `translateY(${(firstLine - 1) * 22 - scrollTop}px)` }"><span v-for="line in visibleNumbers" :key="line">{{ line }}</span></div></div>
-      <div ref="frame" class="mced-frame" @scroll.capture="syncScroll" @click="locateCaret" @keyup="locateCaret">
-        <FaTextarea :model-value="tab.text" :readonly="tab.readOnly" :wrap="wrap ? 'soft' : 'off'" :aria-label="`编辑 ${tab.name}`" spellcheck="false" autocapitalize="off" autocomplete="off" class="mced-area" input-class="mced-ta" @update:model-value="onTextUpdate" />
+      <div ref="frame" class="mced-frame">
+        <YdTextarea :model-value="tab.text" :readonly="tab.readOnly" :wrap="wrap ? 'soft' : 'off'" :aria-label="`编辑 ${tab.name}`" spellcheck="false" autocapitalize="off" autocomplete="off" class="mced-area" input-class="mced-ta" @update:model-value="onTextUpdate" @keydown.capture="onKeydown" @scroll.capture="syncScroll" @click="locateCaret" @keyup="locateCaret" />
       </div>
     </div>
     <div v-if="suggestions" class="mced-sug" role="listbox" aria-label="文本补全">
-      <FaButton v-for="(item, index) in suggestions.items.slice(0, 8)" :key="item" size="sm" :variant="index === suggestions.selected ? 'secondary' : 'ghost'" @mousedown.prevent="selectSuggestion(item)">{{ item }}</FaButton><span>Tab 补全 · Esc 收起</span>
+      <YdButton v-for="(item, index) in suggestions.items.slice(0, 8)" :key="item" size="sm" :variant="index === suggestions.selected ? 'secondary' : 'ghost'" @mousedown.prevent="selectSuggestion(item)">{{ item }}</YdButton><span>Tab 补全 · Esc 收起</span>
     </div>
     <div class="mced-caret"><span>第 {{ caret.line }} 行，{{ caret.column }} 列</span><span>{{ wrap ? '自动换行 · 行号已隐藏' : `${lineCount} 行` }}</span><span>UTF-8</span></div>
   </section>

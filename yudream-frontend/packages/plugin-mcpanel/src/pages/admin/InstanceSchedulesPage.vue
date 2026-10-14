@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { FaAlert, FaButton, FaCard, FaInput, FaModal, FaPageHeader, FaPageMain, FaResponsiveTable, FaSelect, FaSwitch, FaTag, useFaModal, useFaToast } from '@yudream/components'
+import { YdAlert, YdButton, YdCard, YdInput, YdModal, YdPageHeader, YdPageMain, YdResponsiveTable, YdSelect, YdSwitch, YdTag, useYdModal, useYdToast } from '@yudream/components'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createMcPanelExtra } from '../../api/api-extra'
@@ -12,8 +13,8 @@ import { errorMessage, formatDateTime } from '../../composables/utils'
 /** 实例计划任务（对标 MCSM Schedule：间隔 / 每日 + 控制台命令 / 本地备份 / 异地备份）。 */
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 const extra = createMcPanelExtra(props.sdk)
-const toast = useFaToast()
-const modal = useFaModal()
+const toast = useYdToast()
+const modal = useYdModal()
 const route = useRoute()
 const router = useRouter()
 const backupTargets = useBackupTargets(props.sdk)
@@ -205,23 +206,23 @@ const targetOptions = computed(() => backupTargets.targets.value.map(target => (
 </script>
 
 <template>
-  <FaPageHeader :title="`计划任务 · ${instanceId}`" description="间隔 / 每日定时向控制台发送命令">
-    <FaButton variant="outline" @click="router.push(`/platform/plugins/mcpanel/admin/instances/${instanceId}`)">
+  <YdPageHeader :title="`计划任务 · ${instanceId}`" description="间隔 / 每日定时向控制台发送命令">
+    <YdButton variant="outline" @click="router.push(`/platform/plugins/mcpanel/admin/instances/${instanceId}`)">
       返回终端
-    </FaButton>
-    <FaButton v-if="canManage" @click="openCreate">
+    </YdButton>
+    <YdButton v-if="canManage" @click="openCreate">
       新建任务
-    </FaButton>
-  </FaPageHeader>
-  <FaPageMain>
-    <FaAlert class="mb-4" title="说明">
+    </YdButton>
+  </YdPageHeader>
+  <YdPageMain>
+    <YdAlert class="mb-4" title="说明">
   <template #description>
       任务由面板调度线程驱动。动作「发送控制台命令」到点向实例控制台发送命令（如 save-all）；动作「本地备份」到点经宿主数据备份中心做本机导出；动作「异地备份」到点把实例数据整包推送到宿主数据备份中心配置的异地目标，可在备份中心任务记录与实例备份列表查看进度。
   </template>
-    </FaAlert>
-    <FaCard>
-      <FaResponsiveTable
-        v-loading="loading"
+    </YdAlert>
+    <YdCard>
+      <YdLoadingOverlay :loading="loading"><YdResponsiveTable
+
         :columns="columns"
         :data="rows"
         row-key="id"
@@ -236,43 +237,43 @@ const targetOptions = computed(() => backupTargets.targets.value.map(target => (
         </template>
         <template #cell-payload="{ row }">
           <span v-if="String(row.original.action) === 'offsite-backup'" class="flex items-center gap-1">
-            <FaTag variant="secondary">异地备份</FaTag>
+            <YdTag variant="secondary">异地备份</YdTag>
             <span class="mcp-mono">{{ row.original.payload }}</span>
           </span>
           <span v-else-if="String(row.original.action) === 'local-backup'" class="flex items-center gap-1">
-            <FaTag variant="secondary">本地备份</FaTag>
+            <YdTag variant="secondary">本地备份</YdTag>
           </span>
           <span v-else class="mcp-mono">{{ row.original.payload }}</span>
         </template>
         <template #cell-status="{ row }">
-          <FaTag :variant="row.original.enabled === false ? 'secondary' : 'default'">
+          <YdTag :variant="row.original.enabled === false ? 'secondary' : 'default'">
             {{ row.original.enabled === false ? '停用' : '启用' }}
-          </FaTag>
+          </YdTag>
         </template>
         <template #cell-next="{ row }">
           {{ formatDateTime(row.original.nextRunAt as number) }}
         </template>
         <template #cell-operation="{ row }">
           <div class="mcp-op-cell">
-            <FaButton v-if="canManage" size="sm" variant="outline" @click="runNow(row.original)">
+            <YdButton v-if="canManage" size="sm" variant="outline" @click="runNow(row.original)">
               立即执行
-            </FaButton>
-            <FaButton v-if="canManage" size="sm" variant="outline" @click="openEdit(row.original)">
+            </YdButton>
+            <YdButton v-if="canManage" size="sm" variant="outline" @click="openEdit(row.original)">
               编辑
-            </FaButton>
-            <FaButton v-if="canDelete" size="sm" variant="destructive" @click="confirmDelete(row.original)">
+            </YdButton>
+            <YdButton v-if="canDelete" size="sm" variant="destructive" @click="confirmDelete(row.original)">
               删除
-            </FaButton>
+            </YdButton>
           </div>
         </template>
         <template #card="{ row }">
-          <FaCard class="w-full">
+          <YdCard class="w-full">
             <div class="flex flex-col gap-3">
               <div class="flex items-center justify-between gap-2">
                 <span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span>
-                <FaTag :variant="row.enabled === false ? 'secondary' : 'default'">
+                <YdTag :variant="row.enabled === false ? 'secondary' : 'default'">
                   {{ row.enabled === false ? '停用' : '启用' }}
-                </FaTag>
+                </YdTag>
               </div>
               <div class="flex flex-col gap-1 text-sm">
                 <div class="flex gap-2">
@@ -283,11 +284,11 @@ const targetOptions = computed(() => backupTargets.targets.value.map(target => (
                   <span class="shrink-0 text-secondary-foreground/60">命令 / 目标</span>
                   <span class="min-w-0 flex-1 break-all">
                     <template v-if="String(row.action) === 'offsite-backup'">
-                      <FaTag variant="secondary">异地备份</FaTag>
+                      <YdTag variant="secondary">异地备份</YdTag>
                       <span class="mcp-mono">{{ row.payload }}</span>
                     </template>
                     <template v-else-if="String(row.action) === 'local-backup'">
-                      <FaTag variant="secondary">本地备份</FaTag>
+                      <YdTag variant="secondary">本地备份</YdTag>
                     </template>
                     <span v-else class="mcp-mono">{{ row.payload }}</span>
                   </span>
@@ -302,23 +303,23 @@ const targetOptions = computed(() => backupTargets.targets.value.map(target => (
                 </div>
               </div>
               <div class="flex flex-wrap gap-2 border-t pt-3">
-                <FaButton v-if="canManage" size="sm" variant="outline" @click="runNow(row)">
+                <YdButton v-if="canManage" size="sm" variant="outline" @click="runNow(row)">
                   立即执行
-                </FaButton>
-                <FaButton v-if="canManage" size="sm" variant="outline" @click="openEdit(row)">
+                </YdButton>
+                <YdButton v-if="canManage" size="sm" variant="outline" @click="openEdit(row)">
                   编辑
-                </FaButton>
-                <FaButton v-if="canDelete" size="sm" variant="destructive" @click="confirmDelete(row)">
+                </YdButton>
+                <YdButton v-if="canDelete" size="sm" variant="destructive" @click="confirmDelete(row)">
                   删除
-                </FaButton>
+                </YdButton>
               </div>
             </div>
-          </FaCard>
+          </YdCard>
         </template>
-      </FaResponsiveTable>
-    </FaCard>
+      </YdResponsiveTable></YdLoadingOverlay>
+    </YdCard>
 
-    <FaModal
+    <YdModal
       v-model="formOpen"
       :title="editing ? '编辑计划任务' : '新建计划任务'"
       :show-cancel-button="true"
@@ -330,11 +331,11 @@ const targetOptions = computed(() => backupTargets.targets.value.map(target => (
       <div class="mcp-form">
         <label class="mcp-form-item">
           <span class="mcp-form-label">名称</span>
-          <FaInput v-model="form.name" class="mcp-w-full" placeholder="每日备份刷新" />
+          <YdInput v-model="form.name" class="mcp-w-full" placeholder="每日备份刷新" />
         </label>
         <label class="mcp-form-item">
           <span class="mcp-form-label">触发类型</span>
-          <FaSelect
+          <YdSelect
             v-model="form.type"
             :options="[
               { label: '间隔执行', value: 'interval' },
@@ -347,7 +348,7 @@ const targetOptions = computed(() => backupTargets.targets.value.map(target => (
         </label>
         <label class="mcp-form-item">
           <span class="mcp-form-label">动作</span>
-          <FaSelect v-model="form.action" :options="ACTION_OPTIONS" class="mcp-w-full" />
+          <YdSelect v-model="form.action" :options="ACTION_OPTIONS" class="mcp-w-full" />
           <span v-if="form.action === 'offsite-backup'" class="mcp-form-hint">
             到点把本实例的世界/配置数据整包推送到宿主「数据备份中心」配置的异地目标。
           </span>
@@ -357,20 +358,20 @@ const targetOptions = computed(() => backupTargets.targets.value.map(target => (
         </label>
         <label v-if="form.type === 'interval'" class="mcp-form-item">
           <span class="mcp-form-label">间隔（秒）</span>
-          <FaInput v-model="form.intervalSeconds" type="number" class="mcp-w-full" />
+          <YdInput v-model="form.intervalSeconds" type="number" class="mcp-w-full" />
         </label>
         <label v-else-if="form.type === 'daily'" class="mcp-form-item">
           <span class="mcp-form-label">每天时间 HH:mm</span>
-          <FaInput v-model="form.dailyTime" class="mcp-w-full" placeholder="04:00" />
+          <YdInput v-model="form.dailyTime" class="mcp-w-full" placeholder="04:00" />
         </label>
         <label v-else-if="form.type === 'cron'" class="mcp-form-item">
           <span class="mcp-form-label">Cron（分 时 日 月 周）</span>
-          <FaInput v-model="form.cron" class="mcp-w-full mcp-mono" placeholder="0 4 * * *" />
+          <YdInput v-model="form.cron" class="mcp-w-full mcp-mono" placeholder="0 4 * * *" />
           <span class="mcp-form-hint">示例：0 4 * * * 每天 04:00；*/30 * * * * 每 30 分钟</span>
         </label>
         <label v-else class="mcp-form-item">
           <span class="mcp-form-label">触发事件</span>
-          <FaSelect
+          <YdSelect
             v-model="form.event"
             :options="[
               { label: '实例启动', value: 'instance.start' },
@@ -383,11 +384,11 @@ const targetOptions = computed(() => backupTargets.targets.value.map(target => (
         <label v-if="form.action !== 'local-backup'" class="mcp-form-item">
           <span class="mcp-form-label">{{ form.action === 'offsite-backup' ? '异地目标' : '控制台命令' }}</span>
           <template v-if="form.action === 'offsite-backup' && backupTargets.catalogReady.value">
-            <FaSelect v-model="form.payload" :options="targetOptions" class="mcp-w-full" />
+            <YdSelect v-model="form.payload" :options="targetOptions" class="mcp-w-full" />
             <span class="mcp-form-hint">目标来自宿主「数据备份中心」，如需新增请先在备份中心配置。</span>
           </template>
           <template v-else>
-            <FaInput
+            <YdInput
               v-model="form.payload"
               class="mcp-w-full mcp-mono"
               :placeholder="form.action === 'offsite-backup' ? 'nas-webdav' : 'save-all flush'"
@@ -398,15 +399,15 @@ const targetOptions = computed(() => backupTargets.targets.value.map(target => (
           </template>
         </label>
         <label class="flex items-center gap-2 text-sm">
-          <FaSwitch v-model="form.enabled" />
+          <YdSwitch v-model="form.enabled" />
           启用
         </label>
-        <FaAlert v-if="formError" variant="destructive" title="无法保存">
+        <YdAlert v-if="formError" variant="destructive" title="无法保存">
   <template #description>
           {{ formError }}
   </template>
-        </FaAlert>
+        </YdAlert>
       </div>
-    </FaModal>
-  </FaPageMain>
+    </YdModal>
+  </YdPageMain>
 </template>

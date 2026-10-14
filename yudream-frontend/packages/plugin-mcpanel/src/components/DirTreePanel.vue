@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { FaButton, FaIcon } from '@yudream/components'
+import { YdAction, YdButton, YdIcon } from '@yudream/components'
 import { computed, onMounted, ref, watch } from 'vue'
 import { errorMessage } from '../composables/utils'
 
@@ -170,9 +170,9 @@ onMounted(() => void refresh())
     <div class="mcp-tree-head">
       <span>目录</span>
       <span class="mcp-spacer" />
-      <FaButton size="icon-sm" variant="ghost" :disabled="loading" title="重建目录树" @click="refresh">
-        <FaIcon name="i-ri:refresh-line" />
-      </FaButton>
+      <YdButton size="icon-sm" variant="ghost" :disabled="loading" title="重建目录树" @click="refresh">
+        <YdIcon name="i-ri:refresh-line" />
+      </YdButton>
     </div>
     <div v-if="error" class="mcp-tree-msg is-error">
       {{ error }}
@@ -184,25 +184,31 @@ onMounted(() => void refresh())
       没有子目录
     </div>
     <div v-else class="mcp-tree-body">
-      <button
+      <div
         v-for="{ node, depth } in flatRows"
         :key="node.path"
-        type="button"
         class="mcp-tree-row"
         :class="{ 'is-active': node.path === modelValue }"
-        :style="{ paddingLeft: `${8 + depth * 16}px` }"
-        :title="`/${node.path}`"
-        @click="select(node)"
+        :style="{ paddingLeft: String(8 + depth * 16) + 'px' }"
+        :title="'/' + node.path"
       >
-        <span v-if="!node.isFile" class="mcp-tree-caret" @click.stop="toggle(node)">
-          <FaIcon
+        <YdAction
+          v-if="!node.isFile"
+          type="button"
+          class="mcp-tree-caret"
+          :aria-label="(node.expanded ? '收起 ' : '展开 ') + node.name"
+          @click="toggle(node)"
+        >
+          <YdIcon
             :name="node.loading ? 'i-ri:loader-4-line' : node.expanded ? 'i-ri:arrow-down-s-line' : 'i-ri:arrow-right-s-line'"
             :class="{ 'is-spinning': node.loading }"
           />
-        </span>
-        <FaIcon :name="node.isFile ? 'i-ri:file-line' : (node.expanded ? 'i-ri:folder-open-line' : 'i-ri:folder-line')" class="mcp-tree-folder" />
-        <span class="mcp-tree-name">{{ node.name }}</span>
-      </button>
+        </YdAction>
+        <YdAction type="button" class="mcp-tree-select" @click="select(node)">
+          <YdIcon :name="node.isFile ? 'i-ri:file-line' : (node.expanded ? 'i-ri:folder-open-line' : 'i-ri:folder-line')" class="mcp-tree-folder" />
+          <span class="mcp-tree-name">{{ node.name }}</span>
+        </YdAction>
+      </div>
     </div>
   </div>
 </template>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { McpNode, McpNodeAccessMode, McpNodeSaveRequest, McpTlsMode } from '../types'
 import { computed, reactive, ref, watch } from 'vue'
-import { FaAlert, FaButton, FaInput, FaModal, FaSelect, FaSwitch, FaTextarea } from '@yudream/components'
+import { YdAlert, YdButton, YdInput, YdModal, YdSelect, YdSwitch, YdTextarea } from '@yudream/components'
 import type { McPanelApi } from '../api/mcpanel-api'
 import { errorMessage } from '../composables/utils'
 
@@ -272,7 +272,7 @@ async function submit(done: () => void) {
 </script>
 
 <template>
-  <FaModal
+  <YdModal
     v-model="open"
     :title="node ? '编辑节点' : '新增节点'"
     :show-cancel-button="true"
@@ -284,31 +284,31 @@ async function submit(done: () => void) {
     <div class="mcp-form">
       <label class="mcp-form-item">
         <span class="mcp-form-label">节点名称</span>
-        <FaInput v-model="form.name" clearable placeholder="例如：家中-NAT-01" class="w-full" />
+        <YdInput v-model="form.name" clearable placeholder="例如：家中-NAT-01" class="w-full" />
       </label>
       <label class="mcp-form-item">
         <span class="mcp-form-label">控制信道地址</span>
-        <FaInput v-model="form.endpoint" clearable placeholder="wss://节点主机:端口" class="w-full" />
+        <YdInput v-model="form.endpoint" clearable placeholder="wss://节点主机:端口" class="w-full" />
         <span class="mcp-form-hint">只填 wss://host[:port]，/control 路径由面板统一追加。面板服务器会主动拨号该地址：必须填<b>面板可达</b>的地址。节点在无公网映射的内网/容器里时，需先做端口映射或内网穿透（frp、tailscale 等），把穿透后的 wss 地址填到这里。</span>
       </label>
       <label class="mcp-form-item">
         <span class="mcp-form-label">节点对外地址（选填）</span>
-        <FaInput v-model="form.sftpHost" clearable placeholder="默认取控制信道地址的 host" class="w-full" />
+        <YdInput v-model="form.sftpHost" clearable placeholder="默认取控制信道地址的 host" class="w-full" />
         <span class="mcp-form-hint">给<b>玩家接入</b>用的地址：接入方式选「节点直连」时，实例域名解析指向这里。典型场景——控制信道走内网地址（面板与节点同内网），这里填<b>公网 IP / DDNS 域名</b>供玩家从公网接入，两者互不影响；留空 = 解析也指向控制信道 host。开启面板 SFTP 网关后 SFTP 全部经网关中转、不使用该地址（仅网关关闭时，FTP 客户端才会直连它，须填你电脑可达的地址）。</span>
       </label>
       <div class="mcp-form-item">
         <span class="mcp-form-label">玩家接入方式（域名解析取值）</span>
-        <FaSelect v-model="form.accessMode" :options="ACCESS_MODES" class="w-full" />
+        <YdSelect v-model="form.accessMode" :options="ACCESS_MODES" class="w-full" />
         <span class="mcp-form-hint">{{ accessHint }}</span>
       </div>
       <label v-if="needsAccessHost" class="mcp-form-item">
         <span class="mcp-form-label">{{ form.accessMode === 'frp' ? 'FRP 入口地址' : '解析地址' }}</span>
-        <FaInput v-model="form.accessHost" clearable placeholder="IP 或主机名（如 1.2.3.4 / frp.example.com）" class="w-full" />
+        <YdInput v-model="form.accessHost" clearable placeholder="IP 或主机名（如 1.2.3.4 / frp.example.com）" class="w-full" />
         <span class="mcp-form-hint">IP 会写成 A/AAAA 记录；主机名会写成 CNAME（此时 SRV 目标直接指向该主机）。</span>
       </label>
       <label v-if="form.accessMode === 'entry'" class="mcp-form-item">
         <span class="mcp-form-label">入口后端地址（选填）</span>
-        <FaInput v-model="form.accessHost" clearable placeholder="入口机可达的节点地址，如 127.0.0.1 / 10.0.0.8" class="w-full" />
+        <YdInput v-model="form.accessHost" clearable placeholder="入口机可达的节点地址，如 127.0.0.1 / 10.0.0.8" class="w-full" />
         <span class="mcp-form-hint">
           面板会把「域名 → 该地址:实例端口」推送给入口；节点与入口同机（frp 映射到本机端口）时填 127.0.0.1，留空则用节点对外地址。
         </span>
@@ -316,23 +316,23 @@ async function submit(done: () => void) {
       <div class="mcp-form-item">
         <span class="mcp-form-label">实例端口分配范围（选填）</span>
         <div class="flex items-center gap-2">
-          <FaInput v-model="form.portRangeStart" type="number" placeholder="起始端口" class="w-full" />
+          <YdInput v-model="form.portRangeStart" type="number" placeholder="起始端口" class="w-full" />
           <span class="shrink-0 text-sm opacity-60">–</span>
-          <FaInput v-model="form.portRangeEnd" type="number" placeholder="结束端口" class="w-full" />
+          <YdInput v-model="form.portRangeEnd" type="number" placeholder="结束端口" class="w-full" />
         </div>
         <span class="mcp-form-hint">该节点上实例对外端口从该区间分配；留空回落面板默认段。编辑时清空已设范围即回落默认段。</span>
       </div>
       <label class="mcp-form-item">
         <span class="mcp-form-label">TLS 校验</span>
-        <FaSelect v-model="form.tlsMode" :options="TLS_OPTIONS" class="w-full" />
+        <YdSelect v-model="form.tlsMode" :options="TLS_OPTIONS" class="w-full" />
       </label>
       <div v-if="pinned" class="mcp-form-item">
         <span class="mcp-form-label">预批准指纹（sha256）</span>
-        <FaTextarea v-model="form.pinSha256" :rows="2" placeholder="留空则节点注册时自动登记自签证书指纹（推荐）" class="w-full font-mono" />
+        <YdTextarea v-model="form.pinSha256" :rows="2" placeholder="留空则节点注册时自动登记自签证书指纹（推荐）" class="w-full font-mono" />
         <div v-if="props.node?.reportedCertSha256" class="flex items-center gap-2">
-          <FaButton size="sm" variant="outline" @click="form.pinSha256 = props.node!.reportedCertSha256!">
+          <YdButton size="sm" variant="outline" @click="form.pinSha256 = props.node!.reportedCertSha256!">
             填入注册上报指纹
-          </FaButton>
+          </YdButton>
           <span class="mcp-mono truncate text-xs opacity-70">{{ props.node.reportedCertSha256 }}</span>
         </div>
         <span class="mcp-form-hint">新建节点建议留空：节点完成注册时自动以自签证书指纹登记钉住，无需登机取指纹；也可在节点上执行 mcpanel-node fingerprint 手工填入。已注册节点不能清空。</span>
@@ -340,7 +340,7 @@ async function submit(done: () => void) {
       <div class="mcp-form-item">
         <span class="mcp-form-label">本地开发模式</span>
         <label class="flex items-center gap-2 text-sm">
-          <FaSwitch v-model="form.localDevelopment" />
+          <YdSwitch v-model="form.localDevelopment" />
           <span>允许 loopback 目标地址</span>
         </label>
         <span class="mcp-form-hint">仅放开目标地址为 localhost/127.0.0.1（本地联调节点用）；不放宽任何 TLS 校验，仍禁止明文 ws://。</span>
@@ -348,23 +348,23 @@ async function submit(done: () => void) {
       <div v-if="node" class="mcp-form-item">
         <span class="mcp-form-label">启用状态</span>
         <label class="flex items-center gap-2 text-sm">
-          <FaSwitch v-model="form.enabled" />
+          <YdSwitch v-model="form.enabled" />
           <span>{{ form.enabled ? '已启用' : '已停用' }}</span>
         </label>
         <span class="mcp-form-hint">停用仅断开面板与该节点的控制信道，不会启停其上任何实例。</span>
       </div>
       <label class="mcp-form-item">
         <span class="mcp-form-label">备注</span>
-        <FaTextarea v-model="form.remark" :rows="2" placeholder="选填" class="w-full" />
+        <YdTextarea v-model="form.remark" :rows="2" placeholder="选填" class="w-full" />
       </label>
-      <FaAlert v-if="formError" variant="destructive" title="无法保存">
+      <YdAlert v-if="formError" variant="destructive" title="无法保存">
   <template #description>
         {{ formError }}
   </template>
-      </FaAlert>
+      </YdAlert>
       <div v-else-if="!node" class="mcp-form-hint">
         创建成功后请在节点详情页签发一次性注册凭据（token 仅签发当次展示）。
       </div>
     </div>
-  </FaModal>
+  </YdModal>
 </template>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { EditorLoadResult } from '../composables/useEditorTabs.ts'
-import { FaIcon, FaModal, useFaModal } from '@yudream/components'
+import { YdAction, YdIcon, YdModal, useYdModal } from '@yudream/components'
 import { ref } from 'vue'
 import EditorWorkspace from './EditorWorkspace.vue'
 import type { BrowserListResult } from './FileBrowserPanel.vue'
@@ -17,7 +17,7 @@ const props = withDefaults(defineProps<{
 
 const open = defineModel<boolean>('open', { default: false })
 const emit = defineEmits<{ saved: [path: string] }>()
-const modal = useFaModal()
+const modal = useYdModal()
 const workspace = ref<InstanceType<typeof EditorWorkspace> | null>(null)
 
 async function beforeClose(action: 'confirm' | 'cancel' | 'close', done: () => void) {
@@ -31,15 +31,15 @@ function showHelp() {
 </script>
 
 <template>
-  <FaModal v-model="open" :title="title" :footer="false" maximizable :closable="true" :before-close="beforeClose" class="mcp-editor-modal" content-class="mcp-editor-modal-content">
+  <YdModal v-model="open" :title="title" :footer="false" maximizable :closable="true" :before-close="beforeClose" class="mcp-editor-modal" content-class="mcp-editor-modal-content">
     <template #header>
       <div class="mcp-editor-modal-header">
-        <div class="mcp-editor-modal-title"><FaIcon name="i-ri:file-edit-line" /><span>{{ title }}</span></div>
-        <button type="button" class="mcp-editor-help" title="编辑提示" @click="showHelp">
-          <FaIcon name="i-ri:question-line" />
-        </button>
+        <div class="mcp-editor-modal-title"><YdIcon name="i-ri:file-edit-line" /><span>{{ title }}</span></div>
+        <YdAction type="button" class="mcp-editor-help" title="编辑提示" @click="showHelp">
+          <YdIcon name="i-ri:question-line" />
+        </YdAction>
       </div>
     </template>
     <EditorWorkspace ref="workspace" fill :load="load" :save="save" :list-dir="listDir" :can-save="canSave" :initial-path="initialPath" :initial-directory="initialDirectory" @saved="path => emit('saved', path)" />
-  </FaModal>
+  </YdModal>
 </template>

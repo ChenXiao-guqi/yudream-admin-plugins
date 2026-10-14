@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { FaAlert, FaInput, FaModal, FaSelect, FaSwitch, FaTextarea } from '@yudream/components'
+import { YdAlert, YdInput, YdModal, YdSelect, YdSwitch, YdTextarea } from '@yudream/components'
 import { computed, reactive, ref, watch } from 'vue'
 import { createMcPanelExtra } from '../api/api-extra'
 import { errorMessage } from '../composables/utils'
@@ -128,7 +128,7 @@ async function submit(done: () => void) {
 </script>
 
 <template>
-  <FaModal
+  <YdModal
     v-model="open"
     :title="editing ? '编辑模板' : '新建模板'"
     :show-cancel-button="true"
@@ -140,67 +140,67 @@ async function submit(done: () => void) {
     <div class="mcp-form">
       <label class="mcp-form-item">
         <span class="mcp-form-label">模板 Key</span>
-        <FaInput v-model="form.key" :disabled="editing" clearable placeholder="例如 paper-1-21" class="w-full font-mono" />
+        <YdInput v-model="form.key" :disabled="editing" clearable placeholder="例如 paper-1-21" class="w-full font-mono" />
       </label>
       <label class="mcp-form-item">
         <span class="mcp-form-label">模板名称</span>
-        <FaInput v-model="form.name" clearable placeholder="例如 Paper 1.21 插件服" class="w-full" />
+        <YdInput v-model="form.name" clearable placeholder="例如 Paper 1.21 插件服" class="w-full" />
       </label>
       <label class="mcp-form-item">
         <span class="mcp-form-label">模板形态</span>
-        <FaSelect v-model="form.kind" :options="[{ label: '服务端模板（含安装源与注入）', value: 'server' }, { label: '镜像模板（仅容器镜像）', value: 'image' }]" class="w-full" />
+        <YdSelect v-model="form.kind" :options="[{ label: '服务端模板（含安装源与注入）', value: 'server' }, { label: '镜像模板（仅容器镜像）', value: 'image' }]" class="w-full" />
       </label>
       <template v-if="form.kind === 'server'">
         <label class="mcp-form-item">
           <span class="mcp-form-label">服务端类型</span>
-          <FaSelect v-model="form.serverKind" :options="serverKindOptions" class="w-full" />
+          <YdSelect v-model="form.serverKind" :options="serverKindOptions" class="w-full" />
         </label>
         <label class="mcp-form-item">
           <span class="mcp-form-label">默认 MC 版本（可选）</span>
-          <FaInput v-model="form.mcVersion" clearable placeholder="例如 1.21.4" class="w-full" />
+          <YdInput v-model="form.mcVersion" clearable placeholder="例如 1.21.4" class="w-full" />
         </label>
         <label class="mcp-form-item">
           <span class="mcp-form-label">运行镜像</span>
-          <FaInput v-model="form.image" clearable class="w-full font-mono" />
+          <YdInput v-model="form.image" clearable class="w-full font-mono" />
         </label>
         <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
           <label class="mcp-form-item">
             <span class="mcp-form-label">服务端 jar 文件名</span>
-            <FaInput v-model="form.jarGlob" clearable class="w-full font-mono" />
+            <YdInput v-model="form.jarGlob" clearable class="w-full font-mono" />
           </label>
           <label class="mcp-form-item">
             <span class="mcp-form-label">JVM 参数</span>
-            <FaInput v-model="form.jvmOpts" clearable class="w-full font-mono" />
+            <YdInput v-model="form.jvmOpts" clearable class="w-full font-mono" />
           </label>
         </div>
         <label class="mcp-form-item">
           <span class="mcp-form-label">安装源</span>
-          <FaSelect v-model="form.installerType" :options="[{ label: '直接下载（URL 模板）', value: 'download' }, { label: '构建 API（Paper/Purpur 等）', value: 'api' }]" class="w-full" />
+          <YdSelect v-model="form.installerType" :options="[{ label: '直接下载（URL 模板）', value: 'download' }, { label: '构建 API（Paper/Purpur 等）', value: 'api' }]" class="w-full" />
         </label>
         <label v-if="form.installerType === 'download'" class="mcp-form-item">
           <span class="mcp-form-label">下载 URL</span>
-          <FaTextarea v-model="form.installerUrl" :rows="2" placeholder="https://mirror.example/paper.jar" class="w-full font-mono" />
+          <YdTextarea v-model="form.installerUrl" :rows="2" placeholder="https://mirror.example/paper.jar" class="w-full font-mono" />
         </label>
         <div class="mcp-form-item">
           <span class="mcp-form-label">注入</span>
           <div class="flex flex-wrap items-center gap-4">
             <label class="flex items-center gap-2 text-sm">
-              <FaSwitch v-model="form.injectAuthlib" />
+              <YdSwitch v-model="form.injectAuthlib" />
               authlib-injector（javaagent）
             </label>
             <label class="flex items-center gap-2 text-sm">
-              <FaSwitch v-model="form.injectPlaytime" />
+              <YdSwitch v-model="form.injectPlaytime" />
               时长记录插件（Bukkit 系）
             </label>
           </div>
           <span class="mcp-form-hint">下载源与全局开关在「面板设置」配置；加载器核心自动跳过时长插件注入。</span>
         </div>
       </template>
-      <FaAlert v-if="formError" variant="destructive" title="无法保存">
+      <YdAlert v-if="formError" variant="destructive" title="无法保存">
   <template #description>
         {{ formError }}
   </template>
-      </FaAlert>
+      </YdAlert>
     </div>
-  </FaModal>
+  </YdModal>
 </template>

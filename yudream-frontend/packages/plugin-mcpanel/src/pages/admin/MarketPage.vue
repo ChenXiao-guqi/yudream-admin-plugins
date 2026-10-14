@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { FaAlert, FaButton, FaCard, FaIcon, FaInput, FaPageHeader, FaPageMain, FaPagination, FaTag } from '@yudream/components'
+import { YdAction, YdAlert, YdButton, YdCard, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdTag } from '@yudream/components'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { createMcPanelExtra } from '../../api/api-extra'
@@ -96,34 +97,34 @@ onMounted(() => void load())
 </script>
 
 <template>
-  <FaPageHeader title="应用市场" description="服务端模板与核心包一键创建（对标 MCSM 应用市场）">
-    <FaButton variant="outline" @click="load">
+  <YdPageHeader title="应用市场" description="服务端模板与核心包一键创建（对标 MCSM 应用市场）">
+    <YdButton variant="outline" @click="load">
       刷新
-    </FaButton>
-    <FaButton @click="zipImport">
-      <FaIcon name="i-ri:file-zip-line" />
+    </YdButton>
+    <YdButton @click="zipImport">
+      <YdIcon name="i-ri:file-zip-line" />
       ZIP 导入创建
-    </FaButton>
-    <FaButton variant="outline" @click="quickStart">
+    </YdButton>
+    <YdButton variant="outline" @click="quickStart">
       快速开始包
-    </FaButton>
-    <FaButton variant="outline" @click="router.push('/platform/plugins/mcpanel/admin/instances/create')">
+    </YdButton>
+    <YdButton variant="outline" @click="router.push('/platform/plugins/mcpanel/admin/instances/create')">
       手动向导
-    </FaButton>
-  </FaPageHeader>
-  <FaPageMain v-loading="loading">
-    <FaAlert v-if="error" variant="destructive" title="无法加载" class="mb-4">
+    </YdButton>
+  </YdPageHeader>
+  <YdLoadingOverlay :loading="loading"><YdPageMain >
+    <YdAlert v-if="error" variant="destructive" title="无法加载" class="mb-4">
   <template #description>
       {{ error }}
   </template>
-    </FaAlert>
+    </YdAlert>
 
-    <FaCard title="核心包（自动下载）" description="选类型后进入创建向导，版本用选择器挑选">
+    <YdCard title="核心包（自动下载）" description="选类型后进入创建向导，版本用选择器挑选">
       <div v-if="!cores.length" class="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
         暂无可自动下载的核心包
       </div>
       <div v-else class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        <button
+        <YdAction
           v-for="core in cores"
           :key="core.id"
           type="button"
@@ -132,18 +133,18 @@ onMounted(() => void load())
         >
           <div class="flex items-center justify-between gap-2">
             <span class="truncate text-sm font-medium">{{ core.label }}</span>
-            <FaIcon name="i-ri:arrow-right-line" class="shrink-0 text-muted-foreground transition-colors group-hover:text-primary" />
+            <YdIcon name="i-ri:arrow-right-line" class="shrink-0 text-muted-foreground transition-colors group-hover:text-primary" />
           </div>
           <div class="mt-1 text-xs text-muted-foreground">
             FastMirror / 官方源自动安装
           </div>
-        </button>
+        </YdAction>
       </div>
-    </FaCard>
+    </YdCard>
 
-    <FaCard title="服务端模板" description="管理员维护的安装源与启动形态" class="mt-4">
+    <YdCard title="服务端模板" description="管理员维护的安装源与启动形态" class="mt-4">
       <div class="mb-3 flex flex-wrap items-center gap-2">
-        <FaInput v-model="keyword" clearable placeholder="搜索模板名称 / Key / 类型" class="w-full sm:w-72" />
+        <YdInput v-model="keyword" clearable placeholder="搜索模板名称 / Key / 类型" class="w-full sm:w-72" />
         <span class="ml-auto text-xs text-muted-foreground">共 {{ filtered.length }} 项</span>
       </div>
       <div v-if="!filtered.length" class="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
@@ -161,19 +162,19 @@ onMounted(() => void load())
             {{ item.image || '-' }}
           </div>
           <div class="mt-3 flex items-center gap-2">
-            <FaTag v-if="item.mcVersion" variant="secondary">
+            <YdTag v-if="item.mcVersion" variant="secondary">
               {{ item.mcVersion }}
-            </FaTag>
-            <FaTag variant="outline">
+            </YdTag>
+            <YdTag variant="outline">
               {{ item.kind || '-' }}
-            </FaTag>
-            <FaButton size="sm" class="ml-auto" @click="installTemplate(item)">
+            </YdTag>
+            <YdButton size="sm" class="ml-auto" @click="installTemplate(item)">
               安装
-            </FaButton>
+            </YdButton>
           </div>
         </article>
       </div>
-      <FaPagination
+      <YdPagination
         v-model:page="pager.page"
         v-model:size="pager.size"
         :total="pager.total"
@@ -181,6 +182,6 @@ onMounted(() => void load())
         @page-change="() => load()"
         @size-change="() => { pager.page = 1; load() }"
       />
-    </FaCard>
-  </FaPageMain>
+    </YdCard>
+  </YdPageMain></YdLoadingOverlay>
 </template>

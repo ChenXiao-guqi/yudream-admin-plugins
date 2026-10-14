@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn, YdTablePickerQuery, YdTablePickerResult } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { McpNode } from '../../types'
-import { FaAlert, FaButton, FaCard, FaDescriptions, FaIcon, FaInput, FaModal, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable, FaSelect, FaSwitch, FaTag, FaTextarea, YdTablePicker, useFaModal, useFaToast } from '@yudream/components'
+import { YdAlert, YdButton, YdCard, YdDescriptions, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSelect, YdSwitch, YdTag, YdTextarea, YdTablePicker, useYdModal, useYdToast } from '@yudream/components'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { createMcPanelApi } from '../../api/mcpanel-api'
@@ -19,8 +20,8 @@ const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 
 const api = createMcPanelApi(props.sdk)
 const extra = createMcPanelExtra(props.sdk)
-const toast = useFaToast()
-const modal = useFaModal()
+const toast = useYdToast()
+const modal = useYdModal()
 const router = useRouter()
 
 const canManage = computed(() => accountHasPermission(props.sdk.account, MCPANEL_PERMISSION.manage))
@@ -459,19 +460,19 @@ onMounted(() => {
 </script>
 
 <template>
-  <FaPageHeader title="镜像管理" description="管理面板 / 节点 / 镜像管理">
-    <FaButton variant="outline" @click="refreshAll">
-      <FaIcon name="i-ri:refresh-line" />
+  <YdPageHeader title="镜像管理" description="管理面板 / 节点 / 镜像管理">
+    <YdButton variant="outline" @click="refreshAll">
+      <YdIcon name="i-ri:refresh-line" />
       刷新
-    </FaButton>
-    <FaButton v-if="canManage" :disabled="!nodeId" @click="openPull()">
-      <FaIcon name="i-ri:add-line" />
+    </YdButton>
+    <YdButton v-if="canManage" :disabled="!nodeId" @click="openPull()">
+      <YdIcon name="i-ri:add-line" />
       新增镜像
-    </FaButton>
-  </FaPageHeader>
+    </YdButton>
+  </YdPageHeader>
 
-  <FaPageMain class="mcp-col">
-    <FaCard title="远程主机镜像列表" description="镜像构建与容器运行依赖于 Docker 软件，物理主机上所有远程节点将共享所有镜像。">
+  <YdPageMain class="mcp-col">
+    <YdCard title="远程主机镜像列表" description="镜像构建与容器运行依赖于 Docker 软件，物理主机上所有远程节点将共享所有镜像。">
       <div class="mcp-form-item mb-3">
         <span class="mcp-form-label">目标节点</span>
         <YdTablePicker
@@ -487,8 +488,8 @@ onMounted(() => {
         />
       </div>
 
-      <FaResponsiveTable
-        v-loading="loading"
+      <YdLoadingOverlay :loading="loading"><YdResponsiveTable
+
         :columns="imageColumns"
         :data="pagedImages"
         row-key="id"
@@ -501,9 +502,9 @@ onMounted(() => {
         <template #cell-idText="{ row }">
           <div class="mcp-row">
             <code class="mcp-inline-code" :title="String(row.original.idText ?? row.original.id ?? '')">{{ shortId(row.original.id) }}</code>
-            <FaButton variant="ghost" size="icon-sm" title="复制 ID" @click="copyId(row.original)">
-              <FaIcon name="i-ri:file-copy-line" />
-            </FaButton>
+            <YdButton variant="ghost" size="icon-sm" title="复制 ID" @click="copyId(row.original)">
+              <YdIcon name="i-ri:file-copy-line" />
+            </YdButton>
           </div>
         </template>
         <template #cell-nameText="{ row }">
@@ -511,20 +512,20 @@ onMounted(() => {
         </template>
         <template #cell-operation="{ row }">
           <div class="mcp-op-cell">
-            <FaButton size="sm" variant="outline" @click="openDetail(row.original)">
+            <YdButton size="sm" variant="outline" @click="openDetail(row.original)">
               详情
-            </FaButton>
-            <FaButton v-if="canDelete" size="sm" variant="destructive" @click="confirmRemoveImage(row.original)">
+            </YdButton>
+            <YdButton v-if="canDelete" size="sm" variant="destructive" @click="confirmRemoveImage(row.original)">
               删除
-            </FaButton>
+            </YdButton>
           </div>
         </template>
         <template #card="{ row }">
-          <FaCard class="w-full">
+          <YdCard class="w-full">
             <div class="flex flex-col gap-3">
               <div class="flex items-center justify-between gap-2">
                 <span class="min-w-0 break-words text-base font-semibold">{{ row.nameText }}</span>
-                <FaTag variant="secondary">{{ row.sizeText }}</FaTag>
+                <YdTag variant="secondary">{{ row.sizeText }}</YdTag>
               </div>
               <div class="flex flex-col gap-1 text-sm">
                 <div class="flex gap-2">
@@ -533,23 +534,23 @@ onMounted(() => {
                 </div>
               </div>
               <div class="flex flex-wrap gap-2 border-t pt-3">
-                <FaButton size="sm" variant="outline" @click="copyId(row)">
-                  <FaIcon name="i-ri:file-copy-line" />
+                <YdButton size="sm" variant="outline" @click="copyId(row)">
+                  <YdIcon name="i-ri:file-copy-line" />
                   复制 ID
-                </FaButton>
-                <FaButton size="sm" variant="outline" @click="openDetail(row)">
+                </YdButton>
+                <YdButton size="sm" variant="outline" @click="openDetail(row)">
                   详情
-                </FaButton>
-                <FaButton v-if="canDelete" size="sm" variant="destructive" @click="confirmRemoveImage(row)">
+                </YdButton>
+                <YdButton v-if="canDelete" size="sm" variant="destructive" @click="confirmRemoveImage(row)">
                   删除
-                </FaButton>
+                </YdButton>
               </div>
             </div>
-          </FaCard>
+          </YdCard>
         </template>
-      </FaResponsiveTable>
+      </YdResponsiveTable></YdLoadingOverlay>
 
-      <FaPagination
+      <YdPagination
         v-model:page="imagePager.page"
         v-model:size="imagePager.size"
         :total="imagePager.total"
@@ -560,11 +561,11 @@ onMounted(() => {
       <p v-if="pullStatus" class="mcp-status-meta mt-3">
         拉取状态：{{ pullStatus }}
       </p>
-    </FaCard>
+    </YdCard>
 
-    <FaCard title="远程主机容器列表" description="节点上全部 Docker 容器（含非面板启动），MCSM 同款列表。" class="mcp-page-gap">
-      <FaResponsiveTable
-        v-loading="containerLoading"
+    <YdCard title="远程主机容器列表" description="节点上全部 Docker 容器（含非面板启动），MCSM 同款列表。" class="mcp-page-gap">
+      <YdLoadingOverlay :loading="containerLoading"><YdResponsiveTable
+
         :columns="containerColumns"
         :data="allContainers.length ? allContainers : containerRows"
         row-key="id"
@@ -575,18 +576,18 @@ onMounted(() => {
         :empty-text="nodeId ? '该节点暂无容器' : '请先选择目标节点'"
       >
         <template #cell-operation="{ row }">
-          <FaButton v-if="row.original.instanceId" size="sm" variant="outline" @click="openContainer(row.original)">
+          <YdButton v-if="row.original.instanceId" size="sm" variant="outline" @click="openContainer(row.original)">
             打开实例
-          </FaButton>
+          </YdButton>
         </template>
         <template #card="{ row }">
-          <FaCard class="w-full">
+          <YdCard class="w-full">
             <div class="flex flex-col gap-3">
               <div class="flex items-center justify-between gap-2">
                 <span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span>
-                <FaTag :variant="String(row.state) === 'running' ? 'default' : 'secondary'">
+                <YdTag :variant="String(row.state) === 'running' ? 'default' : 'secondary'">
                   {{ row.state || '-' }}
-                </FaTag>
+                </YdTag>
               </div>
               <div class="flex flex-col gap-1 text-sm">
                 <div class="flex gap-2">
@@ -603,19 +604,19 @@ onMounted(() => {
                 </div>
               </div>
               <div v-if="row.instanceId" class="flex flex-wrap gap-2 border-t pt-3">
-                <FaButton size="sm" variant="outline" @click="openContainer(row)">
+                <YdButton size="sm" variant="outline" @click="openContainer(row)">
                   打开实例
-                </FaButton>
+                </YdButton>
               </div>
             </div>
-          </FaCard>
+          </YdCard>
         </template>
-      </FaResponsiveTable>
-    </FaCard>
+      </YdResponsiveTable></YdLoadingOverlay>
+    </YdCard>
 
-    <FaCard title="Java 运行时镜像目录" description="按 Java/JRE 版本维护的内部名称 + 标签，与 Paper 等服务端核心无关；创建服务器时选 Java 运行时。" class="mcp-page-gap">
+    <YdCard title="Java 运行时镜像目录" description="按 Java/JRE 版本维护的内部名称 + 标签，与 Paper 等服务端核心无关；创建服务器时选 Java 运行时。" class="mcp-page-gap">
       <div class="mcp-toolbar-row mb-3">
-        <FaInput
+        <YdInput
           v-model="catalogKeyword"
           clearable
           placeholder="搜索名称 / 标签"
@@ -624,15 +625,15 @@ onMounted(() => {
           @clear="() => { catalogPager.page = 1; loadCatalog() }"
         />
         <div class="mcp-spacer mcp-row">
-          <FaButton v-if="canManage" size="sm" @click="openCatalogCreate">
-            <FaIcon name="i-ri:add-line" />
+          <YdButton v-if="canManage" size="sm" @click="openCatalogCreate">
+            <YdIcon name="i-ri:add-line" />
             新增目录项
-          </FaButton>
+          </YdButton>
         </div>
       </div>
 
-      <FaResponsiveTable
-        v-loading="catalogLoading"
+      <YdLoadingOverlay :loading="catalogLoading"><YdResponsiveTable
+
         :columns="catalogColumns"
         :data="catalogRows"
         row-key="id"
@@ -655,7 +656,7 @@ onMounted(() => {
         </template>
         <template #cell-tags="{ row }">
           <div class="mcp-col" style="gap: 4px;">
-            <FaTag
+            <YdTag
               v-for="tag in resolveTags(row.original)"
               :key="tag"
               variant="secondary"
@@ -663,40 +664,40 @@ onMounted(() => {
               :title="tag"
             >
               {{ tag.length > 42 ? `${tag.slice(0, 42)}…` : tag }}
-            </FaTag>
+            </YdTag>
           </div>
         </template>
         <template #cell-flags="{ row }">
           <div class="mcp-row">
-            <FaTag v-if="row.original.builtin" variant="default">内置</FaTag>
-            <FaTag :variant="row.original.enabled === false ? 'secondary' : 'outline'">
+            <YdTag v-if="row.original.builtin" variant="default">内置</YdTag>
+            <YdTag :variant="row.original.enabled === false ? 'secondary' : 'outline'">
               {{ row.original.enabled === false ? '停用' : '启用' }}
-            </FaTag>
+            </YdTag>
           </div>
         </template>
         <template #cell-operation="{ row }">
           <div class="mcp-op-cell">
-            <FaButton v-if="canManage && nodeId" size="sm" variant="outline" @click="pullFromCatalogRow(row.original)">
+            <YdButton v-if="canManage && nodeId" size="sm" variant="outline" @click="pullFromCatalogRow(row.original)">
               拉取到节点
-            </FaButton>
-            <FaButton v-if="canManage" size="sm" variant="outline" @click="openCatalogEdit(row.original)">
+            </YdButton>
+            <YdButton v-if="canManage" size="sm" variant="outline" @click="openCatalogEdit(row.original)">
               编辑
-            </FaButton>
-            <FaButton v-if="canDelete" size="sm" variant="destructive" @click="confirmCatalogDelete(row.original)">
+            </YdButton>
+            <YdButton v-if="canDelete" size="sm" variant="destructive" @click="confirmCatalogDelete(row.original)">
               删除
-            </FaButton>
+            </YdButton>
           </div>
         </template>
         <template #card="{ row }">
-          <FaCard class="w-full">
+          <YdCard class="w-full">
             <div class="flex flex-col gap-3">
               <div class="flex items-center justify-between gap-2">
                 <span class="min-w-0 break-words text-base font-semibold">{{ row.name || row.label || row.id || '-' }}</span>
                 <div class="flex gap-1">
-                  <FaTag v-if="row.builtin" variant="default">内置</FaTag>
-                  <FaTag :variant="row.enabled === false ? 'secondary' : 'outline'">
+                  <YdTag v-if="row.builtin" variant="default">内置</YdTag>
+                  <YdTag :variant="row.enabled === false ? 'secondary' : 'outline'">
                     {{ row.enabled === false ? '停用' : '启用' }}
-                  </FaTag>
+                  </YdTag>
                 </div>
               </div>
               <div class="flex flex-col gap-1 text-sm">
@@ -714,21 +715,21 @@ onMounted(() => {
                 </div>
               </div>
               <div class="flex flex-wrap gap-2 border-t pt-3">
-                <FaButton v-if="canManage && nodeId" size="sm" variant="outline" @click="pullFromCatalogRow(row)">
+                <YdButton v-if="canManage && nodeId" size="sm" variant="outline" @click="pullFromCatalogRow(row)">
                   拉取到节点
-                </FaButton>
-                <FaButton v-if="canManage" size="sm" variant="outline" @click="openCatalogEdit(row)">
+                </YdButton>
+                <YdButton v-if="canManage" size="sm" variant="outline" @click="openCatalogEdit(row)">
                   编辑
-                </FaButton>
-                <FaButton v-if="canDelete" size="sm" variant="destructive" @click="confirmCatalogDelete(row)">
+                </YdButton>
+                <YdButton v-if="canDelete" size="sm" variant="destructive" @click="confirmCatalogDelete(row)">
                   删除
-                </FaButton>
+                </YdButton>
               </div>
             </div>
-          </FaCard>
+          </YdCard>
         </template>
-      </FaResponsiveTable>
-      <FaPagination
+      </YdResponsiveTable></YdLoadingOverlay>
+      <YdPagination
         v-model:page="catalogPager.page"
         v-model:size="catalogPager.size"
         :total="catalogPager.total"
@@ -736,9 +737,9 @@ onMounted(() => {
         @page-change="() => loadCatalog()"
         @size-change="() => { catalogPager.page = 1; loadCatalog() }"
       />
-    </FaCard>
+    </YdCard>
 
-    <FaModal
+    <YdModal
       v-model="detailOpen"
       title="镜像详情"
       :show-cancel-button="false"
@@ -746,10 +747,10 @@ onMounted(() => {
       class="max-w-[min(36rem,calc(100vw-2rem))]"
       :before-close="(_action: 'confirm' | 'cancel' | 'close', done: () => void) => done()"
     >
-      <FaDescriptions :items="detailItems" :column="1" border />
-    </FaModal>
+      <YdDescriptions :items="detailItems" :column="1" border />
+    </YdModal>
 
-    <FaModal
+    <YdModal
       v-model="pullOpen"
       title="新增镜像（拉取到远程主机）"
       :show-cancel-button="true"
@@ -761,19 +762,19 @@ onMounted(() => {
       <div class="mcp-form">
         <label class="mcp-form-item">
           <span class="mcp-form-label">目标节点</span>
-          <FaInput :model-value="selectedNode?.name || ''" disabled class="mcp-w-full" />
+          <YdInput :model-value="selectedNode?.name || ''" disabled class="mcp-w-full" />
         </label>
         <label class="mcp-form-item">
           <span class="mcp-form-label">镜像地址（名称:标签）</span>
-          <FaInput v-model="pullImage" class="mcp-w-full mcp-mono" placeholder="swr.cn-north-4.myhuaweicloud.com/..." />
+          <YdInput v-model="pullImage" class="mcp-w-full mcp-mono" placeholder="swr.cn-north-4.myhuaweicloud.com/..." />
           <span class="mcp-form-hint">
             建议从镜像目录选择后「拉取到节点」；内置 JRE 使用华为云 SWR 源。Docker 拉取已按 tag 正确拆分。
           </span>
         </label>
       </div>
-    </FaModal>
+    </YdModal>
 
-    <FaModal
+    <YdModal
       v-model="catalogFormOpen"
       :title="catalogEditing ? '编辑镜像目录项' : '新增镜像目录项'"
       :show-cancel-button="true"
@@ -785,20 +786,20 @@ onMounted(() => {
       <div class="mcp-form">
         <label class="mcp-form-item">
           <span class="mcp-form-label">内部使用名称（按 Java 版本）</span>
-          <FaInput v-model="catalogForm.name" class="mcp-w-full" placeholder="例如 Java 21（JRE）" />
+          <YdInput v-model="catalogForm.name" class="mcp-w-full" placeholder="例如 Java 21（JRE）" />
         </label>
         <label class="mcp-form-item">
           <span class="mcp-form-label">Java 版本</span>
-          <FaInput v-model="catalogForm.javaVersion" class="mcp-w-full" placeholder="21" />
+          <YdInput v-model="catalogForm.javaVersion" class="mcp-w-full" placeholder="21" />
           <span class="mcp-form-hint">这里是 JVM 版本，不是 Paper/Fabric 等核心版本。</span>
         </label>
         <label class="mcp-form-item">
           <span class="mcp-form-label">镜像标签（每行一个，可多个）</span>
-          <FaTextarea v-model="catalogForm.tagsText" :rows="4" class="mcp-w-full mcp-mono" placeholder="registry/repo:tag" />
+          <YdTextarea v-model="catalogForm.tagsText" :rows="4" class="mcp-w-full mcp-mono" placeholder="registry/repo:tag" />
         </label>
         <label class="mcp-form-item">
           <span class="mcp-form-label">默认标签（主镜像）</span>
-          <FaSelect
+          <YdSelect
             v-model="catalogForm.primaryImage"
             :options="catalogForm.tagsText.split(/[\n,]/).map(s => s.trim()).filter(Boolean).map(tag => ({ label: tag, value: tag }))"
             class="mcp-w-full"
@@ -807,18 +808,18 @@ onMounted(() => {
         </label>
         <label class="mcp-form-item">
           <span class="mcp-form-label">备注</span>
-          <FaTextarea v-model="catalogForm.note" :rows="2" class="mcp-w-full" />
+          <YdTextarea v-model="catalogForm.note" :rows="2" class="mcp-w-full" />
         </label>
         <label class="flex items-center gap-2 text-sm">
-          <FaSwitch v-model="catalogForm.enabled" />
+          <YdSwitch v-model="catalogForm.enabled" />
           启用（创建向导可见）
         </label>
-        <FaAlert v-if="catalogError" variant="destructive" title="无法保存">
+        <YdAlert v-if="catalogError" variant="destructive" title="无法保存">
   <template #description>
           {{ catalogError }}
   </template>
-        </FaAlert>
+        </YdAlert>
       </div>
-    </FaModal>
-  </FaPageMain>
+    </YdModal>
+  </YdPageMain>
 </template>

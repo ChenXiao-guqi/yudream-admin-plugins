@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { FaAlert, FaButton, FaDropdown, FaIcon, FaSwitch, useFaModal, useFaToast } from '@yudream/components'
+import { YdAlert, YdButton, YdDropdown, YdIcon, YdSwitch, useYdModal, useYdToast } from '@yudream/components'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useEditorTabs } from '../composables/useEditorTabs'
 import type { EditorLoadResult } from '../composables/useEditorTabs'
@@ -42,8 +42,8 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{ saved: [path: string] }>()
 
-const toast = useFaToast()
-const modal = useFaModal()
+const toast = useYdToast()
+const modal = useYdModal()
 const sideOpen = ref(false)
 const directoryReady = ref(!props.initialPath)
 const wrap = ref(false)
@@ -219,7 +219,7 @@ defineExpose({
 <template>
   <div class="mced" :class="{ 'is-fill': fill, 'is-side-open': sideOpen }">
     <div v-if="props.listDir && directoryReady" class="mced-side">
-      <div class="mced-side-head"><span>文件浏览</span><FaButton size="icon-sm" variant="ghost" title="收起目录" @click="sideOpen = false"><FaIcon name="i-ri:close-line" /></FaButton></div>
+      <div class="mced-side-head"><span>文件浏览</span><YdButton size="icon-sm" variant="ghost" title="收起目录" @click="sideOpen = false"><YdIcon name="i-ri:close-line" /></YdButton></div>
       <FileBrowserPanel
         :list="props.listDir"
         :open-file="onTreeFile"
@@ -230,7 +230,7 @@ defineExpose({
 
     <div class="mced-main">
       <div class="mced-toolbar">
-        <FaButton
+        <YdButton
           v-if="props.listDir"
           size="icon-sm"
           variant="ghost"
@@ -238,8 +238,8 @@ defineExpose({
           title="打开目录面板"
           @click="openDirectory"
         >
-          <FaIcon name="i-ri:side-bar-line" />
-        </FaButton>
+          <YdIcon name="i-ri:side-bar-line" />
+        </YdButton>
         <EditorFileTabs
           :tabs="editor.tabs.value"
           :active-path="editor.activePath.value"
@@ -251,23 +251,23 @@ defineExpose({
       <template v-if="active">
         <div v-if="active.error" class="mced-body is-empty">
           <div class="flex flex-col items-center gap-3 text-center">
-            <FaIcon name="i-ri:error-warning-line" class="text-3xl opacity-50" />
-            <FaAlert variant="destructive" :title="`读取失败：${active.name}`" :description="active.error" class="max-w-[36rem]" />
+            <YdIcon name="i-ri:error-warning-line" class="text-3xl opacity-50" />
+            <YdAlert variant="destructive" :title="`读取失败：${active.name}`" :description="active.error" class="max-w-[36rem]" />
             <div class="mced-error-actions">
-              <FaButton size="sm" variant="outline" :disabled="active.loading" @click="editor.retryLoad(active)">
+              <YdButton size="sm" variant="outline" :disabled="active.loading" @click="editor.retryLoad(active)">
                 重试加载
-              </FaButton>
-              <FaDropdown :items="reopenMenu" align="center">
-                <FaButton size="sm" variant="outline">
-                  <FaIcon name="i-ri:translate-2" />换编码重新打开
-                </FaButton>
-              </FaDropdown>
+              </YdButton>
+              <YdDropdown :items="reopenMenu" align="center">
+                <YdButton size="sm" variant="outline">
+                  <YdIcon name="i-ri:translate-2" />换编码重新打开
+                </YdButton>
+              </YdDropdown>
             </div>
           </div>
         </div>
         <div v-else-if="active.loading" class="mced-body is-empty">
           <div class="flex flex-col items-center gap-2">
-            <FaIcon name="i-line-md:loading-twotone-loop" class="text-2xl opacity-60 mced-spin" />
+            <YdIcon name="i-line-md:loading-twotone-loop" class="text-2xl opacity-60 mced-spin" />
             <div class="opacity-80">正在读取文件内容…（{{ active.loadingSeconds }}s）</div>
             <div class="text-xs opacity-50">读取设有客户端截止时间，超时会转为错误提示</div>
           </div>
@@ -297,36 +297,36 @@ defineExpose({
           上次保存未确认
         </span>
         <span class="mced-spacer" />
-        <FaDropdown v-if="active && !active.error && !active.loading" :items="encodingMenu" side="top" align="end">
-          <FaButton size="sm" variant="ghost" class="mced-encoding-btn" title="编码：重新打开按所选编码重新解码；保存时转换由面板转码落盘">
-            {{ encodingLabel }}<FaIcon name="i-ri:arrow-down-s-line" />
-          </FaButton>
-        </FaDropdown>
+        <YdDropdown v-if="active && !active.error && !active.loading" :items="encodingMenu" side="top" align="end">
+          <YdButton size="sm" variant="ghost" class="mced-encoding-btn" title="编码：重新打开按所选编码重新解码；保存时转换由面板转码落盘">
+            {{ encodingLabel }}<YdIcon name="i-ri:arrow-down-s-line" />
+          </YdButton>
+        </YdDropdown>
         <label class="mced-wrap">
           自动换行
-          <FaSwitch v-model="wrap" />
+          <YdSwitch v-model="wrap" />
         </label>
-        <FaButton size="sm" variant="outline" :disabled="!active || active.loading || editor.saving.value" @click="() => active && editor.retryLoad(active)">
-          <FaIcon name="i-ri:refresh-line" />重新读取
-        </FaButton>
-        <FaButton
+        <YdButton size="sm" variant="outline" :disabled="!active || active.loading || editor.saving.value" @click="() => active && editor.retryLoad(active)">
+          <YdIcon name="i-ri:refresh-line" />重新读取
+        </YdButton>
+        <YdButton
           size="sm"
           variant="outline"
           :disabled="!active || editor.saving.value"
           @click="() => active && void editor.closeTab(active.path)"
         >
           关闭标签
-        </FaButton>
-        <FaButton
+        </YdButton>
+        <YdButton
           v-if="active && !active.readOnly"
           size="sm"
           :loading="editor.saving.value"
           :disabled="!isDirty || !!active.error"
           @click="() => void editor.save()"
         >
-          <FaIcon name="i-ri:save-line" />
+          <YdIcon name="i-ri:save-line" />
           保存
-        </FaButton>
+        </YdButton>
       </div>
       <div v-if="active?.saveFailed" class="mced-savebar-note">
         {{ active.saveFailed }}

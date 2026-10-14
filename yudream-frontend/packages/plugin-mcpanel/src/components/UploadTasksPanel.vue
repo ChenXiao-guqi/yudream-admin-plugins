@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { FaButton, FaIcon, FaTag } from '@yudream/components'
+import { YdButton, YdIcon, YdTag } from '@yudream/components'
 import { computed } from 'vue'
 import type { UploadTaskView } from '../composables/useInstanceUploads.ts'
 import { formatBytes } from '../composables/utils.ts'
@@ -56,18 +56,18 @@ function stateTag(task: UploadTaskView): { text: string, variant: 'default' | 's
   <div class="rounded-xl border bg-card p-4">
     <div class="space-y-3">
       <div class="flex flex-wrap items-center gap-2 text-sm">
-        <FaIcon name="i-ri:upload-cloud-2-line" class="text-primary" />
+        <YdIcon name="i-ri:upload-cloud-2-line" class="text-primary" />
         <span class="font-medium">上传任务</span>
         <span class="text-xs text-muted-foreground">分片直传面板中转节点，异步执行不阻塞页面</span>
       </div>
       <div v-for="task in visible" :key="task.taskId" class="space-y-1.5">
         <div class="flex flex-wrap items-center gap-2 text-sm">
           <span class="min-w-0 truncate font-medium">{{ task.name }}</span>
-          <FaTag :variant="stateTag(task).variant">{{ stateTag(task).text }}</FaTag>
+          <YdTag :variant="stateTag(task).variant">{{ stateTag(task).text }}</YdTag>
           <span class="text-xs text-muted-foreground">{{ sizeText(task) }}</span>
           <span class="min-w-0 truncate text-xs text-muted-foreground">{{ task.path }}</span>
           <span class="grow" />
-          <FaButton
+          <YdButton
             v-if="canCancel && task.state === 'running' && !hashing(task.taskId)"
             size="sm"
             variant="outline"
@@ -75,7 +75,7 @@ function stateTag(task: UploadTaskView): { text: string, variant: 'default' | 's
             @click="emit('cancel', task.taskId)"
           >
             取消
-          </FaButton>
+          </YdButton>
         </div>
         <div
           v-if="task.state === 'running'"

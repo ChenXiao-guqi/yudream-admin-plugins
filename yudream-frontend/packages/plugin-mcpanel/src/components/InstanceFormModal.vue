@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { McpNode } from '../types'
-import { FaAlert, FaInput, FaModal, FaSelect, FaTextarea } from '@yudream/components'
+import { YdAlert, YdInput, YdModal, YdSelect, YdTextarea } from '@yudream/components'
 import { computed, reactive, ref, watch } from 'vue'
 import { createMcPanelExtra } from '../api/api-extra'
 import { errorMessage } from '../composables/utils'
@@ -202,7 +202,7 @@ async function submit(done: () => void) {
 </script>
 
 <template>
-  <FaModal
+  <YdModal
     v-model="open"
     :title="editing ? '编辑实例' : '新建实例'"
     :show-cancel-button="true"
@@ -214,67 +214,67 @@ async function submit(done: () => void) {
     <div class="mcp-form">
       <label class="mcp-form-item">
         <span class="mcp-form-label">实例名称</span>
-        <FaInput v-model="form.name" clearable placeholder="例如：生存服-01" class="w-full" />
+        <YdInput v-model="form.name" clearable placeholder="例如：生存服-01" class="w-full" />
       </label>
       <label class="mcp-form-item">
         <span class="mcp-form-label">所属节点</span>
-        <FaSelect v-model="form.nodeId" :options="nodeOptions" class="w-full" />
+        <YdSelect v-model="form.nodeId" :options="nodeOptions" class="w-full" />
         <span class="mcp-form-hint">实例将调度到所选节点并由其 Docker 运行。</span>
       </label>
       <label class="mcp-form-item">
         <span class="mcp-form-label">服务端类型</span>
-        <FaSelect v-model="form.kind" :options="KIND_OPTIONS" class="w-full" />
+        <YdSelect v-model="form.kind" :options="KIND_OPTIONS" class="w-full" />
         <span class="mcp-form-hint">基岩版使用 UDP 端口；主端口由面板按节点端口池自动分配，附加端口可在「实例设置 → 端口管理」开放。</span>
       </label>
       <label class="mcp-form-item">
         <span class="mcp-form-label">MC 版本（可选）</span>
-        <FaInput v-model="form.mcVersion" clearable placeholder="例如 1.21.4" class="w-full" />
+        <YdInput v-model="form.mcVersion" clearable placeholder="例如 1.21.4" class="w-full" />
       </label>
       <label class="mcp-form-item">
         <span class="mcp-form-label">容器镜像</span>
-        <FaInput v-model="form.image" clearable placeholder="eclipse-temurin:21-jre" class="w-full font-mono" />
+        <YdInput v-model="form.image" clearable placeholder="eclipse-temurin:21-jre" class="w-full font-mono" />
       </label>
       <label class="mcp-form-item">
         <span class="mcp-form-label">启动命令</span>
-        <FaTextarea v-model="form.command" :rows="2" placeholder="java -Xms512M -Xmx2G -jar server.jar nogui" class="w-full font-mono" />
+        <YdTextarea v-model="form.command" :rows="2" placeholder="java -Xms512M -Xmx2G -jar server.jar nogui" class="w-full font-mono" />
         <span class="mcp-form-hint">空格分隔；工作目录固定为 /data（实例数据卷）。</span>
       </label>
       <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
         <label class="mcp-form-item">
           <span class="mcp-form-label">内存（MB）</span>
-          <FaInput v-model="form.memoryMb" type="number" class="w-full" />
+          <YdInput v-model="form.memoryMb" type="number" class="w-full" />
         </label>
         <label class="mcp-form-item">
           <span class="mcp-form-label">CPU（毫核）</span>
-          <FaInput v-model="form.cpuMillis" type="number" class="w-full" />
+          <YdInput v-model="form.cpuMillis" type="number" class="w-full" />
         </label>
         <label class="mcp-form-item">
           <span class="mcp-form-label">磁盘（MB）</span>
-          <FaInput v-model="form.diskMb" type="number" class="w-full" />
+          <YdInput v-model="form.diskMb" type="number" class="w-full" />
         </label>
       </div>
       <label v-if="linkAvailable" class="mcp-form-item">
         <span class="mcp-form-label">绑定子服（minecraft-server 联动）</span>
-        <FaSelect v-model="form.mcServerId" :options="mcServerOptions" class="w-full" />
+        <YdSelect v-model="form.mcServerId" :options="mcServerOptions" class="w-full" />
         <span class="mcp-form-hint">绑定后创建/改配将注入 MCSERVER_ID 与 MCSERVER_TERM 环境变量（时长插件按子服记账）；留空即解绑，解绑不动实例数据。</span>
       </label>
       <label class="mcp-form-item">
         <span class="mcp-form-label">启动成功检测（可选）</span>
-        <FaInput v-model="form.startDetect" clearable :placeholder="startDetectPlaceholder || '不启用检测'" class="w-full font-mono" />
+        <YdInput v-model="form.startDetect" clearable :placeholder="startDetectPlaceholder || '不启用检测'" class="w-full font-mono" />
         <span class="mcp-form-hint">控制台输出包含该内容即判定「启动成功」并从启动中转为运行中（需节点程序 0.6.2+）。留空 = 按类型默认{{ startDetectPlaceholder ? `（${startDetectPlaceholder}）` : '；通用应用无默认即不检测' }}。检测最长等待 5 分钟。</span>
       </label>
       <label class="mcp-form-item">
         <span class="mcp-form-label">备注</span>
-        <FaTextarea v-model="form.remark" :rows="2" placeholder="选填" class="w-full" />
+        <YdTextarea v-model="form.remark" :rows="2" placeholder="选填" class="w-full" />
       </label>
-      <FaAlert v-if="formError" variant="destructive" title="无法保存">
+      <YdAlert v-if="formError" variant="destructive" title="无法保存">
   <template #description>
         {{ formError }}
   </template>
-      </FaAlert>
+      </YdAlert>
       <div v-else-if="!editing" class="mcp-form-hint">
         创建后可在实例详情页管理配置文件、控制台与备份。
       </div>
     </div>
-  </FaModal>
+  </YdModal>
 </template>

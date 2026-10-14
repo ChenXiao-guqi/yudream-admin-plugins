@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { McpEnrollCredential } from '../types'
 import { computed, ref, watch } from 'vue'
-import { FaAlert, FaButton, FaIcon, FaModal, useFaToast } from '@yudream/components'
+import { YdAlert, YdButton, YdIcon, YdModal, useYdToast } from '@yudream/components'
 import { formatDateTime, toEpochMs } from '../composables/utils'
 
 /**
@@ -14,7 +14,7 @@ const props = defineProps<{
 }>()
 
 const open = defineModel<boolean>('open', { default: false })
-const toast = useFaToast()
+const toast = useYdToast()
 
 const copied = ref(false)
 
@@ -51,7 +51,7 @@ function openDeployGuide() {
 </script>
 
 <template>
-  <FaModal
+  <YdModal
     v-model="open"
     title="节点注册凭据（仅本次显示）"
     :show-cancel-button="false"
@@ -59,17 +59,17 @@ function openDeployGuide() {
     class="max-w-[min(42rem,calc(100vw-2rem))]"
   >
     <div v-if="credential" class="mcp-form">
-      <FaAlert variant="destructive" title="一次性凭据，关闭后无法再查看">
+      <YdAlert variant="destructive" title="一次性凭据，关闭后无法再查看">
   <template #description>
         请立即复制并配置到节点；过期或注册完成后自动失效，遗失需重新签发。
   </template>
-      </FaAlert>
+      </YdAlert>
       <div class="mcp-form-item">
         <div class="flex items-center justify-between gap-2">
           <span class="mcp-form-label">注册 token</span>
-          <FaButton size="sm" variant="outline" @click="copyToken">
+          <YdButton size="sm" variant="outline" @click="copyToken">
             {{ copied ? '已复制' : '复制' }}
-          </FaButton>
+          </YdButton>
         </div>
         <code class="mcp-token-block">{{ credential.token }}</code>
       </div>
@@ -89,13 +89,13 @@ function openDeployGuide() {
         </ol>
         <span class="mcp-form-hint">token 是一次性凭据：注册成功或过期即失效。注册时节点自签证书指纹会自动登记为面板侧钉住依据（pinned 指纹留空时），无需在节点上手工取指纹。</span>
         <div class="mcp-row">
-          <FaButton size="sm" variant="outline" @click="openDeployGuide">
-            <FaIcon name="i-ri:book-open-line" />
+          <YdButton size="sm" variant="outline" @click="openDeployGuide">
+            <YdIcon name="i-ri:book-open-line" />
             查看完整部署教程
-          </FaButton>
+          </YdButton>
           <span class="mcp-form-hint">二进制 / Docker / Compose 三种部署方式与常见问题（新标签页打开，不影响本弹窗）。</span>
         </div>
       </div>
     </div>
-  </FaModal>
+  </YdModal>
 </template>

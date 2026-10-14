@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { McpNodeStats } from '../../types.ts'
-import { FaAlert, FaButton, FaCard, FaDescriptions, FaIcon, FaInput, FaModal, FaPageHeader, FaPageMain, FaResponsiveTable, FaSelect, FaTag, useFaModal, useFaToast } from '@yudream/components'
+import { YdAction, YdAlert, YdButton, YdCard, YdDescriptions, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdResponsiveTable, YdSelect, YdTag, useYdModal, useYdToast } from '@yudream/components'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createMcPanelExtra } from '../../api/api-extra.ts'
@@ -40,8 +41,8 @@ import { withTimeout } from '../../utils/fileContent.ts'
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 
 const extra = createMcPanelExtra(props.sdk)
-const toast = useFaToast()
-const modal = useFaModal()
+const toast = useYdToast()
+const modal = useYdModal()
 const router = useRouter()
 const route = useRoute()
 
@@ -1170,34 +1171,34 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <FaPageHeader :title="`控制台 · ${instance?.name ?? instanceId}`" class="mb-0">
-    <FaButton variant="outline" @click="router.push(listPath)">
+  <YdPageHeader :title="`控制台 · ${instance?.name ?? instanceId}`" class="mb-0">
+    <YdButton variant="outline" @click="router.push(listPath)">
       返回列表
-    </FaButton>
-    <FaButton v-if="canUse" variant="outline" :disabled="acting || running" @click="act('start')">
+    </YdButton>
+    <YdButton v-if="canUse" variant="outline" :disabled="acting || running" @click="act('start')">
       启动
-    </FaButton>
-    <FaButton v-if="canUse" variant="outline" :disabled="acting || !running" @click="act('stop')">
+    </YdButton>
+    <YdButton v-if="canUse" variant="outline" :disabled="acting || !running" @click="act('stop')">
       停止
-    </FaButton>
-    <FaButton v-if="canUse" variant="outline" :disabled="acting" @click="act('restart')">
+    </YdButton>
+    <YdButton v-if="canUse" variant="outline" :disabled="acting" @click="act('restart')">
       重启
-    </FaButton>
-    <FaButton v-if="canUse" variant="destructive" :disabled="acting" @click="act('kill')">
+    </YdButton>
+    <YdButton v-if="canUse" variant="destructive" :disabled="acting" @click="act('kill')">
       终止
-    </FaButton>
-    <FaButton variant="outline" @click="router.push(filesPath)">
+    </YdButton>
+    <YdButton variant="outline" @click="router.push(filesPath)">
       文件管理
-    </FaButton>
-  </FaPageHeader>
+    </YdButton>
+  </YdPageHeader>
 
-  <FaAlert v-if="loadError" variant="destructive" title="无法加载实例" class="mt-4">
+  <YdAlert v-if="loadError" variant="destructive" title="无法加载实例" class="mt-4">
   <template #description>
     {{ loadError }}
   </template>
-  </FaAlert>
+  </YdAlert>
 
-  <FaPageMain v-else v-loading="loading" class="mcp-mt-4" main-class="mcp-page-stack">
+  <YdLoadingOverlay :loading="loading" v-else><YdPageMain   class="mcp-mt-4" main-class="mcp-page-stack">
     <!-- 上传任务（异步分片上传，跨页面恢复显示） -->
     <UploadTasksPanel
       v-if="uploadTaskItems.length"
@@ -1211,11 +1212,11 @@ onBeforeUnmount(() => {
     <div v-if="activeInstall" class="rounded-xl border bg-card p-4">
       <div class="space-y-2">
         <div class="flex flex-wrap items-center gap-2 text-sm">
-          <FaIcon name="i-ri:download-cloud-2-line" class="text-primary" />
+          <YdIcon name="i-ri:download-cloud-2-line" class="text-primary" />
           <span class="font-medium">正在安装 {{ activeInstall.fileName || '服务端文件' }}</span>
-          <FaTag variant="secondary">
+          <YdTag variant="secondary">
             {{ installPercent > 0 ? `${installPercent}%` : '进行中' }}
-          </FaTag>
+          </YdTag>
           <span v-if="installFailedCount > 0" class="text-xs text-destructive">
             失败 {{ installFailedCount }}
           </span>
@@ -1241,7 +1242,7 @@ onBeforeUnmount(() => {
             :key="`a-${index}-${file.path}`"
             class="flex min-w-0 items-center gap-2"
           >
-            <FaIcon name="i-ri:loader-4-line" class="is-spinning shrink-0 text-primary" />
+            <YdIcon name="i-ri:loader-4-line" class="is-spinning shrink-0 text-primary" />
             <span class="mcp-mono min-w-0 truncate" :title="file.path">{{ file.path }}</span>
             <span class="mcp-status-meta shrink-0">
               {{ formatBytes(Number(file.bytes ?? 0)) }}
@@ -1253,7 +1254,7 @@ onBeforeUnmount(() => {
             :key="`f-${index}-${file.path}`"
             class="flex min-w-0 items-center gap-2"
           >
-            <FaIcon name="i-ri:error-warning-line" class="shrink-0 text-destructive" />
+            <YdIcon name="i-ri:error-warning-line" class="shrink-0 text-destructive" />
             <span class="mcp-mono min-w-0 truncate" :title="file.path">{{ file.path }}</span>
             <span class="min-w-0 truncate text-destructive" :title="file.error">{{ file.error }}</span>
           </div>
@@ -1266,16 +1267,16 @@ onBeforeUnmount(() => {
 
     <div v-else-if="recentInstall" class="rounded-xl border bg-card px-4 py-2 text-sm">
       <template v-if="recentInstall.state === 'done'">
-        <FaIcon name="i-ri:check-double-line" class="mr-1 text-green-600" />
+        <YdIcon name="i-ri:check-double-line" class="mr-1 text-green-600" />
         {{ recentInstall.fileName || '服务端文件' }} 安装完成
       </template>
       <template v-else>
-        <FaIcon name="i-ri:error-warning-line" class="mr-1 text-destructive" />
+        <YdIcon name="i-ri:error-warning-line" class="mr-1 text-destructive" />
         {{ recentInstall.fileName || '服务端文件' }} 安装失败：{{ recentInstall.error || recentInstall.state }}
         <span v-if="recentFailedCount > 0" class="text-xs text-muted-foreground">（失败文件 {{ recentFailedCount }} 个，明细见节点日志）</span>
-        <FaButton v-if="canManage" class="ml-2" size="sm" variant="outline" :loading="installRetrying" @click="retryInstall">
+        <YdButton v-if="canManage" class="ml-2" size="sm" variant="outline" :loading="installRetrying" @click="retryInstall">
           重试安装
-        </FaButton>
+        </YdButton>
       </template>
     </div>
 
@@ -1302,7 +1303,7 @@ onBeforeUnmount(() => {
         </div>
         <div class="flex items-center gap-2">
           <div class="flex rounded-lg border">
-            <button
+            <YdAction
               v-for="win in metricWindows"
               :key="win.value"
               type="button"
@@ -1312,7 +1313,7 @@ onBeforeUnmount(() => {
               @click="selectMetricWindow(win.value)"
             >
               {{ win.label }}
-            </button>
+            </YdAction>
           </div>
           <span class="mcp-status-meta">节点快照 {{ relativeSeenText(latestStats?.reportedAt) }}</span>
         </div>
@@ -1329,24 +1330,24 @@ onBeforeUnmount(() => {
       :hint="inputHint"
     >
       <template #tags>
-        <FaTag variant="default">
+        <YdTag variant="default">
           {{ instance?.name ?? instanceId }}
-        </FaTag>
-        <FaTag :variant="running ? 'default' : 'secondary'">
+        </YdTag>
+        <YdTag :variant="running ? 'default' : 'secondary'">
           {{ stateLabel }}
-        </FaTag>
-        <FaTag variant="outline">
+        </YdTag>
+        <YdTag variant="outline">
           {{ kindLabel }}
-        </FaTag>
-        <FaTag variant="secondary">
+        </YdTag>
+        <YdTag variant="secondary">
           {{ instance?.mcVersion || '-' }}
-        </FaTag>
-        <FaTag v-if="tps != null" variant="outline" class="mcp-tps-tag" :class="tps >= 19 ? 'is-good' : tps >= 15 ? 'is-warn' : 'is-bad'" title="TPS from last 1m（Paper 系自动探测）">
+        </YdTag>
+        <YdTag v-if="tps != null" variant="outline" class="mcp-tps-tag" :class="tps >= 19 ? 'is-good' : tps >= 15 ? 'is-warn' : 'is-bad'" title="TPS from last 1m（Paper 系自动探测）">
           TPS {{ tps.toFixed(1) }}
-        </FaTag>
-        <FaTag v-if="gamePort?.hostPort" variant="outline">
+        </YdTag>
+        <YdTag v-if="gamePort?.hostPort" variant="outline">
           端口 :{{ gamePort.hostPort }}
-        </FaTag>
+        </YdTag>
       </template>
 
       <template #above-screen>
@@ -1363,9 +1364,9 @@ onBeforeUnmount(() => {
           :list="browserList"
           :open-file="openFileFromBrowser"
         />
-        <button type="button" class="mcp-wt-btn mcp-wt-mt" @click="router.push(filesPath)">
+        <YdAction type="button" class="mcp-wt-btn mcp-wt-mt" @click="router.push(filesPath)">
           打开完整文件管理 →
-        </button>
+        </YdAction>
       </template>
 
       <template #right>
@@ -1378,7 +1379,7 @@ onBeforeUnmount(() => {
               {{ players.online ?? 0 }}/{{ players.max ?? '?' }}
               <template v-if="players.latencyMs != null"> · {{ players.latencyMs }}ms</template>
             </span>
-            <button v-for="name in playerNames" :key="name" type="button" class="mcp-term-player is-clickable" :title="`插入「${name}」到命令框`" @click="fillCommandWord(name)">{{ name }}</button>
+            <YdAction v-for="name in playerNames" :key="name" type="button" class="mcp-term-player is-clickable" :title="`插入「${name}」到命令框`" @click="fillCommandWord(name)">{{ name }}</YdAction>
             <span v-if="!playerNames.length && players.online" class="mcp-wt-muted">
               {{ players.online }} 名玩家在线（服务端未上报名单）
             </span>
@@ -1392,15 +1393,15 @@ onBeforeUnmount(() => {
           常用命令
         </div>
         <div class="mcp-wt-list">
-          <button v-for="cmd in COMMON_COMMANDS" :key="cmd" type="button" class="mcp-wt-cmd" @click="term.commandText.value = cmd">
+          <YdAction v-for="cmd in COMMON_COMMANDS" :key="cmd" type="button" class="mcp-wt-cmd" @click="term.commandText.value = cmd">
             {{ cmd }}
-          </button>
+          </YdAction>
         </div>
         <div class="mcp-wt-pane-title">
           历史命令
         </div>
         <div class="mcp-wt-list">
-          <button
+          <YdAction
             v-for="(cmd, index) in [...term.history.value].reverse().slice(0, 15)"
             :key="`${cmd}-${index}`"
             type="button"
@@ -1408,7 +1409,7 @@ onBeforeUnmount(() => {
             @click="term.commandText.value = cmd"
           >
             {{ cmd }}
-          </button>
+          </YdAction>
           <div v-if="!term.history.value.length" class="mcp-wt-muted">
             暂无
           </div>
@@ -1422,72 +1423,72 @@ onBeforeUnmount(() => {
     </TerminalConsole>
 
     <div v-if="pollError && pollError.includes('instance.notFound')" class="mcp-page-gap">
-      <FaAlert variant="destructive" title="节点上没有该实例">
+      <YdAlert variant="destructive" title="节点上没有该实例">
   <template #description>
         面板记录仍在，但节点容器/数据目录不存在。可：启动一次尝试重建容器；或删除实例后用引导式/ZIP 重新创建。
         <div class="mcp-row" style="margin-top:8px;">
-          <FaButton size="sm" :disabled="acting" @click="act('start')">尝试启动</FaButton>
-          <FaButton size="sm" variant="destructive" :disabled="acting" @click="act('kill')">终止</FaButton>
-          <FaButton size="sm" variant="outline" @click="router.push(listPath)">返回列表删除重建</FaButton>
+          <YdButton size="sm" :disabled="acting" @click="act('start')">尝试启动</YdButton>
+          <YdButton size="sm" variant="destructive" :disabled="acting" @click="act('kill')">终止</YdButton>
+          <YdButton size="sm" variant="outline" @click="router.push(listPath)">返回列表删除重建</YdButton>
         </div>
   </template>
-      </FaAlert>
+      </YdAlert>
     </div>
 
     <div class="mcp-fn-grid mcp-page-gap">
-      <button type="button" class="mcp-fn-card" @click="router.push(filesPath)">
+      <YdAction type="button" class="mcp-fn-card" @click="router.push(filesPath)">
         <div class="mcp-fn-title">文件管理 / SFTP</div>
         <div class="mcp-fn-desc">数据目录、上传下载、临时 SFTP</div>
         <div class="mcp-fn-link">前往 →</div>
-      </button>
-      <button type="button" class="mcp-fn-card" @click="router.push(`${listPath}/${instanceId}/schedules`)">
+      </YdAction>
+      <YdAction type="button" class="mcp-fn-card" @click="router.push(`${listPath}/${instanceId}/schedules`)">
         <div class="mcp-fn-title">计划任务</div>
         <div class="mcp-fn-desc">间隔 / 每日定时控制台命令</div>
         <div class="mcp-fn-link">前往 →</div>
-      </button>
-      <button type="button" class="mcp-fn-card" @click="router.push(`${listPath}/${instanceId}/server-config`)">
+      </YdAction>
+      <YdAction type="button" class="mcp-fn-card" @click="router.push(`${listPath}/${instanceId}/server-config`)">
         <div class="mcp-fn-title">服务端配置</div>
         <div class="mcp-fn-desc">server.properties 结构化编辑</div>
         <div class="mcp-fn-link">前往 →</div>
-      </button>
-      <button type="button" class="mcp-fn-card" @click="router.push(`${listPath}/${instanceId}/mods`)">
+      </YdAction>
+      <YdAction type="button" class="mcp-fn-card" @click="router.push(`${listPath}/${instanceId}/mods`)">
         <div class="mcp-fn-title">模组 / 插件</div>
         <div class="mcp-fn-desc">Modrinth 搜索安装到 plugins/mods</div>
         <div class="mcp-fn-link">前往 →</div>
-      </button>
-      <button type="button" class="mcp-fn-card" @click="router.push(`${listPath}/${instanceId}/settings`)">
+      </YdAction>
+      <YdAction type="button" class="mcp-fn-card" @click="router.push(`${listPath}/${instanceId}/settings`)">
         <div class="mcp-fn-title">实例设置</div>
         <div class="mcp-fn-desc">命令、环境变量、RCON / Ping / 终端</div>
         <div class="mcp-fn-link">前往 →</div>
-      </button>
-      <button type="button" class="mcp-fn-card" @click="router.push(`${listPath}/${instanceId}/proxy`)">
+      </YdAction>
+      <YdAction type="button" class="mcp-fn-card" @click="router.push(`${listPath}/${instanceId}/proxy`)">
         <div class="mcp-fn-title">代理与子服</div>
         <div class="mcp-fn-desc">Velocity / Bungee 纳管、子服绑定与子服同步</div>
         <div class="mcp-fn-link">前往 →</div>
-      </button>
-      <button type="button" class="mcp-fn-card" @click="router.push(`${listPath}/${instanceId}/domain`)">
+      </YdAction>
+      <YdAction type="button" class="mcp-fn-card" @click="router.push(`${listPath}/${instanceId}/domain`)">
         <div class="mcp-fn-title">实例域名</div>
         <div class="mcp-fn-desc">自动写入 A / SRV 解析，玩家免端口直连</div>
         <div class="mcp-fn-link">前往 →</div>
-      </button>
-      <button type="button" class="mcp-fn-card" @click="router.push(listPath)">
+      </YdAction>
+      <YdAction type="button" class="mcp-fn-card" @click="router.push(listPath)">
         <div class="mcp-fn-title">返回实例列表</div>
         <div class="mcp-fn-desc">卡片列表与节点筛选</div>
         <div class="mcp-fn-link">前往 →</div>
-      </button>
+      </YdAction>
     </div>
 
     <div class="mcp-wt-lower mcp-page-gap">
-      <FaCard id="inst-info" title="基本信息">
-        <FaDescriptions :items="basicItems" :column="2" border />
-      </FaCard>
-      <FaCard id="inst-authlib" title="Authlib 注入">
+      <YdCard id="inst-info" title="基本信息">
+        <YdDescriptions :items="basicItems" :column="2" border />
+      </YdCard>
+      <YdCard id="inst-authlib" title="Authlib 注入">
         <template v-if="authlibInjection">
-          <FaAlert v-if="!authlibInjection.supported" variant="default" title="注入暂不可用">
+          <YdAlert v-if="!authlibInjection.supported" variant="default" title="注入暂不可用">
             <template #description>{{ authlibInjection.reason }}</template>
-          </FaAlert>
+          </YdAlert>
           <div v-else class="mcp-toolbar-row">
-            <FaButton
+            <YdButton
               size="sm"
               :variant="authlibInjection.enabled ? 'outline' : 'default'"
               :loading="authlibBusy"
@@ -1495,7 +1496,7 @@ onBeforeUnmount(() => {
               @click="toggleAuthlibInjection(!authlibInjection.enabled)"
             >
               {{ authlibInjection.enabled ? '关闭注入' : '开启注入' }}
-            </FaButton>
+            </YdButton>
             <div class="min-w-0">
               <p class="text-sm font-medium">
                 {{ authlibInjection.enabled ? '已注入：启动命令含 -javaagent，启动实例后生效' : '未注入' }}
@@ -1508,14 +1509,14 @@ onBeforeUnmount(() => {
           </div>
         </template>
         <p v-else class="text-sm text-muted-foreground">注入能力不可用（面板设置未配置或无查看权限）。</p>
-      </FaCard>
-      <FaCard id="inst-playtime" title="在线时长注入">
+      </YdCard>
+      <YdCard id="inst-playtime" title="在线时长注入">
         <template v-if="playtimeInjection">
-          <FaAlert v-if="!playtimeInjection.supported" variant="default" title="注入暂不可用">
+          <YdAlert v-if="!playtimeInjection.supported" variant="default" title="注入暂不可用">
             <template #description>{{ playtimeInjection.reason }}</template>
-          </FaAlert>
+          </YdAlert>
           <div v-else class="mcp-toolbar-row">
-            <FaButton
+            <YdButton
               size="sm"
               :variant="playtimeInjection.enabled ? 'outline' : 'default'"
               :loading="playtimeBusy"
@@ -1523,7 +1524,7 @@ onBeforeUnmount(() => {
               @click="togglePlaytimeInjection(!playtimeInjection.enabled)"
             >
               {{ playtimeInjection.enabled ? '关闭注入' : '开启注入' }}
-            </FaButton>
+            </YdButton>
             <div class="min-w-0">
               <p class="text-sm font-medium">
                 {{ playtimeInjection.enabled
@@ -1548,33 +1549,33 @@ onBeforeUnmount(() => {
           </div>
         </template>
         <p v-else class="text-sm text-muted-foreground">注入能力不可用（面板设置未配置制品矩阵或无查看权限）。</p>
-      </FaCard>
-      <FaCard id="inst-backup" title="备份">
+      </YdCard>
+      <YdCard id="inst-backup" title="备份">
         <div class="mcp-toolbar-row mb-3">
           <span class="mcp-status-meta flex items-center gap-2">
             保留：最多
-            <FaInput v-model="policyKeepCount" type="number" class="w-20" />
+            <YdInput v-model="policyKeepCount" type="number" class="w-20" />
             份 /
-            <FaInput v-model="policyKeepDays" type="number" class="w-20" />
+            <YdInput v-model="policyKeepDays" type="number" class="w-20" />
             天（0=不限）
-            <FaButton size="sm" variant="outline" :disabled="!canManage" :loading="policySaving" @click="saveBackupPolicy">
+            <YdButton size="sm" variant="outline" :disabled="!canManage" :loading="policySaving" @click="saveBackupPolicy">
               保存策略
-            </FaButton>
+            </YdButton>
           </span>
           <div class="mcp-spacer mcp-row">
-            <FaButton v-if="canManage" size="sm" @click="openBackupModal">
+            <YdButton v-if="canManage" size="sm" @click="openBackupModal">
               创建备份
-            </FaButton>
-            <FaButton size="sm" variant="outline" @click="() => { void loadBackups() }">
+            </YdButton>
+            <YdButton size="sm" variant="outline" @click="() => { void loadBackups() }">
               刷新
-            </FaButton>
+            </YdButton>
           </div>
         </div>
         <p v-if="backupCreating" class="mb-2 text-sm text-muted-foreground">
           正在打包备份，完成后自动出现在列表（大世界可能需要数分钟）…
         </p>
-        <FaResponsiveTable
-          v-loading="backupLoading"
+        <YdLoadingOverlay :loading="backupLoading"><YdResponsiveTable
+
           :columns="backupColumns"
           :data="backupRows"
           row-key="key"
@@ -1585,9 +1586,9 @@ onBeforeUnmount(() => {
           empty-text="暂无备份"
         >
           <template #cell-kind="{ row }">
-            <FaTag :variant="row.original.type === 'local' ? 'default' : 'secondary'">
+            <YdTag :variant="row.original.type === 'local' ? 'default' : 'secondary'">
               {{ backupKindLabel(row.original) }}
-            </FaTag>
+            </YdTag>
           </template>
           <template #cell-file="{ row }">
             <span v-if="row.original.type === 'local'" class="mcp-mono break-all">{{ row.original.file }}</span>
@@ -1608,33 +1609,33 @@ onBeforeUnmount(() => {
           </template>
           <template #cell-operation="{ row }">
             <div v-if="row.original.type === 'local' && canManage" class="mcp-op-cell">
-              <FaButton
+              <YdButton
                 size="sm"
                 variant="outline"
                 :loading="restoringFile === String(row.original.file)"
                 @click="confirmRestoreBackup(row.original)"
               >
                 恢复
-              </FaButton>
-              <FaButton
+              </YdButton>
+              <YdButton
                 size="sm"
                 variant="destructive"
                 :loading="deletingFile === String(row.original.file)"
                 @click="confirmDeleteBackup(row.original)"
               >
                 删除
-              </FaButton>
+              </YdButton>
             </div>
             <span v-else>-</span>
           </template>
           <template #card="{ row }">
-            <FaCard class="w-full">
+            <YdCard class="w-full">
               <div class="flex flex-col gap-3">
                 <div class="flex items-center justify-between gap-2">
                   <span class="mcp-mono min-w-0 break-all text-sm font-semibold">{{ row.type === 'local' ? row.file : (row.archiveName || `备份任务 #${row.jobId ?? '-'}`) }}</span>
-                  <FaTag :variant="row.type === 'local' ? 'default' : 'secondary'">
+                  <YdTag :variant="row.type === 'local' ? 'default' : 'secondary'">
                     {{ backupKindLabel(row) }}
-                  </FaTag>
+                  </YdTag>
                 </div>
                 <div class="flex flex-col gap-1 text-sm">
                   <div class="flex gap-2">
@@ -1651,28 +1652,28 @@ onBeforeUnmount(() => {
                   </div>
                 </div>
                 <div v-if="row.type === 'local' && canManage" class="flex flex-wrap gap-2 border-t pt-3">
-                  <FaButton
+                  <YdButton
                     size="sm"
                     variant="outline"
                     :loading="restoringFile === String(row.file)"
                     @click="confirmRestoreBackup(row)"
                   >
                     恢复
-                  </FaButton>
-                  <FaButton
+                  </YdButton>
+                  <YdButton
                     size="sm"
                     variant="destructive"
                     :loading="deletingFile === String(row.file)"
                     @click="confirmDeleteBackup(row)"
                   >
                     删除
-                  </FaButton>
+                  </YdButton>
                 </div>
               </div>
-            </FaCard>
+            </YdCard>
           </template>
-        </FaResponsiveTable>
-      </FaCard>
+        </YdResponsiveTable></YdLoadingOverlay>
+      </YdCard>
     </div>
     <FileEditorModal
       v-model="editorOpen"
@@ -1685,7 +1686,7 @@ onBeforeUnmount(() => {
       :initial-directory="editorDirectory"
       @saved="() => browserRef?.reload()"
     />
-    <FaModal
+    <YdModal
       v-model="backupModalOpen"
       title="创建备份"
       :show-cancel-button="true"
@@ -1697,7 +1698,7 @@ onBeforeUnmount(() => {
       <div class="mcp-form">
         <label class="mcp-form-item">
           <span class="mcp-form-label">备份位置</span>
-          <FaSelect
+          <YdSelect
             v-model="backupTarget"
             :options="[
               { label: '本地（节点磁盘，可在本页恢复）', value: 'local' },
@@ -1709,18 +1710,18 @@ onBeforeUnmount(() => {
         </label>
         <label v-if="backupTarget === 'offsite'" class="mcp-form-item">
           <span class="mcp-form-label">异地目标</span>
-          <FaSelect v-if="backupTargets.catalogReady.value" v-model="backupTargetCode" :options="backupTargetOptions" class="mcp-w-full" />
+          <YdSelect v-if="backupTargets.catalogReady.value" v-model="backupTargetCode" :options="backupTargetOptions" class="mcp-w-full" />
           <template v-else>
-            <FaInput v-model="backupTargetCode" class="mcp-w-full mcp-mono" placeholder="nas-webdav" />
+            <YdInput v-model="backupTargetCode" class="mcp-w-full mcp-mono" placeholder="nas-webdav" />
             <span class="mcp-form-hint">无法读取目标目录（宿主 SDK 过旧或暂无启用目标），请手输目标编码。</span>
           </template>
         </label>
-        <FaAlert v-if="backupModalError" variant="destructive" title="无法提交">
+        <YdAlert v-if="backupModalError" variant="destructive" title="无法提交">
           <template #description>
             {{ backupModalError }}
           </template>
-        </FaAlert>
+        </YdAlert>
       </div>
-    </FaModal>
-  </FaPageMain>
+    </YdModal>
+  </YdPageMain></YdLoadingOverlay>
 </template>

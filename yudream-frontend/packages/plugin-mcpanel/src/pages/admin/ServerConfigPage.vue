@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { FaAlert, FaButton, FaCard, FaIcon, FaInput, FaPageHeader, FaPageMain, FaSelect, FaSwitch, FaTabs, FaTag, FaTextarea, useFaToast } from '@yudream/components'
+import { YdAlert, YdButton, YdCard, YdIcon, YdInput, YdPageHeader, YdPageMain, YdSelect, YdSwitch, YdTabs, YdTag, YdTextarea, useYdToast } from '@yudream/components'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createMcPanelExtra } from '../../api/api-extra'
@@ -23,7 +24,7 @@ import { readRawChunk, type FileChunk } from '../../utils/textFileAccess'
  * 代理实例（velocity/bungee）按 kind 切换到 velocity.toml / config.yml 结构化编辑。 */
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 const extra = createMcPanelExtra(props.sdk)
-const toast = useFaToast()
+const toast = useYdToast()
 const route = useRoute()
 const router = useRouter()
 
@@ -390,42 +391,42 @@ onMounted(() => {
 </script>
 
 <template>
-  <FaPageHeader
+  <YdPageHeader
     :title="`服务端配置 · ${instanceId}`"
     description="按分组查看并修改配置，每项均附中文说明；布尔/枚举使用选择器，保存后重启实例生效"
   >
-    <FaButton variant="outline" @click="router.push(`/platform/plugins/mcpanel/admin/instances/${instanceId}`)">
+    <YdButton variant="outline" @click="router.push(`/platform/plugins/mcpanel/admin/instances/${instanceId}`)">
       返回终端
-    </FaButton>
-    <FaButton v-if="canManage && isStructured && !rawMode" variant="outline" :disabled="!dirtyCount" @click="resetAll">
+    </YdButton>
+    <YdButton v-if="canManage && isStructured && !rawMode" variant="outline" :disabled="!dirtyCount" @click="resetAll">
       放弃修改
-    </FaButton>
-    <FaButton v-if="canManage" variant="outline" @click="reloadAll">
+    </YdButton>
+    <YdButton v-if="canManage" variant="outline" @click="reloadAll">
       重新读取
-    </FaButton>
-    <FaButton v-if="canManage" :loading="saving" @click="save">
+    </YdButton>
+    <YdButton v-if="canManage" :loading="saving" @click="save">
       {{ dirtyCount && isStructured && !rawMode ? `保存配置（${dirtyCount}）` : '保存配置' }}
-    </FaButton>
-  </FaPageHeader>
+    </YdButton>
+  </YdPageHeader>
 
-  <FaPageMain v-loading="loading" class="flex flex-col gap-4">
-    <FaAlert v-if="error" variant="destructive" title="提示">
+  <YdLoadingOverlay :loading="loading"><YdPageMain  class="flex flex-col gap-4">
+    <YdAlert v-if="error" variant="destructive" title="提示">
   <template #description>
       {{ error }}
   </template>
-    </FaAlert>
+    </YdAlert>
 
-    <FaAlert v-if="!error && parseError && isStructured && !rawMode" variant="destructive" title="无法结构化解析">
+    <YdAlert v-if="!error && parseError && isStructured && !rawMode" variant="destructive" title="无法结构化解析">
   <template #description>
       {{ parseError }}。可切换「原始文本」直接编辑；修复格式后结构化视图会自动恢复。
   </template>
-    </FaAlert>
+    </YdAlert>
 
     <!-- EULA 一键同意：仅当实例目录里实际存在 eula.txt 时提示（代理端无 eula，不会出现） -->
     <div v-if="eulaExists && !eulaAccepted" class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-500/40 bg-amber-500/5 p-4">
       <div class="min-w-0">
         <div class="flex flex-wrap items-center gap-2 text-sm font-medium">
-          <FaIcon name="i-ri:file-paper-2-line" class="text-amber-600" />
+          <YdIcon name="i-ri:file-paper-2-line" class="text-amber-600" />
           Minecraft EULA 尚未同意
         </div>
         <p class="mt-1 text-xs text-muted-foreground">
@@ -433,25 +434,25 @@ onMounted(() => {
           见 <a href="https://aka.ms/MinecraftEULA" target="_blank" rel="noopener" class="text-primary hover:underline">Minecraft EULA 条款</a>。
         </p>
       </div>
-      <FaButton v-if="canManage" size="sm" :loading="eulaBusy" @click="acceptEula">
-        <FaIcon name="i-ri:check-line" />
+      <YdButton v-if="canManage" size="sm" :loading="eulaBusy" @click="acceptEula">
+        <YdIcon name="i-ri:check-line" />
         一键同意 EULA
-      </FaButton>
+      </YdButton>
     </div>
 
-    <FaAlert v-if="!fileTabs.length" variant="default" title="暂无可编辑的配置文件" class="mb-0">
+    <YdAlert v-if="!fileTabs.length" variant="default" title="暂无可编辑的配置文件" class="mb-0">
   <template #description>
       实例数据目录里还没有已知配置文件（server.properties 等）。先启动一次实例让其生成，
       或到「文件管理」上传；代理实例需先启动一次生成 velocity.toml / config.yml。
   </template>
-    </FaAlert>
+    </YdAlert>
 
-    <FaTabs v-else :model-value="path" :list="fileTabs" @update:model-value="(v: string | number) => selectFile(String(v))" />
+    <YdTabs v-else :model-value="path" :list="fileTabs" @update:model-value="(v: string | number) => selectFile(String(v))" />
 
     <div v-if="fileTabs.length" class="flex flex-col gap-4">
       <div class="flex flex-wrap items-center gap-3">
         <div class="flex min-w-0 flex-1 items-center gap-3">
-          <FaIcon name="i-ri:file-cog-line" class="text-xl text-muted-foreground" />
+          <YdIcon name="i-ri:file-cog-line" class="text-xl text-muted-foreground" />
           <div class="min-w-0">
             <div class="truncate font-mono font-medium">
               /{{ path }}
@@ -462,31 +463,31 @@ onMounted(() => {
           </div>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-          <FaInput
+          <YdInput
             v-if="isStructured && !rawMode"
             v-model="filter"
             clearable
             class="w-full sm:w-64"
             placeholder="搜索配置项 / 说明 / 键名…"
           />
-          <FaSelect
+          <YdSelect
             v-if="isStructured && !rawMode"
             v-model="groupFilter"
             :options="filterOptions"
             class="w-full sm:w-48"
           />
           <label v-if="isStructured && !rawMode" class="flex items-center gap-2 text-sm">
-            <FaSwitch v-model="showOnlyChanged" />
+            <YdSwitch v-model="showOnlyChanged" />
             仅看已改
           </label>
           <label v-if="isStructured" class="flex items-center gap-2 text-sm">
-            <FaSwitch v-model="rawMode" />
+            <YdSwitch v-model="rawMode" />
             原始文本
           </label>
         </div>
       </div>
 
-      <FaTextarea
+      <YdTextarea
         v-if="rawMode || !isStructured"
         v-model="content"
         :rows="24"
@@ -499,7 +500,7 @@ onMounted(() => {
           没有匹配的配置项。可切换分组、关闭「仅看已改」，或清空搜索关键词。
         </div>
 
-        <FaCard
+        <YdCard
           v-for="section in groupedRows"
           :key="section.group"
           :title="section.meta.title"
@@ -507,9 +508,9 @@ onMounted(() => {
         >
           <div class="mb-3 flex items-center gap-2 text-sm text-muted-foreground">
             {{ section.items.length }} 项
-            <FaTag v-if="section.items.some(i => i.dirty)" variant="secondary">
+            <YdTag v-if="section.items.some(i => i.dirty)" variant="secondary">
               含未保存修改
-            </FaTag>
+            </YdTag>
           </div>
 
           <div class="grid gap-3">
@@ -523,17 +524,17 @@ onMounted(() => {
                 <div class="flex flex-wrap items-center gap-2">
                   <span class="font-medium">{{ row.label }}</span>
                   <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">{{ row.key }}</code>
-                  <FaTag variant="outline">
+                  <YdTag variant="outline">
                     {{ typeLabel(row.type) }}
-                  </FaTag>
-                  <FaTag v-if="!row.known" variant="secondary">自定义</FaTag>
-                  <FaTag v-if="row.dirty">已修改</FaTag>
+                  </YdTag>
+                  <YdTag v-if="!row.known" variant="secondary">自定义</YdTag>
+                  <YdTag v-if="row.dirty">已修改</YdTag>
                 </div>
                 <p class="text-sm text-muted-foreground">
                   {{ row.desc }}
                 </p>
                 <div v-if="row.tip" class="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400">
-                  <FaIcon name="i-ri:lightbulb-flash-line" />
+                  <YdIcon name="i-ri:lightbulb-flash-line" />
                   {{ row.tip }}
                 </div>
                 <div v-if="row.defaultValue !== undefined && row.defaultValue !== ''" class="text-xs text-muted-foreground">
@@ -542,7 +543,7 @@ onMounted(() => {
               </div>
 
               <div class="flex shrink-0 items-center gap-2">
-                <FaSelect
+                <YdSelect
                   v-if="row.type === 'boolean' || row.type === 'enum'"
                   :model-value="row.value"
                   :options="selectOptions(row)"
@@ -551,7 +552,7 @@ onMounted(() => {
                   placeholder="未设置"
                   @update:model-value="(v: unknown) => setRowValue(row.key, String(v ?? ''))"
                 />
-                <FaInput
+                <YdInput
                   v-else
                   :model-value="row.value"
                   class="w-56"
@@ -559,22 +560,22 @@ onMounted(() => {
                   :disabled="!canManage"
                   @update:model-value="(v: unknown) => setRowValue(row.key, String(v ?? ''))"
                 />
-                <FaButton
+                <YdButton
                   v-if="row.dirty && canManage"
                   variant="ghost"
                   size="sm"
                   @click="resetRow(row.key)"
                 >
                   撤销本项
-                </FaButton>
+                </YdButton>
               </div>
             </article>
           </div>
-        </FaCard>
+        </YdCard>
       </div>
     </div>
 
-    <FaAlert v-if="!error && isStructured && !rawMode" variant="default" title="编辑提示">
+    <YdAlert v-if="!error && isStructured && !rawMode" variant="default" title="编辑提示">
   <template #description>
       布尔项请用「是/否」；枚举项从下拉中选择。未写入文件的键默认不落盘，改完后点右上角保存。
       世界种子、端口等仅在服务端下次启动时读取；改错时可用「重新读取」或「放弃修改」。
@@ -582,6 +583,6 @@ onMounted(() => {
         yml/toml 结构化保存会重写整个文件（注释与顺序不保留），只改填写的键；需要保留注释请切换「原始文本」编辑。
       </template>
   </template>
-    </FaAlert>
-  </FaPageMain>
+    </YdAlert>
+  </YdPageMain></YdLoadingOverlay>
 </template>

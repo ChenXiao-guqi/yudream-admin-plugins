@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { FaButton, FaCard, FaIcon, FaPageHeader, FaPageMain, FaTag, useFaModal, useFaToast } from '@yudream/components'
+import { YdButton, YdCard, YdIcon, YdPageHeader, YdPageMain, YdTag, useYdModal, useYdToast } from '@yudream/components'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createMcPanelExtra } from '../../api/api-extra.ts'
@@ -17,8 +18,8 @@ import { errorMessage, formatDateTime } from '../../composables/utils.ts'
  */
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 const extra = createMcPanelExtra(props.sdk)
-const toast = useFaToast()
-const modal = useFaModal()
+const toast = useYdToast()
+const modal = useYdModal()
 const route = useRoute()
 const router = useRouter()
 
@@ -153,25 +154,25 @@ watch(instanceId, (now, was) => {
 </script>
 
 <template>
-  <FaPageHeader
+  <YdPageHeader
     :title="`代理与子服 · ${instanceName || instanceId}`"
     description="Velocity / Bungee 代理纳管、子服绑定与子服数据同步"
   >
-    <FaButton variant="outline" @click="router.push(detailPath)">
+    <YdButton variant="outline" @click="router.push(detailPath)">
       返回控制台
-    </FaButton>
-    <FaButton variant="outline" @click="router.push(filesPath)">
+    </YdButton>
+    <YdButton variant="outline" @click="router.push(filesPath)">
       文件管理
-    </FaButton>
-  </FaPageHeader>
+    </YdButton>
+  </YdPageHeader>
 
-  <FaPageMain v-loading="loading" class="flex flex-col gap-4">
+  <YdLoadingOverlay :loading="loading"><YdPageMain  class="flex flex-col gap-4">
     <div v-if="loadError" class="text-sm text-destructive">
       {{ loadError }}
     </div>
 
     <!-- 子服视角：本实例已被某个代理纳管 -->
-    <FaCard
+    <YdCard
       v-if="proxyInfo?.proxyInstanceId"
       title="所属代理"
       description="本实例作为子服挂在代理下；改绑/解绑在代理实例的「代理与子服」页完成"
@@ -179,7 +180,7 @@ watch(instanceId, (now, was) => {
       <div class="mcp-toolbar-row">
         <div class="min-w-0">
           <div class="flex flex-wrap items-center gap-2 text-sm font-medium">
-            <FaIcon name="i-ri:git-branch-line" class="text-primary" />
+            <YdIcon name="i-ri:git-branch-line" class="text-primary" />
             {{ proxyInfo?.proxyName || proxyInfo?.proxyInstanceId }}
           </div>
           <p class="mt-1 text-xs text-muted-foreground">
@@ -188,11 +189,11 @@ watch(instanceId, (now, was) => {
             （即 servers 段的键名）
           </p>
         </div>
-        <FaButton size="sm" variant="outline" @click="router.push(proxyPagePath)">
+        <YdButton size="sm" variant="outline" @click="router.push(proxyPagePath)">
           打开代理侧绑定
-        </FaButton>
+        </YdButton>
       </div>
-    </FaCard>
+    </YdCard>
 
     <ProxyGroupPanel
       v-if="!loading"
@@ -208,29 +209,29 @@ watch(instanceId, (now, was) => {
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div class="min-w-0">
           <div class="flex flex-wrap items-center gap-2 text-sm font-medium">
-            <FaIcon name="i-ri:links-line" class="text-primary" />
+            <YdIcon name="i-ri:links-line" class="text-primary" />
             软链接 ← {{ syncLink.sourceName || syncLink.sourceInstanceId }}
-            <FaTag variant="secondary">
+            <YdTag variant="secondary">
               {{ (syncLink.paths ?? []).length }} 个路径{{ (syncLink.overrides ?? []).length ? ` · 跳过 ${(syncLink.overrides ?? []).length}` : '' }}
-            </FaTag>
-            <FaTag v-if="syncLink.lastSyncAt" variant="outline">
+            </YdTag>
+            <YdTag v-if="syncLink.lastSyncAt" variant="outline">
               上次同步 {{ formatDateTime(Number(syncLink.lastSyncAt)) }}
-            </FaTag>
+            </YdTag>
           </div>
           <p class="mt-1 truncate text-xs text-muted-foreground">
             同步范围：{{ (syncLink.paths ?? []).join('、') || '-' }}（世界数据不同步；同步后运行中的实例需重启加载）
           </p>
         </div>
         <div class="flex items-center gap-2">
-          <FaButton v-if="canManage" size="sm" :loading="syncBusy" @click="runSync">
-            <FaIcon name="i-ri:refresh-line" />
+          <YdButton v-if="canManage" size="sm" :loading="syncBusy" @click="runSync">
+            <YdIcon name="i-ri:refresh-line" />
             立即同步
-          </FaButton>
-          <FaButton v-if="canManage" size="sm" variant="destructive" :disabled="syncBusy" @click="unlinkSync">
+          </YdButton>
+          <YdButton v-if="canManage" size="sm" variant="destructive" :disabled="syncBusy" @click="unlinkSync">
             解除
-          </FaButton>
+          </YdButton>
         </div>
       </div>
     </div>
-  </FaPageMain>
+  </YdPageMain></YdLoadingOverlay>
 </template>

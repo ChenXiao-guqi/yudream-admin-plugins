@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { FaAlert, FaButton, FaCard, FaIcon, FaInput, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable, FaSelect, useFaModal, useFaToast } from '@yudream/components'
+import { YdAlert, YdButton, YdCard, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSelect, useYdModal, useYdToast } from '@yudream/components'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createMcPanelExtra } from '../../api/api-extra.ts'
@@ -14,8 +15,8 @@ import { errorMessage, formatDateTime } from '../../composables/utils.ts'
  */
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 const extra = createMcPanelExtra(props.sdk)
-const toast = useFaToast()
-const modal = useFaModal()
+const toast = useYdToast()
+const modal = useYdModal()
 const route = useRoute()
 const router = useRouter()
 
@@ -151,41 +152,41 @@ onMounted(() => {
 </script>
 
 <template>
-  <FaPageHeader :title="`模组/插件 · ${instanceName || instanceId}`" description="Modrinth 检索并安装到实例 plugins/ 或 mods/">
-    <FaButton variant="outline" @click="router.push(`/platform/plugins/mcpanel/admin/instances/${instanceId}`)">
+  <YdPageHeader :title="`模组/插件 · ${instanceName || instanceId}`" description="Modrinth 检索并安装到实例 plugins/ 或 mods/">
+    <YdButton variant="outline" @click="router.push(`/platform/plugins/mcpanel/admin/instances/${instanceId}`)">
       返回终端
-    </FaButton>
-    <FaButton variant="outline" @click="router.push(`/platform/plugins/mcpanel/admin/instances/${instanceId}/files`)">
+    </YdButton>
+    <YdButton variant="outline" @click="router.push(`/platform/plugins/mcpanel/admin/instances/${instanceId}/files`)">
       文件管理
-    </FaButton>
-  </FaPageHeader>
-  <FaPageMain>
-    <FaAlert v-if="error" variant="destructive" title="提示" class="mb-4">
+    </YdButton>
+  </YdPageHeader>
+  <YdPageMain>
+    <YdAlert v-if="error" variant="destructive" title="提示" class="mb-4">
   <template #description>
       {{ error }}
   </template>
-    </FaAlert>
-    <FaCard title="搜索 Modrinth" description="可选类型/游戏版本/加载器；安装走节点文件通道">
+    </YdAlert>
+    <YdCard title="搜索 Modrinth" description="可选类型/游戏版本/加载器；安装走节点文件通道">
       <div class="grid w-full gap-2 mb-3 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_170px_170px_170px_auto]">
-        <FaInput v-model="keyword" class="w-full" placeholder="关键词" @keydown.enter="search" />
-        <FaSelect
+        <YdInput v-model="keyword" class="w-full" placeholder="关键词" @keydown.enter="search" />
+        <YdSelect
           v-model="projectType"
           :options="[{ label: '插件 plugin', value: 'plugin' }, { label: '模组 mod', value: 'mod' }]"
           class="w-full"
           @change="loadLocal"
         />
-        <FaInput v-model="gameVersion" class="w-full" placeholder="MC 版本，如 1.21.4" />
-        <FaInput v-model="loader" class="w-full" placeholder="加载器 paper/fabric" />
+        <YdInput v-model="gameVersion" class="w-full" placeholder="MC 版本，如 1.21.4" />
+        <YdInput v-model="loader" class="w-full" placeholder="加载器 paper/fabric" />
         <div class="flex items-center justify-end">
-          <FaButton class="w-full xl:w-auto" @click="search">
-            <FaIcon name="i-ri:search-line" />
+          <YdButton class="w-full xl:w-auto" @click="search">
+            <YdIcon name="i-ri:search-line" />
             搜索
-          </FaButton>
+          </YdButton>
         </div>
       </div>
 
-      <FaResponsiveTable
-        v-loading="loading"
+      <YdLoadingOverlay :loading="loading"><YdResponsiveTable
+
         :columns="columns"
         :data="rows"
         row-key="id"
@@ -205,7 +206,7 @@ onMounted(() => {
           {{ Number(row.original.downloads ?? 0).toLocaleString() }}
         </template>
         <template #cell-operation="{ row }">
-          <FaButton
+          <YdButton
             size="sm"
             variant="outline"
             :disabled="!canManage || !instanceId"
@@ -213,10 +214,10 @@ onMounted(() => {
             @click="install(row.original)"
           >
             安装
-          </FaButton>
+          </YdButton>
         </template>
         <template #card="{ row }">
-          <FaCard class="w-full">
+          <YdCard class="w-full">
             <div class="flex flex-col gap-3">
               <div class="flex items-start justify-between gap-2">
                 <span class="min-w-0 break-words text-base font-semibold">{{ row.title }}</span>
@@ -240,7 +241,7 @@ onMounted(() => {
                 </div>
               </div>
               <div class="flex flex-wrap gap-2 border-t pt-3">
-                <FaButton
+                <YdButton
                   size="sm"
                   variant="outline"
                   :disabled="!canManage || !instanceId"
@@ -248,13 +249,13 @@ onMounted(() => {
                   @click="install(row)"
                 >
                   安装
-                </FaButton>
+                </YdButton>
               </div>
             </div>
-          </FaCard>
+          </YdCard>
         </template>
-      </FaResponsiveTable>
-      <FaPagination
+      </YdResponsiveTable></YdLoadingOverlay>
+      <YdPagination
         v-model:page="pager.page"
         v-model:size="pager.size"
         :total="pager.total"
@@ -262,10 +263,10 @@ onMounted(() => {
         @page-change="() => search()"
         @size-change="() => { pager.page = 1; search() }"
       />
-    </FaCard>
+    </YdCard>
 
-    <FaCard :title="projectType === 'plugin' ? '本地插件目录 plugins/' : '本地模组目录 mods/'" class="mcp-page-gap">
-      <FaResponsiveTable
+    <YdCard :title="projectType === 'plugin' ? '本地插件目录 plugins/' : '本地模组目录 mods/'" class="mcp-page-gap">
+      <YdResponsiveTable
         :columns="localColumns"
         :data="localRows"
         row-key="name"
@@ -283,18 +284,18 @@ onMounted(() => {
           {{ row.original.modTime ? formatDateTime(row.original.modTime as number) : '-' }}
         </template>
         <template #cell-operation="{ row }">
-          <FaButton
+          <YdButton
             size="icon-sm"
             variant="destructive"
             :disabled="!canManage"
             title="删除"
             @click="confirmDeleteLocal(row.original)"
           >
-            <FaIcon name="i-ri:delete-bin-line" />
-          </FaButton>
+            <YdIcon name="i-ri:delete-bin-line" />
+          </YdButton>
         </template>
         <template #card="{ row }">
-          <FaCard class="w-full">
+          <YdCard class="w-full">
             <div class="flex flex-col gap-3">
               <div class="flex items-center justify-between gap-2">
                 <span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span>
@@ -312,14 +313,14 @@ onMounted(() => {
                 </div>
               </div>
               <div class="flex flex-wrap gap-2 border-t pt-3">
-                <FaButton size="sm" variant="destructive" :disabled="!canManage" @click="confirmDeleteLocal(row)">
+                <YdButton size="sm" variant="destructive" :disabled="!canManage" @click="confirmDeleteLocal(row)">
                   删除
-                </FaButton>
+                </YdButton>
               </div>
             </div>
-          </FaCard>
+          </YdCard>
         </template>
-      </FaResponsiveTable>
-    </FaCard>
-  </FaPageMain>
+      </YdResponsiveTable>
+    </YdCard>
+  </YdPageMain>
 </template>

@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { McpProxyDetectResult, McpProxyGroup, McpProxyServerRow } from '../types'
-import { FaAlert, FaButton, FaCard, FaIcon, FaResponsiveTable, FaSelect, FaTag, useFaModal, useFaToast } from '@yudream/components'
+import { YdAlert, YdButton, YdCard, YdIcon, YdResponsiveTable, YdSelect, YdTag, useYdModal, useYdToast } from '@yudream/components'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { createMcPanelExtra } from '../api/api-extra'
 import { errorMessage } from '../composables/utils'
@@ -22,8 +23,8 @@ const props = defineProps<{
 }>()
 
 const extra = createMcPanelExtra(props.sdk)
-const toast = useFaToast()
-const modal = useFaModal()
+const toast = useYdToast()
+const modal = useYdModal()
 
 const loading = ref(false)
 const detecting = ref(false)
@@ -54,7 +55,7 @@ const columns: TableColumn<Record<string, unknown>>[] = [
   { id: 'operation', header: '操作', width: 110, align: 'center' },
 ]
 
-/** FaTable 单元格槽的 row.original 是宽松 Record；草稿行在此收紧类型。 */
+/** YdTable 单元格槽的 row.original 是宽松 Record；草稿行在此收紧类型。 */
 function asRow(original: Record<string, unknown>): McpProxyServerRow {
   return original as unknown as McpProxyServerRow
 }
@@ -239,19 +240,19 @@ onMounted(() => {
 </script>
 
 <template>
-  <FaCard
+  <YdCard
     title="代理与子服"
     :description="group
       ? `${kindLabel} 代理已纳管：${group.servers.length} 个子服条目（默认 ${group.defaultServer || '-'}，转发 ${group.forwarding || '-'}）`
       : '识别实例根目录的代理配置（velocity.toml / config.yml），把注册的子服自动绑定到面板实例'"
   >
     <div class="mb-3 flex flex-wrap items-center gap-2">
-      <FaTag v-if="group" variant="default">
+      <YdTag v-if="group" variant="default">
         {{ kindLabel }} · 已纳管
-      </FaTag>
-      <FaTag v-else-if="isProxyKind" variant="secondary">
+      </YdTag>
+      <YdTag v-else-if="isProxyKind" variant="secondary">
         {{ kindLabel }} · 未纳管
-      </FaTag>
+      </YdTag>
       <span v-if="draftMeta.sourcePath" class="text-xs text-muted-foreground">
         配置文件：<code class="rounded bg-muted px-1 py-0.5 font-mono">{{ draftMeta.sourcePath }}</code>
       </span>
@@ -259,22 +260,22 @@ onMounted(() => {
         {{ detectNote }}
       </span>
       <span class="flex-1" />
-      <FaButton v-if="canSave" size="sm" variant="outline" :loading="detecting" @click="detect">
-        <FaIcon name="i-ri:scan-2-line" />
+      <YdButton v-if="canSave" size="sm" variant="outline" :loading="detecting" @click="detect">
+        <YdIcon name="i-ri:scan-2-line" />
         {{ group ? '重新识别' : '识别代理配置' }}
-      </FaButton>
-      <FaButton v-if="group && canSave" size="sm" variant="outline" @click="loadGroup">
+      </YdButton>
+      <YdButton v-if="group && canSave" size="sm" variant="outline" @click="loadGroup">
         刷新
-      </FaButton>
-      <FaButton v-if="group && canSave" size="sm" variant="destructive" :disabled="saving" @click="unmanage">
+      </YdButton>
+      <YdButton v-if="group && canSave" size="sm" variant="destructive" :disabled="saving" @click="unmanage">
         解除纳管
-      </FaButton>
+      </YdButton>
     </div>
 
     <!-- 已纳管视图 -->
-    <FaResponsiveTable
-      v-if="group && !draftRows.length"
-      v-loading="loading"
+    <YdLoadingOverlay :loading="loading" v-if="group && !draftRows.length"><YdResponsiveTable
+
+
       :columns="columns"
       :data="group.servers as unknown as Record<string, unknown>[]"
       row-key="name"
@@ -291,21 +292,21 @@ onMounted(() => {
           >
             {{ row.original.boundName || row.original.boundInstanceId }}
           </router-link>
-          <FaTag v-if="row.original.boundState" :variant="row.original.boundState === 'running' ? 'default' : 'secondary'" class="ml-2">
+          <YdTag v-if="row.original.boundState" :variant="row.original.boundState === 'running' ? 'default' : 'secondary'" class="ml-2">
             {{ row.original.boundState === 'running' ? '运行中' : String(row.original.boundState) }}
-          </FaTag>
+          </YdTag>
         </template>
-        <FaTag v-else variant="outline">
+        <YdTag v-else variant="outline">
           外部子服
-        </FaTag>
+        </YdTag>
       </template>
       <template #cell-match="{ row }">
-        <FaTag :variant="row.original.boundInstanceId ? 'default' : 'outline'">
+        <YdTag :variant="row.original.boundInstanceId ? 'default' : 'outline'">
           {{ row.original.boundInstanceId ? '已绑定' : '外部' }}
-        </FaTag>
+        </YdTag>
       </template>
       <template #cell-operation="{ row }">
-        <FaButton
+        <YdButton
           v-if="canSave && row.original.boundInstanceId"
           size="sm"
           variant="outline"
@@ -313,16 +314,16 @@ onMounted(() => {
           @click="unbindRow(row.original)"
         >
           解绑
-        </FaButton>
+        </YdButton>
       </template>
       <template #card="{ row }">
-        <FaCard class="w-full">
+        <YdCard class="w-full">
           <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between gap-2">
               <span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span>
-              <FaTag :variant="row.boundInstanceId ? 'default' : 'outline'">
+              <YdTag :variant="row.boundInstanceId ? 'default' : 'outline'">
                 {{ row.boundInstanceId ? '已绑定' : '外部' }}
-              </FaTag>
+              </YdTag>
             </div>
             <div class="flex flex-col gap-1 text-sm">
               <div class="flex gap-2">
@@ -339,32 +340,32 @@ onMounted(() => {
                     >
                       {{ row.boundName || row.boundInstanceId }}
                     </router-link>
-                    <FaTag v-if="row.boundState" :variant="row.boundState === 'running' ? 'default' : 'secondary'" class="ml-2">
+                    <YdTag v-if="row.boundState" :variant="row.boundState === 'running' ? 'default' : 'secondary'" class="ml-2">
                       {{ row.boundState === 'running' ? '运行中' : String(row.boundState) }}
-                    </FaTag>
+                    </YdTag>
                   </template>
                   <span v-else class="text-muted-foreground">外部子服</span>
                 </span>
               </div>
             </div>
             <div v-if="canSave && row.boundInstanceId" class="flex flex-wrap gap-2 border-t pt-3">
-              <FaButton size="sm" variant="outline" :disabled="saving" @click="unbindRow(row)">
+              <YdButton size="sm" variant="outline" :disabled="saving" @click="unbindRow(row)">
                 解绑
-              </FaButton>
+              </YdButton>
             </div>
           </div>
-        </FaCard>
+        </YdCard>
       </template>
-    </FaResponsiveTable>
+    </YdResponsiveTable></YdLoadingOverlay>
 
     <!-- 识别/编辑草稿视图 -->
     <template v-else-if="draftRows.length">
-      <FaAlert variant="default" title="确认子服绑定" class="mb-3">
+      <YdAlert variant="default" title="确认子服绑定" class="mb-3">
         <template #description>
           地址匹配与同名建议为自动结果，可逐行调整；「外部子服」仅保留记录。保存不会修改代理配置文件。
         </template>
-      </FaAlert>
-      <FaResponsiveTable
+      </YdAlert>
+      <YdResponsiveTable
         :columns="columns"
         :data="draftRows as unknown as Record<string, unknown>[]"
         row-key="name"
@@ -374,7 +375,7 @@ onMounted(() => {
         empty-text="未解析到子服"
       >
         <template #cell-binding="{ row }">
-          <FaSelect
+          <YdSelect
             :model-value="bindValue(asRow(row.original))"
             :options="bindOptions"
             :disabled="!canSave"
@@ -384,21 +385,21 @@ onMounted(() => {
           />
         </template>
         <template #cell-match="{ row }">
-          <FaTag :variant="MATCH_LABEL[String(row.original.matchType ?? 'none')]?.variant ?? 'outline'">
+          <YdTag :variant="MATCH_LABEL[String(row.original.matchType ?? 'none')]?.variant ?? 'outline'">
             {{ MATCH_LABEL[String(row.original.matchType ?? 'none')]?.text ?? '外部' }}
-          </FaTag>
+          </YdTag>
         </template>
         <template #cell-operation>
           <span class="text-xs text-muted-foreground">-</span>
         </template>
         <template #card="{ row }">
-          <FaCard class="w-full">
+          <YdCard class="w-full">
             <div class="flex flex-col gap-3">
               <div class="flex items-center justify-between gap-2">
                 <span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span>
-                <FaTag :variant="MATCH_LABEL[String(row.matchType ?? 'none')]?.variant ?? 'outline'">
+                <YdTag :variant="MATCH_LABEL[String(row.matchType ?? 'none')]?.variant ?? 'outline'">
                   {{ MATCH_LABEL[String(row.matchType ?? 'none')]?.text ?? '外部' }}
-                </FaTag>
+                </YdTag>
               </div>
               <div class="flex flex-col gap-1 text-sm">
                 <div class="flex gap-2">
@@ -407,7 +408,7 @@ onMounted(() => {
                 </div>
                 <div class="flex flex-col gap-1">
                   <span class="text-secondary-foreground/60">绑定面板实例</span>
-                  <FaSelect
+                  <YdSelect
                     :model-value="bindValue(asRow(row))"
                     :options="bindOptions"
                     :disabled="!canSave"
@@ -418,17 +419,17 @@ onMounted(() => {
                 </div>
               </div>
             </div>
-          </FaCard>
+          </YdCard>
         </template>
-      </FaResponsiveTable>
+      </YdResponsiveTable>
       <div v-if="canSave" class="mt-3 flex items-center justify-end gap-2">
-        <FaButton size="sm" variant="outline" :disabled="saving" @click="cancelDraft">
+        <YdButton size="sm" variant="outline" :disabled="saving" @click="cancelDraft">
           取消
-        </FaButton>
-        <FaButton size="sm" :loading="saving" @click="saveDraft">
-          <FaIcon name="i-ri:links-line" />
+        </YdButton>
+        <YdButton size="sm" :loading="saving" @click="saveDraft">
+          <YdIcon name="i-ri:links-line" />
           保存纳管（{{ draftRows.length }} 条）
-        </FaButton>
+        </YdButton>
       </div>
     </template>
 
@@ -446,5 +447,5 @@ onMounted(() => {
         </template>
       </template>
     </div>
-  </FaCard>
+  </YdCard>
 </template>

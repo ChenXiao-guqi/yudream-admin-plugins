@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { FaAlert, FaButton, FaIcon, FaPageHeader, FaPageMain, FaTag } from '@yudream/components'
+import { YdAlert, YdButton, YdIcon, YdPageHeader, YdPageMain, YdTag } from '@yudream/components'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createMcPanelApi } from '../../api/mcpanel-api.ts'
@@ -163,18 +163,18 @@ onBeforeUnmount(() => { disposed = true; releaseSession() })
 </script>
 
 <template>
-  <FaPageHeader :title="`${nodeName || '节点'} · 终端`" description="直接操作节点主机的 Shell，请谨慎执行系统命令" class="mb-0">
-    <FaButton variant="outline" @click="router.push(`/platform/plugins/mcpanel/admin/nodes/${nodeId}`)"><FaIcon name="i-ri:arrow-left-line" />节点详情</FaButton>
-    <FaButton v-if="canUse" variant="outline" :loading="opening" @click="openTerminal">{{ terminalId ? '重新连接输出' : '打开终端' }}</FaButton>
-    <FaButton v-if="terminalId && canUse" variant="destructive" :loading="closing" @click="closeTerminal">关闭会话</FaButton>
-  </FaPageHeader>
-  <FaPageMain class="mcp-mt-4" main-class="mcp-page-stack">
-    <FaAlert v-if="!canUse" title="当前账号没有节点操作权限">需要 plugin:mcpanel:use 权限。</FaAlert>
-    <FaAlert v-if="error && !terminalId" variant="destructive" title="终端未就绪">{{ error }}<p>节点需要在线并开启 security.terminalEnabled。</p></FaAlert>
+  <YdPageHeader :title="`${nodeName || '节点'} · 终端`" description="直接操作节点主机的 Shell，请谨慎执行系统命令" class="mb-0">
+    <YdButton variant="outline" @click="router.push(`/platform/plugins/mcpanel/admin/nodes/${nodeId}`)"><YdIcon name="i-ri:arrow-left-line" />节点详情</YdButton>
+    <YdButton v-if="canUse" variant="outline" :loading="opening" @click="openTerminal">{{ terminalId ? '重新连接输出' : '打开终端' }}</YdButton>
+    <YdButton v-if="terminalId && canUse" variant="destructive" :loading="closing" @click="closeTerminal">关闭会话</YdButton>
+  </YdPageHeader>
+  <YdPageMain class="mcp-mt-4" main-class="mcp-page-stack">
+    <YdAlert v-if="!canUse" title="当前账号没有节点操作权限">需要 plugin:mcpanel:use 权限。</YdAlert>
+    <YdAlert v-if="error && !terminalId" variant="destructive" title="终端未就绪">{{ error }}<p>节点需要在线并开启 security.terminalEnabled。</p></YdAlert>
     <TerminalConsole :key="nodeId" :term="term" mode="shell" :can-use="canUse && !!terminalId && !closing" :transport="{ opening, connected }" :hint="error" show-reconnect @reconnect="openTerminal">
-      <template #tags><FaTag variant="outline">{{ nodeName || nodeId }}</FaTag><FaTag variant="secondary">{{ nodeStatus === 'online' ? '在线' : nodeStatus === 'offline' ? '离线' : nodeStatus || '未知状态' }}</FaTag></template>
-      <template v-if="canManage" #left><FileBrowserPanel :key="nodeId" title="节点文件" :list="browserList" :open-file="editFile" /><FaButton size="sm" variant="outline" class="mcp-wt-mt" @click="router.push(`/platform/plugins/mcpanel/admin/nodes/${nodeId}/files`)">完整文件管理<FaIcon name="i-ri:arrow-right-line" /></FaButton></template>
-      <template #right><div class="mcp-wt-pane-title">常用命令</div><div class="mcp-wt-list"><FaButton v-for="command in common" :key="command" size="sm" variant="ghost" class="mcp-wt-cmd" @click="term.commandText.value = command">{{ command }}</FaButton></div><div class="mcp-wt-pane-title">最近命令</div><div class="mcp-wt-list"><FaButton v-for="command in [...term.history.value].reverse().slice(0, 15)" :key="command" size="sm" variant="ghost" class="mcp-wt-cmd" @click="term.commandText.value = command">{{ command }}</FaButton><span v-if="!term.history.value.length" class="mcp-muted">还没有命令记录</span></div></template>
+      <template #tags><YdTag variant="outline">{{ nodeName || nodeId }}</YdTag><YdTag variant="secondary">{{ nodeStatus === 'online' ? '在线' : nodeStatus === 'offline' ? '离线' : nodeStatus || '未知状态' }}</YdTag></template>
+      <template v-if="canManage" #left><FileBrowserPanel :key="nodeId" title="节点文件" :list="browserList" :open-file="editFile" /><YdButton size="sm" variant="outline" class="mcp-wt-mt" @click="router.push(`/platform/plugins/mcpanel/admin/nodes/${nodeId}/files`)">完整文件管理<YdIcon name="i-ri:arrow-right-line" /></YdButton></template>
+      <template #right><div class="mcp-wt-pane-title">常用命令</div><div class="mcp-wt-list"><YdButton v-for="command in common" :key="command" size="sm" variant="ghost" class="mcp-wt-cmd" @click="term.commandText.value = command">{{ command }}</YdButton></div><div class="mcp-wt-pane-title">最近命令</div><div class="mcp-wt-list"><YdButton v-for="command in [...term.history.value].reverse().slice(0, 15)" :key="command" size="sm" variant="ghost" class="mcp-wt-cmd" @click="term.commandText.value = command">{{ command }}</YdButton><span v-if="!term.history.value.length" class="mcp-muted">还没有命令记录</span></div></template>
       <template #status-start><span>{{ terminalId ? 'Shell 会话已打开' : '尚未打开会话' }}</span></template>
     </TerminalConsole>
     <FileEditorModal
@@ -187,5 +187,5 @@ onBeforeUnmount(() => { disposed = true; releaseSession() })
       :initial-path="editorPath"
       :initial-directory="editorDirectory"
     />
-  </FaPageMain>
+  </YdPageMain>
 </template>

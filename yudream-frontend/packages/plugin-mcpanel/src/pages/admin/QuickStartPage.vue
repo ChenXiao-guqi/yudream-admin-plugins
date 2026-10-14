@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn, YdTablePickerQuery, YdTablePickerResult } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { McpNode } from '../../types'
-import { FaAlert, FaButton, FaCard, FaInput, FaModal, FaPageHeader, FaPageMain, FaResponsiveTable, FaSelect, YdTablePicker, useFaModal, useFaToast } from '@yudream/components'
+import { YdAction, YdAlert, YdButton, YdCard, YdInput, YdModal, YdPageHeader, YdPageMain, YdResponsiveTable, YdSelect, YdTablePicker, useYdModal, useYdToast } from '@yudream/components'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { createMcPanelApi } from '../../api/mcpanel-api'
@@ -17,8 +18,8 @@ import { errorMessage } from '../../composables/utils'
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 const extra = createMcPanelExtra(props.sdk)
 const api = createMcPanelApi(props.sdk)
-const toast = useFaToast()
-const modal = useFaModal()
+const toast = useYdToast()
+const modal = useYdModal()
 const router = useRouter()
 
 const canManage = computed(() => accountHasPermission(props.sdk.account, MCPANEL_PERMISSION.manage))
@@ -274,27 +275,27 @@ onMounted(() => {
 </script>
 
 <template>
-  <FaPageHeader title="快速开始" description="向导包一键安装（对标 MCSM QuickStart / AppPackages）">
-    <FaButton variant="outline" @click="router.push('/platform/plugins/mcpanel/admin/market')">
+  <YdPageHeader title="快速开始" description="向导包一键安装（对标 MCSM QuickStart / AppPackages）">
+    <YdButton variant="outline" @click="router.push('/platform/plugins/mcpanel/admin/market')">
       应用市场
-    </FaButton>
-    <FaButton @click="router.push('/platform/plugins/mcpanel/admin/instances/create')">
+    </YdButton>
+    <YdButton @click="router.push('/platform/plugins/mcpanel/admin/instances/create')">
       完整向导
-    </FaButton>
-  </FaPageHeader>
-  <FaPageMain v-loading="loading">
-    <FaAlert v-if="error" variant="destructive" class="mb-4">
+    </YdButton>
+  </YdPageHeader>
+  <YdLoadingOverlay :loading="loading"><YdPageMain >
+    <YdAlert v-if="error" variant="destructive" class="mb-4">
   <template #description>
       {{ error }}
   </template>
-    </FaAlert>
+    </YdAlert>
 
-    <FaCard :title="step === 0 ? '① 选择安装包' : `① 已选：${String(selectedPkg?.name || '')}`">
+    <YdCard :title="step === 0 ? '① 选择安装包' : `① 已选：${String(selectedPkg?.name || '')}`">
       <div v-if="!packages.length" class="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
         暂无向导包，请在下方维护目录
       </div>
       <div v-else class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        <button
+        <YdAction
           v-for="pkg in packages"
           :key="String(pkg.id)"
           type="button"
@@ -311,11 +312,11 @@ onMounted(() => {
           <div class="mt-1 text-xs text-muted-foreground">
             {{ pkg.note || `${pkg.memoryMb}MB / ${pkg.cpuMillis}mCPU` }}
           </div>
-        </button>
+        </YdAction>
       </div>
-    </FaCard>
+    </YdCard>
 
-    <FaCard v-if="selectedPkg" title="② 节点与资源" class="mt-4">
+    <YdCard v-if="selectedPkg" title="② 节点与资源" class="mt-4">
       <div class="grid gap-4">
         <div class="grid gap-2">
           <span class="text-sm font-medium">目标节点</span>
@@ -332,44 +333,44 @@ onMounted(() => {
         </div>
         <label class="grid gap-2">
           <span class="text-sm font-medium">实例名称</span>
-          <FaInput v-model="form.name" class="w-full" />
+          <YdInput v-model="form.name" class="w-full" />
         </label>
         <div class="grid gap-4 sm:grid-cols-3">
           <label class="grid gap-2">
             <span class="text-sm font-medium">内存 MB</span>
-            <FaInput v-model="form.memoryMb" type="number" class="w-full" />
+            <YdInput v-model="form.memoryMb" type="number" class="w-full" />
           </label>
           <label class="grid gap-2">
             <span class="text-sm font-medium">CPU mCPU</span>
-            <FaInput v-model="form.cpuMillis" type="number" class="w-full" />
+            <YdInput v-model="form.cpuMillis" type="number" class="w-full" />
           </label>
           <label class="grid gap-2">
             <span class="text-sm font-medium">磁盘 MB</span>
-            <FaInput v-model="form.diskMb" type="number" class="w-full" />
+            <YdInput v-model="form.diskMb" type="number" class="w-full" />
           </label>
         </div>
         <div class="flex items-center gap-2">
-          <FaButton v-if="canManage" :loading="installing" :disabled="!form.nodeId" @click="install()">
+          <YdButton v-if="canManage" :loading="installing" :disabled="!form.nodeId" @click="install()">
             ③ 开始安装
-          </FaButton>
-          <FaButton variant="outline" @click="step = 0; selectedPkg = null">
+          </YdButton>
+          <YdButton variant="outline" @click="step = 0; selectedPkg = null">
             重新选包
-          </FaButton>
+          </YdButton>
         </div>
       </div>
-    </FaCard>
+    </YdCard>
 
-    <FaCard title="快速开始包目录" description="管理员维护向导包；内置常见核心预设" class="mt-4">
+    <YdCard title="快速开始包目录" description="管理员维护向导包；内置常见核心预设" class="mt-4">
       <div class="mb-3 flex items-center gap-2">
-        <FaButton v-if="canManage" size="sm" @click="openCatalogCreate">
+        <YdButton v-if="canManage" size="sm" @click="openCatalogCreate">
           新增包
-        </FaButton>
-        <FaButton size="sm" variant="outline" @click="loadCatalog">
+        </YdButton>
+        <YdButton size="sm" variant="outline" @click="loadCatalog">
           刷新目录
-        </FaButton>
+        </YdButton>
       </div>
-      <FaResponsiveTable
-        v-loading="catalogLoading"
+      <YdLoadingOverlay :loading="catalogLoading"><YdResponsiveTable
+
         :columns="catalogColumns"
         :data="catalogRows"
         row-key="id"
@@ -380,12 +381,12 @@ onMounted(() => {
         empty-text="暂无包，点击新增"
       >
         <template #cell-operation="{ row }">
-          <FaButton v-if="canDelete" size="sm" variant="destructive" @click="confirmCatalogDelete(row.original)">
+          <YdButton v-if="canDelete" size="sm" variant="destructive" @click="confirmCatalogDelete(row.original)">
             删除
-          </FaButton>
+          </YdButton>
         </template>
         <template #card="{ row }">
-          <FaCard class="w-full">
+          <YdCard class="w-full">
             <div class="flex flex-col gap-3">
               <div class="flex items-center justify-between gap-2">
                 <span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span>
@@ -409,17 +410,17 @@ onMounted(() => {
                 </div>
               </div>
               <div v-if="canDelete" class="flex flex-wrap gap-2 border-t pt-3">
-                <FaButton size="sm" variant="destructive" @click="confirmCatalogDelete(row)">
+                <YdButton size="sm" variant="destructive" @click="confirmCatalogDelete(row)">
                   删除
-                </FaButton>
+                </YdButton>
               </div>
             </div>
-          </FaCard>
+          </YdCard>
         </template>
-      </FaResponsiveTable>
-    </FaCard>
+      </YdResponsiveTable></YdLoadingOverlay>
+    </YdCard>
 
-    <FaModal
+    <YdModal
       v-model="formOpen"
       title="新增快速开始包"
       :show-cancel-button="true"
@@ -436,20 +437,20 @@ onMounted(() => {
       }"
     >
       <div class="grid gap-4">
-        <label class="grid gap-2"><span class="text-sm font-medium">名称</span><FaInput v-model="catalogForm.name" class="w-full" /></label>
+        <label class="grid gap-2"><span class="text-sm font-medium">名称</span><YdInput v-model="catalogForm.name" class="w-full" /></label>
         <div class="grid gap-4 sm:grid-cols-2">
-          <label class="grid gap-2"><span class="text-sm font-medium">核心</span><FaSelect v-model="catalogForm.kind" :options="KIND_OPTIONS" class="w-full" /></label>
-          <label class="grid gap-2"><span class="text-sm font-medium">MC 版本</span><FaInput v-model="catalogForm.mcVersion" class="w-full" /></label>
-          <label class="grid gap-2"><span class="text-sm font-medium">Java 镜像目录 ID</span><FaSelect v-model="catalogForm.javaImageId" :options="JAVA_OPTIONS" class="w-full" /></label>
-          <label class="grid gap-2"><span class="text-sm font-medium">默认内存 MB</span><FaInput v-model="catalogForm.memoryMb" type="number" class="w-full" /></label>
+          <label class="grid gap-2"><span class="text-sm font-medium">核心</span><YdSelect v-model="catalogForm.kind" :options="KIND_OPTIONS" class="w-full" /></label>
+          <label class="grid gap-2"><span class="text-sm font-medium">MC 版本</span><YdInput v-model="catalogForm.mcVersion" class="w-full" /></label>
+          <label class="grid gap-2"><span class="text-sm font-medium">Java 镜像目录 ID</span><YdSelect v-model="catalogForm.javaImageId" :options="JAVA_OPTIONS" class="w-full" /></label>
+          <label class="grid gap-2"><span class="text-sm font-medium">默认内存 MB</span><YdInput v-model="catalogForm.memoryMb" type="number" class="w-full" /></label>
         </div>
-        <label class="grid gap-2"><span class="text-sm font-medium">说明</span><FaInput v-model="catalogForm.note" class="w-full" /></label>
-        <FaAlert v-if="catalogError" variant="destructive">
+        <label class="grid gap-2"><span class="text-sm font-medium">说明</span><YdInput v-model="catalogForm.note" class="w-full" /></label>
+        <YdAlert v-if="catalogError" variant="destructive">
   <template #description>
           {{ catalogError }}
   </template>
-        </FaAlert>
+        </YdAlert>
       </div>
-    </FaModal>
-  </FaPageMain>
+    </YdModal>
+  </YdPageMain></YdLoadingOverlay>
 </template>

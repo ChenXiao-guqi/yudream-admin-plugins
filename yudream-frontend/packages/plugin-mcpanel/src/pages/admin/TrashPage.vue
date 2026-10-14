@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { TableColumn } from '@yudream/components'
-import { FaButton, FaCard, FaIcon, FaInput, FaModal, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable, FaSearchBar, FaTag, FaTooltip, useFaModal, useFaToast } from '@yudream/components'
+import { YdButton, YdCard, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdTag, YdTooltip, useYdModal, useYdToast } from '@yudream/components'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { createMcPanelExtra } from '../../api/api-extra'
 import { createNodeOpsApi } from '../../api/node-ops-api'
@@ -18,8 +19,8 @@ const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 
 const extra = createMcPanelExtra(props.sdk)
 const nodeOps = createNodeOpsApi(props.sdk)
-const toast = useFaToast()
-const modal = useFaModal()
+const toast = useYdToast()
+const modal = useYdModal()
 const download = useChunkedDownload()
 
 const canManage = computed(() => accountHasPermission(props.sdk.account, MCPANEL_PERMISSION.manage))
@@ -230,30 +231,30 @@ onMounted(() => {
 </script>
 
 <template>
-  <FaPageHeader title="回收站" description="已删除实例的数据目录：保留期内可找回或下载，超过节点保留期后自动清除">
-    <FaButton variant="outline" @click="() => load()">
-      <FaIcon name="i-ri:refresh-line" />
+  <YdPageHeader title="回收站" description="已删除实例的数据目录：保留期内可找回或下载，超过节点保留期后自动清除">
+    <YdButton variant="outline" @click="() => load()">
+      <YdIcon name="i-ri:refresh-line" />
       刷新
-    </FaButton>
-  </FaPageHeader>
+    </YdButton>
+  </YdPageHeader>
 
-  <FaPageMain>
-    <FaSearchBar class="mcp-page-gap">
+  <YdPageMain>
+    <YdSearchBar class="mcp-page-gap">
       <div class="flex flex-wrap items-center gap-2">
-        <FaInput v-model="keyword" clearable placeholder="搜索实例名 / 节点 / ID" class="w-64" @keyup.enter="search" />
-        <FaButton @click="search">
-          <FaIcon name="i-ri:search-line" />
+        <YdInput v-model="keyword" clearable placeholder="搜索实例名 / 节点 / ID" class="w-64" @keyup.enter="search" />
+        <YdButton @click="search">
+          <YdIcon name="i-ri:search-line" />
           查询
-        </FaButton>
+        </YdButton>
         <span class="text-muted-foreground text-xs">
           保留期由节点配置 trash.retentionDays 控制（默认 14 天，0=永久保留），到期后节点自动永久清除。
         </span>
       </div>
-    </FaSearchBar>
+    </YdSearchBar>
 
-    <FaResponsiveTable
+    <YdLoadingOverlay :loading="loading"><YdResponsiveTable
       class="mcp-page-gap"
-      v-loading="loading"
+
       :columns="columns"
       :data="rows"
       row-key="trashId"
@@ -289,9 +290,9 @@ onMounted(() => {
         </div>
       </template>
       <template #cell-status="{ row }">
-        <FaTag :variant="statusTagVariant(row.original)">
+        <YdTag :variant="statusTagVariant(row.original)">
           {{ dirStatusText(row.original) }}
-        </FaTag>
+        </YdTag>
       </template>
       <template #cell-retention="{ row }">
         <span v-if="typeof row.original.retentionDays === 'number'">
@@ -301,8 +302,8 @@ onMounted(() => {
       </template>
       <template #cell-operation="{ row }">
         <div class="mcp-op-cell">
-          <FaTooltip text="以原规格重建实例（名称可改）">
-            <FaButton
+          <YdTooltip text="以原规格重建实例（名称可改）">
+            <YdButton
               v-if="canManage"
               size="sm"
               variant="outline"
@@ -310,40 +311,40 @@ onMounted(() => {
               @click="openRestore(row.original)"
             >
               找回
-            </FaButton>
-          </FaTooltip>
-          <FaTooltip text="打包为 zip 下载（大目录打包可能较慢）">
-            <FaButton
+            </YdButton>
+          </YdTooltip>
+          <YdTooltip text="打包为 zip 下载（大目录打包可能较慢）">
+            <YdButton
               v-if="canManage"
               size="icon-sm"
               variant="outline"
               :disabled="!nodeReady(row.original) || row.original.dirPresent === false || download.active.value"
               @click="downloadRow(row.original)"
             >
-              <FaIcon name="i-ri:download-2-line" />
-            </FaButton>
-          </FaTooltip>
-          <FaTooltip text="立即永久删除（不可恢复）">
-            <FaButton
+              <YdIcon name="i-ri:download-2-line" />
+            </YdButton>
+          </YdTooltip>
+          <YdTooltip text="立即永久删除（不可恢复）">
+            <YdButton
               v-if="canDelete"
               size="icon-sm"
               variant="destructive"
               :disabled="!nodeReady(row.original)"
               @click="confirmRemove(row.original)"
             >
-              <FaIcon name="i-ri:delete-bin-line" />
-            </FaButton>
-          </FaTooltip>
+              <YdIcon name="i-ri:delete-bin-line" />
+            </YdButton>
+          </YdTooltip>
         </div>
       </template>
       <template #card="{ row }">
-        <FaCard class="w-full">
+        <YdCard class="w-full">
           <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between gap-2">
               <span class="min-w-0 break-words text-base font-semibold">{{ row.instanceName }}</span>
-              <FaTag :variant="statusTagVariant(row)">
+              <YdTag :variant="statusTagVariant(row)">
                 {{ dirStatusText(row) }}
-              </FaTag>
+              </YdTag>
             </div>
             <div class="flex flex-col gap-1 text-sm">
               <div v-if="row.remark" class="flex gap-2">
@@ -368,7 +369,7 @@ onMounted(() => {
               </div>
             </div>
             <div class="flex flex-wrap gap-2 border-t pt-3">
-              <FaButton
+              <YdButton
                 v-if="canManage"
                 size="sm"
                 variant="outline"
@@ -376,8 +377,8 @@ onMounted(() => {
                 @click="openRestore(row)"
               >
                 找回
-              </FaButton>
-              <FaButton
+              </YdButton>
+              <YdButton
                 v-if="canManage"
                 size="sm"
                 variant="outline"
@@ -385,8 +386,8 @@ onMounted(() => {
                 @click="downloadRow(row)"
               >
                 下载
-              </FaButton>
-              <FaButton
+              </YdButton>
+              <YdButton
                 v-if="canDelete"
                 size="sm"
                 variant="destructive"
@@ -394,14 +395,14 @@ onMounted(() => {
                 @click="confirmRemove(row)"
               >
                 删除
-              </FaButton>
+              </YdButton>
             </div>
           </div>
-        </FaCard>
+        </YdCard>
       </template>
-    </FaResponsiveTable>
+    </YdResponsiveTable></YdLoadingOverlay>
 
-    <FaPagination
+    <YdPagination
       v-model:page="pager.page"
       v-model:size="pager.size"
       :total="pager.total"
@@ -410,7 +411,7 @@ onMounted(() => {
       @size-change="() => { pager.page = 1; load() }"
     />
 
-    <FaModal
+    <YdModal
       v-model="restoreOpen"
       title="从回收站找回实例"
       :show-cancel-button="true"
@@ -425,10 +426,10 @@ onMounted(() => {
         </p>
         <label class="flex flex-col gap-1">
           <span class="text-sm">实例名称</span>
-          <FaInput v-model="restoreName" clearable class="w-full" />
+          <YdInput v-model="restoreName" clearable class="w-full" />
         </label>
         <p v-if="restoreError" class="text-destructive text-xs">{{ restoreError }}</p>
       </div>
-    </FaModal>
-  </FaPageMain>
+    </YdModal>
+  </YdPageMain>
 </template>

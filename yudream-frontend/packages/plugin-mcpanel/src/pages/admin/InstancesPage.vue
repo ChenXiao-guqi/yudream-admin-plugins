@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { TableColumn } from '@yudream/components'
 import type { McpNode, McpNodeContainerStat } from '../../types'
-import { FaButton, FaButtonGroup, FaCard, FaCheckbox, FaIcon, FaInput, FaModal, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable, FaSearchBar, FaSelect, FaTag, FaTooltip, useFaModal, useFaToast } from '@yudream/components'
+import { YdAction, YdButton, YdButtonGroup, YdCard, YdCheckbox, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdSelect, YdTag, YdTooltip, useYdModal, useYdToast } from '@yudream/components'
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { createMcPanelApi } from '../../api/mcpanel-api'
@@ -12,14 +13,14 @@ import { errorMessage, formatMib, toNumberOr } from '../../composables/utils'
 import InstanceFormModal from '../../components/InstanceFormModal.vue'
 import MetricTrendChart from '../../components/MetricTrendChart.vue'
 
-/** 实例列表：标准 FaTable 管理页（选择列批量操作 + 筛选 + 服务端分页），
+/** 实例列表：标准 YdTable 管理页（选择列批量操作 + 筛选 + 服务端分页），
  * 并提供卡片视图（实时 CPU/内存趋势 + 图标操作）。 */
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 
 const api = createMcPanelApi(props.sdk)
 const extra = createMcPanelExtra(props.sdk)
-const toast = useFaToast()
-const modal = useFaModal()
+const toast = useYdToast()
+const modal = useYdModal()
 const router = useRouter()
 
 const canUse = computed(() => accountHasPermission(props.sdk.account, MCPANEL_PERMISSION.use))
@@ -62,7 +63,7 @@ const selectedIds = ref<string[]>([])
 const batchLoading = ref(false)
 const formOpen = ref(false)
 const editing = ref<Record<string, unknown> | null>(null)
-/** FaTable 暴露 TanStack table 实例，用于批量操作后重置选择状态。 */
+/** YdTable 暴露 TanStack table 实例，用于批量操作后重置选择状态。 */
 const tableRef = ref<{ table?: { resetRowSelection: () => void } } | null>(null)
 
 /** 视图模式：表格（默认）/ 卡片；卡片带实时资源趋势。 */
@@ -426,47 +427,47 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <FaPageHeader title="应用实例" description="Minecraft 服务器实例的生命周期与批量管理">
-    <FaButtonGroup class="mr-1">
-      <FaTooltip text="表格视图">
-        <FaButton size="sm" :variant="viewMode === 'table' ? 'default' : 'outline'" @click="viewMode = 'table'">
-          <FaIcon name="i-ri:table-line" />
-        </FaButton>
-      </FaTooltip>
-      <FaTooltip text="卡片视图（实时监控）">
-        <FaButton size="sm" :variant="viewMode === 'card' ? 'default' : 'outline'" @click="viewMode = 'card'">
-          <FaIcon name="i-ri:layout-grid-line" />
-        </FaButton>
-      </FaTooltip>
-    </FaButtonGroup>
-    <FaButton v-if="canManage" @click="openCreate">
-      <FaIcon name="i-ri:magic-line" />
+  <YdPageHeader title="应用实例" description="Minecraft 服务器实例的生命周期与批量管理">
+    <YdButtonGroup class="mr-1">
+      <YdTooltip text="表格视图">
+        <YdButton size="sm" :variant="viewMode === 'table' ? 'default' : 'outline'" @click="viewMode = 'table'">
+          <YdIcon name="i-ri:table-line" />
+        </YdButton>
+      </YdTooltip>
+      <YdTooltip text="卡片视图（实时监控）">
+        <YdButton size="sm" :variant="viewMode === 'card' ? 'default' : 'outline'" @click="viewMode = 'card'">
+          <YdIcon name="i-ri:layout-grid-line" />
+        </YdButton>
+      </YdTooltip>
+    </YdButtonGroup>
+    <YdButton v-if="canManage" @click="openCreate">
+      <YdIcon name="i-ri:magic-line" />
       创建服务器
-    </FaButton>
-    <FaButton variant="outline" @click="router.push('/platform/plugins/mcpanel/admin/market')">
+    </YdButton>
+    <YdButton variant="outline" @click="router.push('/platform/plugins/mcpanel/admin/market')">
       应用市场
-    </FaButton>
-    <FaButton variant="outline" @click="router.push('/platform/plugins/mcpanel/admin/quickstart')">
+    </YdButton>
+    <YdButton variant="outline" @click="router.push('/platform/plugins/mcpanel/admin/quickstart')">
       快速开始
-    </FaButton>
-  </FaPageHeader>
+    </YdButton>
+  </YdPageHeader>
 
-  <FaPageMain>
+  <YdPageMain>
     <!-- 卡片视图：实时资源 + 迷你趋势 + 图标操作 -->
-    <div v-if="viewMode === 'card'" v-loading="loading">
+    <YdLoadingOverlay :loading="loading" v-if="viewMode === 'card'"><div  >
       <div v-if="!rows.length" class="mcp-empty-hint">
         暂无实例，可通过「创建服务器」「应用市场」或「快速开始」安装
       </div>
       <div v-else class="mcp-card-grid">
         <div v-for="row in rows" :key="String(row.id)" class="mcp-card">
           <div class="mcp-card-head">
-            <button type="button" class="mcp-card-title" :title="String(row.name ?? '')" @click="openDetail(row)">
+            <YdAction type="button" class="mcp-card-title" :title="String(row.name ?? '')" @click="openDetail(row)">
               {{ row.name || '未命名实例' }}
-            </button>
+            </YdAction>
             <span class="mcp-spacer" />
-            <FaTag :variant="stateTagVariant(row)">
+            <YdTag :variant="stateTagVariant(row)">
               {{ stateLabel(row) }}
-            </FaTag>
+            </YdTag>
           </div>
           <div class="mcp-card-sub" :title="String(row.image ?? '')">
             {{ row.image || '-' }}
@@ -495,48 +496,48 @@ onBeforeUnmount(() => {
             </div>
           </div>
           <div class="mcp-card-ops">
-            <FaTooltip text="详情">
-              <FaButton size="icon-sm" variant="ghost" @click="openDetail(row)">
-                <FaIcon name="i-ri:eye-line" />
-              </FaButton>
-            </FaTooltip>
+            <YdTooltip text="详情">
+              <YdButton size="icon-sm" variant="ghost" @click="openDetail(row)">
+                <YdIcon name="i-ri:eye-line" />
+              </YdButton>
+            </YdTooltip>
             <template v-if="canUse">
-              <FaTooltip v-if="stateOf(row) !== 'running'" text="启动">
-                <FaButton size="icon-sm" variant="ghost" :disabled="actingId === String(row.id)" @click="act(row, 'start')">
-                  <FaIcon name="i-ri:play-line" />
-                </FaButton>
-              </FaTooltip>
-              <FaTooltip v-else text="停止">
-                <FaButton size="icon-sm" variant="ghost" :disabled="actingId === String(row.id)" @click="act(row, 'stop')">
-                  <FaIcon name="i-ri:stop-line" />
-                </FaButton>
-              </FaTooltip>
-              <FaTooltip text="重启">
-                <FaButton size="icon-sm" variant="ghost" :disabled="actingId === String(row.id)" @click="act(row, 'restart')">
-                  <FaIcon name="i-ri:restart-line" />
-                </FaButton>
-              </FaTooltip>
-              <FaTooltip text="强杀">
-                <FaButton size="icon-sm" variant="ghost" class="text-destructive" :disabled="actingId === String(row.id)" @click="act(row, 'kill')">
-                  <FaIcon name="i-ri:close-circle-line" />
-                </FaButton>
-              </FaTooltip>
+              <YdTooltip v-if="stateOf(row) !== 'running'" text="启动">
+                <YdButton size="icon-sm" variant="ghost" :disabled="actingId === String(row.id)" @click="act(row, 'start')">
+                  <YdIcon name="i-ri:play-line" />
+                </YdButton>
+              </YdTooltip>
+              <YdTooltip v-else text="停止">
+                <YdButton size="icon-sm" variant="ghost" :disabled="actingId === String(row.id)" @click="act(row, 'stop')">
+                  <YdIcon name="i-ri:stop-line" />
+                </YdButton>
+              </YdTooltip>
+              <YdTooltip text="重启">
+                <YdButton size="icon-sm" variant="ghost" :disabled="actingId === String(row.id)" @click="act(row, 'restart')">
+                  <YdIcon name="i-ri:restart-line" />
+                </YdButton>
+              </YdTooltip>
+              <YdTooltip text="强杀">
+                <YdButton size="icon-sm" variant="ghost" class="text-destructive" :disabled="actingId === String(row.id)" @click="act(row, 'kill')">
+                  <YdIcon name="i-ri:close-circle-line" />
+                </YdButton>
+              </YdTooltip>
             </template>
-            <FaTooltip v-if="canManage" text="编辑">
-              <FaButton size="icon-sm" variant="ghost" @click="editing = row; formOpen = true">
-                <FaIcon name="i-ri:edit-line" />
-              </FaButton>
-            </FaTooltip>
-            <FaTooltip v-if="canDelete" text="删除">
-              <FaButton size="icon-sm" variant="ghost" class="text-destructive" @click="confirmDelete(row)">
-                <FaIcon name="i-ri:delete-bin-line" />
-              </FaButton>
-            </FaTooltip>
+            <YdTooltip v-if="canManage" text="编辑">
+              <YdButton size="icon-sm" variant="ghost" @click="editing = row; formOpen = true">
+                <YdIcon name="i-ri:edit-line" />
+              </YdButton>
+            </YdTooltip>
+            <YdTooltip v-if="canDelete" text="删除">
+              <YdButton size="icon-sm" variant="ghost" class="text-destructive" @click="confirmDelete(row)">
+                <YdIcon name="i-ri:delete-bin-line" />
+              </YdButton>
+            </YdTooltip>
           </div>
         </div>
       </div>
 
-      <FaPagination
+      <YdPagination
         v-model:page="pager.page"
         v-model:size="pager.size"
         :total="pager.total"
@@ -544,13 +545,13 @@ onBeforeUnmount(() => {
         @page-change="() => load()"
         @size-change="() => { pager.page = 1; load() }"
       />
-    </div>
+    </div></YdLoadingOverlay>
 
-    <!-- 表格视图：标准 FaTable 管理页 -->
+    <!-- 表格视图：标准 YdTable 管理页 -->
     <template v-else>
-      <FaResponsiveTable
+      <YdLoadingOverlay :loading="loading"><YdResponsiveTable
         ref="tableRef"
-        v-loading="loading"
+
         :columns="columns"
         :data="rows"
         row-key="id"
@@ -566,57 +567,57 @@ onBeforeUnmount(() => {
       >
         <template #toolbar>
           <div class="flex w-full flex-col gap-2">
-            <FaSearchBar :show-toggle="false" class="w-full">
+            <YdSearchBar :show-toggle="false" class="w-full">
               <div class="grid w-full gap-2 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_160px_200px_auto]">
-                <FaInput v-model="filters.keyword" clearable placeholder="实例名 / 备注" class="w-full" @keydown.enter="search" @clear="search" />
-                <FaSelect v-model="filters.status" :options="STATUS_OPTIONS" class="w-full" @change="search" />
-                <FaSelect v-model="filters.nodeId" :options="nodeOptions" class="w-full" @change="search" />
+                <YdInput v-model="filters.keyword" clearable placeholder="实例名 / 备注" class="w-full" @keydown.enter="search" @clear="search" />
+                <YdSelect v-model="filters.status" :options="STATUS_OPTIONS" class="w-full" @change="search" />
+                <YdSelect v-model="filters.nodeId" :options="nodeOptions" class="w-full" @change="search" />
                 <div class="flex items-center justify-end gap-2">
-                  <FaButton variant="outline" @click="resetFilters">
+                  <YdButton variant="outline" @click="resetFilters">
                     重置
-                  </FaButton>
-                  <FaButton @click="search">
-                    <FaIcon name="i-ri:search-line" />
+                  </YdButton>
+                  <YdButton @click="search">
+                    <YdIcon name="i-ri:search-line" />
                     查询
-                  </FaButton>
+                  </YdButton>
                 </div>
               </div>
-            </FaSearchBar>
+            </YdSearchBar>
             <div v-if="selectedIds.length" class="flex flex-wrap items-center gap-2 rounded-md border border-dashed px-3 py-2">
               <span class="text-sm text-muted-foreground">已选 {{ selectedIds.length }} 个实例</span>
-              <FaButton v-if="canUse" size="sm" variant="outline" :disabled="batchLoading" @click="batchAction('start')">
+              <YdButton v-if="canUse" size="sm" variant="outline" :disabled="batchLoading" @click="batchAction('start')">
                 批量启动
-              </FaButton>
-              <FaButton v-if="canUse" size="sm" variant="outline" :disabled="batchLoading" @click="batchAction('stop')">
+              </YdButton>
+              <YdButton v-if="canUse" size="sm" variant="outline" :disabled="batchLoading" @click="batchAction('stop')">
                 批量停止
-              </FaButton>
-              <FaButton v-if="canUse" size="sm" variant="outline" :disabled="batchLoading" @click="batchAction('restart')">
+              </YdButton>
+              <YdButton v-if="canUse" size="sm" variant="outline" :disabled="batchLoading" @click="batchAction('restart')">
                 批量重启
-              </FaButton>
-              <FaButton v-if="canUse" size="sm" variant="destructive" :disabled="batchLoading" @click="batchAction('kill')">
+              </YdButton>
+              <YdButton v-if="canUse" size="sm" variant="destructive" :disabled="batchLoading" @click="batchAction('kill')">
                 批量强杀
-              </FaButton>
-              <FaButton size="sm" variant="ghost" @click="clearSelection">
+              </YdButton>
+              <YdButton size="sm" variant="ghost" @click="clearSelection">
                 取消选择
-              </FaButton>
+              </YdButton>
             </div>
           </div>
         </template>
 
         <template #cell-name="{ row }">
           <div class="flex min-w-0 flex-col">
-            <span class="cursor-pointer truncate font-medium text-primary hover:underline" @click="openDetail(row.original)">
+            <YdAction type="button" class="truncate font-medium text-primary hover:underline" @click="openDetail(row.original)">
               {{ row.original.name || '未命名实例' }}
-            </span>
+            </YdAction>
             <span class="truncate text-xs text-muted-foreground">
               {{ nodeNameMap.get(String(row.original.nodeId)) || row.original.nodeId || '-' }}
             </span>
           </div>
         </template>
         <template #cell-state="{ row }">
-          <FaTag :variant="stateTagVariant(row.original)">
+          <YdTag :variant="stateTagVariant(row.original)">
             {{ stateLabel(row.original) }}
-          </FaTag>
+          </YdTag>
         </template>
         <template #cell-kind="{ row }">
           {{ KIND_LABEL[String(row.original.kind)] || row.original.kind || '-' }}
@@ -628,7 +629,7 @@ onBeforeUnmount(() => {
             class="inline-flex items-center gap-1 text-primary hover:underline"
             :title="`所属代理 ${proxyOf(row.original)?.proxyName ?? ''}（子服 ${proxyOf(row.original)?.serverName ?? ''}）`"
           >
-            <FaIcon name="i-ri:link" />
+            <YdIcon name="i-ri:link" />
             子服 · {{ proxyOf(row.original)?.proxyName || '代理' }}
           </router-link>
           <router-link
@@ -637,7 +638,7 @@ onBeforeUnmount(() => {
             class="inline-flex items-center gap-1 text-primary hover:underline"
             :title="`代理子服：${proxyChildrenOf(row.original).map(child => String(child.serverName ?? '')).filter(Boolean).join('、')}`"
           >
-            <FaIcon name="i-ri:shuffle-line" />
+            <YdIcon name="i-ri:shuffle-line" />
             代理 · {{ proxyChildrenOf(row.original).length }} 子服
           </router-link>
           <span v-else class="text-muted-foreground">-</span>
@@ -653,53 +654,53 @@ onBeforeUnmount(() => {
         </template>
         <template #cell-operation="{ row }">
           <div class="mcp-op-cell">
-            <FaTooltip text="详情">
-              <FaButton size="icon-sm" variant="outline" @click="openDetail(row.original)">
-                <FaIcon name="i-ri:eye-line" />
-              </FaButton>
-            </FaTooltip>
+            <YdTooltip text="详情">
+              <YdButton size="icon-sm" variant="outline" @click="openDetail(row.original)">
+                <YdIcon name="i-ri:eye-line" />
+              </YdButton>
+            </YdTooltip>
             <template v-if="canUse">
-              <FaTooltip v-if="stateOf(row.original) !== 'running'" text="启动">
-                <FaButton size="icon-sm" variant="outline" :disabled="actingId === String(row.original.id)" @click="act(row.original, 'start')">
-                  <FaIcon name="i-ri:play-line" />
-                </FaButton>
-              </FaTooltip>
-              <FaTooltip v-else text="停止">
-                <FaButton size="icon-sm" variant="outline" :disabled="actingId === String(row.original.id)" @click="act(row.original, 'stop')">
-                  <FaIcon name="i-ri:stop-line" />
-                </FaButton>
-              </FaTooltip>
-              <FaTooltip text="重启">
-                <FaButton size="icon-sm" variant="outline" :disabled="actingId === String(row.original.id)" @click="act(row.original, 'restart')">
-                  <FaIcon name="i-ri:restart-line" />
-                </FaButton>
-              </FaTooltip>
-              <FaTooltip text="强杀">
-                <FaButton size="icon-sm" variant="outline" class="text-destructive" :disabled="actingId === String(row.original.id)" @click="act(row.original, 'kill')">
-                  <FaIcon name="i-ri:close-circle-line" />
-                </FaButton>
-              </FaTooltip>
+              <YdTooltip v-if="stateOf(row.original) !== 'running'" text="启动">
+                <YdButton size="icon-sm" variant="outline" :disabled="actingId === String(row.original.id)" @click="act(row.original, 'start')">
+                  <YdIcon name="i-ri:play-line" />
+                </YdButton>
+              </YdTooltip>
+              <YdTooltip v-else text="停止">
+                <YdButton size="icon-sm" variant="outline" :disabled="actingId === String(row.original.id)" @click="act(row.original, 'stop')">
+                  <YdIcon name="i-ri:stop-line" />
+                </YdButton>
+              </YdTooltip>
+              <YdTooltip text="重启">
+                <YdButton size="icon-sm" variant="outline" :disabled="actingId === String(row.original.id)" @click="act(row.original, 'restart')">
+                  <YdIcon name="i-ri:restart-line" />
+                </YdButton>
+              </YdTooltip>
+              <YdTooltip text="强杀">
+                <YdButton size="icon-sm" variant="outline" class="text-destructive" :disabled="actingId === String(row.original.id)" @click="act(row.original, 'kill')">
+                  <YdIcon name="i-ri:close-circle-line" />
+                </YdButton>
+              </YdTooltip>
             </template>
-            <FaTooltip v-if="canManage" text="编辑">
-              <FaButton size="icon-sm" variant="outline" @click="editing = row.original; formOpen = true">
-                <FaIcon name="i-ri:edit-line" />
-              </FaButton>
-            </FaTooltip>
-            <FaTooltip v-if="canDelete" text="删除">
-              <FaButton size="icon-sm" variant="destructive" @click="confirmDelete(row.original)">
-                <FaIcon name="i-ri:delete-bin-line" />
-              </FaButton>
-            </FaTooltip>
+            <YdTooltip v-if="canManage" text="编辑">
+              <YdButton size="icon-sm" variant="outline" @click="editing = row.original; formOpen = true">
+                <YdIcon name="i-ri:edit-line" />
+              </YdButton>
+            </YdTooltip>
+            <YdTooltip v-if="canDelete" text="删除">
+              <YdButton size="icon-sm" variant="destructive" @click="confirmDelete(row.original)">
+                <YdIcon name="i-ri:delete-bin-line" />
+              </YdButton>
+            </YdTooltip>
           </div>
         </template>
         <template #card="{ row }">
-          <FaCard class="w-full">
+          <YdCard class="w-full">
             <div class="flex flex-col gap-3">
               <div class="flex items-center justify-between gap-2">
                 <span class="min-w-0 break-words text-base font-semibold">{{ row.name || '未命名实例' }}</span>
-                <FaTag :variant="stateTagVariant(row)">
+                <YdTag :variant="stateTagVariant(row)">
                   {{ stateLabel(row) }}
-                </FaTag>
+                </YdTag>
               </div>
               <div class="flex flex-col gap-1 text-sm">
                 <div class="flex gap-2">
@@ -724,36 +725,36 @@ onBeforeUnmount(() => {
                 </div>
               </div>
               <div class="flex flex-wrap gap-2 border-t pt-3">
-                <FaButton size="sm" variant="outline" @click="openDetail(row)">
+                <YdButton size="sm" variant="outline" @click="openDetail(row)">
                   详情
-                </FaButton>
+                </YdButton>
                 <template v-if="canUse">
-                  <FaButton v-if="stateOf(row) !== 'running'" size="sm" variant="outline" :disabled="actingId === String(row.id)" @click="act(row, 'start')">
+                  <YdButton v-if="stateOf(row) !== 'running'" size="sm" variant="outline" :disabled="actingId === String(row.id)" @click="act(row, 'start')">
                     启动
-                  </FaButton>
-                  <FaButton v-else size="sm" variant="outline" :disabled="actingId === String(row.id)" @click="act(row, 'stop')">
+                  </YdButton>
+                  <YdButton v-else size="sm" variant="outline" :disabled="actingId === String(row.id)" @click="act(row, 'stop')">
                     停止
-                  </FaButton>
-                  <FaButton size="sm" variant="outline" :disabled="actingId === String(row.id)" @click="act(row, 'restart')">
+                  </YdButton>
+                  <YdButton size="sm" variant="outline" :disabled="actingId === String(row.id)" @click="act(row, 'restart')">
                     重启
-                  </FaButton>
-                  <FaButton size="sm" variant="outline" class="text-destructive" :disabled="actingId === String(row.id)" @click="act(row, 'kill')">
+                  </YdButton>
+                  <YdButton size="sm" variant="outline" class="text-destructive" :disabled="actingId === String(row.id)" @click="act(row, 'kill')">
                     强杀
-                  </FaButton>
+                  </YdButton>
                 </template>
-                <FaButton v-if="canManage" size="sm" variant="outline" @click="editing = row; formOpen = true">
+                <YdButton v-if="canManage" size="sm" variant="outline" @click="editing = row; formOpen = true">
                   编辑
-                </FaButton>
-                <FaButton v-if="canDelete" size="sm" variant="destructive" @click="confirmDelete(row)">
+                </YdButton>
+                <YdButton v-if="canDelete" size="sm" variant="destructive" @click="confirmDelete(row)">
                   删除
-                </FaButton>
+                </YdButton>
               </div>
             </div>
-          </FaCard>
+          </YdCard>
         </template>
-      </FaResponsiveTable>
+      </YdResponsiveTable></YdLoadingOverlay>
 
-      <FaPagination
+      <YdPagination
         v-model:page="pager.page"
         v-model:size="pager.size"
         :total="pager.total"
@@ -771,7 +772,7 @@ onBeforeUnmount(() => {
       @saved="() => { toast.success('实例已保存'); load() }"
     />
 
-    <FaModal
+    <YdModal
       v-model="deleteOpen"
       title="删除实例"
       :show-cancel-button="true"
@@ -787,11 +788,11 @@ onBeforeUnmount(() => {
           删除后实例的数据目录将移入节点回收站，保留期内可在
           <b>回收站</b> 页面找回（重建实例）或打包下载；超过节点保留期后自动永久清除。
         </p>
-        <FaCheckbox v-model="deletePurge">
+        <YdCheckbox v-model="deletePurge">
           <span class="text-destructive">跳过回收站，连同数据目录一起永久删除（不可恢复）</span>
-        </FaCheckbox>
+        </YdCheckbox>
         <p v-if="deleteError" class="text-destructive text-xs">{{ deleteError }}</p>
       </div>
-    </FaModal>
-  </FaPageMain>
+    </YdModal>
+  </YdPageMain>
 </template>

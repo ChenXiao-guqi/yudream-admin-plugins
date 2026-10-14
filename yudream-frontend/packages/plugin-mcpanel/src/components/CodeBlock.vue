@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { FaButton, useFaToast } from '@yudream/components'
+import { YdButton, useYdToast } from '@yudream/components'
 import { ref } from 'vue'
 
 /** 可复制命令块：教程页的 shell / 配置片段统一入口，带一键复制与行数自适应。 */
@@ -9,7 +9,7 @@ const props = defineProps<{
   label?: string
 }>()
 
-const toast = useFaToast()
+const toast = useYdToast()
 const copied = ref(false)
 
 async function copy() {
@@ -31,9 +31,9 @@ async function copy() {
   <div class="mcp-code-block">
     <div class="mcp-code-block-head">
       <span class="mcp-code-block-label">{{ label }}</span>
-      <FaButton size="sm" variant="outline" @click="copy">
+      <YdButton size="sm" variant="outline" @click="copy">
         {{ copied ? '已复制' : '复制' }}
-      </FaButton>
+      </YdButton>
     </div>
     <pre class="mcp-code-block-body">{{ code }}</pre>
   </div>
