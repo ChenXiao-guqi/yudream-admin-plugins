@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import {
-  FaIcon,
-  FaInput,
-  FaNumberField,
-  FaSelect,
-  FaSwitch,
-  FaTextarea,
-  FaTooltip,
+  YdIcon,
+  YdInput,
+  YdNumberField,
+  YdSelect,
+  YdSwitch,
+  YdTextarea,
+  YdTooltip,
   YdTablePicker,
   type TableColumn,
   type YdTablePickerQuery,
@@ -135,7 +135,7 @@ const alertGroupOptions = computed(() => {
     <!-- 运行开关 -->
     <section class="rounded-xl border p-5">
       <div class="mb-4 flex items-center gap-2">
-        <FaIcon name="i-lucide:toggle-left" class="text-primary" />
+        <YdIcon name="i-lucide:toggle-left" class="text-primary" />
         <div>
           <h3 class="text-sm font-semibold">运行开关</h3>
           <p class="mt-0.5 text-xs text-muted-foreground">
@@ -150,10 +150,10 @@ const alertGroupOptions = computed(() => {
             <p class="qa-switch-tile__desc">允许群消息触发自动化处理</p>
           </div>
           <div class="qa-switch-tile__controls">
-            <FaTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
-              <FaSwitch :model-value="!isInherited('enabled')" @update:model-value="setOverride('enabled', $event ?? false)" />
-            </FaTooltip>
-            <FaSwitch :model-value="Boolean(valueFor('enabled'))" :disabled="isInherited('enabled')" @update:model-value="update('enabled', $event ?? false)" />
+            <YdTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
+              <YdSwitch :model-value="!isInherited('enabled')" @update:model-value="setOverride('enabled', $event ?? false)" />
+            </YdTooltip>
+            <YdSwitch :model-value="Boolean(valueFor('enabled'))" :disabled="isInherited('enabled')" @update:model-value="update('enabled', $event ?? false)" />
           </div>
         </div>
         <div class="qa-switch-tile">
@@ -162,10 +162,10 @@ const alertGroupOptions = computed(() => {
             <p class="qa-switch-tile__desc">处理抖音和 Bilibili 分享链接</p>
           </div>
           <div class="qa-switch-tile__controls">
-            <FaTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
-              <FaSwitch :model-value="!isInherited('mediaEnabled')" @update:model-value="setOverride('mediaEnabled', $event ?? false)" />
-            </FaTooltip>
-            <FaSwitch :model-value="Boolean(valueFor('mediaEnabled'))" :disabled="isInherited('mediaEnabled')" @update:model-value="update('mediaEnabled', $event ?? false)" />
+            <YdTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
+              <YdSwitch :model-value="!isInherited('mediaEnabled')" @update:model-value="setOverride('mediaEnabled', $event ?? false)" />
+            </YdTooltip>
+            <YdSwitch :model-value="Boolean(valueFor('mediaEnabled'))" :disabled="isInherited('mediaEnabled')" @update:model-value="update('mediaEnabled', $event ?? false)" />
           </div>
         </div>
         <div class="qa-switch-tile">
@@ -174,10 +174,10 @@ const alertGroupOptions = computed(() => {
             <p class="qa-switch-tile__desc">自动审核匹配的入群申请</p>
           </div>
           <div class="qa-switch-tile__controls">
-            <FaTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
-              <FaSwitch :model-value="!isInherited('joinVerificationEnabled')" @update:model-value="setOverride('joinVerificationEnabled', $event ?? false)" />
-            </FaTooltip>
-            <FaSwitch :model-value="Boolean(valueFor('joinVerificationEnabled'))" :disabled="isInherited('joinVerificationEnabled')" @update:model-value="update('joinVerificationEnabled', $event ?? false)" />
+            <YdTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
+              <YdSwitch :model-value="!isInherited('joinVerificationEnabled')" @update:model-value="setOverride('joinVerificationEnabled', $event ?? false)" />
+            </YdTooltip>
+            <YdSwitch :model-value="Boolean(valueFor('joinVerificationEnabled'))" :disabled="isInherited('joinVerificationEnabled')" @update:model-value="update('joinVerificationEnabled', $event ?? false)" />
           </div>
         </div>
         <div class="qa-switch-tile">
@@ -186,10 +186,10 @@ const alertGroupOptions = computed(() => {
             <p class="qa-switch-tile__desc">入群验证规则未命中时再请求 AI</p>
           </div>
           <div class="qa-switch-tile__controls">
-            <FaTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
-              <FaSwitch :model-value="!isInherited('aiFallbackEnabled')" @update:model-value="setOverride('aiFallbackEnabled', $event ?? false)" />
-            </FaTooltip>
-            <FaSwitch :model-value="Boolean(valueFor('aiFallbackEnabled'))" :disabled="isInherited('aiFallbackEnabled')" @update:model-value="update('aiFallbackEnabled', $event ?? false)" />
+            <YdTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
+              <YdSwitch :model-value="!isInherited('aiFallbackEnabled')" @update:model-value="setOverride('aiFallbackEnabled', $event ?? false)" />
+            </YdTooltip>
+            <YdSwitch :model-value="Boolean(valueFor('aiFallbackEnabled'))" :disabled="isInherited('aiFallbackEnabled')" @update:model-value="update('aiFallbackEnabled', $event ?? false)" />
           </div>
         </div>
         <div class="qa-switch-tile qa-switch-tile--wide">
@@ -198,10 +198,10 @@ const alertGroupOptions = computed(() => {
             <p class="qa-switch-tile__desc">累计群消息批量送 AI 审核，按置信度自动禁言并推送告警</p>
           </div>
           <div class="qa-switch-tile__controls">
-            <FaTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
-              <FaSwitch :model-value="!isInherited('riskMonitorEnabled')" @update:model-value="setOverride('riskMonitorEnabled', $event ?? false)" />
-            </FaTooltip>
-            <FaSwitch :model-value="Boolean(valueFor('riskMonitorEnabled'))" :disabled="isInherited('riskMonitorEnabled')" @update:model-value="update('riskMonitorEnabled', $event ?? false)" />
+            <YdTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
+              <YdSwitch :model-value="!isInherited('riskMonitorEnabled')" @update:model-value="setOverride('riskMonitorEnabled', $event ?? false)" />
+            </YdTooltip>
+            <YdSwitch :model-value="Boolean(valueFor('riskMonitorEnabled'))" :disabled="isInherited('riskMonitorEnabled')" @update:model-value="update('riskMonitorEnabled', $event ?? false)" />
           </div>
         </div>
       </div>
@@ -211,17 +211,17 @@ const alertGroupOptions = computed(() => {
     <section class="rounded-xl border p-5">
       <div class="mb-4 flex items-center justify-between gap-3">
         <div class="flex items-center gap-2">
-          <FaIcon name="i-lucide:clapperboard" class="text-primary" />
+          <YdIcon name="i-lucide:clapperboard" class="text-primary" />
           <div>
             <h3 class="text-sm font-semibold">媒体服务</h3>
             <p class="mt-0.5 text-xs text-muted-foreground">媒体解析服务的可访问地址，机器人容器也必须能访问。</p>
           </div>
         </div>
-        <FaTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
-          <FaSwitch :model-value="!isInherited('mediaProviderEndpoint')" @update:model-value="setOverride('mediaProviderEndpoint', $event ?? false)" />
-        </FaTooltip>
+        <YdTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
+          <YdSwitch :model-value="!isInherited('mediaProviderEndpoint')" @update:model-value="setOverride('mediaProviderEndpoint', $event ?? false)" />
+        </YdTooltip>
       </div>
-      <FaInput
+      <YdInput
         class="w-full"
         type="url"
         placeholder="http://服务器地址:端口"
@@ -235,7 +235,7 @@ const alertGroupOptions = computed(() => {
     <!-- 风险监测 -->
     <section v-if="valueFor('riskMonitorEnabled')" class="rounded-xl border p-5">
       <div class="mb-4 flex items-center gap-2">
-        <FaIcon name="i-lucide:shield-alert" class="text-primary" />
+        <YdIcon name="i-lucide:shield-alert" class="text-primary" />
         <div>
           <h3 class="text-sm font-semibold">风险监测</h3>
           <p class="mt-0.5 text-xs text-muted-foreground">送检内容包含发送者 QQ、绑定账号昵称与时间，AI 按条判定风险与置信度。</p>
@@ -245,21 +245,21 @@ const alertGroupOptions = computed(() => {
         <div class="space-y-2">
           <div class="flex items-center justify-between gap-3">
             <label class="text-sm font-medium">送检条数</label>
-            <FaTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
-              <FaSwitch :model-value="!isInherited('riskBatchSize')" @update:model-value="setOverride('riskBatchSize', $event ?? false)" />
-            </FaTooltip>
+            <YdTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
+              <YdSwitch :model-value="!isInherited('riskBatchSize')" @update:model-value="setOverride('riskBatchSize', $event ?? false)" />
+            </YdTooltip>
           </div>
-          <FaNumberField class="w-full" :min="5" :max="100" :model-value="numberFor('riskBatchSize')" :disabled="isInherited('riskBatchSize')" @update:model-value="setNumber('riskBatchSize', $event)" />
+          <YdNumberField class="w-full" :min="5" :max="100" :model-value="numberFor('riskBatchSize')" :disabled="isInherited('riskBatchSize')" @update:model-value="setNumber('riskBatchSize', $event)" />
           <p class="text-xs text-muted-foreground">每群累计满该条数即整批送 AI 审核一次（5-100）。</p>
         </div>
         <div class="space-y-2">
           <div class="flex items-center justify-between gap-3">
             <label class="text-sm font-medium">告警置信度（%）</label>
-            <FaTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
-              <FaSwitch :model-value="!isInherited('riskAlertConfidence')" @update:model-value="setOverride('riskAlertConfidence', $event ?? false)" />
-            </FaTooltip>
+            <YdTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
+              <YdSwitch :model-value="!isInherited('riskAlertConfidence')" @update:model-value="setOverride('riskAlertConfidence', $event ?? false)" />
+            </YdTooltip>
           </div>
-          <FaNumberField class="w-full" :min="0" :max="100" :model-value="numberFor('riskAlertConfidence')" :disabled="isInherited('riskAlertConfidence')" @update:model-value="setNumber('riskAlertConfidence', $event)" />
+          <YdNumberField class="w-full" :min="0" :max="100" :model-value="numberFor('riskAlertConfidence')" :disabled="isInherited('riskAlertConfidence')" @update:model-value="setNumber('riskAlertConfidence', $event)" />
           <p class="text-xs text-muted-foreground">达到该置信度的风险消息才会推送告警。</p>
         </div>
       </div>
@@ -271,10 +271,10 @@ const alertGroupOptions = computed(() => {
             <p class="qa-switch-tile__desc">风险告警发到单独指定的群，而不是出事的那个群</p>
           </div>
           <div class="qa-switch-tile__controls">
-            <FaTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
-              <FaSwitch :model-value="!isInherited('riskAlertGroup')" @update:model-value="setOverride('riskAlertGroup', $event ?? false)" />
-            </FaTooltip>
-            <FaSwitch :model-value="Boolean(valueFor('riskAlertGroup'))" :disabled="isInherited('riskAlertGroup')" @update:model-value="update('riskAlertGroup', $event ?? false)" />
+            <YdTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
+              <YdSwitch :model-value="!isInherited('riskAlertGroup')" @update:model-value="setOverride('riskAlertGroup', $event ?? false)" />
+            </YdTooltip>
+            <YdSwitch :model-value="Boolean(valueFor('riskAlertGroup'))" :disabled="isInherited('riskAlertGroup')" @update:model-value="update('riskAlertGroup', $event ?? false)" />
           </div>
         </div>
         <div class="qa-switch-tile">
@@ -283,10 +283,10 @@ const alertGroupOptions = computed(() => {
             <p class="qa-switch-tile__desc">向所选管理员发送私聊告警</p>
           </div>
           <div class="qa-switch-tile__controls">
-            <FaTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
-              <FaSwitch :model-value="!isInherited('riskAlertAdmin')" @update:model-value="setOverride('riskAlertAdmin', $event ?? false)" />
-            </FaTooltip>
-            <FaSwitch :model-value="Boolean(valueFor('riskAlertAdmin'))" :disabled="isInherited('riskAlertAdmin')" @update:model-value="update('riskAlertAdmin', $event ?? false)" />
+            <YdTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
+              <YdSwitch :model-value="!isInherited('riskAlertAdmin')" @update:model-value="setOverride('riskAlertAdmin', $event ?? false)" />
+            </YdTooltip>
+            <YdSwitch :model-value="Boolean(valueFor('riskAlertAdmin'))" :disabled="isInherited('riskAlertAdmin')" @update:model-value="update('riskAlertAdmin', $event ?? false)" />
           </div>
         </div>
       </div>
@@ -294,11 +294,11 @@ const alertGroupOptions = computed(() => {
       <div v-if="valueFor('riskAlertGroup')" class="mt-4 space-y-2">
         <div class="flex items-center justify-between gap-3">
           <label class="text-sm font-medium">告警推送群</label>
-          <FaTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
-            <FaSwitch :model-value="!isInherited('riskAlertGroupChannelId')" @update:model-value="setOverride('riskAlertGroupChannelId', $event ?? false)" />
-          </FaTooltip>
+          <YdTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
+            <YdSwitch :model-value="!isInherited('riskAlertGroupChannelId')" @update:model-value="setOverride('riskAlertGroupChannelId', $event ?? false)" />
+          </YdTooltip>
         </div>
-        <FaSelect
+        <YdSelect
           class="w-full"
           placeholder="选择接收告警的群"
           :options="alertGroupOptions"
@@ -306,7 +306,7 @@ const alertGroupOptions = computed(() => {
           :disabled="isInherited('riskAlertGroupChannelId')"
           @update:model-value="update('riskAlertGroupChannelId', String($event ?? ''))"
         />
-        <FaInput
+        <YdInput
           v-model="extraAlertGroupId"
           class="w-full"
           placeholder="官方群 openid，回车添加"
@@ -319,9 +319,9 @@ const alertGroupOptions = computed(() => {
       <div v-if="valueFor('riskAlertAdmin') && userFetcher" class="mt-4 space-y-2">
         <div class="flex items-center justify-between gap-3">
           <label class="text-sm font-medium">接收告警的管理员</label>
-          <FaTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
-            <FaSwitch :model-value="!isInherited('riskAlertAdminUserIds')" @update:model-value="setOverride('riskAlertAdminUserIds', $event ?? false)" />
-          </FaTooltip>
+          <YdTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
+            <YdSwitch :model-value="!isInherited('riskAlertAdminUserIds')" @update:model-value="setOverride('riskAlertAdminUserIds', $event ?? false)" />
+          </YdTooltip>
         </div>
         <YdTablePicker
           :model-value="adminUserIds"
@@ -350,48 +350,48 @@ const alertGroupOptions = computed(() => {
             <p class="mt-0.5 text-xs text-muted-foreground">按置信度两档设置禁言时长，时长单位为秒（86400 = 1 天）。</p>
           </div>
           <div class="flex shrink-0 items-center gap-2">
-            <FaTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
-              <FaSwitch :model-value="!isInherited('riskMuteEnabled')" @update:model-value="setOverride('riskMuteEnabled', $event ?? false)" />
-            </FaTooltip>
-            <FaSwitch :model-value="Boolean(valueFor('riskMuteEnabled'))" :disabled="isInherited('riskMuteEnabled')" @update:model-value="update('riskMuteEnabled', $event ?? false)" />
+            <YdTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
+              <YdSwitch :model-value="!isInherited('riskMuteEnabled')" @update:model-value="setOverride('riskMuteEnabled', $event ?? false)" />
+            </YdTooltip>
+            <YdSwitch :model-value="Boolean(valueFor('riskMuteEnabled'))" :disabled="isInherited('riskMuteEnabled')" @update:model-value="update('riskMuteEnabled', $event ?? false)" />
           </div>
         </div>
         <div v-if="valueFor('riskMuteEnabled')" class="qa-mute-grid">
           <div class="space-y-2">
             <div class="flex items-center justify-between gap-2">
               <label class="text-xs font-medium">低档置信度（%）</label>
-              <FaTooltip v-if="allowInheritance" text="自定义该字段">
-                <FaSwitch :model-value="!isInherited('riskMuteLowConfidence')" @update:model-value="setOverride('riskMuteLowConfidence', $event ?? false)" />
-              </FaTooltip>
+              <YdTooltip v-if="allowInheritance" text="自定义该字段">
+                <YdSwitch :model-value="!isInherited('riskMuteLowConfidence')" @update:model-value="setOverride('riskMuteLowConfidence', $event ?? false)" />
+              </YdTooltip>
             </div>
-            <FaNumberField class="w-full" :min="0" :max="100" :model-value="numberFor('riskMuteLowConfidence')" :disabled="isInherited('riskMuteLowConfidence')" @update:model-value="setNumber('riskMuteLowConfidence', $event)" />
+            <YdNumberField class="w-full" :min="0" :max="100" :model-value="numberFor('riskMuteLowConfidence')" :disabled="isInherited('riskMuteLowConfidence')" @update:model-value="setNumber('riskMuteLowConfidence', $event)" />
           </div>
           <div class="space-y-2">
             <div class="flex items-center justify-between gap-2">
               <label class="text-xs font-medium">低档禁言（秒）</label>
-              <FaTooltip v-if="allowInheritance" text="自定义该字段">
-                <FaSwitch :model-value="!isInherited('riskMuteLowSeconds')" @update:model-value="setOverride('riskMuteLowSeconds', $event ?? false)" />
-              </FaTooltip>
+              <YdTooltip v-if="allowInheritance" text="自定义该字段">
+                <YdSwitch :model-value="!isInherited('riskMuteLowSeconds')" @update:model-value="setOverride('riskMuteLowSeconds', $event ?? false)" />
+              </YdTooltip>
             </div>
-            <FaNumberField class="w-full" :min="0" :model-value="numberFor('riskMuteLowSeconds')" :disabled="isInherited('riskMuteLowSeconds')" @update:model-value="setNumber('riskMuteLowSeconds', $event)" />
+            <YdNumberField class="w-full" :min="0" :model-value="numberFor('riskMuteLowSeconds')" :disabled="isInherited('riskMuteLowSeconds')" @update:model-value="setNumber('riskMuteLowSeconds', $event)" />
           </div>
           <div class="space-y-2">
             <div class="flex items-center justify-between gap-2">
               <label class="text-xs font-medium">高档置信度（%）</label>
-              <FaTooltip v-if="allowInheritance" text="自定义该字段">
-                <FaSwitch :model-value="!isInherited('riskMuteHighConfidence')" @update:model-value="setOverride('riskMuteHighConfidence', $event ?? false)" />
-              </FaTooltip>
+              <YdTooltip v-if="allowInheritance" text="自定义该字段">
+                <YdSwitch :model-value="!isInherited('riskMuteHighConfidence')" @update:model-value="setOverride('riskMuteHighConfidence', $event ?? false)" />
+              </YdTooltip>
             </div>
-            <FaNumberField class="w-full" :min="0" :max="100" :model-value="numberFor('riskMuteHighConfidence')" :disabled="isInherited('riskMuteHighConfidence')" @update:model-value="setNumber('riskMuteHighConfidence', $event)" />
+            <YdNumberField class="w-full" :min="0" :max="100" :model-value="numberFor('riskMuteHighConfidence')" :disabled="isInherited('riskMuteHighConfidence')" @update:model-value="setNumber('riskMuteHighConfidence', $event)" />
           </div>
           <div class="space-y-2">
             <div class="flex items-center justify-between gap-2">
               <label class="text-xs font-medium">高档禁言（秒）</label>
-              <FaTooltip v-if="allowInheritance" text="自定义该字段">
-                <FaSwitch :model-value="!isInherited('riskMuteHighSeconds')" @update:model-value="setOverride('riskMuteHighSeconds', $event ?? false)" />
-              </FaTooltip>
+              <YdTooltip v-if="allowInheritance" text="自定义该字段">
+                <YdSwitch :model-value="!isInherited('riskMuteHighSeconds')" @update:model-value="setOverride('riskMuteHighSeconds', $event ?? false)" />
+              </YdTooltip>
             </div>
-            <FaNumberField class="w-full" :min="0" :model-value="numberFor('riskMuteHighSeconds')" :disabled="isInherited('riskMuteHighSeconds')" @update:model-value="setNumber('riskMuteHighSeconds', $event)" />
+            <YdNumberField class="w-full" :min="0" :model-value="numberFor('riskMuteHighSeconds')" :disabled="isInherited('riskMuteHighSeconds')" @update:model-value="setNumber('riskMuteHighSeconds', $event)" />
           </div>
         </div>
         <p v-if="valueFor('riskMuteEnabled')" class="mt-3 text-xs text-muted-foreground">置信度达到高档阈值按高档时长禁言，达到低档阈值按低档时长禁言；Milky 与官方 QQ 连接均已适配。</p>
@@ -401,7 +401,7 @@ const alertGroupOptions = computed(() => {
     <!-- AI 决策 -->
     <section class="rounded-xl border p-5">
       <div class="mb-4 flex items-center gap-2">
-        <FaIcon name="i-lucide:sparkles" class="text-primary" />
+        <YdIcon name="i-lucide:sparkles" class="text-primary" />
         <div>
           <h3 class="text-sm font-semibold">AI 决策</h3>
           <p class="mt-0.5 text-xs text-muted-foreground">入群验证兜底与风险监测共用的模型配置，模型随提供方联动。</p>
@@ -411,11 +411,11 @@ const alertGroupOptions = computed(() => {
         <div class="space-y-2">
           <div class="flex items-center justify-between gap-3">
             <label class="text-sm font-medium">AI 服务提供方</label>
-            <FaTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
-              <FaSwitch :model-value="!isInherited('providerCode')" @update:model-value="setOverride('providerCode', $event ?? false)" />
-            </FaTooltip>
+            <YdTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
+              <YdSwitch :model-value="!isInherited('providerCode')" @update:model-value="setOverride('providerCode', $event ?? false)" />
+            </YdTooltip>
           </div>
-          <FaSelect
+          <YdSelect
             class="w-full"
             :options="providerOptions"
             :model-value="String(valueFor('providerCode') ?? '')"
@@ -426,11 +426,11 @@ const alertGroupOptions = computed(() => {
         <div class="space-y-2">
           <div class="flex items-center justify-between gap-3">
             <label class="text-sm font-medium">AI 模型</label>
-            <FaTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
-              <FaSwitch :model-value="!isInherited('modelCode')" @update:model-value="setOverride('modelCode', $event ?? false)" />
-            </FaTooltip>
+            <YdTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
+              <YdSwitch :model-value="!isInherited('modelCode')" @update:model-value="setOverride('modelCode', $event ?? false)" />
+            </YdTooltip>
           </div>
-          <FaSelect
+          <YdSelect
             class="w-full"
             :options="modelOptions"
             :model-value="String(valueFor('modelCode') ?? '')"
@@ -441,11 +441,11 @@ const alertGroupOptions = computed(() => {
         <div class="qa-form-span space-y-2">
           <div class="flex items-center justify-between gap-3">
             <label class="text-sm font-medium">AI 兜底结果</label>
-            <FaTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
-              <FaSwitch :model-value="!isInherited('failClosed')" @update:model-value="setOverride('failClosed', $event ?? false)" />
-            </FaTooltip>
+            <YdTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
+              <YdSwitch :model-value="!isInherited('failClosed')" @update:model-value="setOverride('failClosed', $event ?? false)" />
+            </YdTooltip>
           </div>
-          <FaSelect
+          <YdSelect
             class="w-full"
             :options="fallbackDecisionOptions"
             :model-value="Boolean(valueFor('failClosed')) ? 'fail-closed' : 'fail-open'"
@@ -459,7 +459,7 @@ const alertGroupOptions = computed(() => {
     <!-- 入群审核规则 -->
     <section class="rounded-xl border p-5">
       <div class="mb-4 flex items-center gap-2">
-        <FaIcon name="i-lucide:user-check" class="text-primary" />
+        <YdIcon name="i-lucide:user-check" class="text-primary" />
         <div>
           <h3 class="text-sm font-semibold">入群审核规则</h3>
           <p class="mt-0.5 text-xs text-muted-foreground">每行一个匹配答案。官方问答会带「问题：答案」，只写答案也能命中。处理过程写入系统日志（模块「QQ 群自动化」，分类 [入群验证]）。官方 QQ 只处理入群申请事件（GROUP_JOIN_REQUEST），机器人必须是该群管理员并订阅群成员事件；已入群通知（GROUP_MEMBER_ADD）无法再审批。</p>
@@ -469,20 +469,20 @@ const alertGroupOptions = computed(() => {
         <div class="space-y-2">
           <div class="flex items-center justify-between gap-3">
             <label class="text-sm font-medium">通过答案</label>
-            <FaTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
-              <FaSwitch :model-value="!isInherited('approvedAnswers')" @update:model-value="setOverride('approvedAnswers', $event ?? false)" />
-            </FaTooltip>
+            <YdTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
+              <YdSwitch :model-value="!isInherited('approvedAnswers')" @update:model-value="setOverride('approvedAnswers', $event ?? false)" />
+            </YdTooltip>
           </div>
-          <FaTextarea class="min-h-28" placeholder="每行一个答案" :model-value="textFor('approvedAnswers')" :disabled="isInherited('approvedAnswers')" @update:model-value="setAnswerList('approvedAnswers', $event)" />
+          <YdTextarea class="min-h-28" placeholder="每行一个答案" :model-value="textFor('approvedAnswers')" :disabled="isInherited('approvedAnswers')" @update:model-value="setAnswerList('approvedAnswers', $event)" />
         </div>
         <div class="space-y-2">
           <div class="flex items-center justify-between gap-3">
             <label class="text-sm font-medium">拒绝答案</label>
-            <FaTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
-              <FaSwitch :model-value="!isInherited('rejectedAnswers')" @update:model-value="setOverride('rejectedAnswers', $event ?? false)" />
-            </FaTooltip>
+            <YdTooltip v-if="allowInheritance" text="开启后自定义该字段，关闭则继承默认">
+              <YdSwitch :model-value="!isInherited('rejectedAnswers')" @update:model-value="setOverride('rejectedAnswers', $event ?? false)" />
+            </YdTooltip>
           </div>
-          <FaTextarea class="min-h-28" placeholder="每行一个答案" :model-value="textFor('rejectedAnswers')" :disabled="isInherited('rejectedAnswers')" @update:model-value="setAnswerList('rejectedAnswers', $event)" />
+          <YdTextarea class="min-h-28" placeholder="每行一个答案" :model-value="textFor('rejectedAnswers')" :disabled="isInherited('rejectedAnswers')" @update:model-value="setAnswerList('rejectedAnswers', $event)" />
         </div>
       </div>
     </section>

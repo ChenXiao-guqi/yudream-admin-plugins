@@ -1,20 +1,21 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import { computed, onMounted, ref, watch } from 'vue'
 import {
-  FaAlert,
-  FaButton,
-  FaCard,
-  FaIcon,
-  FaInput,
-  FaModal,
-  FaPageHeader,
-  FaPageMain,
-  FaPagination,
-  FaSelect,
-  FaResponsiveTable,
-  FaTag,
-  useFaModal,
-  useFaToast,
+  YdAlert,
+  YdButton,
+  YdCard,
+  YdIcon,
+  YdInput,
+  YdModal,
+  YdPageHeader,
+  YdPageMain,
+  YdPagination,
+  YdSelect,
+  YdResponsiveTable,
+  YdTag,
+  useYdModal,
+  useYdToast,
   type TableColumn,
 } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
@@ -23,8 +24,8 @@ import { formatGroupLabel, type MediaJob, type Option } from '../types'
 
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 const api = createQqbotAutomationApi(props.sdk)
-const toast = useFaToast()
-const modal = useFaModal()
+const toast = useYdToast()
+const modal = useYdModal()
 
 const jobs = ref<MediaJob[]>([])
 const page = ref(1)
@@ -257,28 +258,28 @@ onMounted(load)
 
 <template>
   <section>
-    <FaPageHeader title="媒体任务" description="查看群消息触发和手动测试的媒体解析任务。">
+    <YdPageHeader title="媒体任务" description="查看群消息触发和手动测试的媒体解析任务。">
       <div class="flex flex-wrap gap-2">
-        <FaButton variant="outline" :disabled="loading" @click="load">
-          <FaIcon name="i-lucide:refresh-cw" />
+        <YdButton variant="outline" :disabled="loading" @click="load">
+          <YdIcon name="i-lucide:refresh-cw" />
           刷新
-        </FaButton>
-        <FaButton variant="destructive" :disabled="!total || clearing" @click="confirmClearJobs">
-          <FaIcon name="i-lucide:trash-2" />
+        </YdButton>
+        <YdButton variant="destructive" :disabled="!total || clearing" @click="confirmClearJobs">
+          <YdIcon name="i-lucide:trash-2" />
           清空任务
-        </FaButton>
-        <FaButton @click="openTest">
-          <FaIcon name="i-lucide:flask-conical" />
+        </YdButton>
+        <YdButton @click="openTest">
+          <YdIcon name="i-lucide:flask-conical" />
           发起测试
-        </FaButton>
+        </YdButton>
       </div>
-    </FaPageHeader>
+    </YdPageHeader>
 
-    <FaPageMain class="space-y-4">
-      <FaAlert v-if="error" variant="destructive" title="操作未完成" :description="error" />
+    <YdPageMain class="space-y-4">
+      <YdAlert v-if="error" variant="destructive" title="操作未完成" :description="error" />
 
-      <FaResponsiveTable
-        v-loading="loading"
+      <YdLoadingOverlay :loading="loading"><YdResponsiveTable
+
         row-key="id"
         table-root-class="overflow-hidden rounded-lg"
         table-class="min-w-[860px]"
@@ -293,7 +294,7 @@ onMounted(load)
           <a class="break-all text-primary hover:underline" :href="row.original.sourceUrl" target="_blank" rel="noreferrer">{{ row.original.sourceUrl }}</a>
         </template>
         <template #cell-trigger="{ row }">{{ triggerLabel(row.original.trigger) }}</template>
-        <template #cell-status="{ row }"><FaTag :variant="statusVariant(row.original.status)">{{ statusLabel(row.original.status) }}</FaTag></template>
+        <template #cell-status="{ row }"><YdTag :variant="statusVariant(row.original.status)">{{ statusLabel(row.original.status) }}</YdTag></template>
         <template #cell-result="{ row }">
           <div class="space-y-1">
             <a v-if="row.original.downloadUrl" class="block text-primary hover:underline" :href="row.original.downloadUrl" target="_blank" rel="noreferrer">打开解析结果</a>
@@ -304,12 +305,12 @@ onMounted(load)
         </template>
         <template #cell-createdAt="{ row }">{{ formatTime(row.original.createdAt) }}</template>
         <template #card="{ row }">
-          <FaCard class="w-full">
+          <YdCard class="w-full">
             <div class="flex flex-col gap-3">
               <div class="flex items-center justify-between gap-2">
                 <a class="min-w-0 break-all text-base font-semibold text-primary hover:underline" :href="row.sourceUrl" target="_blank" rel="noreferrer">{{ row.sourceUrl }}</a>
                 <div class="flex shrink-0 gap-1">
-                  <FaTag :variant="statusVariant(row.status)">{{ statusLabel(row.status) }}</FaTag>
+                  <YdTag :variant="statusVariant(row.status)">{{ statusLabel(row.status) }}</YdTag>
                 </div>
               </div>
               <div class="flex flex-col gap-1 text-sm">
@@ -331,14 +332,14 @@ onMounted(load)
                 </div>
               </div>
             </div>
-          </FaCard>
+          </YdCard>
         </template>
-      </FaResponsiveTable>
+      </YdResponsiveTable></YdLoadingOverlay>
 
-      <FaPagination v-model:page="page" v-model:size="size" :total="total" class="mt-3" />
-    </FaPageMain>
+      <YdPagination v-model:page="page" v-model:size="size" :total="total" class="mt-3" />
+    </YdPageMain>
 
-    <FaModal
+    <YdModal
       v-model="testOpen"
       title="发起媒体解析测试"
       description="测试会解析链接，并将解析出的媒体文件发送到所选 QQ 群。"
@@ -355,19 +356,19 @@ onMounted(load)
       <div class="grid grid-cols-1 gap-4">
         <div class="space-y-2">
           <label class="text-sm font-medium">QQ 连接</label>
-          <FaSelect v-model="testConnectionId" class="w-full" placeholder="选择连接" :options="connectionOptions" :disabled="submittingTest" />
+          <YdSelect v-model="testConnectionId" class="w-full" placeholder="选择连接" :options="connectionOptions" :disabled="submittingTest" />
         </div>
         <div class="space-y-2">
           <label class="text-sm font-medium">群聊</label>
-          <FaSelect v-model="testChannelId" class="w-full" placeholder="选择群聊" :options="groupOptions" :disabled="!testConnectionId || submittingTest" />
-          <FaInput v-model="extraGroupId" class="w-full" placeholder="官方群 openid，回车添加" :disabled="!testConnectionId || submittingTest" @keydown.enter.prevent="addExtraGroup" />
+          <YdSelect v-model="testChannelId" class="w-full" placeholder="选择群聊" :options="groupOptions" :disabled="!testConnectionId || submittingTest" />
+          <YdInput v-model="extraGroupId" class="w-full" placeholder="官方群 openid，回车添加" :disabled="!testConnectionId || submittingTest" @keydown.enter.prevent="addExtraGroup" />
           <p class="text-xs text-muted-foreground">官方 QQ 没有历史群列表，选项来自本进程收到过的群消息。群名缺失时可先到策略页发识别消息并写备注。</p>
         </div>
         <div class="space-y-2">
           <label class="text-sm font-medium">媒体链接</label>
-          <FaInput v-model="testUrl" class="w-full" type="url" placeholder="粘贴抖音或 Bilibili 链接" :disabled="submittingTest" />
+          <YdInput v-model="testUrl" class="w-full" type="url" placeholder="粘贴抖音或 Bilibili 链接" :disabled="submittingTest" />
         </div>
       </div>
-    </FaModal>
+    </YdModal>
   </section>
 </template>

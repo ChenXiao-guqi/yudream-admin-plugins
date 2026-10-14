@@ -1,20 +1,21 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import { computed, onMounted, ref, watch } from 'vue'
 import {
-  FaAlert,
-  FaButton,
-  FaCard,
-  FaDrawer,
-  FaIcon,
-  FaInput,
-  FaPageHeader,
-  FaPageMain,
-  FaPagination,
-  FaSelect,
-  FaResponsiveTable,
-  FaTag,
-  useFaModal,
-  useFaToast,
+  YdAlert,
+  YdButton,
+  YdCard,
+  YdDrawer,
+  YdIcon,
+  YdInput,
+  YdPageHeader,
+  YdPageMain,
+  YdPagination,
+  YdSelect,
+  YdResponsiveTable,
+  YdTag,
+  useYdModal,
+  useYdToast,
   type TableColumn,
   type YdTablePickerQuery,
   type YdTablePickerResult,
@@ -40,8 +41,8 @@ type UserPickerRow = UserOption & { label: string }
 
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 const api = createQqbotAutomationApi(props.sdk)
-const toast = useFaToast()
-const modal = useFaModal()
+const toast = useYdToast()
+const modal = useYdModal()
 
 const connections = ref<Option[]>([])
 const groups = ref<Option[]>([])
@@ -384,11 +385,11 @@ onMounted(async () => {
 
 <template>
   <section>
-    <FaPageHeader title="群自动化策略" description="配置连接默认策略，并按需为单独群聊覆盖指定字段。" />
+    <YdPageHeader title="群自动化策略" description="配置连接默认策略，并按需为单独群聊覆盖指定字段。" />
 
-    <FaPageMain>
+    <YdPageMain>
       <div class="qqbot-automation-page">
-      <FaAlert v-if="error" variant="destructive" title="操作未完成" :description="error" />
+      <YdAlert v-if="error" variant="destructive" title="操作未完成" :description="error" />
 
       <div class="qa-row">
         <section class="qa-card">
@@ -397,14 +398,14 @@ onMounted(async () => {
               <h2 class="qa-title">QQ 连接</h2>
               <p class="qa-desc">切换连接后加载该连接的默认策略与群级覆盖。</p>
             </div>
-            <FaButton variant="outline" size="sm" :disabled="!connectionId || loading" @click="loadCurrentConnection">
-              <FaIcon name="i-lucide:refresh-cw" />
+            <YdButton variant="outline" size="sm" :disabled="!connectionId || loading" @click="loadCurrentConnection">
+              <YdIcon name="i-lucide:refresh-cw" />
               刷新
-            </FaButton>
+            </YdButton>
           </div>
           <div class="qa-card-body">
             <div class="qa-select-row">
-              <FaSelect
+              <YdSelect
                 placeholder="选择连接"
                 :model-value="connectionId"
                 :options="connectionOptions"
@@ -418,7 +419,7 @@ onMounted(async () => {
               <div class="qa-fields">
                 <div class="qa-field">
                   <label class="qa-label">群 openid</label>
-                  <FaSelect
+                  <YdSelect
                     class="w-full"
                     placeholder="选择要识别或备注的群"
                     :model-value="identifyChannelId"
@@ -428,16 +429,16 @@ onMounted(async () => {
                 </div>
                 <div class="qa-field">
                   <label class="qa-label">后台备注</label>
-                  <FaInput v-model="aliasDraft" class="w-full" placeholder="如 运营群 / 告警群" maxlength="40" />
+                  <YdInput v-model="aliasDraft" class="w-full" placeholder="如 运营群 / 告警群" maxlength="40" />
                 </div>
               </div>
               <div class="qa-actions">
-                <FaButton size="sm" variant="outline" :disabled="!identifyChannelId" :loading="identifyingGroupId === identifyChannelId" @click="identifyGroup(identifyChannelId)">发识别消息</FaButton>
-                <FaButton size="sm" :disabled="!identifyChannelId" :loading="savingAlias" @click="saveAlias">保存备注</FaButton>
+                <YdButton size="sm" variant="outline" :disabled="!identifyChannelId" :loading="identifyingGroupId === identifyChannelId" @click="identifyGroup(identifyChannelId)">发识别消息</YdButton>
+                <YdButton size="sm" :disabled="!identifyChannelId" :loading="savingAlias" @click="saveAlias">保存备注</YdButton>
               </div>
             </div>
             <div v-if="currentConnection" class="qa-hint">
-              <FaTag :variant="protocolVariant(currentConnection)">{{ protocolLabel(currentConnection) }}</FaTag>
+              <YdTag :variant="protocolVariant(currentConnection)">{{ protocolLabel(currentConnection) }}</YdTag>
               <span v-if="currentConnection.protocol === 'official'">官方连接：媒体签发公网直链发送；入群审批走官方申请事件（机器人须为群管理员），告警发到单独指定群。官方群选择器默认只有 openid，可用上方「识别」或「备注」区分。</span>
               <span v-else>Milky 连接：媒体经共享目录落盘，支持合并转发与语音。</span>
             </div>
@@ -450,17 +451,17 @@ onMounted(async () => {
               <h2 class="qa-title">媒体存储</h2>
               <p class="qa-desc">这里填的是 YuDream 后端容器能看到的路径，不是宿主机路径。官方连接签发公网直链时，后端进程必须能读到这份目录。</p>
             </div>
-            <FaButton variant="outline" size="sm" :loading="savingMediaSettings" @click="saveMediaSettings">保存</FaButton>
+            <YdButton variant="outline" size="sm" :loading="savingMediaSettings" @click="saveMediaSettings">保存</YdButton>
           </div>
           <div class="qa-card-body">
             <div class="qa-fields">
               <div class="qa-field">
                 <label class="qa-label">后端可读目录</label>
-                <FaInput v-model="mediaSettingsDraft.hostDirectory" class="w-full" placeholder="/media" clearable />
+                <YdInput v-model="mediaSettingsDraft.hostDirectory" class="w-full" placeholder="/media" clearable />
               </div>
               <div class="qa-field">
                 <label class="qa-label">解析服务容器目录</label>
-                <FaInput v-model="mediaSettingsDraft.containerDirectory" class="w-full" placeholder="/app/download" />
+                <YdInput v-model="mediaSettingsDraft.containerDirectory" class="w-full" placeholder="/app/download" />
               </div>
             </div>
             <p class="qa-hint">当前生产 compose 把宿主机 /opt/yudream-douyin-api/download 挂进后端 /media，解析服务自己挂到 /app/download。所以这里填 /media 和 /app/download，不要填宿主机 /opt/... 路径。</p>
@@ -474,10 +475,10 @@ onMounted(async () => {
             <h2 class="qa-title">连接默认策略</h2>
             <p class="qa-desc">未覆盖的群级字段会使用这里的配置。</p>
           </div>
-          <FaButton size="sm" :loading="savingDefault" :disabled="!connectionId || loading" @click="saveDefault">
-            <FaIcon name="i-lucide:save" />
+          <YdButton size="sm" :loading="savingDefault" :disabled="!connectionId || loading" @click="saveDefault">
+            <YdIcon name="i-lucide:save" />
             保存默认策略
-          </FaButton>
+          </YdButton>
         </div>
         <div v-if="connectionId" class="qa-card-body">
           <PolicyFieldsForm
@@ -500,15 +501,15 @@ onMounted(async () => {
             <h2 class="qa-title">群级覆盖</h2>
             <p class="qa-desc">只保存需要差异化的字段；删除覆盖后立即恢复继承。</p>
           </div>
-          <FaButton size="sm" :disabled="!connectionId || loading" @click="openCreate">
-            <FaIcon name="i-lucide:plus" />
+          <YdButton size="sm" :disabled="!connectionId || loading" @click="openCreate">
+            <YdIcon name="i-lucide:plus" />
             新增群级覆盖
-          </FaButton>
+          </YdButton>
         </div>
 
         <div class="qa-card-body">
-          <FaResponsiveTable
-            v-loading="loading"
+          <YdLoadingOverlay :loading="loading"><YdResponsiveTable
+
             row-key="channelId"
             table-root-class="overflow-hidden rounded-lg"
             border
@@ -519,23 +520,23 @@ onMounted(async () => {
             empty-text="当前连接还没有群级覆盖"
           >
             <template #cell-group="{ row }"><span class="font-medium">{{ groupName(row.original.channelId) }}</span></template>
-            <template #cell-enabled="{ row }"><FaTag :variant="policyState(row.original).variant">{{ policyState(row.original).label }}</FaTag></template>
+            <template #cell-enabled="{ row }"><YdTag :variant="policyState(row.original).variant">{{ policyState(row.original).label }}</YdTag></template>
             <template #cell-media="{ row }">{{ mediaState(row.original) }}</template>
             <template #cell-risk="{ row }">{{ riskState(row.original) }}</template>
             <template #cell-overrides="{ row }">{{ countOverrides(row.original) }} 项</template>
             <template #cell-operation="{ row }">
               <div class="flex-center gap-2">
-                <FaButton size="sm" variant="outline" @click="openEdit(row.original)">编辑</FaButton>
-                <FaButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</FaButton>
+                <YdButton size="sm" variant="outline" @click="openEdit(row.original)">编辑</YdButton>
+                <YdButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</YdButton>
               </div>
             </template>
             <template #card="{ row }">
-              <FaCard class="w-full">
+              <YdCard class="w-full">
                 <div class="flex flex-col gap-3">
                   <div class="flex items-center justify-between gap-2">
                     <span class="min-w-0 break-words text-base font-semibold">{{ groupName(row.channelId) }}</span>
                     <div class="flex gap-1">
-                      <FaTag :variant="policyState(row).variant">{{ policyState(row).label }}</FaTag>
+                      <YdTag :variant="policyState(row).variant">{{ policyState(row).label }}</YdTag>
                     </div>
                   </div>
                   <div class="flex flex-col gap-1 text-sm">
@@ -557,15 +558,15 @@ onMounted(async () => {
                     </div>
                   </div>
                   <div class="flex flex-wrap gap-2 border-t pt-3">
-                    <FaButton size="sm" variant="outline" @click="openEdit(row)">编辑</FaButton>
-                    <FaButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</FaButton>
+                    <YdButton size="sm" variant="outline" @click="openEdit(row)">编辑</YdButton>
+                    <YdButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</YdButton>
                   </div>
                 </div>
-              </FaCard>
+              </YdCard>
             </template>
-          </FaResponsiveTable>
+          </YdResponsiveTable></YdLoadingOverlay>
 
-          <FaPagination
+          <YdPagination
             v-if="connectionId"
             v-model:page="page"
             v-model:size="size"
@@ -575,9 +576,9 @@ onMounted(async () => {
         </div>
       </section>
       </div>
-    </FaPageMain>
+    </YdPageMain>
 
-    <FaDrawer
+    <YdDrawer
       v-model="editorOpen"
       :title="editorTitle"
       description="只启用需要差异化的字段，其余字段继续继承连接默认策略。"
@@ -594,12 +595,12 @@ onMounted(async () => {
       <div class="space-y-5">
         <section v-if="!editorChannelId" class="space-y-3 rounded-xl border p-4">
           <label class="text-sm font-medium">群聊</label>
-          <FaSelect v-model="editorChannelId" class="w-full" placeholder="选择需要单独配置的群聊" :options="groupOptions" />
-          <FaInput v-model="extraGroupId" class="w-full" placeholder="官方群 openid，回车添加" @keydown.enter.prevent="addExtraGroup" />
+          <YdSelect v-model="editorChannelId" class="w-full" placeholder="选择需要单独配置的群聊" :options="groupOptions" />
+          <YdInput v-model="extraGroupId" class="w-full" placeholder="官方群 openid，回车添加" @keydown.enter.prevent="addExtraGroup" />
           <p class="text-xs text-muted-foreground">官方 QQ 没有历史群列表，选项来自本进程收到过的群消息。无法区分时先发识别消息，再给对应群写备注。</p>
         </section>
         <section v-else class="flex items-center gap-3 rounded-xl border bg-muted/30 px-4 py-3">
-          <FaIcon name="i-lucide:messages-square" class="text-primary" />
+          <YdIcon name="i-lucide:messages-square" class="text-primary" />
           <div>
             <p class="text-xs text-muted-foreground">当前群聊</p>
             <p class="mt-0.5 font-medium">{{ groupName(editorChannelId) }}</p>
@@ -615,6 +616,6 @@ onMounted(async () => {
           @update:override="editorDraft = $event"
         />
       </div>
-    </FaDrawer>
+    </YdDrawer>
   </section>
 </template>
