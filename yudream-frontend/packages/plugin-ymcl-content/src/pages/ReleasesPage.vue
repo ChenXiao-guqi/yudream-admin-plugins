@@ -1,22 +1,24 @@
 <script setup lang="ts">
-import type { FileItem, FileUploadRequestOptions, TableColumn } from '@yudream/components'
+import { YdLoadingOverlay } from '@yudream/components'
+import type { FileItem, FileUploadRequestOptions, TableColumn, YdFilePickerInstance } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import {
-  FaButton,
-  FaCard,
-  FaFileUpload,
-  FaIcon,
-  FaInput,
-  FaModal,
-  FaPageHeader,
-  FaPageMain,
-  FaSelect,
-  FaSwitch,
-  FaTable,
-  FaTag,
-  FaTextarea,
-  useFaModal,
-  useFaToast,
+  YdButton,
+  YdCard,
+  YdFilePicker,
+  YdFileUpload,
+  YdIcon,
+  YdInput,
+  YdModal,
+  YdPageHeader,
+  YdPageMain,
+  YdSelect,
+  YdSwitch,
+  YdResponsiveTable,
+  YdTag,
+  YdTextarea,
+  useYdModal,
+  useYdToast,
 } from '@yudream/components'
 import { onMounted, reactive, ref } from 'vue'
 import MarkdownEditor from '../components/MarkdownEditor.vue'
@@ -33,8 +35,8 @@ import {
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 
 const api = createUpdateApi(props.sdk)
-const toast = useFaToast()
-const confirm = useFaModal()
+const toast = useYdToast()
+const confirm = useYdModal()
 
 const loading = ref(false)
 const saving = ref(false)
@@ -45,6 +47,7 @@ const releaseModalMode = ref<'create' | 'edit'>('create')
 const artifactModalOpen = ref(false)
 const detailVersion = ref('')
 const artifactFiles = ref<FileItem[]>([])
+const signaturePicker = ref<YdFilePickerInstance | null>(null)
 
 function emptyChanges(): Record<UpdateChangeCategory, string[]> {
   return {
@@ -256,7 +259,7 @@ function openArtifactEditor(version: string) {
   artifactModalOpen.value = true
 }
 
-/** FaFileUpload 自定义上传通道：选中文件即按当前表单元数据直传插件 multipart 端点。 */
+/** YdFileUpload 自定义上传通道：选中文件即按当前表单元数据直传插件 multipart 端点。 */
 async function uploadArtifactRequest(options: FileUploadRequestOptions) {
   uploadingArtifact.value = true
   try {
@@ -289,30 +292,25 @@ function onArtifactUploadSuccess() {
   void reload()
 }
 
-/** 选择 .sig 签名文件，读取文本自动填入签名输入框。动态创建原生 input 不经过模板，规范检查不扫运行时节点。 */
 function pickSignatureFile() {
-  const input = document.createElement('input')
-  input.type = 'file'
-  input.accept = '.sig,.txt,.minisig,text/plain'
-  input.onchange = () => {
-    const file = input.files?.[0]
-    if (!file) {
+  signaturePicker.value?.open()
+}
+
+function onSignatureFileSelect(files: File[]) {
+  const file = files[0]
+  if (!file) return
+  const reader = new FileReader()
+  reader.onerror = () => toast.error('读取签名文件失败')
+  reader.onload = () => {
+    const text = String(reader.result || '').trim()
+    if (!text) {
+      toast.warning('签名文件内容为空')
       return
     }
-    const reader = new FileReader()
-    reader.onerror = () => toast.error('读取签名文件失败')
-    reader.onload = () => {
-      const text = String(reader.result || '').trim()
-      if (!text) {
-        toast.warning('签名文件内容为空')
-        return
-      }
-      artifactForm.signature = text
-      toast.success(`已读取 ${file.name} 的签名`)
-    }
-    reader.readAsText(file)
+    artifactForm.signature = text
+    toast.success(`已读取 undefined 的签名`)
   }
-  input.click()
+  reader.readAsText(file)
 }
 
 async function submitUrlArtifact() {
@@ -417,37 +415,37 @@ onMounted(() => {
 
 <template>
 	<section class="ymcl-releases-page">
-		<FaPageHeader
+		<YdPageHeader
 			title="更新发包"
 			description="YMCL 自有更新平台：维护版本发布与制品（外部 URL 或站内文件）。发布时间与更新日志公开页自动生成。"
 			class="mb-0"
 		>
-			<FaButton type="primary" @click="openCreateRelease">
-				<FaIcon name="i-ri:add-line" />
+			<YdButton type="primary" @click="openCreateRelease">
+				<YdIcon name="i-ri:add-line" />
 				新建发布
-			</FaButton>
-		</FaPageHeader>
+			</YdButton>
+		</YdPageHeader>
 
-		<FaPageMain>
-			<FaCard content-class="ymcl-card-content">
+		<YdPageMain>
+			<YdCard content-class="ymcl-card-content">
 				<div class="ymcl-toolbar">
 					<p class="ymcl-muted">
 						公开 API 前缀：
 						<code>/api/plugins/ymcl-content/v1/update</code>
 						·
-						<FaButton size="sm" variant="ghost" @click="openChangelogIndex">
-							<FaIcon name="i-ri:file-text-line" />
+						<YdButton size="sm" variant="ghost" @click="openChangelogIndex">
+							<YdIcon name="i-ri:file-text-line" />
 							打开更新日志公开页
-						</FaButton>
+						</YdButton>
 					</p>
-					<FaButton type="primary" @click="openCreateRelease">
-						<FaIcon name="i-ri:add-line" />
+					<YdButton type="primary" @click="openCreateRelease">
+						<YdIcon name="i-ri:add-line" />
 						新建发布
-					</FaButton>
+					</YdButton>
 				</div>
-				<FaTable
+				<YdLoadingOverlay :loading="loading"><YdResponsiveTable
 					table-root-class="max-w-full overflow-x-auto rounded-lg overflow-hidden"
-					v-loading="loading"
+
 					:columns="columns"
 					:data="records"
 					row-key="version"
@@ -455,19 +453,19 @@ onMounted(() => {
 					<template #empty>
 						<div class="ymcl-empty">
 							<span class="ymcl-muted">暂无发布。先新建发布，再添加 updater / 安装包制品。</span>
-							<FaButton type="primary" @click="openCreateRelease">
-								<FaIcon name="i-ri:add-line" />
+							<YdButton type="primary" @click="openCreateRelease">
+								<YdIcon name="i-ri:add-line" />
 								新建发布
-							</FaButton>
+							</YdButton>
 						</div>
 					</template>
 					<template #cell-title="{ row }">
 						<span class="ymcl-break">{{ row.original.title || `YMCL ${row.original.version}` }}</span>
 					</template>
 					<template #cell-channel="{ row }">
-						<FaTag :variant="row.original.channel === 'beta' ? 'outline' : 'default'">
+						<YdTag :variant="row.original.channel === 'beta' ? 'outline' : 'default'">
 							{{ row.original.channel === 'beta' ? '测试版' : '正式版' }}
-						</FaTag>
+						</YdTag>
 					</template>
 					<template #cell-changes="{ row }">
 						<span>{{ changeCount(row.original) || '-' }}</span>
@@ -480,36 +478,36 @@ onMounted(() => {
 					</template>
 					<template #cell-status="{ row }">
 						<div class="ymcl-row-actions">
-							<FaTag v-if="row.original.yanked" variant="outline">已撤回</FaTag>
-							<FaTag v-else-if="row.original.enabled === false" variant="outline">停用</FaTag>
-							<FaTag v-else variant="default">发布中</FaTag>
+							<YdTag v-if="row.original.yanked" variant="outline">已撤回</YdTag>
+							<YdTag v-else-if="row.original.enabled === false" variant="outline">停用</YdTag>
+							<YdTag v-else variant="default">发布中</YdTag>
 						</div>
 					</template>
 					<template #cell-operations="{ row }">
 						<div class="ymcl-row-actions">
-							<FaButton size="sm" variant="outline" @click="openEditRelease(row.original)">
-								<FaIcon name="i-ri:pencil-line" />
+							<YdButton size="sm" variant="outline" @click="openEditRelease(row.original)">
+								<YdIcon name="i-ri:pencil-line" />
 								编辑
-							</FaButton>
-							<FaButton size="sm" variant="outline" @click="openArtifactEditor(row.original.version)">
-								<FaIcon name="i-ri:attachment-line" />
+							</YdButton>
+							<YdButton size="sm" variant="outline" @click="openArtifactEditor(row.original.version)">
+								<YdIcon name="i-ri:attachment-line" />
 								制品
-							</FaButton>
-							<FaButton size="sm" variant="outline" @click="openChangelog(row.original)">
-								<FaIcon name="i-ri:file-text-line" />
+							</YdButton>
+							<YdButton size="sm" variant="outline" @click="openChangelog(row.original)">
+								<YdIcon name="i-ri:file-text-line" />
 								日志
-							</FaButton>
-							<FaButton size="sm" variant="outline" @click="toggleYank(row.original)">
+							</YdButton>
+							<YdButton size="sm" variant="outline" @click="toggleYank(row.original)">
 								{{ row.original.yanked ? '恢复' : '撤回' }}
-							</FaButton>
-							<FaButton
+							</YdButton>
+							<YdButton
 								size="sm"
 								variant="destructive"
 								:disabled="saving"
 								@click="removeRelease(row.original)"
 							>
 								删除
-							</FaButton>
+							</YdButton>
 						</div>
 						<div
 							v-if="row.original.artifacts?.length"
@@ -525,16 +523,20 @@ onMounted(() => {
 									· {{ artifact.filename }}
 									· {{ artifact.hostedLocally ? '站内' : 'URL' }}
 								</span>
-								<FaButton size="sm" variant="ghost" @click="removeArtifact(row.original.version, artifact)">
+								<YdButton size="sm" variant="ghost" @click="removeArtifact(row.original.version, artifact)">
 									移除
-								</FaButton>
+								</YdButton>
 							</div>
 						</div>
 					</template>
-				</FaTable>
-			</FaCard>
 
-			<FaModal
+					<template #card="{ row }">
+						<YdCard class="w-full"><div class="flex flex-col gap-3"><div class="flex items-start justify-between gap-3"><strong>{{ row.title || `YMCL ${row.version}` }}</strong><YdTag :variant="row.channel === 'beta' ? 'outline' : 'default'">{{ row.channel === 'beta' ? '测试版' : '正式版' }}</YdTag></div><p class="ymcl-muted">版本 {{ row.version }} · {{ formatPublishedAt(row.publishedAt) }} · {{ artifactSummary(row) }}</p><div class="ymcl-row-actions"><YdButton size="sm" variant="outline" @click="openEditRelease(row)">编辑</YdButton><YdButton size="sm" variant="outline" @click="openArtifactEditor(row.version)">制品</YdButton><YdButton size="sm" variant="outline" @click="openChangelog(row)">日志</YdButton><YdButton size="sm" variant="outline" @click="toggleYank(row)">{{ row.yanked ? '恢复' : '撤回' }}</YdButton><YdButton size="sm" variant="destructive" :disabled="saving" @click="removeRelease(row)">删除</YdButton></div><div v-for="artifact in row.artifacts || []" :key="artifact.id" class="ymcl-artifact-item"><span class="ymcl-break">{{ artifact.kind }} · {{ artifact.platform }}/{{ artifact.architecture }} · {{ artifact.filename }}</span><YdButton size="sm" variant="ghost" @click="removeArtifact(row.version, artifact)">移除</YdButton></div></div></YdCard>
+					</template>
+				</YdResponsiveTable></YdLoadingOverlay>
+			</YdCard>
+
+			<YdModal
 				v-model="releaseModalOpen"
 				title="发布元数据"
 				width="720px"
@@ -544,15 +546,15 @@ onMounted(() => {
 				<form class="ymcl-form" @submit.prevent>
 					<div class="ymcl-form-row">
 						<label class="ymcl-label">版本（必填，如 1.2.0 或 1.2.0-beta.1）</label>
-						<FaInput v-model="releaseForm.version" placeholder="1.2.0" clearable />
+						<YdInput v-model="releaseForm.version" placeholder="1.2.0" clearable />
 					</div>
 					<div class="ymcl-form-row">
 						<label class="ymcl-label">渠道</label>
-						<FaSelect v-model="releaseForm.channel" :options="channelSelectOptions" />
+						<YdSelect v-model="releaseForm.channel" :options="channelSelectOptions" />
 					</div>
 					<div class="ymcl-form-row">
 						<label class="ymcl-label">展示标题（可空，默认 YMCL + 版本号）</label>
-						<FaInput v-model="releaseForm.title" placeholder="YMCL 1.2.0" clearable />
+						<YdInput v-model="releaseForm.title" placeholder="YMCL 1.2.0" clearable />
 					</div>
 					<div class="ymcl-form-row">
 						<label class="ymcl-label">发布时间与更新日志（自动生成）</label>
@@ -571,11 +573,11 @@ onMounted(() => {
 					</div>
 					<div class="ymcl-form-row">
 						<label class="ymcl-label">强制更新</label>
-						<FaSwitch v-model="releaseForm.forceUpdate" />
+						<YdSwitch v-model="releaseForm.forceUpdate" />
 					</div>
 					<div class="ymcl-form-row">
 						<label class="ymcl-label">启用</label>
-						<FaSwitch v-model="releaseForm.enabled" />
+						<YdSwitch v-model="releaseForm.enabled" />
 					</div>
 
 					<div class="ymcl-changes-block">
@@ -591,10 +593,10 @@ onMounted(() => {
 							<div class="ymcl-change-category-head">
 								<span class="ymcl-change-dot" :style="{ background: category.color }" />
 								<strong>{{ category.label }}</strong>
-								<FaButton size="sm" variant="outline" type="button" @click="addChangeItem(category.key)">
-									<FaIcon name="i-ri:add-line" />
+								<YdButton size="sm" variant="outline" type="button" @click="addChangeItem(category.key)">
+									<YdIcon name="i-ri:add-line" />
 									添加条目
-								</FaButton>
+								</YdButton>
 							</div>
 							<div v-if="releaseForm.changes[category.key].length === 0" class="ymcl-muted">
 								暂无条目
@@ -604,19 +606,19 @@ onMounted(() => {
 								:key="`${category.key}-${index}`"
 								class="ymcl-change-item"
 							>
-								<FaInput
+								<YdInput
 									v-model="releaseForm.changes[category.key][index]"
 									:placeholder="`${category.label}要点 ${index + 1}`"
 									clearable
 								/>
-								<FaButton
+								<YdButton
 									size="sm"
 									variant="destructive"
 									type="button"
 									@click="removeChangeItem(category.key, index)"
 								>
 									删除
-								</FaButton>
+								</YdButton>
 							</div>
 						</div>
 					</div>
@@ -630,16 +632,16 @@ onMounted(() => {
 					</div>
 				</form>
 				<template #footer>
-					<FaButton variant="outline" @click="releaseModalOpen = false">
+					<YdButton variant="outline" @click="releaseModalOpen = false">
 						取消
-					</FaButton>
-					<FaButton :loading="saving" @click="submitRelease">
+					</YdButton>
+					<YdButton :loading="saving" @click="submitRelease">
 						保存
-					</FaButton>
+					</YdButton>
 				</template>
-			</FaModal>
+			</YdModal>
 
-		<FaModal
+		<YdModal
 			v-model="artifactModalOpen"
 			:title="`维护制品 · ${detailVersion}`"
 			width="620px"
@@ -650,70 +652,73 @@ onMounted(() => {
 				<div class="ymcl-form-row">
 					<label class="ymcl-label">托管方式</label>
 					<div class="ymcl-row-actions">
-						<FaButton
+						<YdButton
 							size="sm"
 							:type="artifactForm.mode === 'file' ? 'primary' : undefined"
 							:variant="artifactForm.mode === 'file' ? undefined : 'outline'"
 							@click="artifactForm.mode = 'file'"
 						>
 							站内上传
-						</FaButton>
-						<FaButton
+						</YdButton>
+						<YdButton
 							size="sm"
 							:type="artifactForm.mode === 'url' ? 'primary' : undefined"
 							:variant="artifactForm.mode === 'url' ? undefined : 'outline'"
 							@click="artifactForm.mode = 'url'"
 						>
 							外部 URL
-						</FaButton>
+						</YdButton>
 					</div>
 				</div>
 				<div class="ymcl-form-row">
 					<label class="ymcl-label">kind</label>
-					<FaInput v-model="artifactForm.kind" placeholder="updater / installer / portable" clearable />
+					<YdInput v-model="artifactForm.kind" placeholder="updater / installer / portable" clearable />
 				</div>
 				<div class="ymcl-form-row">
 					<label class="ymcl-label">variant</label>
-					<FaInput v-model="artifactForm.variant" placeholder="tauri / deb / appimage / nsis..." clearable />
+					<YdInput v-model="artifactForm.variant" placeholder="tauri / deb / appimage / nsis..." clearable />
 				</div>
 				<div class="ymcl-form-row">
 					<label class="ymcl-label">platform / architecture</label>
 					<div class="ymcl-row-actions">
-						<FaInput v-model="artifactForm.platform" placeholder="windows / linux / macos" clearable />
-						<FaInput v-model="artifactForm.architecture" placeholder="x86_64 / aarch64" clearable />
+						<YdInput v-model="artifactForm.platform" placeholder="windows / linux / macos" clearable />
+						<YdInput v-model="artifactForm.architecture" placeholder="x86_64 / aarch64" clearable />
 					</div>
 				</div>
 				<div class="ymcl-form-row">
 					<label class="ymcl-label">targetPlatforms（逗号分隔，updater 用）</label>
-					<FaInput v-model="artifactForm.targetPlatforms" placeholder="windows-x86_64,linux-x86_64" clearable />
+					<YdInput v-model="artifactForm.targetPlatforms" placeholder="windows-x86_64,linux-x86_64" clearable />
 				</div>
 				<div class="ymcl-form-row">
 					<label class="ymcl-label">文件名（可空，站内上传默认取所选文件名）</label>
-					<FaInput v-model="artifactForm.filename" placeholder="YMCL-1.2.0_x64-setup.nsis.zip" clearable />
+					<YdInput v-model="artifactForm.filename" placeholder="YMCL-1.2.0_x64-setup.nsis.zip" clearable />
 				</div>
 				<template v-if="artifactForm.mode === 'url'">
 					<div class="ymcl-form-row">
 						<label class="ymcl-label">下载 URL（必填）</label>
-						<FaInput v-model="artifactForm.downloadUrl" placeholder="https://..." clearable />
+						<YdInput v-model="artifactForm.downloadUrl" placeholder="https://..." clearable />
 					</div>
 					<div class="ymcl-form-row">
 						<label class="ymcl-label">sha256（deb 等建议填写）</label>
-						<FaInput v-model="artifactForm.sha256" placeholder="hex" clearable />
+						<YdInput v-model="artifactForm.sha256" placeholder="hex" clearable />
 					</div>
 				</template>
 				<div class="ymcl-form-row">
 					<label class="ymcl-label">minisign 签名（updater 必填）</label>
 					<div class="ymcl-row-actions">
-						<FaButton size="sm" variant="outline" :disabled="uploadingArtifact" @click="pickSignatureFile">
-							<FaIcon name="i-ri:shield-check-line" />
+						<YdFilePicker ref="signaturePicker" accept=".sig,.txt,.minisig,text/plain" label="选择签名文件" @select="onSignatureFileSelect">
+							<template #default />
+						</YdFilePicker>
+						<YdButton size="sm" variant="outline" :disabled="uploadingArtifact" @click="pickSignatureFile">
+							<YdIcon name="i-ri:shield-check-line" />
 							选择 .sig 文件自动填充
-						</FaButton>
+						</YdButton>
 					</div>
-					<FaTextarea v-model="artifactForm.signature" :rows="4" placeholder="或直接粘贴 minisign 签名内容" />
+					<YdTextarea v-model="artifactForm.signature" :rows="4" placeholder="或直接粘贴 minisign 签名内容" />
 				</div>
 				<div v-if="artifactForm.mode === 'file'" class="ymcl-form-row">
 					<label class="ymcl-label">更新包文件（先确认上方元数据与签名，再选择文件；选中即上传）</label>
-					<FaFileUpload
+					<YdFileUpload
 						v-model="artifactFiles"
 						:max="1"
 						:http-request="uploadArtifactRequest"
@@ -724,19 +729,19 @@ onMounted(() => {
 				</div>
 			</form>
 			<template #footer>
-				<FaButton variant="outline" @click="artifactModalOpen = false">
+				<YdButton variant="outline" @click="artifactModalOpen = false">
 					取消
-				</FaButton>
-				<FaButton
+				</YdButton>
+				<YdButton
 					v-if="artifactForm.mode === 'url'"
 					:loading="saving"
 					@click="submitUrlArtifact"
 				>
 					保存 URL 制品
-				</FaButton>
+				</YdButton>
 			</template>
-			</FaModal>
-		</FaPageMain>
+			</YdModal>
+		</YdPageMain>
 	</section>
 </template>
 

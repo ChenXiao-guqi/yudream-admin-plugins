@@ -1,22 +1,24 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import {
-  FaButton,
-  FaIcon,
-  FaInput,
-  FaModal,
-  FaPageHeader,
-  FaPageMain,
-  FaPagination,
-  FaSearchBar,
-  FaSelect,
-  FaSwitch,
-  FaTable,
-  FaTag,
-  FaTextarea,
-  useFaModal,
-  useFaToast,
+  YdButton,
+  YdIcon,
+  YdInput,
+  YdModal,
+  YdPageHeader,
+  YdPageMain,
+  YdPagination,
+  YdSearchBar,
+  YdSelect,
+  YdSwitch,
+  YdResponsiveTable,
+  YdCard,
+  YdTag,
+  YdTextarea,
+  useYdModal,
+  useYdToast,
 } from '@yudream/components'
 import { onMounted, reactive, ref } from 'vue'
 import MarkdownEditor from '../components/MarkdownEditor.vue'
@@ -30,8 +32,8 @@ import {
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 
 const api = createContentApi(props.sdk)
-const toast = useFaToast()
-const confirm = useFaModal()
+const toast = useYdToast()
+const confirm = useYdModal()
 
 const loading = ref(false)
 const saving = ref(false)
@@ -215,15 +217,14 @@ onMounted(() => {
 </script>
 
 <template>
-	<FaPageHeader title="内容分发" description="维护启动器拉取的更新公告、新手指引与在线内容，公开端点 /v1/content/{kind} 与 /v1/catalog">
-		<FaButton type="primary" @click="openCreate">
-			<FaIcon name="i-ri:add-line" />
+	<YdPageHeader title="内容分发" description="维护启动器拉取的更新公告、新手指引与在线内容，公开端点 /v1/content/{kind} 与 /v1/catalog">
+		<YdButton type="primary" @click="openCreate">
+			<YdIcon name="i-ri:add-line" />
 			新建内容
-		</FaButton>
-	</FaPageHeader>
-	<FaPageMain>
-		<FaTable
-			v-loading="loading"
+		</YdButton>
+	</YdPageHeader>
+	<YdPageMain>
+		<YdLoadingOverlay :loading="loading"><YdResponsiveTable
 			:columns="columns"
 			:data="records"
 			row-key="id"
@@ -234,60 +235,71 @@ onMounted(() => {
 			column-visibility
 		>
 			<template #toolbar>
-				<FaSearchBar class="w-full">
+				<YdSearchBar class="w-full">
 					<div class="ymcl-form-row ymcl-filter-bar">
-						<FaSelect v-model="filters.kind" :options="kindSelectOptions" @update:model-value="applyFilters" />
-						<FaButton variant="outline" @click="applyFilters">
-							<FaIcon name="i-ri:search-line" />
+						<YdSelect v-model="filters.kind" :options="kindSelectOptions" @update:model-value="applyFilters" />
+						<YdButton variant="outline" @click="applyFilters">
+							<YdIcon name="i-ri:search-line" />
 							查询
-						</FaButton>
-						<FaButton variant="ghost" @click="resetFilters">
+						</YdButton>
+						<YdButton variant="ghost" @click="resetFilters">
 							重置
-						</FaButton>
+						</YdButton>
 					</div>
-				</FaSearchBar>
+				</YdSearchBar>
 			</template>
 			<template #empty>
 				<div class="ymcl-empty">
 					<span class="ymcl-muted">暂无内容。新建的更新公告会推送给启动器用户。</span>
-					<FaButton type="primary" @click="openCreate">
-						<FaIcon name="i-ri:add-line" />
+					<YdButton type="primary" @click="openCreate">
+						<YdIcon name="i-ri:add-line" />
 						新建内容
-					</FaButton>
+					</YdButton>
 				</div>
 			</template>
 			<template #cell-title="{ row }">
 				<span class="ymcl-break">{{ row.original.title }}</span>
 			</template>
 			<template #cell-kind="{ row }">
-				<FaTag :variant="row.original.kind === 'updates' ? 'default' : 'secondary'">
+				<YdTag :variant="row.original.kind === 'updates' ? 'default' : 'secondary'">
 					{{ kindLabels[row.original.kind] || row.original.kind }}
-				</FaTag>
+				</YdTag>
 			</template>
 			<template #cell-summary="{ row }">
 				<span class="ymcl-break">{{ row.original.summary || '-' }}</span>
 			</template>
 			<template #cell-status="{ row }">
-				<FaTag :variant="row.original.enabled !== false ? 'default' : 'outline'">
+				<YdTag :variant="row.original.enabled !== false ? 'default' : 'outline'">
 					{{ row.original.enabled !== false ? '已启用' : '已停用' }}
-				</FaTag>
+				</YdTag>
 			</template>
 			<template #cell-updatedAt="{ row }">{{ formatTime(row.original.updatedAt) }}</template>
 			<template #cell-operation="{ row }">
 				<div class="ymcl-row-actions">
-					<FaButton size="sm" variant="outline" @click="openEdit(row.original)">
+					<YdButton size="sm" variant="outline" @click="openEdit(row.original)">
 						编辑
-					</FaButton>
-					<FaButton size="sm" variant="outline" @click="toggleEnabled(row.original)">
+					</YdButton>
+					<YdButton size="sm" variant="outline" @click="toggleEnabled(row.original)">
 						{{ row.original.enabled !== false ? '停用' : '启用' }}
-					</FaButton>
-					<FaButton size="sm" variant="destructive" @click="confirmDelete(row.original)">
+					</YdButton>
+					<YdButton size="sm" variant="destructive" @click="confirmDelete(row.original)">
 						删除
-					</FaButton>
+					</YdButton>
 				</div>
 			</template>
-		</FaTable>
-		<FaPagination
+
+		<template #card="{ row }">
+			<YdCard class="w-full">
+				<div class="flex flex-col gap-3">
+					<div class="flex items-start justify-between gap-3"><strong class="break-all">{{ row.title }}</strong><YdTag :variant="row.enabled !== false ? 'default' : 'outline'">{{ row.enabled !== false ? '已启用' : '已停用' }}</YdTag></div>
+					<p class="ymcl-break">{{ kindLabels[row.kind] || row.kind }} · {{ row.summary || '-' }}</p>
+					<p class="ymcl-muted">排序 {{ row.sort }} · 更新于 {{ formatTime(row.updatedAt) }}</p>
+					<div class="ymcl-row-actions"><YdButton size="sm" variant="outline" @click="openEdit(row)">编辑</YdButton><YdButton size="sm" variant="outline" @click="toggleEnabled(row)">{{ row.enabled !== false ? '停用' : '启用' }}</YdButton><YdButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</YdButton></div>
+				</div>
+			</YdCard>
+		</template>
+</YdResponsiveTable></YdLoadingOverlay>
+		<YdPagination
 			v-model:page="pagination.page"
 			v-model:size="pagination.size"
 			:total="total"
@@ -296,9 +308,9 @@ onMounted(() => {
 			@page-change="reload"
 			@size-change="applyFilters"
 		/>
-	</FaPageMain>
+	</YdPageMain>
 
-	<FaModal
+	<YdModal
 		v-model="editorOpen"
 		:title="editorMode === 'create' ? '新建内容' : '编辑内容'"
 		width="720px"
@@ -308,15 +320,15 @@ onMounted(() => {
 		<form class="ymcl-form" @submit.prevent>
 			<div class="ymcl-form-row">
 				<label class="ymcl-label">分类</label>
-				<FaSelect v-model="form.kind" :options="CONTENT_KIND_OPTIONS.map(item => ({ ...item }))" />
+				<YdSelect v-model="form.kind" :options="CONTENT_KIND_OPTIONS.map(item => ({ ...item }))" />
 			</div>
 			<div class="ymcl-form-row">
 				<label class="ymcl-label">标题（必填）</label>
-				<FaInput v-model="form.title" placeholder="公告或指引标题" clearable />
+				<YdInput v-model="form.title" placeholder="公告或指引标题" clearable />
 			</div>
 			<div class="ymcl-form-row">
 				<label class="ymcl-label">摘要（弹窗通知预览，建议 300 字内）</label>
-				<FaTextarea v-model="form.summary" :rows="3" placeholder="一句话说明这次内容的要点" />
+				<YdTextarea v-model="form.summary" :rows="3" placeholder="一句话说明这次内容的要点" />
 			</div>
 			<div class="ymcl-form-row">
 				<label class="ymcl-label">正文（Markdown，公告弹窗展示）</label>
@@ -324,29 +336,29 @@ onMounted(() => {
 			</div>
 			<div class="ymcl-form-row">
 				<label class="ymcl-label">跳转链接（可选，启动器「访问」按钮）</label>
-				<FaInput v-model="form.url" placeholder="https://..." clearable />
+				<YdInput v-model="form.url" placeholder="https://..." clearable />
 			</div>
 			<div class="ymcl-form-row">
 				<label class="ymcl-label">封面图（可选）</label>
-				<FaInput v-model="form.coverUrl" placeholder="https://..." clearable />
+				<YdInput v-model="form.coverUrl" placeholder="https://..." clearable />
 			</div>
 			<div class="ymcl-form-row">
 				<label class="ymcl-label">备注（可选，仅管理端可见）</label>
-				<FaInput v-model="form.meta" clearable />
+				<YdInput v-model="form.meta" clearable />
 			</div>
 			<div class="ymcl-form-row">
 				<label class="ymcl-label">排序（数值越小越靠前）</label>
-				<FaInput v-model="form.sort" type="number" />
+				<YdInput v-model="form.sort" type="number" />
 			</div>
 			<div class="ymcl-form-row">
 				<label class="ymcl-label">启用（停用后启动器不再拉取）</label>
-				<FaSwitch v-model="form.enabled" />
+				<YdSwitch v-model="form.enabled" />
 			</div>
 			<div class="ymcl-form-row">
-				<FaButton type="primary" :loading="saving" @click="submitRecord">
+				<YdButton type="primary" :loading="saving" @click="submitRecord">
 					保存
-				</FaButton>
+				</YdButton>
 			</div>
 		</form>
-	</FaModal>
+	</YdModal>
 </template>
