@@ -1,11 +1,11 @@
 <template>
-  <FaCard :title="title" :description="eyebrow">
+  <YdCard :title="title" :description="eyebrow">
     <slot />
-  </FaCard>
+  </YdCard>
 </template>
 
 <script setup lang="ts">
-import { FaCard } from '@yudream/components'
+import { YdCard } from '@yudream/components'
 
 defineProps<{
   title: string

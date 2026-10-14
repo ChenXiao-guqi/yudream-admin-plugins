@@ -3,7 +3,7 @@ import type { TableColumn } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { AlipayOrder } from '../types'
 import { computed, onMounted, reactive, ref } from 'vue'
-import { FaButton, FaCard, FaIcon, FaInput, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable, FaSearchBar, FaTag } from '@yudream/components'
+import { YdButton, YdCard, YdIcon, YdInput, YdLoading, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdTag } from '@yudream/components'
 import { createAlipayApi } from '../api/alipay-api'
 
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
@@ -26,19 +26,20 @@ onMounted(load)
 </script>
 
 <template>
-  <FaPageHeader title="支付宝订单" class="mb-0" />
-  <FaPageMain>
-    <FaResponsiveTable v-loading="loading" row-key="outTradeNo" table-root-class="max-w-full overflow-x-auto rounded-lg" table-class="min-w-[1050px]" border stripe column-visibility :columns="columns" :data="filteredRows" empty-text="暂无订单">
-      <template #toolbar><FaSearchBar class="w-full"><div class="alipay-form-grid"><FaInput v-model="search" clearable placeholder="订单号 / 用户 / 状态" /><div class="alipay-actions"><FaButton variant="outline" @click="reset">重置</FaButton><FaButton @click="load"><FaIcon name="i-ri:search-line" />查询</FaButton></div></div></FaSearchBar></template>
-      <template #cell-status="{ row }"><FaTag>{{ row.original.status }}</FaTag></template>
+  <YdPageHeader title="支付宝订单" class="mb-0" />
+  <YdPageMain>
+    <YdLoading v-if="loading && !rows.length" class="py-6" />
+    <YdResponsiveTable :aria-busy="loading" row-key="outTradeNo" table-root-class="max-w-full overflow-x-auto rounded-lg" table-class="min-w-[1050px]" border stripe column-visibility :columns="columns" :data="filteredRows" empty-text="暂无订单">
+      <template #toolbar><YdSearchBar class="w-full"><div class="alipay-form-grid"><YdInput v-model="search" clearable placeholder="订单号 / 用户 / 状态" /><div class="alipay-actions"><YdButton variant="outline" @click="reset">重置</YdButton><YdButton @click="load"><YdIcon name="i-ri:search-line" />查询</YdButton></div></div></YdSearchBar></template>
+      <template #cell-status="{ row }"><YdTag>{{ row.original.status }}</YdTag></template>
       <template #cell-createdAt="{ row }">{{ formatTime(row.original.createdAt) }}</template>
       <template #card="{ row }">
-        <FaCard class="w-full">
+        <YdCard class="w-full">
           <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between gap-2">
               <span class="min-w-0 break-words text-base font-semibold">{{ row.outTradeNo }}</span>
               <div class="flex gap-1">
-                <FaTag>{{ row.status }}</FaTag>
+                <YdTag>{{ row.status }}</YdTag>
               </div>
             </div>
             <div class="flex flex-col gap-1 text-sm">
@@ -60,9 +61,9 @@ onMounted(load)
               </div>
             </div>
           </div>
-        </FaCard>
+        </YdCard>
       </template>
-    </FaResponsiveTable>
-    <FaPagination v-model:page="pager.page" v-model:size="pager.size" :total="pager.total" class="mt-3" @page-change="load" @size-change="onSize" />
-  </FaPageMain>
+    </YdResponsiveTable>
+    <YdPagination v-model:page="pager.page" v-model:size="pager.size" :total="pager.total" class="mt-3" @page-change="load" @size-change="onSize" />
+  </YdPageMain>
 </template>

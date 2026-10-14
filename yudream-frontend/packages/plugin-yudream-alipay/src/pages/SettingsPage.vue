@@ -2,13 +2,13 @@
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { AlipayConfig } from '../types'
 import { onMounted, reactive, ref } from 'vue'
-import { FaButton, FaIcon, FaInput, FaPageHeader, FaPageMain, FaSelect, FaSwitch, FaTextarea, useFaToast } from '@yudream/components'
+import { YdButton, YdIcon, YdInput, YdPageHeader, YdPageMain, YdSelect, YdSwitch, YdTextarea, useYdToast } from '@yudream/components'
 import { createAlipayApi } from '../api/alipay-api'
 import AlipayPanel from '../components/AlipayPanel.vue'
 
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 const api = createAlipayApi(props.sdk)
-const toast = useFaToast()
+const toast = useYdToast()
 const saving = ref(false)
 const DEFAULT_GATEWAY_URL = 'https://openapi.alipay.com/gateway.do'
 const form = reactive<AlipayConfig>(defaults({}))
@@ -21,25 +21,25 @@ onMounted(load)
 </script>
 
 <template>
-  <FaPageHeader title="支付宝配置" class="mb-0" />
-  <FaPageMain>
+  <YdPageHeader title="支付宝配置" class="mb-0" />
+  <YdPageMain>
     <AlipayPanel title="接口配置" eyebrow="Config">
       <form class="alipay-form" @submit.prevent="save">
         <div class="alipay-form-grid">
-          <label><span>启用状态</span><FaSwitch v-model="form.enabled" /></label>
-          <label><span>AppId</span><FaInput v-model="form.appId" placeholder="支付宝开放平台应用 AppId" /></label>
-          <label><span>签名类型</span><FaSelect v-model="form.signType" :options="signOptions" /></label>
-          <label><span>字符集</span><FaInput v-model="form.charset" placeholder="UTF-8" /></label>
+          <label><span>启用状态</span><YdSwitch v-model="form.enabled" /></label>
+          <label><span>AppId</span><YdInput v-model="form.appId" placeholder="支付宝开放平台应用 AppId" /></label>
+          <label><span>签名类型</span><YdSelect v-model="form.signType" :options="signOptions" /></label>
+          <label><span>字符集</span><YdInput v-model="form.charset" placeholder="UTF-8" /></label>
         </div>
-        <label><span>网关地址</span><FaInput v-model="form.gatewayUrl" placeholder="https://openapi.alipay.com/gateway.do" /></label>
+        <label><span>网关地址</span><YdInput v-model="form.gatewayUrl" placeholder="https://openapi.alipay.com/gateway.do" /></label>
         <div class="alipay-form-grid">
-          <label><span>异步通知地址</span><FaInput v-model="form.notifyUrl" placeholder="https://example.com/api/plugins/yudream-alipay/notify" /></label>
-          <label><span>同步返回地址</span><FaInput v-model="form.returnUrl" placeholder="https://example.com/pay/result" /></label>
+          <label><span>异步通知地址</span><YdInput v-model="form.notifyUrl" placeholder="https://example.com/api/plugins/yudream-alipay/notify" /></label>
+          <label><span>同步返回地址</span><YdInput v-model="form.returnUrl" placeholder="https://example.com/pay/result" /></label>
         </div>
-        <label><span>应用私钥</span><FaTextarea v-model="form.privateKey" placeholder="保存后会脱敏显示" /></label>
-        <label><span>支付宝公钥</span><FaTextarea v-model="form.alipayPublicKey" placeholder="保存后会脱敏显示" /></label>
-        <div class="alipay-actions"><FaButton :loading="saving" type="submit"><FaIcon name="i-ri:save-3-line" />保存配置</FaButton></div>
+        <label><span>应用私钥</span><YdTextarea v-model="form.privateKey" placeholder="保存后会脱敏显示" /></label>
+        <label><span>支付宝公钥</span><YdTextarea v-model="form.alipayPublicKey" placeholder="保存后会脱敏显示" /></label>
+        <div class="alipay-actions"><YdButton :loading="saving" type="submit"><YdIcon name="i-ri:save-3-line" />保存配置</YdButton></div>
       </form>
     </AlipayPanel>
-  </FaPageMain>
+  </YdPageMain>
 </template>

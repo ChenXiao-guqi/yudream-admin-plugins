@@ -3,7 +3,7 @@ import type { TableColumn } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { AlipayOrder } from '../types'
 import { onMounted, reactive, ref } from 'vue'
-import { FaCard, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable, FaTag } from '@yudream/components'
+import { YdCard, YdLoading, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdTag } from '@yudream/components'
 import { createAlipayApi } from '../api/alipay-api'
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 const api = createAlipayApi(props.sdk)
@@ -14,13 +14,13 @@ async function load() { loading.value = true; try { const result = await api.meO
 function onSize() { pager.page = 1; load() }
 onMounted(load)
 </script>
-<template><FaPageHeader title="我的支付宝订单" class="mb-0" /><FaPageMain><FaResponsiveTable v-loading="loading" row-key="outTradeNo" table-root-class="max-w-full overflow-x-auto rounded-lg" table-class="min-w-[900px]" border stripe :columns="columns" :data="rows"><template #cell-status="{ row }"><FaTag>{{ row.original.status }}</FaTag></template><template #cell-createdAt="{ row }">{{ formatTime(row.original.createdAt) }}</template><template #card="{ row }">
-  <FaCard class="w-full">
+<template><YdPageHeader title="我的支付宝订单" class="mb-0" /><YdPageMain><YdLoading v-if="loading && !rows.length" class="py-6" /><YdResponsiveTable :aria-busy="loading" row-key="outTradeNo" table-root-class="max-w-full overflow-x-auto rounded-lg" table-class="min-w-[900px]" border stripe :columns="columns" :data="rows"><template #cell-status="{ row }"><YdTag>{{ row.original.status }}</YdTag></template><template #cell-createdAt="{ row }">{{ formatTime(row.original.createdAt) }}</template><template #card="{ row }">
+  <YdCard class="w-full">
     <div class="flex flex-col gap-3">
       <div class="flex items-center justify-between gap-2">
         <span class="min-w-0 break-words text-base font-semibold">{{ row.outTradeNo }}</span>
         <div class="flex gap-1">
-          <FaTag>{{ row.status }}</FaTag>
+          <YdTag>{{ row.status }}</YdTag>
         </div>
       </div>
       <div class="flex flex-col gap-1 text-sm">
@@ -42,5 +42,5 @@ onMounted(load)
         </div>
       </div>
     </div>
-  </FaCard>
-</template></FaResponsiveTable><FaPagination v-model:page="pager.page" v-model:size="pager.size" :total="pager.total" class="mt-3" @page-change="load" @size-change="onSize" /></FaPageMain></template>
+  </YdCard>
+</template></YdResponsiveTable><YdPagination v-model:page="pager.page" v-model:size="pager.size" :total="pager.total" class="mt-3" @page-change="load" @size-change="onSize" /></YdPageMain></template>
