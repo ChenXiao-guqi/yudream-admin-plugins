@@ -1,12 +1,12 @@
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { PonyGameView, PonyMyStats, PonyOverview, PonyPlayerView } from '../types'
-import { useFaToast } from '@yudream/components'
+import { useYdToast } from '@yudream/components'
 import { computed, reactive, ref } from 'vue'
 import { createPonyApi } from '../api/pony-api'
 
 export function usePonyPlugin(sdk: YuDreamPluginSdk) {
   const api = createPonyApi(sdk)
-  const toast = useFaToast()
+  const toast = useYdToast()
   const loading = ref(false)
   const overview = ref<PonyOverview | null>(null)
   const games = ref<PonyGameView[]>([])

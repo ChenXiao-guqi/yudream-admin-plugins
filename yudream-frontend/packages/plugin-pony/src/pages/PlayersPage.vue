@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { PonyPluginModel } from '../composables/usePonyPlugin'
 import type { PonyPlayerView } from '../types'
-import { FaButton, FaCard, FaIcon, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable, FaTag } from '@yudream/components'
+import { YdButton, YdCard, YdIcon, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdTag } from '@yudream/components'
 
 defineProps<{ model: PonyPluginModel }>()
 const columns: TableColumn<PonyPlayerView>[] = [
@@ -17,12 +18,12 @@ const columns: TableColumn<PonyPlayerView>[] = [
 </script>
 
 <template>
-  <FaPageHeader title="玩家战绩" class="mb-0">
-    <FaButton variant="outline" :loading="model.loading" @click="model.loadPlayers"><FaIcon name="i-ri:refresh-line" />刷新</FaButton>
-  </FaPageHeader>
-  <FaPageMain>
-    <FaResponsiveTable
-      v-loading="model.loading"
+  <YdPageHeader title="玩家战绩" class="mb-0">
+    <YdButton variant="outline" :loading="model.loading" @click="model.loadPlayers"><YdIcon name="i-ri:refresh-line" />刷新</YdButton>
+  </YdPageHeader>
+  <YdPageMain>
+    <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable
+
       :columns="columns"
       :data="model.players"
       row-key="userId"
@@ -38,17 +39,17 @@ const columns: TableColumn<PonyPlayerView>[] = [
       <template #cell-winRate="{ row }">{{ model.playerWinRate(row.original) }}</template>
       <template #cell-streak="{ row }">
         <div class="pony-chip-list">
-          <FaTag variant="secondary">当前 {{ row.original.currentStreak }}</FaTag>
-          <FaTag variant="secondary">最佳 {{ row.original.bestStreak }}</FaTag>
+          <YdTag variant="secondary">当前 {{ row.original.currentStreak }}</YdTag>
+          <YdTag variant="secondary">最佳 {{ row.original.bestStreak }}</YdTag>
         </div>
       </template>
       <template #cell-updatedAt="{ row }">{{ model.formatTime(row.original.updatedAt) }}</template>
       <template #card="{ row }">
-        <FaCard class="w-full">
+        <YdCard class="w-full">
           <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between gap-2">
               <span class="min-w-0 break-words text-base font-semibold">{{ model.playerLabel(row) }}</span>
-              <FaTag variant="secondary">胜率 {{ model.playerWinRate(row) }}</FaTag>
+              <YdTag variant="secondary">胜率 {{ model.playerWinRate(row) }}</YdTag>
             </div>
             <div class="flex flex-col gap-1 text-sm">
               <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">QQ</span><span>{{ row.qq || '-' }}</span></div>
@@ -58,9 +59,9 @@ const columns: TableColumn<PonyPlayerView>[] = [
               <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">最近参与</span><span>{{ model.formatTime(row.updatedAt) }}</span></div>
             </div>
           </div>
-        </FaCard>
+        </YdCard>
       </template>
-    </FaResponsiveTable>
-    <FaPagination v-model:page="model.playerPager.page" v-model:size="model.playerPager.size" :total="model.playerPager.total" class="mt-3" @page-change="model.loadPlayers" @size-change="model.loadPlayers" />
-  </FaPageMain>
+    </YdResponsiveTable></YdLoadingOverlay>
+    <YdPagination v-model:page="model.playerPager.page" v-model:size="model.playerPager.size" :total="model.playerPager.total" class="mt-3" @page-change="model.loadPlayers" @size-change="model.loadPlayers" />
+  </YdPageMain>
 </template>
