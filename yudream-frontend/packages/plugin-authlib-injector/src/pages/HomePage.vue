@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { AuthlibEndpoint } from '../types'
 import type { AuthlibPluginModel } from '../composables/useAuthlibPlugin'
-import { FaButton, FaCard, FaIcon, FaPageHeader, FaPageMain, FaResponsiveTable, FaTag } from '@yudream/components'
+import { YdButton, YdCard, YdIcon, YdPageHeader, YdPageMain, YdResponsiveTable, YdTag } from '@yudream/components'
 
 defineProps<{ model: AuthlibPluginModel }>()
 
@@ -15,39 +16,39 @@ const columns: TableColumn<AuthlibEndpoint>[] = [
 
 <template>
   <section class="authlib-home">
-    <FaPageHeader title="Authlib 运行状态" description="查看 Yggdrasil 协议服务地址、依赖状态和固定协议端点。" class="mb-0">
-      <FaButton @click="model.copy(model.launcherUrl)">
-        <FaIcon name="i-ri:file-copy-line" />
+    <YdPageHeader title="Authlib 运行状态" description="查看 Yggdrasil 协议服务地址、依赖状态和固定协议端点。" class="mb-0">
+      <YdButton @click="model.copy(model.launcherUrl)">
+        <YdIcon name="i-ri:file-copy-line" />
         复制 API 地址
-      </FaButton>
-    </FaPageHeader>
+      </YdButton>
+    </YdPageHeader>
 
-    <FaPageMain>
+    <YdPageMain>
       <div class="authlib-summary-grid">
-        <FaCard title="启动器配置" description="Yggdrasil 服务根地址" content-class="authlib-card-content">
+        <YdCard title="启动器配置" description="Yggdrasil 服务根地址" content-class="authlib-card-content">
           <div class="authlib-address-row">
             <code>{{ model.launcherUrl }}</code>
-            <FaButton size="sm" variant="outline" @click="model.copy(model.launcherUrl)">
-              <FaIcon name="i-ri:file-copy-line" />
+            <YdButton size="sm" variant="outline" @click="model.copy(model.launcherUrl)">
+              <YdIcon name="i-ri:file-copy-line" />
               复制
-            </FaButton>
+            </YdButton>
           </div>
           <p class="authlib-muted">将此地址填写到支持 authlib-injector 的启动器或服务端配置中。</p>
-        </FaCard>
+        </YdCard>
 
-        <FaCard title="服务状态" description="仅管理端可见" content-class="authlib-card-content">
+        <YdCard title="服务状态" description="仅管理端可见" content-class="authlib-card-content">
           <div class="authlib-status-line">
             <span>连接状态</span>
-            <FaTag :variant="model.status ? 'default' : 'secondary'">{{ model.statusText }}</FaTag>
+            <YdTag :variant="model.status ? 'default' : 'secondary'">{{ model.statusText }}</YdTag>
           </div>
           <div class="authlib-status-line"><span>账号来源</span><strong>{{ model.status?.accountSource || '-' }}</strong></div>
           <div class="authlib-status-line"><span>皮肤插件</span><strong>{{ model.status?.skinPluginEnabled ? '已启用' : '未启用' }}</strong></div>
           <div class="authlib-status-line"><span>材质地址</span><code>{{ model.status?.textureBaseUrl || '-' }}</code></div>
-        </FaCard>
+        </YdCard>
       </div>
 
-      <FaResponsiveTable
-        v-loading="model.loading"
+      <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable
+
         row-key="path"
         table-root-class="authlib-endpoint-table-root rounded-lg overflow-hidden"
         table-class="min-w-[880px]"
@@ -63,20 +64,20 @@ const columns: TableColumn<AuthlibEndpoint>[] = [
               <strong>协议端点</strong>
               <span>固定协议清单，不作为管理 CRUD 数据。</span>
             </div>
-            <FaTag variant="secondary">{{ model.endpoints.length }} 个端点</FaTag>
+            <YdTag variant="secondary">{{ model.endpoints.length }} 个端点</YdTag>
           </div>
         </template>
         <template #cell-method="{ row }">
-          <FaTag :variant="row.original.method === 'GET' ? 'secondary' : 'default'">{{ row.original.method }}</FaTag>
+          <YdTag :variant="row.original.method === 'GET' ? 'secondary' : 'default'">{{ row.original.method }}</YdTag>
         </template>
         <template #cell-path="{ row }"><code>{{ row.original.path }}</code></template>
         <template #card="{ row }">
-          <FaCard class="w-full">
+          <YdCard class="w-full">
             <div class="flex flex-col gap-3">
               <div class="flex items-center justify-between gap-2">
                 <span class="text-base font-semibold break-all">{{ row.path }}</span>
                 <div class="flex gap-1">
-                  <FaTag :variant="row.method === 'GET' ? 'secondary' : 'default'">{{ row.method }}</FaTag>
+                  <YdTag :variant="row.method === 'GET' ? 'secondary' : 'default'">{{ row.method }}</YdTag>
                 </div>
               </div>
               <div class="flex flex-col gap-1 text-sm">
@@ -86,9 +87,9 @@ const columns: TableColumn<AuthlibEndpoint>[] = [
                 </div>
               </div>
             </div>
-          </FaCard>
+          </YdCard>
         </template>
-      </FaResponsiveTable>
-    </FaPageMain>
+      </YdResponsiveTable></YdLoadingOverlay>
+    </YdPageMain>
   </section>
 </template>

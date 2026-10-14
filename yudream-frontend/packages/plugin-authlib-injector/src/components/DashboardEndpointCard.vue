@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { FaButton, FaIcon, useFaToast } from '@yudream/components'
+import { YdAction, YdButton, YdIcon, useYdToast } from '@yudream/components'
 import { computed } from 'vue'
 
 interface DashboardCardLike {
@@ -11,7 +11,7 @@ interface DashboardCardLike {
 }
 
 const props = defineProps<{ sdk: YuDreamPluginSdk, card: DashboardCardLike, onOpen?: (card?: DashboardCardLike) => void }>()
-const toast = useFaToast()
+const toast = useYdToast()
 const endpointUrl = computed(() => absoluteUrl(props.sdk.http.url('/')).replace(/\/$/, ''))
 const dragPayload = computed(() => (props.card.dragPayloadTemplate || '{url}')
   .replaceAll('{encodedUrl}', encodeURIComponent(endpointUrl.value))
@@ -44,7 +44,7 @@ function absoluteUrl(url: string) {
 <template>
   <div class="dashboard-card__content authlib-dashboard-card">
     <div class="authlib-dashboard-card__body">
-      <button
+      <YdAction
         type="button"
         class="authlib-dashboard-card__endpoint"
         title="复制 API 地址，也可拖拽到支持导入配置的客户端"
@@ -54,14 +54,14 @@ function absoluteUrl(url: string) {
       >
         <code>{{ endpointUrl }}</code>
         <span class="authlib-dashboard-card__copy">
-          <FaIcon name="i-ri:file-copy-line" />
+          <YdIcon name="i-ri:file-copy-line" />
         </span>
-      </button>
+      </YdAction>
 
     </div>
     <div class="authlib-dashboard-card__actions">
       <span class="authlib-dashboard-card__hint">点击复制，或拖入启动器</span>
-      <FaButton v-if="card.actionPath" size="sm" variant="ghost" @click="onOpen?.(card)">打开管理</FaButton>
+      <YdButton v-if="card.actionPath" size="sm" variant="ghost" @click="onOpen?.(card)">打开管理</YdButton>
     </div>
   </div>
 </template>

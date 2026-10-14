@@ -1,12 +1,12 @@
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { AuthlibEndpoint, AuthlibStatus } from '../types'
-import { useFaToast } from '@yudream/components'
+import { useYdToast } from '@yudream/components'
 import { computed, reactive, ref } from 'vue'
 import { createAuthlibApi } from '../api/authlib-api'
 
 export function useAuthlibPlugin(sdk: YuDreamPluginSdk) {
   const api = createAuthlibApi(sdk)
-  const toast = useFaToast()
+  const toast = useYdToast()
   const loading = ref(false)
   const status = ref<AuthlibStatus | null>(null)
   const launcherUrl = computed(() => absoluteUrl(api.apiUrl('/')).replace(/\/$/, ''))
