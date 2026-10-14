@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { PetAdminItem } from '../types'
-import { FaButton, FaCard, FaDrawer, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable, FaTag } from '@yudream/components'
+import { YdButton, YdCard, YdDrawer, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdTag } from '@yudream/components'
 import { usePetAdmin } from '../composables/usePetAdmin'
 
 const props = defineProps<{
@@ -55,14 +56,14 @@ function formatTime(value?: string) {
 
 <template>
   <section class="mc-pet-page">
-    <FaPageHeader title="用户宠物">
-      <FaButton variant="outline" :loading="loading" @click="model.load">
+    <YdPageHeader title="用户宠物">
+      <YdButton variant="outline" :loading="loading" @click="model.load">
         刷新
-      </FaButton>
-    </FaPageHeader>
-    <FaPageMain>
-      <FaResponsiveTable
-        v-loading="loading"
+      </YdButton>
+    </YdPageHeader>
+    <YdPageMain>
+      <YdLoadingOverlay :loading="loading"><YdResponsiveTable
+
         row-key="userId"
         table-root-class="mc-pet-table-scroll"
         border
@@ -83,7 +84,7 @@ function formatTime(value?: string) {
           {{ row.original.effective.size }}px
         </template>
         <template #cell-hidden="{ row }">
-          <FaTag v-if="row.original.effective.hidden">已隐藏</FaTag>
+          <YdTag v-if="row.original.effective.hidden">已隐藏</YdTag>
           <span v-else class="mc-pet-muted">显示中</span>
         </template>
         <template #cell-updatedAt="{ row }">
@@ -91,16 +92,16 @@ function formatTime(value?: string) {
         </template>
         <template #cell-operation="{ row }">
           <div class="mc-pet-row-actions">
-            <FaButton size="sm" variant="outline" :loading="acting" @click="model.openDetail(row.original)">
+            <YdButton size="sm" variant="outline" :loading="acting" @click="model.openDetail(row.original)">
               详情
-            </FaButton>
-            <FaButton size="sm" variant="destructive" :loading="acting" @click="model.reset(row.original)">
+            </YdButton>
+            <YdButton size="sm" variant="destructive" :loading="acting" @click="model.reset(row.original)">
               重置
-            </FaButton>
+            </YdButton>
           </div>
         </template>
         <template #card="{ row }">
-          <FaCard class="w-full">
+          <YdCard class="w-full">
             <div class="mc-pet-card">
               <strong>{{ row.userId }}</strong>
               <div class="mc-pet-muted">
@@ -110,18 +111,18 @@ function formatTime(value?: string) {
                 <template v-if="row.effective.hidden"> · 已隐藏</template>
               </div>
               <div class="mc-pet-row-actions">
-                <FaButton size="sm" variant="outline" :loading="acting" @click="model.openDetail(row)">
+                <YdButton size="sm" variant="outline" :loading="acting" @click="model.openDetail(row)">
                   详情
-                </FaButton>
-                <FaButton size="sm" variant="destructive" :loading="acting" @click="model.reset(row)">
+                </YdButton>
+                <YdButton size="sm" variant="destructive" :loading="acting" @click="model.reset(row)">
                   重置
-                </FaButton>
+                </YdButton>
               </div>
             </div>
-          </FaCard>
+          </YdCard>
         </template>
-      </FaResponsiveTable>
-      <FaPagination
+      </YdResponsiveTable></YdLoadingOverlay>
+      <YdPagination
         v-model:page="pager.page"
         v-model:size="pager.size"
         :total="pager.total"
@@ -129,7 +130,7 @@ function formatTime(value?: string) {
         @page-change="model.load"
         @size-change="model.load"
       />
-      <FaDrawer
+      <YdDrawer
         v-model="detailVisible"
         title="用户宠物详情"
         side="right"
@@ -165,12 +166,12 @@ function formatTime(value?: string) {
             </dl>
           </section>
           <div class="mc-pet-actions">
-            <FaButton variant="destructive" :loading="acting" @click="model.reset(detail)">
+            <YdButton variant="destructive" :loading="acting" @click="model.reset(detail)">
               重置该用户偏好
-            </FaButton>
+            </YdButton>
           </div>
         </div>
-      </FaDrawer>
-    </FaPageMain>
+      </YdDrawer>
+    </YdPageMain>
   </section>
 </template>

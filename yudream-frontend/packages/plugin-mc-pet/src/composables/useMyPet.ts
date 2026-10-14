@@ -1,6 +1,6 @@
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { MyPet, MyPetSavePayload, PetOptions, PetPreferenceMode } from '../types'
-import { useFaToast } from '@yudream/components'
+import { useYdToast } from '@yudream/components'
 import { computed, onMounted, ref } from 'vue'
 import { createMcPetApi } from '../api/mc-pet-api'
 
@@ -10,7 +10,7 @@ export function textureUrl(hash?: string) {
 
 export function useMyPet(sdk: YuDreamPluginSdk) {
   const api = createMcPetApi(sdk)
-  const toast = useFaToast()
+  const toast = useYdToast()
 
   const loading = ref(false)
   const saving = ref(false)

@@ -7,9 +7,9 @@
     :style="positionStyle"
     @pointerdown="onPointerDown"
   >
-    <FaButton class="mc-pet-global__toggle" variant="outline" size="icon-sm" :aria-label="collapsed ? '展开网页宠物' : '收起网页宠物'" :title="collapsed ? '展开网页宠物' : '收起网页宠物'" @pointerdown.stop @click.stop="toggleCollapsed">
-      <FaIcon :name="collapsed ? 'morph:ghost' : 'morph:minus'" />
-    </FaButton>
+    <YdButton class="mc-pet-global__toggle" variant="outline" size="icon-sm" :aria-label="collapsed ? '展开网页宠物' : '收起网页宠物'" :title="collapsed ? '展开网页宠物' : '收起网页宠物'" @pointerdown.stop @click.stop="toggleCollapsed">
+      <YdIcon :name="collapsed ? 'morph:ghost' : 'morph:minus'" />
+    </YdButton>
     <transition name="mc-pet-speech">
       <div v-if="speech && !collapsed" class="mc-pet-global__speech" @pointerdown.stop>
         {{ speech }}
@@ -27,7 +27,7 @@
     </div>
     <transition name="mc-pet-bubble">
       <div v-if="menuOpen" class="mc-pet-global__bubble" @pointerdown.stop>
-        <button
+        <YdAction
           v-for="item in menuItems"
           :key="item.key"
           type="button"
@@ -36,7 +36,7 @@
         >
           <span :class="item.icon" />
           {{ item.label }}
-        </button>
+        </YdAction>
       </div>
     </transition>
   </div>
@@ -45,8 +45,8 @@
 <script setup lang="ts">
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { MyPet, PetAnimation } from '../types'
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import { FaButton, FaIcon } from '@yudream/components'
+import {computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { YdAction, YdButton, YdIcon } from '@yudream/components'
 import { useRouter } from 'vue-router'
 import { createMcPetApi } from '../api/mc-pet-api'
 import { getPetAction, registerPetAction } from '../pet/actions'

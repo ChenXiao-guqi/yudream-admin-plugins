@@ -1,30 +1,34 @@
 <template>
-  <FaModal v-model="open" title="上传皮肤" :confirm-button-loading="saving" :before-close="handleBeforeClose">
+  <YdModal v-model="open" title="上传皮肤" :confirm-button-loading="saving" :before-close="handleBeforeClose">
     <div class="mc-pet-upload">
       <div class="mc-pet-upload__picker">
         <PetStage :skin="previewSkin" :slim="form.model === 'slim'" :width="120" :height="144" />
-        <FaButton variant="outline" :disabled="saving" @click="pickFile">
-          {{ form.base64 ? '重新选择' : '选择皮肤 PNG' }}
-        </FaButton>
+        <YdFilePicker accept="image/png,.png" :disabled="saving" aria-label="选择皮肤 PNG" @select="onFileSelect">
+          <template #default="{ open, triggerAttrs }">
+            <YdButton v-bind="triggerAttrs" variant="outline" :disabled="saving" @click="open">
+              {{ form.base64 ? '重新选择' : '选择皮肤 PNG' }}
+            </YdButton>
+          </template>
+        </YdFilePicker>
         <span class="mc-pet-muted">64x64 或 64x32 PNG，约 1MB 以内</span>
       </div>
       <div class="mc-pet-upload__form">
-        <FaLabel label="皮肤名称" class="mc-pet-field">
-          <FaInput v-model="form.name" maxlength="40" placeholder="默认为文件名" />
-        </FaLabel>
-        <FaLabel label="模型" class="mc-pet-field">
-          <FaRadioGroup v-model="form.model" :options="modelOptions" />
-        </FaLabel>
+        <YdLabel label="皮肤名称" class="mc-pet-field">
+          <YdInput v-model="form.name" maxlength="40" placeholder="默认为文件名" />
+        </YdLabel>
+        <YdLabel label="模型" class="mc-pet-field">
+          <YdRadioGroup v-model="form.model" :options="modelOptions" />
+        </YdLabel>
         <span class="mc-pet-muted">上传后保存到你的皮肤衣柜，并可直接选为宠物皮肤。</span>
       </div>
     </div>
-  </FaModal>
+  </YdModal>
 </template>
 
 <script setup lang="ts">
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { PetClosetOption } from '../types'
-import { FaButton, FaInput, FaLabel, FaModal, FaRadioGroup, useFaToast } from '@yudream/components'
+import { YdButton, YdFilePicker, YdInput, YdLabel, YdModal, YdRadioGroup, useYdToast } from '@yudream/components'
 import { computed, reactive, ref, watch } from 'vue'
 import { createMcPetApi } from '../api/mc-pet-api'
 import PetStage from './PetStage.vue'
@@ -42,7 +46,7 @@ const emit = defineEmits<{
 const MAX_FILE_SIZE = 1024 * 1024
 
 const api = createMcPetApi(props.sdk)
-const toast = useFaToast()
+const toast = useYdToast()
 
 const saving = ref(false)
 const form = reactive({
@@ -73,18 +77,11 @@ watch(open, (value) => {
   }
 })
 
-/** CI 规范禁止模板内原生 input，文件选择用 JS 动态创建。 */
-function pickFile() {
-  const input = document.createElement('input')
-  input.type = 'file'
-  input.accept = 'image/png,.png'
-  input.onchange = () => {
-    const file = input.files?.[0]
-    if (file) {
-      void readFile(file)
-    }
+function onFileSelect(files: File[]) {
+  const file = files[0]
+  if (file) {
+    void readFile(file)
   }
-  input.click()
 }
 
 async function readFile(file: File) {

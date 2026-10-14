@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { PetClosetOption, PetCorner } from '../types'
-import { FaButton, FaPageHeader, FaPageMain, FaRadioGroup, FaSelect, FaSlider, FaSwitch } from '@yudream/components'
+import { YdButton, YdPageHeader, YdPageMain, YdRadioGroup, YdSelect, YdSlider, YdSwitch } from '@yudream/components'
 import { computed, ref } from 'vue'
 import PetStage from '../components/PetStage.vue'
 import SkinUploadModal from '../components/SkinUploadModal.vue'
@@ -59,13 +60,13 @@ async function onUploaded(item: PetClosetOption) {
 </script>
 
 <template>
-  <section v-loading="loading" class="mc-pet-page">
-    <FaPageHeader title="我的宠物">
-      <FaButton variant="outline" :loading="loading" @click="model.load">
+  <YdLoadingOverlay :loading="loading"><section  class="mc-pet-page">
+    <YdPageHeader title="我的宠物">
+      <YdButton variant="outline" :loading="loading" @click="model.load">
         刷新
-      </FaButton>
-    </FaPageHeader>
-    <FaPageMain>
+      </YdButton>
+    </YdPageHeader>
+    <YdPageMain>
       <div class="mc-pet-mypet">
         <div class="mc-pet-mypet__form">
           <div v-if="skinMissingHint" class="mc-pet-hint">
@@ -73,14 +74,14 @@ async function onUploaded(item: PetClosetOption) {
           </div>
           <label class="mc-pet-field">
             <span class="mc-pet-field__label">宠物来源</span>
-            <FaRadioGroup v-model="form.mode" :options="modeOptions" />
+            <YdRadioGroup v-model="form.mode" :options="modeOptions" />
             <span v-if="form.mode === 'default'" class="mc-pet-field__hint">
               使用管理员设置的默认宠物（当前：{{ pet?.source === 'texture' ? '皮肤材质' : '内置 Steve' }}）
             </span>
           </label>
           <label v-if="form.mode === 'player'" class="mc-pet-field">
             <span class="mc-pet-field__label">选择角色</span>
-            <FaSelect
+            <YdSelect
               v-model="form.playerName"
               :options="playerOptions"
               placeholder="请选择角色"
@@ -92,16 +93,16 @@ async function onUploaded(item: PetClosetOption) {
           </label>
           <label v-if="form.mode === 'closet'" class="mc-pet-field">
             <span class="mc-pet-field__label">选择衣柜皮肤</span>
-            <FaSelect
+            <YdSelect
               v-model="form.closetItemId"
               :options="closetOptions"
               placeholder="请选择衣柜皮肤"
               :disabled="!closetOptions.length"
             />
             <div v-if="options.skinAvailable" class="mc-pet-actions">
-              <FaButton variant="outline" @click="uploadVisible = true">
+              <YdButton variant="outline" @click="uploadVisible = true">
                 上传皮肤
-              </FaButton>
+              </YdButton>
             </div>
             <span v-if="!closetOptions.length" class="mc-pet-field__hint">
               衣柜还是空的，可点击「上传皮肤」直接上传 PNG，或先在皮肤插件中收藏皮肤。
@@ -109,26 +110,26 @@ async function onUploaded(item: PetClosetOption) {
           </label>
           <label class="mc-pet-field">
             <span class="mc-pet-field__label">宠物尺寸（{{ form.size }}px）</span>
-            <FaSlider v-model="sizeModel" :min="48" :max="320" :step="4" :tooltip="false" />
+            <YdSlider v-model="sizeModel" :min="48" :max="320" :step="4" :tooltip="false" />
           </label>
           <label class="mc-pet-field">
             <span class="mc-pet-field__label">默认停靠角</span>
-            <FaSelect v-model="form.corner" :options="cornerOptions" />
+            <YdSelect v-model="form.corner" :options="cornerOptions" />
             <span class="mc-pet-field__hint">未拖拽过宠物时停靠在该角落；拖拽后以拖拽位置为准。</span>
           </label>
           <div class="mc-pet-field">
-            <FaSwitch v-model="form.hidden">
+            <YdSwitch v-model="form.hidden">
               隐藏宠物
-            </FaSwitch>
+            </YdSwitch>
             <span class="mc-pet-field__hint">隐藏后不再全站显示，可随时回来重新开启。</span>
           </div>
           <div class="mc-pet-actions">
-            <FaButton type="submit" :loading="saving" @click="model.save">
+            <YdButton type="submit" :loading="saving" @click="model.save">
               保存设置
-            </FaButton>
-            <FaButton v-if="hasPosition" variant="outline" :disabled="saving" @click="model.clearPosition">
+            </YdButton>
+            <YdButton v-if="hasPosition" variant="outline" :disabled="saving" @click="model.clearPosition">
               回到默认停靠角
-            </FaButton>
+            </YdButton>
           </div>
         </div>
         <aside class="mc-pet-mypet__preview">
@@ -136,7 +137,7 @@ async function onUploaded(item: PetClosetOption) {
           <PetStage :skin="previewSkin" :slim="previewSlim" floating />
         </aside>
       </div>
-    </FaPageMain>
+    </YdPageMain>
     <SkinUploadModal :sdk="props.sdk" v-model:visible="uploadVisible" @uploaded="onUploaded" />
-  </section>
+  </section></YdLoadingOverlay>
 </template>

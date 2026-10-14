@@ -1,6 +1,6 @@
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { PetAdminItem, PetClickAction, PetClosetOption, PetCorner, PetDefaults, PetDefaultsMode } from '../types'
-import { useFaModal, useFaToast } from '@yudream/components'
+import { useYdModal, useYdToast } from '@yudream/components'
 import { onMounted, reactive, ref } from 'vue'
 import { createMcPetApi } from '../api/mc-pet-api'
 import { errorMessage } from './useMyPet'
@@ -8,7 +8,7 @@ import { errorMessage } from './useMyPet'
 /** 管理端全局默认设置。 */
 export function usePetDefaults(sdk: YuDreamPluginSdk) {
   const api = createMcPetApi(sdk)
-  const toast = useFaToast()
+  const toast = useYdToast()
 
   const loading = ref(false)
   const saving = ref(false)
@@ -120,8 +120,8 @@ export function usePetDefaults(sdk: YuDreamPluginSdk) {
 /** 管理端用户宠物列表。 */
 export function usePetAdmin(sdk: YuDreamPluginSdk) {
   const api = createMcPetApi(sdk)
-  const toast = useFaToast()
-  const modal = useFaModal()
+  const toast = useYdToast()
+  const modal = useYdModal()
 
   const loading = ref(false)
   const acting = ref(false)
