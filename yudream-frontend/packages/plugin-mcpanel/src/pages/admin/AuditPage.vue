@@ -247,7 +247,6 @@ onMounted(() => void load())
   <YdPageMain>
     <YdAlert v-if="error" variant="destructive" title="无法加载审计日志" :description="error" class="mb-4" />
     <YdLoadingOverlay :loading="loading"><YdResponsiveTable
-
       :columns="columns"
       :data="rows"
       row-key="logId"
@@ -260,12 +259,12 @@ onMounted(() => void load())
     >
       <template #toolbar>
         <YdSearchBar :show-toggle="false" class="w-full">
-          <div class="grid w-full gap-2 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_170px_minmax(0,1fr)_auto]">
-            <YdInput v-model="filters.action" clearable placeholder="动作，如 instance.start" class="w-full" @keydown.enter="() => { pager.page = 1; load() }" />
-            <YdInput v-model="filters.actor" clearable placeholder="操作者" class="w-full" @keydown.enter="() => { pager.page = 1; load() }" />
-            <YdSelect v-model="filters.targetType" :options="TARGET_TYPES" class="w-full" @change="() => { pager.page = 1; load() }" />
-            <YdInput v-model="filters.targetId" clearable placeholder="对象 ID" class="w-full" @keydown.enter="() => { pager.page = 1; load() }" />
-            <div class="flex items-center justify-end gap-2">
+          <div class="flex w-full flex-wrap items-center gap-2">
+            <YdInput v-model="filters.action" clearable placeholder="动作，如 instance.start" class="w-56" @keydown.enter="() => { pager.page = 1; load() }" />
+            <YdInput v-model="filters.actor" clearable placeholder="操作者" class="w-44" @keydown.enter="() => { pager.page = 1; load() }" />
+            <YdSelect v-model="filters.targetType" :options="TARGET_TYPES" class="w-36" @change="() => { pager.page = 1; load() }" />
+            <YdInput v-model="filters.targetId" clearable placeholder="对象 ID" class="w-52" @keydown.enter="() => { pager.page = 1; load() }" />
+            <div class="ml-auto flex items-center gap-2">
               <YdButton variant="outline" @click="reset">
                 重置
               </YdButton>

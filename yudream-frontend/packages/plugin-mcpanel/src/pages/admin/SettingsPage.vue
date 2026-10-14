@@ -819,8 +819,8 @@ onMounted(() => void load())
   </template>
     </YdAlert>
 
-    <div class="grid grid-cols-1 items-start gap-4 xl:grid-cols-2">
-      <YdCard title="注入下载源（authlib-injector / 时长统计）" class="xl:col-span-2">
+    <div class="flex flex-col gap-4 xl:max-w-[960px]">
+      <YdCard title="注入下载源（authlib-injector / 时长统计）" class="w-full">
         <div class="mcp-form">
           <label class="flex items-center gap-3 text-sm">
             <YdSwitch v-model="form.authlibEnabled" />

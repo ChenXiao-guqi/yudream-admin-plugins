@@ -110,6 +110,30 @@
   gap: 12px;
 }
 
+/* 独立表单页：限制字段行宽，避免在大屏上横向拉伸失去节奏 */
+.wallet-form--page {
+  max-width: 560px;
+  gap: 14px;
+  padding-top: 4px;
+}
+
+.wallet-form-head {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.wallet-form-head strong {
+  color: var(--color-text-1);
+  font-size: 15px;
+}
+
+.wallet-form-head span {
+  color: var(--color-text-3);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
 .wallet-form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
