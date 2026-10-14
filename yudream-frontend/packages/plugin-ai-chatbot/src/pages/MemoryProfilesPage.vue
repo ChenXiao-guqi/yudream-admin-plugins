@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { MemoryFact, MemoryProfile } from '../types'
 import { computed, onMounted, reactive, ref } from 'vue'
-import { FaAvatar, FaButton, FaInput, FaPageHeader, FaPageMain, FaPagination, FaTag, FaTextarea, useFaModal, useFaToast } from '@yudream/components'
+import { YdAvatar, YdButton, YdInput, YdPageHeader, YdPageMain, YdPagination, YdTag, YdTextarea, useYdModal, useYdToast } from '@yudream/components'
 import { createAiChatbotApi } from '../api/ai-chatbot-api'
 import FactsEditor from '../components/FactsEditor.vue'
 import { formatDateTime, formatPercent } from '../utils/format'
@@ -13,8 +14,8 @@ const MAX_TAGS = 20
 type Profile = Required<MemoryProfile> & { facts: Required<MemoryFact>[] }
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 const api = createAiChatbotApi(props.sdk)
-const toast = useFaToast()
-const modal = useFaModal()
+const toast = useYdToast()
+const modal = useYdModal()
 const rows = ref<Profile[]>([])
 const loading = ref(false)
 const pager = reactive({ page: 1, size: 12, total: 0 })
@@ -130,24 +131,24 @@ onMounted(load)
 <template>
   <section class="mp">
     <template v-if="view === 'list'">
-      <FaPageHeader title="记忆画像管理" description="维护每位用户的画像内容：摘要、标签与事实档案。">
-        <FaButton variant="outline" :loading="analyzingAll" @click="analyzeAll">一键分析全部</FaButton>
-        <FaButton variant="outline" :loading="loading" @click="load">刷新</FaButton>
-      </FaPageHeader>
-      <FaPageMain>
-        <div v-if="rows.length" v-loading="loading" class="mp-grid">
+      <YdPageHeader title="记忆画像管理" description="维护每位用户的画像内容：摘要、标签与事实档案。">
+        <YdButton variant="outline" :loading="analyzingAll" @click="analyzeAll">一键分析全部</YdButton>
+        <YdButton variant="outline" :loading="loading" @click="load">刷新</YdButton>
+      </YdPageHeader>
+      <YdPageMain>
+        <YdLoadingOverlay :loading="loading" v-if="rows.length"><div   class="mp-grid">
           <article v-for="row in rows" :key="row.id" class="mp-card">
             <header class="mp-card-head">
-              <FaAvatar :src="row.avatar || ''" :fallback="initial(row)" class="mp-avatar" />
+              <YdAvatar :src="row.avatar || ''" :fallback="initial(row)" class="mp-avatar" />
               <div class="mp-card-title">
                 <strong>{{ displayName(row) }}</strong>
                 <span class="mp-sub">QQ {{ row.platformUserId || '—' }}</span>
               </div>
-              <FaTag :variant="row.enabled ? 'default' : 'secondary'">{{ row.enabled ? '已启用' : '已停用' }}</FaTag>
+              <YdTag :variant="row.enabled ? 'default' : 'secondary'">{{ row.enabled ? '已启用' : '已停用' }}</YdTag>
             </header>
             <p class="mp-summary" :class="{ empty: !row.summary && !row.personality }">{{ row.personality || row.summary || '暂无画像内容，点击审阅后可由 AI 生成或人工维护。' }}</p>
             <div v-if="row.tags.length" class="mp-tags">
-              <FaTag v-for="tag in row.tags.slice(0, 4)" :key="tag" variant="secondary">{{ tag }}</FaTag>
+              <YdTag v-for="tag in row.tags.slice(0, 4)" :key="tag" variant="secondary">{{ tag }}</YdTag>
               <span v-if="row.tags.length > 4" class="mp-sub">+{{ row.tags.length - 4 }}</span>
             </div>
             <div class="mp-meta">
@@ -157,31 +158,31 @@ onMounted(load)
               <span>{{ formatDateTime(row.lastActivityAt) }}</span>
             </div>
             <footer class="mp-actions">
-              <FaButton size="sm" @click="openReview(row)">审阅画像</FaButton>
-              <FaButton size="sm" variant="outline" @click="toggle(row)">{{ row.enabled ? '停用' : '启用' }}</FaButton>
-              <FaButton size="sm" variant="destructive" @click="remove(row)">删除</FaButton>
+              <YdButton size="sm" @click="openReview(row)">审阅画像</YdButton>
+              <YdButton size="sm" variant="outline" @click="toggle(row)">{{ row.enabled ? '停用' : '启用' }}</YdButton>
+              <YdButton size="sm" variant="destructive" @click="remove(row)">删除</YdButton>
             </footer>
           </article>
-        </div>
+        </div></YdLoadingOverlay>
         <p v-else class="mp-empty">{{ loading ? '加载中…' : '暂无记忆画像' }}</p>
-        <FaPagination v-model:page="pager.page" v-model:size="pager.size" :total="pager.total" class="mt-3" @page-change="load" @size-change="load" />
-      </FaPageMain>
+        <YdPagination v-model:page="pager.page" v-model:size="pager.size" :total="pager.total" class="mt-3" @page-change="load" @size-change="load" />
+      </YdPageMain>
     </template>
 
     <template v-else-if="draft && selected">
-      <FaPageHeader :title="`${displayName(selected)} 的画像审阅`" description="人工审阅与维护画像内容；AI 生成的内容需确认后再保存。">
+      <YdPageHeader :title="`${displayName(selected)} 的画像审阅`" description="人工审阅与维护画像内容；AI 生成的内容需确认后再保存。">
         <div class="mp-head-actions">
-          <FaButton variant="outline" :loading="analyzing" @click="analyze">AI 重新分析</FaButton>
-          <FaButton variant="outline" @click="backToList">返回列表</FaButton>
+          <YdButton variant="outline" :loading="analyzing" @click="analyze">AI 重新分析</YdButton>
+          <YdButton variant="outline" @click="backToList">返回列表</YdButton>
         </div>
-      </FaPageHeader>
-      <FaPageMain>
+      </YdPageHeader>
+      <YdPageMain>
         <div class="mp-review">
           <aside class="mp-side">
             <div class="mp-side-head">
-              <FaAvatar :src="selected.avatar || ''" :fallback="initial(selected)" class="mp-avatar large" />
+              <YdAvatar :src="selected.avatar || ''" :fallback="initial(selected)" class="mp-avatar large" />
               <strong>{{ displayName(selected) }}</strong>
-              <FaTag :variant="selected.enabled ? 'default' : 'secondary'">{{ selected.enabled ? '已启用' : '已停用' }}</FaTag>
+              <YdTag :variant="selected.enabled ? 'default' : 'secondary'">{{ selected.enabled ? '已启用' : '已停用' }}</YdTag>
             </div>
             <dl class="mp-info">
               <div><dt>QQ</dt><dd>{{ selected.platformUserId || '—' }}</dd></div>
@@ -193,8 +194,8 @@ onMounted(load)
               <div><dt>上次 AI 分析</dt><dd>{{ formatDateTime(selected.lastAnalyzedAt) }}</dd></div>
             </dl>
             <div class="mp-side-actions">
-              <FaButton size="sm" variant="outline" @click="toggle(selected).then(load)">{{ selected.enabled ? '停用画像' : '启用画像' }}</FaButton>
-              <FaButton size="sm" variant="destructive" @click="remove(selected)">删除画像</FaButton>
+              <YdButton size="sm" variant="outline" @click="toggle(selected).then(load)">{{ selected.enabled ? '停用画像' : '启用画像' }}</YdButton>
+              <YdButton size="sm" variant="destructive" @click="remove(selected)">删除画像</YdButton>
             </div>
           </aside>
 
@@ -208,14 +209,14 @@ onMounted(load)
 
             <section class="mp-panel">
               <h3>人工摘要</h3>
-              <FaTextarea v-model="draft.summary" placeholder="人工审阅后的用户摘要，将用于 AI 上下文。" maxlength="1000" />
+              <YdTextarea v-model="draft.summary" placeholder="人工审阅后的用户摘要，将用于 AI 上下文。" maxlength="1000" />
             </section>
 
             <section class="mp-panel">
               <h3>标签 <span class="mp-hint">最多 {{ MAX_TAGS }} 个，回车添加</span></h3>
               <div class="mp-tag-editor">
-                <FaTag v-for="tag in draft.tags" :key="tag" variant="secondary" closable @close="removeTag(tag)">{{ tag }}</FaTag>
-                <FaInput v-model="tagInput" class="mp-tag-input" placeholder="输入标签后回车" @keydown="onTagKeydown" @blur="addTag" />
+                <YdTag v-for="tag in draft.tags" :key="tag" variant="secondary" closable @close="removeTag(tag)">{{ tag }}</YdTag>
+                <YdInput v-model="tagInput" class="mp-tag-input" placeholder="输入标签后回车" @keydown="onTagKeydown" @blur="addTag" />
               </div>
             </section>
 
@@ -233,12 +234,12 @@ onMounted(load)
             </section>
 
             <div class="mp-savebar">
-              <FaButton variant="outline" @click="backToList">取消</FaButton>
-              <FaButton :loading="saving" @click="saveProfile">保存画像</FaButton>
+              <YdButton variant="outline" @click="backToList">取消</YdButton>
+              <YdButton :loading="saving" @click="saveProfile">保存画像</YdButton>
             </div>
           </div>
         </div>
-      </FaPageMain>
+      </YdPageMain>
     </template>
   </section>
 </template>

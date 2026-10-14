@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { YdLoadingOverlay } from '@yudream/components'
+import {computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { FaAvatar, FaButton, FaCard, FaInput, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable, FaTag, useFaToast, type TableColumn } from '@yudream/components'
+import { YdAction, YdAvatar, YdButton, YdCard, YdInput, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdTag, useYdToast, type TableColumn } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import { createAiChatbotApi } from '../api/ai-chatbot-api'
 import type { ActivityEvent, ActivityFilters, ActivityTimelinePoint, MemoryProfile, ProfileObservation } from '../types'
@@ -9,7 +10,7 @@ import { formatDateTime, formatPercent } from '../utils/format'
 
 const FACT_LABELS: Record<string, string> = { preference: '偏好', interest: '兴趣', identity: '身份', note: '备注', habit: '习惯', topic: '话题', emotion: '情绪', recent_message: '最近消息' }
 interface FactTone { text: string; border: string }
-const PRIMARY_TONE: FactTone = { text: 'rgb(var(--primary-6))', border: 'rgb(var(--primary-6) / 0.45)' }
+const PRIMARY_TONE: FactTone = { text: 'var(--color-text-1)', border: 'color-mix(in srgb, var(--color-text-1) 45%, transparent)' }
 const FACT_TONES: Record<string, FactTone> = {
   preference: PRIMARY_TONE,
   interest: { text: 'rgb(var(--success-6))', border: 'rgb(var(--success-6) / 0.45)' },
@@ -21,12 +22,12 @@ const FACT_TONES: Record<string, FactTone> = {
   recent_message: { text: 'var(--color-text-3)', border: 'var(--color-border-2)' },
 }
 const DEFAULT_FACT_TONE: FactTone = { text: 'var(--color-text-2)', border: 'var(--color-border-3)' }
-const HEAT_COLORS = ['var(--color-fill-2)', 'rgb(var(--primary-6) / 0.25)', 'rgb(var(--primary-6) / 0.5)', 'rgb(var(--primary-6) / 0.75)', 'rgb(var(--primary-6))']
+const HEAT_COLORS = ['var(--color-fill-2)', 'color-mix(in srgb, var(--color-text-1) 25%, transparent)', 'color-mix(in srgb, var(--color-text-1) 50%, transparent)', 'color-mix(in srgb, var(--color-text-1) 75%, transparent)', 'var(--color-text-1)']
 const CALENDAR_WEEKS = 15
 
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 const api = createAiChatbotApi(props.sdk)
-const toast = useFaToast()
+const toast = useYdToast()
 const router = useRouter()
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
@@ -179,45 +180,45 @@ onMounted(() => loadUsers())
 
 <template>
   <section class="upw">
-    <FaPageHeader title="用户画像工作台" description="面向单个用户的画像审阅：AI 人格分析、标签、事实、发言证据与活跃趋势。">
-      <FaButton variant="outline" :loading="usersLoading" @click="loadUsers(1)">刷新</FaButton>
-    </FaPageHeader>
-    <FaPageMain>
+    <YdPageHeader title="用户画像工作台" description="面向单个用户的画像审阅：AI 人格分析、标签、事实、发言证据与活跃趋势。">
+      <YdButton variant="outline" :loading="usersLoading" @click="loadUsers(1)">刷新</YdButton>
+    </YdPageHeader>
+    <YdPageMain>
       <div class="upw-layout">
         <aside class="upw-users">
           <div class="upw-search">
-            <FaInput v-model="keyword" placeholder="搜索昵称 / QQ / 用户标识" class="w-full" />
+            <YdInput v-model="keyword" placeholder="搜索昵称 / QQ / 用户标识" class="w-full" />
           </div>
           <div class="upw-user-list">
-            <button v-for="user in filteredUsers" :key="user.id" type="button" class="upw-user-card" :class="{ active: user.id === selectedId }" @click="select(user)">
-              <FaAvatar :src="user.avatar || ''" :fallback="initial(user)" class="upw-avatar" />
+            <YdAction v-for="user in filteredUsers" :key="user.id" type="button" class="upw-user-card" :class="{ active: user.id === selectedId }" @click="select(user)">
+              <YdAvatar :src="user.avatar || ''" :fallback="initial(user)" class="upw-avatar" />
               <span class="upw-user-main">
                 <span class="upw-user-name">
                   <strong>{{ displayName(user) }}</strong>
-                  <FaTag v-if="user.enabled === false" variant="secondary">已停用</FaTag>
+                  <YdTag v-if="user.enabled === false" variant="secondary">已停用</YdTag>
                 </span>
                 <span class="upw-user-sub">{{ user.platformUserId || user.userId || '—' }}</span>
                 <span v-if="user.tags?.length" class="upw-user-tags">
-                  <FaTag v-for="tag in user.tags.slice(0, 3)" :key="tag" variant="secondary">{{ tag }}</FaTag>
+                  <YdTag v-for="tag in user.tags.slice(0, 3)" :key="tag" variant="secondary">{{ tag }}</YdTag>
                   <span v-if="user.tags.length > 3" class="upw-user-sub">+{{ user.tags.length - 3 }}</span>
                 </span>
               </span>
               <span class="upw-user-time">{{ relativeTime(user.lastActivityAt) }}</span>
-            </button>
+            </YdAction>
             <p v-if="!filteredUsers.length" class="upw-empty small">{{ usersLoading ? '加载中…' : '没有匹配的用户' }}</p>
           </div>
-          <button v-if="hasMore" type="button" class="upw-more" :disabled="usersLoading" @click="loadUsers(userPager.page + 1)">
+          <YdAction v-if="hasMore" type="button" class="upw-more" :disabled="usersLoading" @click="loadUsers(userPager.page + 1)">
             加载更多（{{ users.length }} / {{ userPager.total }}）
-          </button>
+          </YdAction>
         </aside>
 
-        <div v-if="profile" v-loading="detailLoading" class="upw-detail">
+        <YdLoadingOverlay :loading="detailLoading" v-if="profile"><div   class="upw-detail">
           <section class="upw-hero">
-            <FaAvatar :src="profile.avatar || ''" :fallback="initial(profile)" class="upw-avatar large" />
+            <YdAvatar :src="profile.avatar || ''" :fallback="initial(profile)" class="upw-avatar large" />
             <div class="upw-hero-main">
               <div class="upw-hero-title">
                 <h2>{{ displayName(profile) }}</h2>
-                <FaTag :variant="profile.enabled === false ? 'secondary' : 'default'">{{ profile.enabled === false ? '画像已停用' : '画像已启用' }}</FaTag>
+                <YdTag :variant="profile.enabled === false ? 'secondary' : 'default'">{{ profile.enabled === false ? '画像已停用' : '画像已启用' }}</YdTag>
               </div>
               <p class="upw-hero-sub">QQ {{ profile.platformUserId || '—' }} · 群 {{ profile.channelId || '—' }} · 最后活跃 {{ relativeTime(profile.lastActivityAt) }}</p>
               <div class="upw-hero-stats">
@@ -232,8 +233,8 @@ onMounted(() => loadUsers())
               </div>
             </div>
             <div class="upw-hero-actions">
-              <FaButton :loading="analyzing" @click="analyze">重新分析画像</FaButton>
-              <FaButton variant="link" @click="goMemoryProfiles">管理画像</FaButton>
+              <YdButton :loading="analyzing" @click="analyze">重新分析画像</YdButton>
+              <YdButton variant="link" @click="goMemoryProfiles">管理画像</YdButton>
             </div>
           </section>
 
@@ -261,7 +262,7 @@ onMounted(() => loadUsers())
           <section class="upw-card">
             <div class="upw-card-head"><h3>标签</h3><span class="upw-hint">由 AI 分析或人工维护</span></div>
             <div v-if="profile.tags?.length" class="upw-tags">
-              <FaTag v-for="tag in profile.tags" :key="tag" variant="secondary">{{ tag }}</FaTag>
+              <YdTag v-for="tag in profile.tags" :key="tag" variant="secondary">{{ tag }}</YdTag>
             </div>
             <p v-else class="upw-empty small">暂无标签</p>
           </section>
@@ -324,17 +325,17 @@ onMounted(() => loadUsers())
 
           <section class="upw-card">
             <div class="upw-card-head"><h3>最近互动事件</h3><span class="upw-hint">仅元数据，不含消息正文</span></div>
-            <FaResponsiveTable row-key="id" table-root-class="overflow-x-auto" table-class="min-w-[560px]" :columns="eventColumns" :data="events" empty-text="暂无互动事件">
+            <YdResponsiveTable row-key="id" table-root-class="overflow-x-auto" table-class="min-w-[560px]" :columns="eventColumns" :data="events" empty-text="暂无互动事件">
               <template #cell-occurredAt="{ row }">{{ formatDateTime(row.original.occurredAt) }}</template>
               <template #cell-mode="{ row }">{{ row.original.mode === 'MENTION' ? '@触发' : (row.original.mode === 'RANDOM' ? '随机' : '—') }}</template>
-              <template #cell-result="{ row }"><FaTag :variant="row.original.success ? 'default' : 'destructive'">{{ row.original.success ? '成功' : '失败' }}</FaTag></template>
+              <template #cell-result="{ row }"><YdTag :variant="row.original.success ? 'default' : 'destructive'">{{ row.original.success ? '成功' : '失败' }}</YdTag></template>
               <template #card="{ row }">
-                <FaCard class="w-full">
+                <YdCard class="w-full">
                   <div class="flex flex-col gap-3">
                     <div class="flex items-center justify-between gap-2">
                       <span class="min-w-0 break-words text-base font-semibold">{{ formatDateTime(row.occurredAt) }}</span>
                       <div class="flex gap-1">
-                        <FaTag :variant="row.success ? 'default' : 'destructive'">{{ row.success ? '成功' : '失败' }}</FaTag>
+                        <YdTag :variant="row.success ? 'default' : 'destructive'">{{ row.success ? '成功' : '失败' }}</YdTag>
                       </div>
                     </div>
                     <div class="flex flex-col gap-1 text-sm">
@@ -348,15 +349,15 @@ onMounted(() => loadUsers())
                       </div>
                     </div>
                   </div>
-                </FaCard>
+                </YdCard>
               </template>
-            </FaResponsiveTable>
-            <FaPagination v-model:page="eventPager.page" v-model:size="eventPager.size" :total="eventPager.total" class="mt-3" @page-change="loadEvents" @size-change="loadEvents" />
+            </YdResponsiveTable>
+            <YdPagination v-model:page="eventPager.page" v-model:size="eventPager.size" :total="eventPager.total" class="mt-3" @page-change="loadEvents" @size-change="loadEvents" />
           </section>
-        </div>
+        </div></YdLoadingOverlay>
         <div v-else class="upw-placeholder">{{ detailLoading ? '加载中…' : '从左侧选择一位用户查看画像分析' }}</div>
       </div>
-    </FaPageMain>
+    </YdPageMain>
   </section>
 </template>
 
