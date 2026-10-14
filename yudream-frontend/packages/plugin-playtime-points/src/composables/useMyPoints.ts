@@ -1,12 +1,12 @@
 import type { MySummary, SettlementRecord } from '../types'
 import type { PlaytimePointsApi } from '../api/playtime-points-api'
 import { reactive, ref } from 'vue'
-import { useFaToast } from '@yudream/components'
+import { useYdToast } from '@yudream/components'
 import { errorMessage } from './utils'
 
 /** 用户端「我的积分」：汇总数据与个人结算流水。 */
 export function useMyPoints(api: PlaytimePointsApi) {
-  const toast = useFaToast()
+  const toast = useYdToast()
   const loading = ref(false)
   const summary = ref<MySummary | null>(null)
   const records = ref<SettlementRecord[]>([])

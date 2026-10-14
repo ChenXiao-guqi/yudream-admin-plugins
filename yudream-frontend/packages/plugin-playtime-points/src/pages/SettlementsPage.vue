@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { TableColumn } from '@yudream/components'
 import type { SettlementRecord } from '../types'
-import { FaButton, FaCard, FaIcon, FaInput, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable, FaSearchBar, FaSelect, FaTag } from '@yudream/components'
+import { YdButton, YdCard, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdSelect, YdTag } from '@yudream/components'
 import { onMounted } from 'vue'
 import { createPlaytimePointsApi } from '../api/playtime-points-api'
 import { useSettlements } from '../composables/useSettlements'
@@ -38,16 +39,16 @@ onMounted(() => {
 </script>
 
 <template>
-  <FaPageHeader title="结算记录">
-    <FaButton :loading="running" @click="model.runNow()">
-      <FaIcon name="i-ri:play-circle-line" />
+  <YdPageHeader title="结算记录">
+    <YdButton :loading="running" @click="model.runNow()">
+      <YdIcon name="i-ri:play-circle-line" />
       立即结算
-    </FaButton>
-  </FaPageHeader>
+    </YdButton>
+  </YdPageHeader>
 
-  <FaPageMain>
-    <FaResponsiveTable
-      v-loading="loading"
+  <YdPageMain>
+    <YdLoadingOverlay :loading="loading"><YdResponsiveTable
+
       row-key="id"
       table-root-class="rounded-lg overflow-hidden"
       table-class="ptp-table-w1360"
@@ -59,9 +60,9 @@ onMounted(() => {
       empty-text="暂无结算记录：玩家退出服务器并达到 1 积分后这里会出现流水。"
     >
       <template #toolbar>
-        <FaSearchBar class="w-full">
+        <YdSearchBar class="w-full">
           <div class="ptp-filters">
-            <FaSelect
+            <YdSelect
               v-model="filters.serverId"
               :options="serverOptions"
               placeholder="全部服务器"
@@ -69,7 +70,7 @@ onMounted(() => {
               class="ptp-filter-control"
               @change="model.search()"
             />
-            <FaInput
+            <YdInput
               v-model="filters.keyword"
               placeholder="按玩家名搜索"
               clearable
@@ -77,16 +78,16 @@ onMounted(() => {
               @keyup.enter="model.search()"
             />
             <div class="flex items-center gap-2">
-              <FaButton size="sm" @click="model.search()">
-                <FaIcon name="i-ri:search-line" />
+              <YdButton size="sm" @click="model.search()">
+                <YdIcon name="i-ri:search-line" />
                 查询
-              </FaButton>
-              <FaButton size="sm" variant="outline" @click="model.resetFilters()">
+              </YdButton>
+              <YdButton size="sm" variant="outline" @click="model.resetFilters()">
                 重置
-              </FaButton>
+              </YdButton>
             </div>
           </div>
-        </FaSearchBar>
+        </YdSearchBar>
       </template>
       <template #cell-windowEnd="{ row }">{{ formatTime(row.original.windowEnd) }}</template>
       <template #cell-effective="{ row }">{{ row.original.effectiveMinutes }} 分钟</template>
@@ -106,18 +107,18 @@ onMounted(() => {
       <template #cell-weight="{ row }">{{ weightLabel(row.original) }}</template>
       <template #cell-points="{ row }">{{ row.original.points }}</template>
       <template #cell-credited="{ row }">
-        <FaTag :variant="Number(row.original.credited) > 0 ? 'default' : 'secondary'">
+        <YdTag :variant="Number(row.original.credited) > 0 ? 'default' : 'secondary'">
           {{ creditedLabel(row.original) }}
-        </FaTag>
+        </YdTag>
       </template>
       <template #card="{ row }">
-        <FaCard class="w-full">
+        <YdCard class="w-full">
           <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between gap-2">
               <span class="min-w-0 break-words text-base font-semibold">{{ row.playerName }}</span>
-              <FaTag :variant="Number(row.credited) > 0 ? 'default' : 'secondary'">
+              <YdTag :variant="Number(row.credited) > 0 ? 'default' : 'secondary'">
                 {{ creditedLabel(row) }}
-              </FaTag>
+              </YdTag>
             </div>
             <div class="flex flex-col gap-1 text-sm">
               <div class="flex gap-2">
@@ -150,17 +151,17 @@ onMounted(() => {
               </div>
             </div>
           </div>
-        </FaCard>
+        </YdCard>
       </template>
       <template #empty>
         <div class="ptp-empty">
-          <FaIcon name="i-ri:file-list-3-line" />
+          <YdIcon name="i-ri:file-list-3-line" />
           <span>暂无结算记录：玩家退出服务器并达到 1 积分后这里会出现流水。</span>
         </div>
       </template>
-    </FaResponsiveTable>
+    </YdResponsiveTable></YdLoadingOverlay>
 
-    <FaPagination
+    <YdPagination
       v-model:page="pager.page"
       v-model:size="pager.size"
       :total="pager.total"
@@ -168,5 +169,5 @@ onMounted(() => {
       @page-change="model.onPageChange"
       @size-change="model.onSizeChange"
     />
-  </FaPageMain>
+  </YdPageMain>
 </template>

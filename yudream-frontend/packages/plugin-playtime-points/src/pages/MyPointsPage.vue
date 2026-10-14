@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { TableColumn } from '@yudream/components'
 import type { CheckInRewardRecord, SettlementRecord } from '../types'
-import { FaCard, FaIcon, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable, FaTable, FaTag } from '@yudream/components'
+import { YdCard, YdIcon, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdTag } from '@yudream/components'
 import { computed, onMounted } from 'vue'
 import { createPlaytimePointsApi } from '../api/playtime-points-api'
 import { useMyPoints } from '../composables/useMyPoints'
@@ -67,36 +68,36 @@ onMounted(() => {
 </script>
 
 <template>
-  <FaPageHeader
+  <YdPageHeader
     title="我的积分"
     description="在 Minecraft 服务器里的有效在线时长会按服务器（群组服下按子服）权重折算成钱包积分，每次退出服务器结算一次；项目打卡验收通过也会计分：每次固定积分，或按打卡的有效在线时长与时薪折算（没有时长的打卡按设置的固定积分发放）。"
   />
 
-  <FaPageMain>
-    <div class="ptp-my" v-loading="loading">
+  <YdPageMain>
+    <YdLoadingOverlay :loading="loading"><div class="ptp-my" >
       <div class="ptp-stat-grid">
-        <FaCard v-for="card in statCards" :key="card.label" class="ptp-stat-card">
+        <YdCard v-for="card in statCards" :key="card.label" class="ptp-stat-card">
           <div class="ptp-stat-label">{{ card.label }}</div>
           <div class="ptp-stat-value">
             <span v-if="card.label === '钱包余额' && summary?.assetSymbol">{{ summary.assetSymbol }}</span>
             {{ card.value }}
           </div>
           <div class="ptp-stat-hint">{{ card.hint }}</div>
-        </FaCard>
+        </YdCard>
       </div>
 
-      <FaCard v-if="summary && summary.byServer.length">
+      <YdCard v-if="summary && summary.byServer.length">
         <div class="ptp-section-title">各服务器明细</div>
         <div class="ptp-server-list">
           <div v-for="item in summary.byServer" :key="item.serverId" class="ptp-server-row">
             <span class="ptp-server-name">{{ item.serverName || item.serverId }}</span>
             <span class="ptp-server-meta">{{ item.effectiveMinutes }} 分钟 · {{ item.sessions }} 次结算</span>
-            <FaTag variant="secondary">+{{ item.points }}</FaTag>
+            <YdTag variant="secondary">+{{ item.points }}</YdTag>
           </div>
         </div>
-      </FaCard>
+      </YdCard>
 
-      <FaCard v-if="subServerSummary.length">
+      <YdCard v-if="subServerSummary.length">
         <div class="ptp-section-title">各子服明细</div>
         <p class="ptp-hint">
           群组服下同一段在线时长会按子服拆分计分，下表是各子服累计的有效时长与积分（不含被设置为「不参与结算」的子服）。
@@ -107,12 +108,12 @@ onMounted(() => {
             <span class="ptp-server-meta">
               {{ item.serverName || item.serverId }} · {{ item.effectiveMinutes }} 分钟 · {{ item.sessions }} 次结算
             </span>
-            <FaTag variant="secondary">+{{ item.points }}</FaTag>
+            <YdTag variant="secondary">+{{ item.points }}</YdTag>
           </div>
         </div>
-      </FaCard>
+      </YdCard>
 
-      <FaCard v-if="checkInSummary && checkInSummary.enabled">
+      <YdCard v-if="checkInSummary && checkInSummary.enabled">
         <div class="ptp-section-title">最近打卡积分</div>
         <p class="ptp-hint">
           项目工作细节验收通过后，该细节下的每条打卡各计一次积分：固定金额模式按每次金额发放；
@@ -120,7 +121,7 @@ onMounted(() => {
           （图片/文件/定位等非 MC 打卡）按「非时长打卡每次积分」发放，并在这里展示折算过程；
           「来源」表示这笔是由定时拉取还是验收实时回调发放的。没有发放的打卡也会列出并写明原因。
         </p>
-        <FaTable
+        <YdResponsiveTable
           row-key="checkInId"
           table-root-class="rounded-lg overflow-hidden"
           table-class="ptp-table-w1030"
@@ -131,9 +132,9 @@ onMounted(() => {
         >
           <template #cell-acceptedAt="{ row }">{{ formatTime(row.original.acceptedAt) }}</template>
           <template #cell-points="{ row }">
-            <FaTag :variant="Number(row.original.credit) > 0 ? 'secondary' : 'outline'">
+            <YdTag :variant="Number(row.original.credit) > 0 ? 'secondary' : 'outline'">
               {{ Number(row.original.credit) > 0 ? `+${row.original.credit}` : '未发放' }}
-            </FaTag>
+            </YdTag>
           </template>
           <template #cell-calc="{ row }">
             <span class="ptp-calc-text" :class="{ 'ptp-calc-skipped': !(Number(row.original.credit) > 0) }">
@@ -141,23 +142,25 @@ onMounted(() => {
             </span>
           </template>
           <template #cell-source="{ row }">
-            <FaTag :variant="row.original.source === 'REALTIME' ? 'default' : 'outline'">
+            <YdTag :variant="row.original.source === 'REALTIME' ? 'default' : 'outline'">
               {{ sourceLabel(row.original.source) }}
-            </FaTag>
+            </YdTag>
           </template>
           <template #empty>
             <div class="ptp-empty">
-              <FaIcon name="i-ri:map-pin-time-line" />
+              <YdIcon name="i-ri:map-pin-time-line" />
               <span>还没有打卡积分：项目工作细节验收通过后会自动计入。</span>
             </div>
           </template>
-        </FaTable>
-      </FaCard>
 
-      <FaCard>
+          <template #card="{ row }"><YdCard class="w-full"><div class="flex flex-col gap-2"><div class="flex items-start justify-between gap-3"><strong>{{ row.projectName || row.projectId }} · {{ row.detailTitle || row.detailId }}</strong><YdTag :variant="Number(row.credit) > 0 ? 'secondary' : 'outline'">{{ Number(row.credit) > 0 ? `+${row.credit}` : '未发放' }}</YdTag></div><span class="ptp-muted">验收通过 {{ formatTime(row.acceptedAt) }}</span><span>{{ checkInRewardLabel(row) }}</span><span>来源：{{ sourceLabel(row.source) }}</span></div></YdCard></template>
+</YdResponsiveTable>
+      </YdCard>
+
+      <YdCard>
         <div class="ptp-section-title">结算流水</div>
-        <FaResponsiveTable
-          v-loading="loading"
+        <YdLoadingOverlay :loading="loading"><YdResponsiveTable
+
           row-key="id"
           table-root-class="rounded-lg overflow-hidden"
           table-class="ptp-table-w1240"
@@ -184,18 +187,18 @@ onMounted(() => {
           </template>
           <template #cell-points="{ row }">{{ row.original.points }}</template>
           <template #cell-credited="{ row }">
-            <FaTag :variant="Number(row.original.credited) > 0 ? 'default' : 'secondary'">
+            <YdTag :variant="Number(row.original.credited) > 0 ? 'default' : 'secondary'">
               {{ creditedLabel(row.original) }}
-            </FaTag>
+            </YdTag>
           </template>
           <template #card="{ row }">
-            <FaCard class="w-full">
+            <YdCard class="w-full">
               <div class="flex flex-col gap-3">
                 <div class="flex items-center justify-between gap-2">
                   <span class="min-w-0 break-words text-base font-semibold">{{ row.playerName }}</span>
-                  <FaTag :variant="Number(row.credited) > 0 ? 'default' : 'secondary'">
+                  <YdTag :variant="Number(row.credited) > 0 ? 'default' : 'secondary'">
                     {{ creditedLabel(row) }}
-                  </FaTag>
+                  </YdTag>
                 </div>
                 <div class="flex flex-col gap-1 text-sm">
                   <div class="flex gap-2">
@@ -228,16 +231,16 @@ onMounted(() => {
                   </template>
                 </div>
               </div>
-            </FaCard>
+            </YdCard>
           </template>
           <template #empty>
             <div class="ptp-empty">
-              <FaIcon name="i-ri:coins-line" />
+              <YdIcon name="i-ri:coins-line" />
               <span>还没有结算记录：进入服务器并退出一次后，这里会出现第一笔结算。</span>
             </div>
           </template>
-        </FaResponsiveTable>
-        <FaPagination
+        </YdResponsiveTable></YdLoadingOverlay>
+        <YdPagination
           v-model:page="pager.page"
           v-model:size="pager.size"
           :total="pager.total"
@@ -245,7 +248,7 @@ onMounted(() => {
           @page-change="model.onPageChange"
           @size-change="model.onSizeChange"
         />
-      </FaCard>
-    </div>
-  </FaPageMain>
+      </YdCard>
+    </div></YdLoadingOverlay>
+  </YdPageMain>
 </template>

@@ -1,7 +1,7 @@
 import type { AdminOptions, CheckInRewardMode, ProjectOption, SaveSettingsPayload, ServerRule } from '../types'
 import type { PlaytimePointsApi } from '../api/playtime-points-api'
 import { computed, reactive, ref } from 'vue'
-import { useFaToast } from '@yudream/components'
+import { useYdToast } from '@yudream/components'
 import { errorMessage } from './utils'
 
 /** 管理端设置页状态：加载 options（依赖可用性、服务器与子服拓扑、项目列表、当前规则），组装保存。 */
@@ -58,7 +58,7 @@ function minutesOf(value: number | string | null | undefined): number {
 }
 
 export function useSettings(api: PlaytimePointsApi) {
-  const toast = useFaToast()
+  const toast = useYdToast()
   const loading = ref(false)
   const saving = ref(false)
   const options = ref<AdminOptions | null>(null)

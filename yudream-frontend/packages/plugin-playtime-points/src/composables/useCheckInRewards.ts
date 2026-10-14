@@ -1,12 +1,12 @@
 import type { CheckInRewardRecord } from '../types'
 import type { PlaytimePointsApi } from '../api/playtime-points-api'
 import { reactive, ref } from 'vue'
-import { useFaToast } from '@yudream/components'
+import { useYdToast } from '@yudream/components'
 import { errorMessage } from './utils'
 
 /** 管理端「打卡积分」流水页：分页列表 + 按项目 / 用户筛选。 */
 export function useCheckInRewards(api: PlaytimePointsApi) {
-  const toast = useFaToast()
+  const toast = useYdToast()
   const loading = ref(false)
   const records = ref<CheckInRewardRecord[]>([])
   const projectOptions = ref<{ label: string, value: string }[]>([])

@@ -1,13 +1,13 @@
 import type { SettlementRecord } from '../types'
 import type { PlaytimePointsApi } from '../api/playtime-points-api'
 import { reactive, ref } from 'vue'
-import { useFaModal, useFaToast } from '@yudream/components'
+import { useYdModal, useYdToast } from '@yudream/components'
 import { errorMessage } from './utils'
 
 /** 管理端结算记录页：分页列表、筛选与手动立即结算。 */
 export function useSettlements(api: PlaytimePointsApi) {
-  const toast = useFaToast()
-  const modal = useFaModal()
+  const toast = useYdToast()
+  const modal = useYdModal()
   const loading = ref(false)
   const running = ref(false)
   const records = ref<SettlementRecord[]>([])
