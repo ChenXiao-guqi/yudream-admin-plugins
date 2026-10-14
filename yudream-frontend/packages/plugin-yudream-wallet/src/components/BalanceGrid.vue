@@ -1,6 +1,6 @@
 <template>
   <div class="wallet-balance-grid">
-    <button
+    <YdAction
       v-for="balance in model.sortedBalances"
       :key="balance.assetCode"
       class="wallet-balance-card"
@@ -19,7 +19,7 @@
       <span class="wallet-card-stat">
         历史总额 {{ model.assetSymbol(balance.assetCode) }}{{ model.formatAmount(balance.historicalTotalAmount, balance.assetCode) }}
       </span>
-    </button>
+    </YdAction>
 
     <div v-if="!model.sortedBalances.length" class="wallet-empty">
       暂无余额数据
@@ -28,6 +28,7 @@
 </template>
 
 <script setup lang="ts">
+import { YdAction } from '@yudream/components'
 import type { WalletPluginModel } from '../composables/useWalletPlugin'
 
 defineProps<{

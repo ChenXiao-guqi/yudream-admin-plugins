@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { WalletPluginModel } from '../composables/useWalletPlugin'
 import type { WalletBalance } from '../types'
 import { computed, ref } from 'vue'
-import { FaButton, FaCard, FaIcon, FaInput, FaModal, FaPageHeader, FaPageMain, FaPagination, FaSearchBar, FaSelect, FaResponsiveTable, FaTextarea } from '@yudream/components'
+import { YdButton, YdCard, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdSearchBar, YdSelect, YdResponsiveTable, YdTextarea } from '@yudream/components'
 
 const props = defineProps<{ model: WalletPluginModel }>()
 const changeVisible = ref(false)
@@ -24,12 +25,12 @@ function onSizeChange() { props.model.balancePager.page = 1; props.model.loadAdm
 </script>
 
 <template>
-  <FaPageHeader title="余额管理" class="mb-0">
-    <FaButton @click="openChange"><FaIcon name="i-ri:exchange-funds-line" />余额处理</FaButton>
-  </FaPageHeader>
-  <FaPageMain>
-    <FaResponsiveTable
-      v-loading="model.loading"
+  <YdPageHeader title="余额管理" class="mb-0">
+    <YdButton @click="openChange"><YdIcon name="i-ri:exchange-funds-line" />余额处理</YdButton>
+  </YdPageHeader>
+  <YdPageMain>
+    <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable
+
       :columns="columns"
       :data="model.adminBalances"
       :row-key="row => `${row.userId}:${row.assetCode}`"
@@ -39,11 +40,11 @@ function onSizeChange() { props.model.balancePager.page = 1; props.model.loadAdm
       empty-text="暂无余额记录"
     >
       <template #toolbar>
-        <FaSearchBar class="w-full">
+        <YdSearchBar class="w-full">
           <div class="wallet-filter-bar">
-            <FaSelect v-model="model.selectedBalanceAssetCode" :options="assetOptions" @change="model.applyBalanceAsset(model.selectedBalanceAssetCode)" />
+            <YdSelect v-model="model.selectedBalanceAssetCode" :options="assetOptions" @change="model.applyBalanceAsset(model.selectedBalanceAssetCode)" />
           </div>
-        </FaSearchBar>
+        </YdSearchBar>
       </template>
       <template #cell-user="{ row }">{{ model.userLabel(row.original.user, row.original.userId) }}</template>
       <template #cell-email="{ row }">{{ row.original.user?.email || '-' }}</template>
@@ -52,7 +53,7 @@ function onSizeChange() { props.model.balancePager.page = 1; props.model.loadAdm
       <template #cell-historical="{ row }">{{ model.assetSymbol(row.original.assetCode) }}{{ model.formatAmount(row.original.historicalTotalAmount, row.original.assetCode) }}</template>
       <template #cell-updatedAt="{ row }">{{ model.formatTime(row.original.updatedAt) }}</template>
       <template #card="{ row }">
-        <FaCard class="w-full">
+        <YdCard class="w-full">
           <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between gap-2">
               <span class="min-w-0 break-words text-base font-semibold">{{ model.userLabel(row.user, row.userId) }}</span>
@@ -76,22 +77,22 @@ function onSizeChange() { props.model.balancePager.page = 1; props.model.loadAdm
               </div>
             </div>
           </div>
-        </FaCard>
+        </YdCard>
       </template>
-    </FaResponsiveTable>
-    <FaPagination v-model:page="model.balancePager.page" v-model:size="model.balancePager.size" :total="model.balancePager.total" class="mt-3" @page-change="onPageChange" @size-change="onSizeChange" />
+    </YdResponsiveTable></YdLoadingOverlay>
+    <YdPagination v-model:page="model.balancePager.page" v-model:size="model.balancePager.size" :total="model.balancePager.total" class="mt-3" @page-change="onPageChange" @size-change="onSizeChange" />
 
-    <FaModal v-model="changeVisible" title="余额处理" description="为指定用户执行入账或扣账操作。" show-cancel-button :show-confirm-button="false" class="sm:max-w-2xl">
+    <YdModal v-model="changeVisible" title="余额处理" description="为指定用户执行入账或扣账操作。" show-cancel-button :show-confirm-button="false" class="sm:max-w-2xl">
       <form class="wallet-form gap-3" @submit.prevent>
-        <label><span>用户 ID</span><FaInput v-model="model.changeForm.userId" placeholder="系统用户 ID" /></label>
-        <label><span>币种</span><FaSelect v-model="model.changeForm.assetCode" :options="assetOptions" /></label>
-        <label><span>金额</span><FaInput v-model="model.changeForm.amount" inputmode="decimal" placeholder="0" /></label>
-        <label><span>备注</span><FaTextarea v-model="model.changeForm.remark" placeholder="可选" /></label>
+        <label><span>用户 ID</span><YdInput v-model="model.changeForm.userId" placeholder="系统用户 ID" /></label>
+        <label><span>币种</span><YdSelect v-model="model.changeForm.assetCode" :options="assetOptions" /></label>
+        <label><span>金额</span><YdInput v-model="model.changeForm.amount" inputmode="decimal" placeholder="0" /></label>
+        <label><span>备注</span><YdTextarea v-model="model.changeForm.remark" placeholder="可选" /></label>
         <div class="wallet-actions">
-          <FaButton :loading="model.saving" type="button" @click="changeBalance('credit')"><FaIcon name="i-ri:add-circle-line" />入账</FaButton>
-          <FaButton :loading="model.saving" variant="destructive" type="button" @click="changeBalance('debit')"><FaIcon name="i-ri:subtract-line" />扣账</FaButton>
+          <YdButton :loading="model.saving" type="button" @click="changeBalance('credit')"><YdIcon name="i-ri:add-circle-line" />入账</YdButton>
+          <YdButton :loading="model.saving" variant="destructive" type="button" @click="changeBalance('debit')"><YdIcon name="i-ri:subtract-line" />扣账</YdButton>
         </div>
       </form>
-    </FaModal>
-  </FaPageMain>
+    </YdModal>
+  </YdPageMain>
 </template>

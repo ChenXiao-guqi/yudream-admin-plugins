@@ -1,12 +1,12 @@
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { AssetForm, BalanceChangeForm, RechargeForm, RechargeSettingsForm, TimeValue, TransactionFilters, TransferForm, WalletAsset, WalletBalance, WalletPaymentChannel, WalletRechargeOptions, WalletRechargeResult, WalletRechargeRule, WalletSummary, WalletTransaction, WalletUser } from '../types'
-import { useFaToast } from '@yudream/components'
+import { useYdToast } from '@yudream/components'
 import { computed, reactive, ref } from 'vue'
 import { createWalletApi } from '../api/wallet-api'
 
 export function useWalletPlugin(sdk: YuDreamPluginSdk) {
   const api = createWalletApi(sdk)
-  const toast = useFaToast()
+  const toast = useYdToast()
   const loading = ref(false)
   const saving = ref(false)
   const summary = ref<WalletSummary | null>(null)

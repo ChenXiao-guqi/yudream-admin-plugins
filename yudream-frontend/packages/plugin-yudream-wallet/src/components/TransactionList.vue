@@ -2,7 +2,7 @@
 import type { TableColumn } from '@yudream/components'
 import type { WalletPluginModel } from '../composables/useWalletPlugin'
 import type { WalletTransaction } from '../types'
-import { FaCard, FaResponsiveTable, FaTag } from '@yudream/components'
+import { YdCard, YdResponsiveTable, YdTag } from '@yudream/components'
 
 defineProps<{ model: WalletPluginModel, items: WalletTransaction[] }>()
 
@@ -18,7 +18,7 @@ const columns: TableColumn<WalletTransaction>[] = [
 </script>
 
 <template>
-  <FaResponsiveTable
+  <YdResponsiveTable
     row-key="id"
     table-root-class="max-w-full overflow-x-auto rounded-lg"
     table-class="min-w-[1050px]"
@@ -30,7 +30,7 @@ const columns: TableColumn<WalletTransaction>[] = [
     empty-text="暂无流水"
   >
     <template #cell-type="{ row }">
-      <FaTag>{{ model.transactionLabel(row.original.type) }}</FaTag>
+      <YdTag>{{ model.transactionLabel(row.original.type) }}</YdTag>
     </template>
     <template #cell-source="{ row }">{{ model.sourceLabel(row.original.source) }}</template>
     <template #cell-assetCode="{ row }">{{ model.assetName(row.original.assetCode) }}</template>
@@ -48,12 +48,12 @@ const columns: TableColumn<WalletTransaction>[] = [
     <template #cell-businessNo="{ row }">{{ row.original.businessNo || '-' }}</template>
     <template #cell-createdAt="{ row }">{{ model.formatTime(row.original.createdAt) }}</template>
     <template #card="{ row }">
-      <FaCard class="w-full">
+      <YdCard class="w-full">
         <div class="flex flex-col gap-3">
           <div class="flex items-center justify-between gap-2">
             <span class="min-w-0 break-words text-base font-semibold">{{ row.businessNo || '-' }}</span>
             <div class="flex gap-1">
-              <FaTag>{{ model.transactionLabel(row.type) }}</FaTag>
+              <YdTag>{{ model.transactionLabel(row.type) }}</YdTag>
             </div>
           </div>
           <div class="flex flex-col gap-1 text-sm">
@@ -78,7 +78,7 @@ const columns: TableColumn<WalletTransaction>[] = [
             </div>
           </div>
         </div>
-      </FaCard>
+      </YdCard>
     </template>
-  </FaResponsiveTable>
+  </YdResponsiveTable>
 </template>

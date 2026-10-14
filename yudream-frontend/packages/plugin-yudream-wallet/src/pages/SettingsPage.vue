@@ -1,12 +1,13 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { WalletPluginModel } from '../composables/useWalletPlugin'
 import type { WalletAsset } from '../types'
 import { ref } from 'vue'
-import { FaButton, FaCard, FaIcon, FaInput, FaModal, FaNumberField, FaPageHeader, FaPageMain, FaPagination, FaSwitch, FaResponsiveTable, FaTag, useFaModal } from '@yudream/components'
+import { YdButton, YdCard, YdIcon, YdInput, YdModal, YdNumberField, YdPageHeader, YdPageMain, YdPagination, YdSwitch, YdResponsiveTable, YdTag, useYdModal } from '@yudream/components'
 
 const props = defineProps<{ model: WalletPluginModel }>()
-const modal = useFaModal()
+const modal = useYdModal()
 const formVisible = ref(false)
 const assetColumns: TableColumn<WalletAsset>[] = [
   { accessorKey: 'code', header: '编码', width: 100, fixed: 'left' }, { accessorKey: 'name', header: '名称', width: 140 },
@@ -23,24 +24,24 @@ async function saveAsset() { await props.model.saveAsset(); formVisible.value = 
 </script>
 
 <template>
-  <FaPageHeader title="币种管理" class="mb-0">
-    <FaButton @click="openCreate"><FaIcon name="i-ri:add-line" />新增币种</FaButton>
-  </FaPageHeader>
-  <FaPageMain>
-    <FaResponsiveTable v-loading="model.loading" row-key="code" table-root-class="max-w-full overflow-x-auto rounded-lg" table-class="min-w-[1050px]" border stripe column-visibility :columns="assetColumns" :data="model.managedAssets" empty-text="暂无币种">
-      <template #cell-type="{ row }"><FaTag>{{ row.original.money ? '货币' : '积分' }}</FaTag></template>
-      <template #cell-transferEnabled="{ row }"><FaTag>{{ row.original.transferEnabled ? '允许' : '关闭' }}</FaTag></template>
-      <template #cell-enabled="{ row }"><FaTag>{{ row.original.enabled ? '启用' : '停用' }}</FaTag></template>
-      <template #cell-operation="{ row }"><div class="flex-center gap-2"><FaButton size="sm" variant="outline" @click="openEdit(row.original)">编辑</FaButton><FaButton size="sm" variant="destructive" :loading="model.saving" @click="confirmDeleteAsset(row.original)">删除</FaButton></div></template>
+  <YdPageHeader title="币种管理" class="mb-0">
+    <YdButton @click="openCreate"><YdIcon name="i-ri:add-line" />新增币种</YdButton>
+  </YdPageHeader>
+  <YdPageMain>
+    <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable  row-key="code" table-root-class="max-w-full overflow-x-auto rounded-lg" table-class="min-w-[1050px]" border stripe column-visibility :columns="assetColumns" :data="model.managedAssets" empty-text="暂无币种">
+      <template #cell-type="{ row }"><YdTag>{{ row.original.money ? '货币' : '积分' }}</YdTag></template>
+      <template #cell-transferEnabled="{ row }"><YdTag>{{ row.original.transferEnabled ? '允许' : '关闭' }}</YdTag></template>
+      <template #cell-enabled="{ row }"><YdTag>{{ row.original.enabled ? '启用' : '停用' }}</YdTag></template>
+      <template #cell-operation="{ row }"><div class="flex-center gap-2"><YdButton size="sm" variant="outline" @click="openEdit(row.original)">编辑</YdButton><YdButton size="sm" variant="destructive" :loading="model.saving" @click="confirmDeleteAsset(row.original)">删除</YdButton></div></template>
       <template #card="{ row }">
-        <FaCard class="w-full">
+        <YdCard class="w-full">
           <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between gap-2">
               <span class="min-w-0 break-words text-base font-semibold">{{ row.name }} ({{ row.code }})</span>
               <div class="flex gap-1">
-                <FaTag>{{ row.money ? '货币' : '积分' }}</FaTag>
-                <FaTag>{{ row.transferEnabled ? '允许' : '关闭' }}</FaTag>
-                <FaTag>{{ row.enabled ? '启用' : '停用' }}</FaTag>
+                <YdTag>{{ row.money ? '货币' : '积分' }}</YdTag>
+                <YdTag>{{ row.transferEnabled ? '允许' : '关闭' }}</YdTag>
+                <YdTag>{{ row.enabled ? '启用' : '停用' }}</YdTag>
               </div>
             </div>
             <div class="flex flex-col gap-1 text-sm">
@@ -58,26 +59,26 @@ async function saveAsset() { await props.model.saveAsset(); formVisible.value = 
               </div>
             </div>
             <div class="flex flex-wrap gap-2 border-t pt-3">
-              <FaButton size="sm" variant="outline" @click="openEdit(row)">编辑</FaButton>
-              <FaButton size="sm" variant="destructive" :loading="model.saving" @click="confirmDeleteAsset(row)">删除</FaButton>
+              <YdButton size="sm" variant="outline" @click="openEdit(row)">编辑</YdButton>
+              <YdButton size="sm" variant="destructive" :loading="model.saving" @click="confirmDeleteAsset(row)">删除</YdButton>
             </div>
           </div>
-        </FaCard>
+        </YdCard>
       </template>
-    </FaResponsiveTable>
-    <FaPagination v-model:page="model.assetPager.page" v-model:size="model.assetPager.size" :total="model.assetPager.total" class="mt-3" @page-change="onAssetPage" @size-change="onAssetSize" />
+    </YdResponsiveTable></YdLoadingOverlay>
+    <YdPagination v-model:page="model.assetPager.page" v-model:size="model.assetPager.size" :total="model.assetPager.total" class="mt-3" @page-change="onAssetPage" @size-change="onAssetSize" />
 
-    <FaModal v-model="formVisible" title="币种配置" show-cancel-button class="sm:max-w-2xl" :confirm-loading="model.saving" @confirm="saveAsset">
+    <YdModal v-model="formVisible" title="币种配置" show-cancel-button class="sm:max-w-2xl" :confirm-loading="model.saving" @confirm="saveAsset">
         <form class="wallet-form gap-3" @submit.prevent="saveAsset">
-          <label><span>编码</span><FaInput v-model="model.assetForm.code" placeholder="POINT" /></label>
-          <label><span>名称</span><FaInput v-model="model.assetForm.name" placeholder="积分" /></label>
-          <label><span>符号</span><FaInput v-model="model.assetForm.symbol" placeholder="¥ / 积分" /></label>
-          <label><span>精度</span><FaNumberField v-model="model.assetForm.scale" :min="0" :max="8" /></label>
-          <label><span>最低转账</span><FaInput v-model="model.assetForm.minTransferAmount" inputmode="decimal" /></label>
-          <label><span>货币资产</span><FaSwitch v-model="model.assetForm.money" /></label>
-          <label><span>允许转账</span><FaSwitch v-model="model.assetForm.transferEnabled" /></label>
-          <label><span>启用</span><FaSwitch v-model="model.assetForm.enabled" /></label>
+          <label><span>编码</span><YdInput v-model="model.assetForm.code" placeholder="POINT" /></label>
+          <label><span>名称</span><YdInput v-model="model.assetForm.name" placeholder="积分" /></label>
+          <label><span>符号</span><YdInput v-model="model.assetForm.symbol" placeholder="¥ / 积分" /></label>
+          <label><span>精度</span><YdNumberField v-model="model.assetForm.scale" :min="0" :max="8" /></label>
+          <label><span>最低转账</span><YdInput v-model="model.assetForm.minTransferAmount" inputmode="decimal" /></label>
+          <label><span>货币资产</span><YdSwitch v-model="model.assetForm.money" /></label>
+          <label><span>允许转账</span><YdSwitch v-model="model.assetForm.transferEnabled" /></label>
+          <label><span>启用</span><YdSwitch v-model="model.assetForm.enabled" /></label>
         </form>
-    </FaModal>
-  </FaPageMain>
+    </YdModal>
+  </YdPageMain>
 </template>

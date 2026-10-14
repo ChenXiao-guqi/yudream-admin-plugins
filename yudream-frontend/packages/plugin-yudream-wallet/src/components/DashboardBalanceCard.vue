@@ -2,7 +2,7 @@
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { WalletAsset, WalletBalance } from '../types'
 import { computed, onMounted, ref } from 'vue'
-import { FaButton, FaIcon } from '@yudream/components'
+import { YdButton, YdIcon } from '@yudream/components'
 import { createWalletApi } from '../api/wallet-api'
 
 interface DashboardCardLike {
@@ -86,11 +86,11 @@ function openCard() {
 <template>
   <div class="dashboard-card__content wallet-dashboard-card">
     <div v-if="loading" class="wallet-dashboard-card__state">
-      <FaIcon name="i-ri:loader-4-line" class="animate-spin" />
+      <YdIcon name="i-ri:loader-4-line" class="animate-spin" />
       正在读取余额
     </div>
     <div v-else-if="error" class="wallet-dashboard-card__state error">
-      <FaIcon name="i-ri:error-warning-line" />
+      <YdIcon name="i-ri:error-warning-line" />
       {{ error }}
     </div>
     <template v-else>
@@ -98,7 +98,7 @@ function openCard() {
         <div class="wallet-dashboard-card__main">
           <div class="wallet-dashboard-card__heading">
             <span>{{ readableLabel(primaryAsset?.name, primaryAsset?.code || '钱包余额') }}</span>
-            <FaButton v-if="card?.actionPath" size="sm" variant="ghost" aria-label="打开钱包" @click="openCard">钱包明细<FaIcon name="i-ri:arrow-right-up-line" /></FaButton>
+            <YdButton v-if="card?.actionPath" size="sm" variant="ghost" aria-label="打开钱包" @click="openCard">钱包明细<YdIcon name="i-ri:arrow-right-up-line" /></YdButton>
           </div>
           <strong :title="primaryAmount" :style="{ '--wallet-amount-length': Math.max(primaryAmount.length, 8) }">
             <small>{{ readableLabel(primaryAsset?.symbol) }}</small>
