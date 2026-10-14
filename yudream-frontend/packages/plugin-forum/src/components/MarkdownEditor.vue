@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { MdEditor } from 'md-editor-v3'
 import { computed } from 'vue'
-import { useFaToast } from '@yudream/components'
+import { YdMarkdownEditor } from '@yudream/components'
+import { useYdToast } from '@yudream/components'
 const props = defineProps<{ modelValue: string; sdk: YuDreamPluginSdk; placeholder?: string }>()
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
-const toast = useFaToast()
+const toast = useYdToast()
 const value = computed({ get: () => props.modelValue || '', set: v => emit('update:modelValue', v) })
 async function upload(files: File[], callback: (urls: { url: string; alt: string; title: string }[]) => void) {
   try {
@@ -19,5 +19,5 @@ async function upload(files: File[], callback: (urls: { url: string; alt: string
 }
 </script>
 <template>
-  <MdEditor v-model="value" language="zh-CN" preview-theme="github" code-theme="github" :placeholder="placeholder" :no-upload-img="false" :style="{ height: 'clamp(320px, 55vh, 520px)' }" @on-upload-img="upload" />
+  <YdMarkdownEditor v-model="value" :placeholder="placeholder" height="clamp(320px, 55vh, 520px)" :image-upload="upload" />
 </template>

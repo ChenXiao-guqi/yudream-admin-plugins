@@ -1,11 +1,12 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginAiProviderOption, YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { FaButton, FaIcon, FaNumberField, FaPageHeader, FaPageMain, FaSelect, FaSwitch, useFaToast } from '@yudream/components'
+import { YdButton, YdIcon, YdNumberField, YdPageHeader, YdPageMain, YdSelect, YdSwitch, useYdToast } from '@yudream/components'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { createForumApi } from '../api/forum-api'
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 const api = createForumApi(props.sdk)
-const toast = useFaToast()
+const toast = useYdToast()
 const saving = ref(false)
 const loading = ref(false)
 const aiProviders = ref<YuDreamPluginAiProviderOption[]>([])
@@ -32,5 +33,5 @@ async function save() { saving.value = true; try { await api.saveSettings({ ...f
 onMounted(load)
 </script>
 <template>
-  <div class="forum-page"><FaPageHeader title="论坛设置" description="全局审核策略和 AI 标签配置"><FaButton :loading="saving" @click="save"><FaIcon name="i-ri:save-3-line" />保存设置</FaButton></FaPageHeader><FaPageMain><form v-loading="loading" class="forum-editor forum-settings-grid" @submit.prevent="save"><label>全局审核策略<FaSelect v-model="form.moderation" class="forum-select" :options="[{label:'关闭审核，直接发布',value:'off'},{label:'人工审核',value:'manual'},{label:'AI 审核',value:'ai'}]" /></label><label class="forum-switch"><FaSwitch v-model="form.aiTagging" />启用 AI 自动打标签</label><label>AI 提供方<FaSelect :model-value="form.aiProviderCode" class="forum-select" :options="providerOptions" @update:model-value="onProviderChange" /></label><label>AI 模型<FaSelect v-model="form.aiModelCode" class="forum-select" :options="modelOptions" :disabled="!form.aiProviderCode && !modelOptions.length" /></label><label>AI 超时（秒）<FaNumberField v-model="form.aiTimeoutSeconds" :min="5" :max="120" /></label><p v-if="aiUnavailable" class="forum-form-warning"><FaIcon name="i-ri:error-warning-line" />宿主 AI 选项暂时不可用，已保留当前配置；请检查宿主 AI 能力后重试。</p><p class="forum-form-hint">提供方和模型来自宿主 AI 配置，不需要手工填写编码。留空表示使用宿主默认值。分类可以覆盖全局审核策略；AI 失败时自动回退人工审核。</p></form></FaPageMain></div>
+  <div class="forum-page"><YdPageHeader title="论坛设置" description="全局审核策略和 AI 标签配置"><YdButton :loading="saving" @click="save"><YdIcon name="i-ri:save-3-line" />保存设置</YdButton></YdPageHeader><YdPageMain><YdLoadingOverlay :loading="loading"><form  class="forum-editor forum-settings-grid" @submit.prevent="save"><label>全局审核策略<YdSelect v-model="form.moderation" class="forum-select" :options="[{label:'关闭审核，直接发布',value:'off'},{label:'人工审核',value:'manual'},{label:'AI 审核',value:'ai'}]" /></label><label class="forum-switch"><YdSwitch v-model="form.aiTagging" />启用 AI 自动打标签</label><label>AI 提供方<YdSelect :model-value="form.aiProviderCode" class="forum-select" :options="providerOptions" @update:model-value="onProviderChange" /></label><label>AI 模型<YdSelect v-model="form.aiModelCode" class="forum-select" :options="modelOptions" :disabled="!form.aiProviderCode && !modelOptions.length" /></label><label>AI 超时（秒）<YdNumberField v-model="form.aiTimeoutSeconds" :min="5" :max="120" /></label><p v-if="aiUnavailable" class="forum-form-warning"><YdIcon name="i-ri:error-warning-line" />宿主 AI 选项暂时不可用，已保留当前配置；请检查宿主 AI 能力后重试。</p><p class="forum-form-hint">提供方和模型来自宿主 AI 配置，不需要手工填写编码。留空表示使用宿主默认值。分类可以覆盖全局审核策略；AI 失败时自动回退人工审核。</p></form></YdLoadingOverlay></YdPageMain></div>
 </template>
