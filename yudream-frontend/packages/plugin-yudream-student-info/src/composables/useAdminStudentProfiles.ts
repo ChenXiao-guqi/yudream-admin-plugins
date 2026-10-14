@@ -1,13 +1,13 @@
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { AdminStudentProfileForm, StudentProfile, StudentProfileFilters } from '../types'
-import { useFaToast } from '@yudream/components'
+import { useYdToast } from '@yudream/components'
 import { reactive, ref } from 'vue'
 import { createStudentInfoApi } from '../api/student-info-api'
 import { formatTime, trimmedFields, validate } from './useMyStudentProfile'
 
 export function useAdminStudentProfiles(sdk: YuDreamPluginSdk) {
   const api = createStudentInfoApi(sdk)
-  const toast = useFaToast()
+  const toast = useYdToast()
   const loading = ref(false)
   const saving = ref(false)
   const deletingUserId = ref('')

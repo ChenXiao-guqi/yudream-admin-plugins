@@ -1,12 +1,12 @@
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { StudentProfile, StudentProfileFields, TimeValue } from '../types'
-import { useFaToast } from '@yudream/components'
+import { useYdToast } from '@yudream/components'
 import { computed, reactive, ref } from 'vue'
 import { createStudentInfoApi } from '../api/student-info-api'
 
 export function useMyStudentProfile(sdk: YuDreamPluginSdk) {
   const api = createStudentInfoApi(sdk)
-  const toast = useFaToast()
+  const toast = useYdToast()
   const loading = ref(false)
   const saving = ref(false)
   const profile = ref<StudentProfile | null>(null)

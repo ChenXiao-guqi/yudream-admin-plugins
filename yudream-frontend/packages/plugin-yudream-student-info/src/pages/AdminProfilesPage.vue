@@ -1,14 +1,15 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { StudentProfile } from '../types'
-import { FaButton, FaCard, FaIcon, FaInput, FaLabel, FaModal, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable, FaSearchBar, useFaModal } from '@yudream/components'
+import { YdButton, YdCard, YdIcon, YdInput, YdLabel, YdModal, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, useYdModal } from '@yudream/components'
 import { onMounted, ref } from 'vue'
 import { useAdminStudentProfiles } from '../composables/useAdminStudentProfiles'
 
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 const model = useAdminStudentProfiles(props.sdk)
-const confirm = useFaModal()
+const confirm = useYdModal()
 const formOpen = ref(false)
 
 const columns: TableColumn<StudentProfile>[] = [
@@ -51,16 +52,16 @@ onMounted(model.load)
 
 <template>
   <section class="student-info-page">
-    <FaPageHeader title="学生档案管理" :description="`共 ${model.pagination.total} 条档案`" class="mb-0">
-      <FaButton @click="openCreate">
-        <FaIcon name="i-ri:add-line" />
+    <YdPageHeader title="学生档案管理" :description="`共 ${model.pagination.total} 条档案`" class="mb-0">
+      <YdButton @click="openCreate">
+        <YdIcon name="i-ri:add-line" />
         新增档案
-      </FaButton>
-    </FaPageHeader>
+      </YdButton>
+    </YdPageHeader>
 
-    <FaPageMain>
-      <FaResponsiveTable
-        v-loading="model.loading"
+    <YdPageMain>
+      <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable
+
         row-key="userId"
         table-root-class="max-w-full overflow-x-auto rounded-lg"
         table-class="min-w-[1170px]"
@@ -71,20 +72,20 @@ onMounted(model.load)
         :data="model.records"
       >
         <template #toolbar>
-          <FaSearchBar class="w-full">
+          <YdSearchBar class="w-full">
             <form class="student-info-filter-grid" @submit.prevent="model.search">
-              <FaInput v-model="model.filters.keyword" clearable class="w-full" placeholder="用户 / 姓名 / 学号" @clear="model.search" />
-              <FaInput v-model="model.filters.college" clearable class="w-full" placeholder="学院" @clear="model.search" />
-              <FaInput v-model="model.filters.className" clearable class="w-full" placeholder="班级" @clear="model.search" />
+              <YdInput v-model="model.filters.keyword" clearable class="w-full" placeholder="用户 / 姓名 / 学号" @clear="model.search" />
+              <YdInput v-model="model.filters.college" clearable class="w-full" placeholder="学院" @clear="model.search" />
+              <YdInput v-model="model.filters.className" clearable class="w-full" placeholder="班级" @clear="model.search" />
               <div class="student-info-filter-actions">
-                <FaButton type="button" variant="outline" @click="model.resetFilters">重置</FaButton>
-                <FaButton type="submit">
-                  <FaIcon name="i-ri:search-line" />
+                <YdButton type="button" variant="outline" @click="model.resetFilters">重置</YdButton>
+                <YdButton type="submit">
+                  <YdIcon name="i-ri:search-line" />
                   查询
-                </FaButton>
+                </YdButton>
               </div>
             </form>
-          </FaSearchBar>
+          </YdSearchBar>
         </template>
         <template #cell-user="{ row }">
           <div class="student-info-user-cell">
@@ -99,12 +100,12 @@ onMounted(model.load)
         <template #cell-updatedAt="{ row }">{{ model.formatTime(row.original.updatedAt) }}</template>
         <template #cell-operation="{ row }">
           <div class="student-info-row-actions">
-            <FaButton size="sm" variant="outline" @click="openEdit(row.original)">编辑</FaButton>
-            <FaButton size="sm" variant="destructive" :loading="model.deletingUserId === row.original.userId" @click="confirmDelete(row.original)">删除</FaButton>
+            <YdButton size="sm" variant="outline" @click="openEdit(row.original)">编辑</YdButton>
+            <YdButton size="sm" variant="destructive" :loading="model.deletingUserId === row.original.userId" @click="confirmDelete(row.original)">删除</YdButton>
           </div>
         </template>
         <template #card="{ row }">
-          <FaCard class="w-full">
+          <YdCard class="w-full">
             <div class="flex flex-col gap-3">
               <div class="flex items-center justify-between gap-2">
                 <span class="min-w-0 break-words text-base font-semibold">{{ model.displayName(row) }}</span>
@@ -129,15 +130,15 @@ onMounted(model.load)
                 </div>
               </div>
               <div class="flex flex-wrap gap-2 border-t pt-3">
-                <FaButton size="sm" variant="outline" @click="openEdit(row)">编辑</FaButton>
-                <FaButton size="sm" variant="destructive" :loading="model.deletingUserId === row.userId" @click="confirmDelete(row)">删除</FaButton>
+                <YdButton size="sm" variant="outline" @click="openEdit(row)">编辑</YdButton>
+                <YdButton size="sm" variant="destructive" :loading="model.deletingUserId === row.userId" @click="confirmDelete(row)">删除</YdButton>
               </div>
             </div>
-          </FaCard>
+          </YdCard>
         </template>
-      </FaResponsiveTable>
+      </YdResponsiveTable></YdLoadingOverlay>
 
-      <FaPagination
+      <YdPagination
         v-model:page="model.pagination.page"
         v-model:size="model.pagination.size"
         :total="model.pagination.total"
@@ -145,9 +146,9 @@ onMounted(model.load)
         @page-change="model.onPageChange"
         @size-change="model.onSizeChange"
       />
-    </FaPageMain>
+    </YdPageMain>
 
-    <FaModal
+    <YdModal
       v-model="formOpen"
       :title="model.editingUserId ? '编辑学生档案' : '新增学生档案'"
       class="w-[min(560px,calc(100vw-2rem))]"
@@ -156,21 +157,21 @@ onMounted(model.load)
       @closed="model.resetForm"
     >
       <form class="student-info-form" @submit.prevent="save">
-        <FaLabel label="用户 ID" class="student-info-field">
-          <FaInput v-model="model.form.userId" class="w-full" :disabled="!!model.editingUserId" />
-        </FaLabel>
-        <FaLabel label="姓名" class="student-info-field"><FaInput v-model="model.form.studentName" class="w-full" maxlength="40" /></FaLabel>
-        <FaLabel label="学号" class="student-info-field"><FaInput v-model="model.form.studentNo" class="w-full" maxlength="64" /></FaLabel>
-        <FaLabel label="班级" class="student-info-field"><FaInput v-model="model.form.className" class="w-full" maxlength="80" /></FaLabel>
-        <FaLabel label="学院" class="student-info-field"><FaInput v-model="model.form.college" class="w-full" maxlength="80" /></FaLabel>
+        <YdLabel label="用户 ID" class="student-info-field">
+          <YdInput v-model="model.form.userId" class="w-full" :disabled="!!model.editingUserId" />
+        </YdLabel>
+        <YdLabel label="姓名" class="student-info-field"><YdInput v-model="model.form.studentName" class="w-full" maxlength="40" /></YdLabel>
+        <YdLabel label="学号" class="student-info-field"><YdInput v-model="model.form.studentNo" class="w-full" maxlength="64" /></YdLabel>
+        <YdLabel label="班级" class="student-info-field"><YdInput v-model="model.form.className" class="w-full" maxlength="80" /></YdLabel>
+        <YdLabel label="学院" class="student-info-field"><YdInput v-model="model.form.college" class="w-full" maxlength="80" /></YdLabel>
         <div class="student-info-actions student-info-modal-actions">
-          <FaButton type="button" variant="outline" @click="formOpen = false">取消</FaButton>
-          <FaButton type="submit" :loading="model.saving">
-            <FaIcon name="i-ri:save-3-line" />
+          <YdButton type="button" variant="outline" @click="formOpen = false">取消</YdButton>
+          <YdButton type="submit" :loading="model.saving">
+            <YdIcon name="i-ri:save-3-line" />
             保存
-          </FaButton>
+          </YdButton>
         </div>
       </form>
-    </FaModal>
+    </YdModal>
   </section>
 </template>
