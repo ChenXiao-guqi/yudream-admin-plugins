@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import type { UploadImgEvent } from 'md-editor-v3'
-import { useFaToast } from '@yudream/components'
-import { MdEditor } from 'md-editor-v3'
+import { useYdToast, YdMarkdownEditor, type YdMarkdownImageUploadHandler } from '@yudream/components'
 import { computed } from 'vue'
 
 type UploadImageResult = string | {
@@ -25,14 +23,14 @@ const emit = defineEmits<{
   'update:modelValue': [value: string]
 }>()
 
-const toast = useFaToast()
+const toast = useYdToast()
 
 const editorValue = computed({
   get: () => props.modelValue || '',
   set: value => emit('update:modelValue', value),
 })
 
-const handleUploadImg: UploadImgEvent = async (files, callback) => {
+const handleUploadImg: YdMarkdownImageUploadHandler = async (files, callback) => {
   if (!props.uploadImage) {
     callback([])
     return
@@ -73,14 +71,6 @@ async function uploadMarkdownImage(file: File): Promise<MarkdownUploadImage> {
 
 <template>
   <div class="mc-markdown">
-    <MdEditor
-      v-model="editorValue"
-      language="zh-CN"
-      preview-theme="github"
-      code-theme="github"
-      :no-upload-img="!uploadImage"
-      :style="{ height: 'clamp(320px, 60vh, 460px)' }"
-      @on-upload-img="handleUploadImg"
-    />
+    <YdMarkdownEditor v-model="editorValue" height="clamp(320px, 60vh, 460px)" :image-upload="uploadImage ? handleUploadImg : undefined" />
   </div>
 </template>

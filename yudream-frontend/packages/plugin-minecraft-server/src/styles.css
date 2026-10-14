@@ -4,8 +4,8 @@
   --mc-text: var(--color-text-1, #1d2129);
   --mc-muted: var(--color-text-3, #86909c);
   --mc-border: var(--color-border-2, #e5e6eb);
-  --mc-primary: rgb(var(--primary-6, 22 93 255));
-  --mc-primary-dark: rgb(var(--primary-7, 14 66 210));
+  --mc-primary: var(--color-text-1, #1d2129);
+  --mc-primary-dark: var(--color-text-1, #1d2129);
   --mc-warning: rgb(var(--warning-6, 255 125 0));
   color: var(--mc-text);
 }
@@ -296,7 +296,7 @@
 }
 
 .mc-trend-area {
-  fill: rgb(var(--primary-6, 22 93 255) / 0.14);
+  fill: color-mix(in srgb, var(--color-text-1) 14%, transparent);
 }
 
 .mc-trend-line {

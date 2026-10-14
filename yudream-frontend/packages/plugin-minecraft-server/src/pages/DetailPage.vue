@@ -2,62 +2,62 @@
   <section class="mc-page">
     <section class="mc-hero">
       <div><div class="mc-title-row"><h2>{{ server?.name || '服务器详情' }}</h2><span v-if="server && !server.enabled" class="mc-closed-badge">已关闭</span></div><p>{{ server?.currentSeason?.name || '当前周目未设置' }}</p></div>
-      <div class="mc-actions"><FaButton as="a" variant="outline" :href="model.closedSurface ? '/platform/plugins/minecraft-server?closed=true' : '/platform/plugins/minecraft-server'"><FaIcon name="i-ri:list-check" />列表</FaButton></div>
+      <div class="mc-actions"><YdButton as="a" variant="outline" :href="model.closedSurface ? '/platform/plugins/minecraft-server?closed=true' : '/platform/plugins/minecraft-server'"><YdIcon name="i-ri:list-check" />列表</YdButton></div>
     </section>
     <div v-if="server" class="mc-detail-layout">
-      <FaCard v-if="!server.enabled" title="服务器状态" description="Closed"><div class="mc-closed-notice">该服务器已关闭，仅保留历史信息供浏览。</div></FaCard>
-      <FaCard title="在线状态" description="Status"><div class="mc-status-board"><FaTag :variant="server.status?.status === 'ONLINE' ? 'default' : 'secondary'">{{ model.statusText(server.status?.status) }}</FaTag><strong>{{ server.status?.onlinePlayers ?? 0 }} / {{ server.status?.maxPlayers ?? 0 }}</strong><span>最后检查：{{ model.formatTime(server.status?.checkedAt) }}</span></div><div class="mc-line-list"><div v-for="endpoint in server.endpoints" :key="endpoint.id || endpoint.host" class="mc-line detail"><div class="mc-line-main"><strong>{{ endpoint.name }}</strong><code>{{ model.endpointAddress(endpoint) }}</code></div><FaTag :variant="endpointStatus(endpoint.id)?.status === 'ONLINE' ? 'default' : 'secondary'">{{ model.statusText(endpointStatus(endpoint.id)?.status) }}</FaTag><span>{{ endpoint.edition }}</span><span>{{ endpointStatus(endpoint.id)?.ping ?? '-' }} ms</span></div></div></FaCard>
-      <FaCard v-if="server.map?.publicAccess" title="公开地图" description="Map">
+      <YdCard v-if="!server.enabled" title="服务器状态" description="Closed"><div class="mc-closed-notice">该服务器已关闭，仅保留历史信息供浏览。</div></YdCard>
+      <YdCard title="在线状态" description="Status"><div class="mc-status-board"><YdTag :variant="server.status?.status === 'ONLINE' ? 'default' : 'secondary'">{{ model.statusText(server.status?.status) }}</YdTag><strong>{{ server.status?.onlinePlayers ?? 0 }} / {{ server.status?.maxPlayers ?? 0 }}</strong><span>最后检查：{{ model.formatTime(server.status?.checkedAt) }}</span></div><div class="mc-line-list"><div v-for="endpoint in server.endpoints" :key="endpoint.id || endpoint.host" class="mc-line detail"><div class="mc-line-main"><strong>{{ endpoint.name }}</strong><code>{{ model.endpointAddress(endpoint) }}</code></div><YdTag :variant="endpointStatus(endpoint.id)?.status === 'ONLINE' ? 'default' : 'secondary'">{{ model.statusText(endpointStatus(endpoint.id)?.status) }}</YdTag><span>{{ endpoint.edition }}</span><span>{{ endpointStatus(endpoint.id)?.ping ?? '-' }} ms</span></div></div></YdCard>
+      <YdCard v-if="server.map?.publicAccess" title="公开地图" description="Map">
         <div class="mc-map-action">
           <span>{{ server.map.originalName || (server.map.externalUrl ? '网盘下载' : '地图 ZIP') }}</span>
-          <FaButton
+          <YdButton
             v-if="server.map.externalUrl"
             as="a"
             :href="server.map.externalUrl"
             target="_blank"
             rel="noopener noreferrer"
           >
-            <FaIcon name="i-ri:external-link-line" />打开网盘下载
-          </FaButton>
-          <FaButton v-else :loading="model.mapOperating" @click="model.downloadMap()">
-            <FaIcon name="i-ri:download-line" />下载地图 ZIP
-          </FaButton>
+            <YdIcon name="i-ri:external-link-line" />打开网盘下载
+          </YdButton>
+          <YdButton v-else :loading="model.mapOperating" @click="model.downloadMap()">
+            <YdIcon name="i-ri:download-line" />下载地图 ZIP
+          </YdButton>
         </div>
-      </FaCard>
-      <FaCard title="在线人数趋势" description="Trend"><OnlineTrendChart :items="model.statusHistory" :max-players="server.status?.maxPlayers" :format-time="model.formatTime" /></FaCard>
-      <FaCard v-if="model.adminSurface && server.topology?.reported" title="群组服子服" description="Proxy">
+      </YdCard>
+      <YdCard title="在线人数趋势" description="Trend"><OnlineTrendChart :items="model.statusHistory" :max-players="server.status?.maxPlayers" :format-time="model.formatTime" /></YdCard>
+      <YdCard v-if="model.adminSurface && server.topology?.reported" title="群组服子服" description="Proxy">
         <div class="mc-status-board">
-          <FaTag variant="default">{{ server.topology.proxy || 'proxy' }}</FaTag>
+          <YdTag variant="default">{{ server.topology.proxy || 'proxy' }}</YdTag>
           <strong>{{ server.topology.onlinePlayers }} 人在线</strong>
           <span>{{ server.topology.servers.length }} 个子服 · {{ server.topology.sensorCount }} 个已装传感器</span>
           <span>上报于 {{ model.formatTime(server.topology.reportedAt) }}</span>
-          <FaButton size="sm" :loading="model.resolvingTopology" @click="model.resolveTopology(server)"><FaIcon name="i-ri:refresh-line" />重新解析</FaButton>
+          <YdButton size="sm" :loading="model.resolvingTopology" @click="model.resolveTopology(server)"><YdIcon name="i-ri:refresh-line" />重新解析</YdButton>
         </div>
         <p v-if="server.topology.proxyVersion" class="mc-topology-note">代理版本 {{ server.topology.proxyVersion }}。子服列表由代理端桥接上报，Admin 无法探测，因此这里只读。</p>
-        <FaResponsiveTable row-key="name" table-root-class="max-w-full overflow-x-auto rounded-lg" border stripe :columns="subServerColumns" :data="server.topology.servers">
+        <YdResponsiveTable row-key="name" table-root-class="max-w-full overflow-x-auto rounded-lg" border stripe :columns="subServerColumns" :data="server.topology.servers">
           <template #cell-address="{ row }"><code>{{ row.original.address || '-' }}</code></template>
-          <template #cell-sensor="{ row }"><FaTag :variant="row.original.sensor ? 'default' : 'secondary'">{{ row.original.sensor ? '已装' : '未装' }}</FaTag></template>
-          <template #cell-defaultServer="{ row }"><FaTag v-if="row.original.defaultServer" variant="default">默认</FaTag><span v-else>-</span></template>
+          <template #cell-sensor="{ row }"><YdTag :variant="row.original.sensor ? 'default' : 'secondary'">{{ row.original.sensor ? '已装' : '未装' }}</YdTag></template>
+          <template #cell-defaultServer="{ row }"><YdTag v-if="row.original.defaultServer" variant="default">默认</YdTag><span v-else>-</span></template>
           <template #card="{ row }">
-            <FaCard class="w-full"><div class="flex flex-col gap-3"><div class="flex items-center justify-between gap-2"><span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span><FaTag :variant="row.sensor ? 'default' : 'secondary'">{{ row.sensor ? '已装传感器' : '未装传感器' }}</FaTag></div><div class="flex flex-col gap-1 text-sm"><div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">地址</span><span class="break-all">{{ row.address || '-' }}</span></div><div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">在线</span><span>{{ row.online }}</span></div><div v-if="row.defaultServer" class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">默认服</span><span>是</span></div></div></div></FaCard>
+            <YdCard class="w-full"><div class="flex flex-col gap-3"><div class="flex items-center justify-between gap-2"><span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span><YdTag :variant="row.sensor ? 'default' : 'secondary'">{{ row.sensor ? '已装传感器' : '未装传感器' }}</YdTag></div><div class="flex flex-col gap-1 text-sm"><div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">地址</span><span class="break-all">{{ row.address || '-' }}</span></div><div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">在线</span><span>{{ row.online }}</span></div><div v-if="row.defaultServer" class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">默认服</span><span>是</span></div></div></div></YdCard>
           </template>
-        </FaResponsiveTable>
-      </FaCard>
-      <FaCard v-else-if="model.adminSurface" title="群组服子服" description="Proxy">
+        </YdResponsiveTable>
+      </YdCard>
+      <YdCard v-else-if="model.adminSurface" title="群组服子服" description="Proxy">
         <div class="mc-closed-notice">还没有收到代理的子服上报。代理的子服列表只能由代理端桥接上报——Server List Ping 只返回代理自身信息，Admin 无法探测。</div>
-        <div class="mc-actions mc-topology-actions"><FaButton :loading="model.resolvingTopology" @click="model.resolveTopology(server)"><FaIcon name="i-ri:radar-line" />解析群组服</FaButton></div>
-      </FaCard>
-      <FaCard title="服务器说明" description="Markdown"><MarkdownPreview :content="server.descriptionMarkdown" /></FaCard>
-      <FaCard v-if="model.walletEnabled" title="我的操作记录" description="Records"><FaResponsiveTable row-key="id" table-root-class="max-w-full overflow-x-auto rounded-lg" border stripe :columns="recordColumns" :data="model.records"><template #cell-createdAt="{ row }">{{ model.formatTime(row.original.createdAt) }}</template><template #cell-source="{ row }">{{ row.original.source || row.original.type }}</template><template #cell-amount="{ row }">{{ model.formatAmount(row.original.amount) }}</template><template #cell-remark="{ row }">{{ row.original.remark || row.original.businessNo || '-' }}</template><template #card="{ row }"><FaCard class="w-full"><div class="flex flex-col gap-3"><div class="flex items-center justify-between gap-2"><span class="min-w-0 break-words text-base font-semibold">{{ row.source || row.type }}</span></div><div class="flex flex-col gap-1 text-sm"><div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">币种</span><span class="break-all">{{ row.assetCode }}</span></div><div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">金额</span><span class="break-all">{{ model.formatAmount(row.amount) }}</span></div><div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">时间</span><span>{{ model.formatTime(row.createdAt) }}</span></div><div v-if="row.remark || row.businessNo" class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">备注</span><span class="break-all">{{ row.remark || row.businessNo }}</span></div></div></div></FaCard></template></FaResponsiveTable><FaPagination v-model:page="model.recordsPager.page" v-model:size="model.recordsPager.size" :total="model.recordsPager.total" class="mt-3" @page-change="reloadRecords" @size-change="reloadRecords" /></FaCard>
+        <div class="mc-actions mc-topology-actions"><YdButton :loading="model.resolvingTopology" @click="model.resolveTopology(server)"><YdIcon name="i-ri:radar-line" />解析群组服</YdButton></div>
+      </YdCard>
+      <YdCard title="服务器说明" description="Markdown"><MarkdownPreview :content="server.descriptionMarkdown" /></YdCard>
+      <YdCard v-if="model.walletEnabled" title="我的操作记录" description="Records"><YdResponsiveTable row-key="id" table-root-class="max-w-full overflow-x-auto rounded-lg" border stripe :columns="recordColumns" :data="model.records"><template #cell-createdAt="{ row }">{{ model.formatTime(row.original.createdAt) }}</template><template #cell-source="{ row }">{{ row.original.source || row.original.type }}</template><template #cell-amount="{ row }">{{ model.formatAmount(row.original.amount) }}</template><template #cell-remark="{ row }">{{ row.original.remark || row.original.businessNo || '-' }}</template><template #card="{ row }"><YdCard class="w-full"><div class="flex flex-col gap-3"><div class="flex items-center justify-between gap-2"><span class="min-w-0 break-words text-base font-semibold">{{ row.source || row.type }}</span></div><div class="flex flex-col gap-1 text-sm"><div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">币种</span><span class="break-all">{{ row.assetCode }}</span></div><div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">金额</span><span class="break-all">{{ model.formatAmount(row.amount) }}</span></div><div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">时间</span><span>{{ model.formatTime(row.createdAt) }}</span></div><div v-if="row.remark || row.businessNo" class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">备注</span><span class="break-all">{{ row.remark || row.businessNo }}</span></div></div></div></YdCard></template></YdResponsiveTable><YdPagination v-model:page="model.recordsPager.page" v-model:size="model.recordsPager.size" :total="model.recordsPager.total" class="mt-3" @page-change="reloadRecords" @size-change="reloadRecords" /></YdCard>
     </div>
-    <FaCard v-else title="未找到服务器" description="Empty"><div class="mc-empty">请从服务器列表重新进入。</div></FaCard>
+    <YdCard v-else title="未找到服务器" description="Empty"><div class="mc-empty">请从服务器列表重新进入。</div></YdCard>
   </section>
 </template>
 <script setup lang="ts">
 import type { TableColumn } from '@yudream/components'
 import type { EconomyRecord, MinecraftSubServer } from '../types'
 import { computed } from 'vue'
-import { FaButton, FaCard, FaIcon, FaPagination, FaResponsiveTable, FaTag } from '@yudream/components'
+import { YdButton, YdCard, YdIcon, YdPagination, YdResponsiveTable, YdTag } from '@yudream/components'
 import MarkdownPreview from '../components/MarkdownPreview.vue'
 import OnlineTrendChart from '../components/OnlineTrendChart.vue'
 import type { MinecraftServerPluginModel } from '../composables/useMinecraftServerPlugin'

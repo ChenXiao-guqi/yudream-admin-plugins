@@ -3,11 +3,11 @@ import type { TableColumn } from '@yudream/components'
 import type { MinecraftServer } from '../types'
 import type { MinecraftServerPluginModel } from '../composables/useMinecraftServerPlugin'
 import { useRouter } from 'vue-router'
-import { FaButton, FaCard, FaIcon, FaPageHeader, FaPageMain, FaPagination, FaResponsiveTable, FaSearchBar, FaTag, useFaModal } from '@yudream/components'
+import { YdButton, YdCard, YdIcon, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdTag, useYdModal } from '@yudream/components'
 
 const props = defineProps<{ model: MinecraftServerPluginModel }>()
 const router = useRouter()
-const modal = useFaModal()
+const modal = useYdModal()
 const columns: TableColumn<MinecraftServer>[] = [
   { accessorKey: 'name', header: '服务器', width: 240, fixed: 'left' },
   { id: 'status', header: '状态', width: 100, align: 'center' },
@@ -32,24 +32,24 @@ function confirmToggleServer(server: MinecraftServer) {
 </script>
 
 <template>
-  <FaPageHeader title="服务器管理" class="mb-0">
-    <FaButton @click="go('Editor')"><FaIcon name="i-ri:add-line" />新增服务器</FaButton>
-  </FaPageHeader>
-  <FaPageMain>
-    <FaResponsiveTable row-key="id" table-root-class="max-w-full overflow-x-auto rounded-lg" table-class="min-w-[980px]" border stripe column-visibility :columns="columns" :data="model.servers">
-      <template #toolbar><FaSearchBar class="w-full"><div class="flex justify-end gap-2"><FaButton variant="outline" :loading="model.loading" @click="reload"><FaIcon name="i-ri:refresh-line" />刷新</FaButton></div></FaSearchBar></template>
+  <YdPageHeader title="服务器管理" class="mb-0">
+    <YdButton @click="go('Editor')"><YdIcon name="i-ri:add-line" />新增服务器</YdButton>
+  </YdPageHeader>
+  <YdPageMain>
+    <YdResponsiveTable row-key="id" table-root-class="max-w-full overflow-x-auto rounded-lg" table-class="min-w-[980px]" border stripe column-visibility :columns="columns" :data="model.servers">
+      <template #toolbar><YdSearchBar class="w-full"><div class="flex justify-end gap-2"><YdButton variant="outline" :loading="model.loading" @click="reload"><YdIcon name="i-ri:refresh-line" />刷新</YdButton></div></YdSearchBar></template>
       <template #cell-name="{ row }"><div class="grid gap-1"><strong>{{ row.original.name }}</strong><span class="font-mono text-xs text-muted-foreground">ID: {{ row.original.id }}</span></div></template>
-      <template #cell-status="{ row }"><FaTag :variant="row.original.status?.status === 'ONLINE' ? 'default' : 'secondary'">{{ model.statusText(row.original.status?.status) }}</FaTag></template>
+      <template #cell-status="{ row }"><YdTag :variant="row.original.status?.status === 'ONLINE' ? 'default' : 'secondary'">{{ model.statusText(row.original.status?.status) }}</YdTag></template>
       <template #cell-enabled="{ row }">{{ row.original.enabled ? '启用' : '停用' }}</template>
-      <template #cell-operation="{ row }"><div class="flex flex-wrap justify-center gap-2"><FaButton size="sm" :variant="row.original.enabled ? 'destructive' : 'outline'" :loading="model.saving" @click="confirmToggleServer(row.original)">{{ row.original.enabled ? '结束服务器' : '恢复运营' }}</FaButton><FaButton size="sm" variant="outline" @click="go('Editor', row.original.id)">编辑</FaButton><FaButton size="sm" variant="outline" @click="go('Seasons', row.original.id)">周目</FaButton><FaButton size="sm" variant="outline" @click="go('Operations', row.original.id)">操作记录</FaButton><FaButton size="sm" variant="outline" @click="go('Players', row.original.id)">玩家统计</FaButton></div></template>
+      <template #cell-operation="{ row }"><div class="flex flex-wrap justify-center gap-2"><YdButton size="sm" :variant="row.original.enabled ? 'destructive' : 'outline'" :loading="model.saving" @click="confirmToggleServer(row.original)">{{ row.original.enabled ? '结束服务器' : '恢复运营' }}</YdButton><YdButton size="sm" variant="outline" @click="go('Editor', row.original.id)">编辑</YdButton><YdButton size="sm" variant="outline" @click="go('Seasons', row.original.id)">周目</YdButton><YdButton size="sm" variant="outline" @click="go('Operations', row.original.id)">操作记录</YdButton><YdButton size="sm" variant="outline" @click="go('Players', row.original.id)">玩家统计</YdButton></div></template>
       <template #card="{ row }">
-        <FaCard class="w-full">
+        <YdCard class="w-full">
           <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between gap-2">
               <span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span>
               <div class="flex gap-1">
-                <FaTag :variant="row.status?.status === 'ONLINE' ? 'default' : 'secondary'">{{ model.statusText(row.status?.status) }}</FaTag>
-                <FaTag :variant="row.enabled ? 'default' : 'secondary'">{{ row.enabled ? '启用' : '停用' }}</FaTag>
+                <YdTag :variant="row.status?.status === 'ONLINE' ? 'default' : 'secondary'">{{ model.statusText(row.status?.status) }}</YdTag>
+                <YdTag :variant="row.enabled ? 'default' : 'secondary'">{{ row.enabled ? '启用' : '停用' }}</YdTag>
               </div>
             </div>
             <div class="flex flex-col gap-1 text-sm">
@@ -63,16 +63,16 @@ function confirmToggleServer(server: MinecraftServer) {
               </div>
             </div>
             <div class="flex flex-wrap gap-2 border-t pt-3">
-              <FaButton size="sm" :variant="row.enabled ? 'destructive' : 'outline'" :loading="model.saving" @click="confirmToggleServer(row)">{{ row.enabled ? '结束服务器' : '恢复运营' }}</FaButton>
-              <FaButton size="sm" variant="outline" @click="go('Editor', row.id)">编辑</FaButton>
-              <FaButton size="sm" variant="outline" @click="go('Seasons', row.id)">周目</FaButton>
-              <FaButton size="sm" variant="outline" @click="go('Operations', row.id)">操作记录</FaButton>
-              <FaButton size="sm" variant="outline" @click="go('Players', row.id)">玩家统计</FaButton>
+              <YdButton size="sm" :variant="row.enabled ? 'destructive' : 'outline'" :loading="model.saving" @click="confirmToggleServer(row)">{{ row.enabled ? '结束服务器' : '恢复运营' }}</YdButton>
+              <YdButton size="sm" variant="outline" @click="go('Editor', row.id)">编辑</YdButton>
+              <YdButton size="sm" variant="outline" @click="go('Seasons', row.id)">周目</YdButton>
+              <YdButton size="sm" variant="outline" @click="go('Operations', row.id)">操作记录</YdButton>
+              <YdButton size="sm" variant="outline" @click="go('Players', row.id)">玩家统计</YdButton>
             </div>
           </div>
-        </FaCard>
+        </YdCard>
       </template>
-    </FaResponsiveTable>
-    <FaPagination v-model:page="model.serverPager.page" v-model:size="model.serverPager.size" :total="model.serverPager.total" class="mt-3" @page-change="reload" @size-change="reload" />
-  </FaPageMain>
+    </YdResponsiveTable>
+    <YdPagination v-model:page="model.serverPager.page" v-model:size="model.serverPager.size" :total="model.serverPager.total" class="mt-3" @page-change="reload" @size-change="reload" />
+  </YdPageMain>
 </template>

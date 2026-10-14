@@ -1,7 +1,7 @@
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { EconomyRecord, InheritanceRule, MinecraftBridgeSettings, MinecraftEndpoint, MinecraftServer, MinecraftStatusSnapshot, MessagingConnectionOption, MessagingGroupOption, ModpackBinding, PlayerActivity, PlayerSubServerDetail, SeasonForm, SeasonOperation, ServerForm, TimeValue } from '../types'
 import { subServerBreakdown as breakdownOf, hasSubServerDimension, isDefaultSubServer, subServerLabel } from '../utils/subServer'
-import { useFaToast } from '@yudream/components'
+import { useYdToast } from '@yudream/components'
 import { computed, reactive, ref } from 'vue'
 import { createMinecraftApi } from '../api/minecraft-api'
 import { uploadFileWithProgress } from '../api/upload'
@@ -12,7 +12,7 @@ const STATUS_HISTORY_LIMIT = 144
 
 export function useMinecraftServerPlugin(sdk: YuDreamPluginSdk) {
   const api = createMinecraftApi(sdk)
-  const toast = useFaToast()
+  const toast = useYdToast()
   const loading = ref(false)
   const saving = ref(false)
   const walletEnabled = ref(true)

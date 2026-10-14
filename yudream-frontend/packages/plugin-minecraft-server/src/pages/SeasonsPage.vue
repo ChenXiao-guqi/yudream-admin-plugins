@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { MinecraftServerPluginModel } from '../composables/useMinecraftServerPlugin'
 import type { ModpackBinding } from '../types'
-import { FaButton, FaInput, FaPageHeader, FaPageMain, FaSelect, FaTextarea } from '@yudream/components'
+import { YdButton, YdInput, YdPageHeader, YdPageMain, YdSelect, YdTextarea } from '@yudream/components'
 import InheritanceRulesEditor from '../components/InheritanceRulesEditor.vue'
 
 const props = defineProps<{ model: MinecraftServerPluginModel }>()
@@ -33,22 +33,22 @@ function setBindingType(season: { modpackBinding?: ModpackBinding | null }, type
 }
 </script>
 <template>
-  <FaPageHeader title="周目管理" class="mb-0" />
-  <FaPageMain>
+  <YdPageHeader title="周目管理" class="mb-0" />
+  <YdPageMain>
     <form class="grid gap-4" @submit.prevent="model.previewSeason">
       <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
-        <label class="grid gap-2"><span>周目名称</span><FaInput v-model="model.seasonForm.name" /></label>
-        <label class="grid gap-2"><span>开始时间</span><FaInput v-model="model.seasonForm.startedAtText" type="datetime-local" /></label>
-        <label class="grid gap-2"><span>备注</span><FaInput v-model="model.seasonForm.remark" /></label>
+        <label class="grid gap-2"><span>周目名称</span><YdInput v-model="model.seasonForm.name" /></label>
+        <label class="grid gap-2"><span>开始时间</span><YdInput v-model="model.seasonForm.startedAtText" type="datetime-local" /></label>
+        <label class="grid gap-2"><span>备注</span><YdInput v-model="model.seasonForm.remark" /></label>
       </div>
-      <label class="grid gap-2"><span>周目说明</span><FaTextarea v-model="model.seasonForm.description" /></label>
+      <label class="grid gap-2"><span>周目说明</span><YdTextarea v-model="model.seasonForm.description" /></label>
       <div class="mt-4 grid gap-3">
         <h3 class="text-base font-semibold">继承规则</h3>
         <InheritanceRulesEditor :model="model" />
       </div>
       <div class="mt-4 flex flex-wrap justify-end gap-2">
-        <FaButton type="submit" variant="outline" :loading="model.saving">预览继承</FaButton>
-        <FaButton type="button" :disabled="!model.previewOperation" :loading="model.saving" @click="model.openSeason">确认开启</FaButton>
+        <YdButton type="submit" variant="outline" :loading="model.saving">预览继承</YdButton>
+        <YdButton type="button" :disabled="!model.previewOperation" :loading="model.saving" @click="model.openSeason">确认开启</YdButton>
       </div>
     </form>
     <section v-if="model.serverForm.seasons.length" class="mt-8 grid gap-4">
@@ -62,21 +62,21 @@ function setBindingType(season: { modpackBinding?: ModpackBinding | null }, type
         <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
           <label class="grid gap-2">
             <span>绑定类型</span>
-            <FaSelect :model-value="bindingOf(season).type || 'NONE'" :options="typeOptions" @update:model-value="setBindingType(season, String($event))" />
+            <YdSelect :model-value="bindingOf(season).type || 'NONE'" :options="typeOptions" @update:model-value="setBindingType(season, String($event))" />
           </label>
           <template v-if="bindingOf(season).type === 'VANILLA'">
-            <label class="grid gap-2"><span>游戏版本</span><FaInput :model-value="bindingOf(season).gameVersion ?? undefined" placeholder="1.21.4" @update:model-value="bindingOf(season).gameVersion = String($event ?? '')" /></label>
-            <label class="grid gap-2"><span>加载器</span><FaSelect v-model="bindingOf(season).loader" :options="loaderOptions" /></label>
+            <label class="grid gap-2"><span>游戏版本</span><YdInput :model-value="bindingOf(season).gameVersion ?? undefined" placeholder="1.21.4" @update:model-value="bindingOf(season).gameVersion = String($event ?? '')" /></label>
+            <label class="grid gap-2"><span>加载器</span><YdSelect v-model="bindingOf(season).loader" :options="loaderOptions" /></label>
           </template>
           <template v-else-if="bindingOf(season).type === 'MRPACK'">
-            <label class="grid gap-2"><span>整合包 ID</span><FaInput :model-value="bindingOf(season).packId ?? undefined" placeholder="pack-id" @update:model-value="bindingOf(season).packId = String($event ?? '')" /></label>
-            <label class="grid gap-2"><span>版本（可选）</span><FaInput :model-value="bindingOf(season).versionId ?? undefined" placeholder="推荐版本可留空" @update:model-value="bindingOf(season).versionId = String($event ?? '')" /></label>
+            <label class="grid gap-2"><span>整合包 ID</span><YdInput :model-value="bindingOf(season).packId ?? undefined" placeholder="pack-id" @update:model-value="bindingOf(season).packId = String($event ?? '')" /></label>
+            <label class="grid gap-2"><span>版本（可选）</span><YdInput :model-value="bindingOf(season).versionId ?? undefined" placeholder="推荐版本可留空" @update:model-value="bindingOf(season).versionId = String($event ?? '')" /></label>
           </template>
         </div>
         <div class="flex justify-end">
-          <FaButton size="sm" type="button" :loading="model.saving" :disabled="!season.id" @click="model.bindSeasonModpack(String(season.id), bindingOf(season))">保存绑定</FaButton>
+          <YdButton size="sm" type="button" :loading="model.saving" :disabled="!season.id" @click="model.bindSeasonModpack(String(season.id), bindingOf(season))">保存绑定</YdButton>
         </div>
       </div>
     </section>
-  </FaPageMain>
+  </YdPageMain>
 </template>
