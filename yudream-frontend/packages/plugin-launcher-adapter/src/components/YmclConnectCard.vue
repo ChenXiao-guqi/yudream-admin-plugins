@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { FaButton, FaIcon, useFaToast } from '@yudream/components'
+import { YdAction, YdButton, YdIcon, useYdToast } from '@yudream/components'
 import { computed } from 'vue'
 import { applyYmclDragPayload, openYmcl as openYmclProtocol, siteOrigin } from '../composables/ymcl-protocol'
 
@@ -17,7 +17,7 @@ const props = defineProps<{
   onOpen?: (card?: DashboardCardLike) => void
 }>()
 
-const toast = useFaToast()
+const toast = useYdToast()
 void props.sdk
 const origin = computed(() => siteOrigin())
 
@@ -45,7 +45,7 @@ function openPage() {
       <p class="launcher-dashboard-card__desc">
         {{ card?.description || '一键向 YMCL 添加本域授权。点击拉起启动器，或把地址拖到 YMCL 的站点输入框。' }}
       </p>
-      <button
+      <YdAction
         type="button"
         class="launcher-dashboard-card__endpoint"
         title="复制域站基址，也可拖到 YMCL 自动填充"
@@ -55,22 +55,22 @@ function openPage() {
       >
         <code>{{ origin }}</code>
         <span class="launcher-dashboard-card__copy">
-          <FaIcon name="i-ri:file-copy-line" />
+          <YdIcon name="i-ri:file-copy-line" />
         </span>
-      </button>
+      </YdAction>
       <p class="launcher-dashboard-card__hint">
-        <FaIcon name="i-ri:information-line" />
+        <YdIcon name="i-ri:information-line" />
         <span>点击复制前端基址；拖到 YMCL 会写入 ymcl:site: 邀请。打开 YMCL 走 ymcl:// 协议，需启动器已登记该协议。</span>
       </p>
     </div>
     <div class="launcher-dashboard-card__actions">
-      <FaButton size="sm" @click="openYmcl">
-        <FaIcon name="i-ri:external-link-line" />
+      <YdButton size="sm" @click="openYmcl">
+        <YdIcon name="i-ri:external-link-line" />
         打开 YMCL
-      </FaButton>
-      <FaButton v-if="card?.actionPath" size="sm" variant="outline" @click="openPage">
+      </YdButton>
+      <YdButton v-if="card?.actionPath" size="sm" variant="outline" @click="openPage">
         查看说明
-      </FaButton>
+      </YdButton>
     </div>
   </div>
 </template>

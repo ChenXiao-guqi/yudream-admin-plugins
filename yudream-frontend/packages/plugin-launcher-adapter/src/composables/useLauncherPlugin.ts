@@ -1,13 +1,13 @@
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { LauncherPack, LauncherPackDetail, PackForm, YmclChromeForm, YmclChromePage, YmclNavNode } from '../types'
-import { useFaToast } from '@yudream/components'
+import { useYdToast } from '@yudream/components'
 import { reactive, ref } from 'vue'
 import { createLauncherApi } from '../api/launcher-api'
 import { applyYmclDragPayload, formatTime, openYmcl as openYmclProtocol, siteOrigin, ymclAddSiteUri, ymclSiteToken } from './ymcl-protocol'
 
 export function useLauncherPlugin(sdk: YuDreamPluginSdk) {
   const api = createLauncherApi(sdk)
-  const toast = useFaToast()
+  const toast = useYdToast()
   const loading = ref(false)
   const saving = ref(false)
   const packs = ref<LauncherPack[]>([])

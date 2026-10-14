@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { FaButton, FaIcon, FaInput, FaTag } from '@yudream/components'
+import { YdAction, YdButton, YdIcon, YdInput, YdTag } from '@yudream/components'
 import { computed, ref } from 'vue'
 import {
   ICON_CATEGORIES,
@@ -150,17 +150,17 @@ function useFallback() {
   >
     <div class="launcher-icon-picker__bar">
       <span class="launcher-icon-picker__preview" :title="displayIcon || '未选择'">
-        <FaIcon v-if="displayIcon" :name="displayIcon" />
-        <FaIcon v-else name="i-ri:image-line" class="is-placeholder" />
+        <YdIcon v-if="displayIcon" :name="displayIcon" />
+        <YdIcon v-else name="i-ri:image-line" class="is-placeholder" />
       </span>
-      <FaInput
+      <YdInput
         v-model="search"
         class="launcher-icon-picker__search"
         placeholder="搜索中文名 / i-ri:xxx / token…"
         clearable
         :disabled="disabled"
       />
-      <FaButton
+      <YdButton
         size="sm"
         variant="ghost"
         :disabled="disabled"
@@ -168,8 +168,8 @@ function useFallback() {
         @click="toggleCustom"
       >
         自定义
-      </FaButton>
-      <FaButton
+      </YdButton>
+      <YdButton
         v-if="fallback && modelValue !== fallback"
         size="sm"
         variant="ghost"
@@ -177,31 +177,31 @@ function useFallback() {
         @click="useFallback"
       >
         用默认
-      </FaButton>
-      <FaButton
+      </YdButton>
+      <YdButton
         size="sm"
         variant="ghost"
         :disabled="disabled || !modelValue"
         @click="clear"
       >
         清除
-      </FaButton>
+      </YdButton>
     </div>
 
     <div v-if="showCustom" class="launcher-icon-picker__custom">
-      <FaInput
+      <YdInput
         v-model="customName"
         placeholder="如 i-mdi:home-variant 或 home"
         :disabled="disabled"
         @keydown.enter.prevent="applyCustom"
       />
-      <FaButton size="sm" :disabled="disabled || !customName.trim()" @click="applyCustom">
+      <YdButton size="sm" :disabled="disabled || !customName.trim()" @click="applyCustom">
         应用
-      </FaButton>
+      </YdButton>
     </div>
 
     <div class="launcher-icon-picker__chips" role="tablist" aria-label="图标分类">
-      <button
+      <YdAction
         v-for="item in categoryOptions"
         :key="item.key"
         type="button"
@@ -214,16 +214,16 @@ function useFallback() {
       >
         {{ item.label }}
         <span class="launcher-icon-picker__chip-count">{{ item.count }}</span>
-      </button>
+      </YdAction>
     </div>
 
     <div class="launcher-icon-picker__meta">
       <template v-if="modelValue">
         当前值：<code>{{ modelValue }}</code>
-        <FaTag v-if="isNativeToken" variant="outline">原生 token</FaTag>
-        <FaTag v-else-if="isCustomValue" variant="outline">自定义</FaTag>
-        <FaTag v-else-if="selectedMeta" variant="secondary">{{ selectedMeta.label }}</FaTag>
-        <FaIcon
+        <YdTag v-if="isNativeToken" variant="outline">原生 token</YdTag>
+        <YdTag v-else-if="isCustomValue" variant="outline">自定义</YdTag>
+        <YdTag v-else-if="selectedMeta" variant="secondary">{{ selectedMeta.label }}</YdTag>
+        <YdIcon
           v-if="displayIcon"
           :name="displayIcon"
           class="launcher-icon-picker__meta-icon"
@@ -240,7 +240,7 @@ function useFallback() {
       role="listbox"
       aria-label="选择图标"
     >
-      <button
+      <YdAction
         v-for="icon in filteredIcons"
         :key="icon.name"
         type="button"
@@ -256,9 +256,9 @@ function useFallback() {
         :disabled="disabled"
         @click="select(icon.token || icon.name)"
       >
-        <FaIcon :name="icon.name" />
+        <YdIcon :name="icon.name" />
         <span class="launcher-icon-picker__cell-label">{{ icon.label }}</span>
-      </button>
+      </YdAction>
     </div>
 
     <div class="launcher-icon-picker__footer">

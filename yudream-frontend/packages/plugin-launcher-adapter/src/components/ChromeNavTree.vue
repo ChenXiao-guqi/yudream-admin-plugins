@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { FaIcon, FaTag } from '@yudream/components'
+import { YdAction, YdIcon, YdTag } from '@yudream/components'
 import type { YmclNavKind, YmclNavNode } from '../types'
 
 defineOptions({ name: 'ChromeNavTree' })
@@ -42,7 +42,7 @@ function kindVariant(kind: YmclNavKind, depth: number) {
 
 <template>
   <div v-for="item in nodes" :key="item.key" class="chrome-tree-block" :class="{ 'chrome-tree-block--child': (depth || 0) > 0 }">
-    <button
+    <YdAction
       class="chrome-tree-node"
       :class="{
         'is-active': selectedKey === item.key,
@@ -53,17 +53,17 @@ function kindVariant(kind: YmclNavKind, depth: number) {
     >
       <span class="chrome-tree-node__main">
         <span class="chrome-tree-node__icon">
-          <FaIcon :name="item.icon" />
+          <YdIcon :name="item.icon" />
         </span>
         <span>{{ item.title }}</span>
-        <FaTag :variant="kindVariant(item.kind, depth || 0)" class="text-xs">
+        <YdTag :variant="kindVariant(item.kind, depth || 0)" class="text-xs">
           {{ kindLabel(item.kind, depth || 0) }}
-        </FaTag>
-        <FaTag v-if="!item.node.visible" variant="secondary" class="text-xs">
+        </YdTag>
+        <YdTag v-if="!item.node.visible" variant="secondary" class="text-xs">
           隐藏
-        </FaTag>
+        </YdTag>
       </span>
-    </button>
+    </YdAction>
     <ChromeNavTree
       v-if="item.children?.length"
       :nodes="item.children"

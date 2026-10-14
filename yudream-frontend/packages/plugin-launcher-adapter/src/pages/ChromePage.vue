@@ -1,16 +1,17 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import {
-  FaButton,
-  FaIcon,
-  FaImageUpload,
-  FaInput,
-  FaPageHeader,
-  FaPageMain,
-  FaSelect,
-  FaSwitch,
-  FaTag,
-  FaTooltip,
+  YdButton,
+  YdIcon,
+  YdImageUpload,
+  YdInput,
+  YdPageHeader,
+  YdPageMain,
+  YdSelect,
+  YdSwitch,
+  YdTag,
+  YdTooltip,
 } from '@yudream/components'
 import { computed, onMounted, ref, watch } from 'vue'
 import ChromeNavTree from '../components/ChromeNavTree.vue'
@@ -250,28 +251,28 @@ function depthLabel(node: ChromeTreeNode) {
 
 <template>
   <div class="chrome-page">
-    <FaPageHeader title="启动器外观" description="各插件向适配器注册页面；本页只编排 Tab / 菜单树与站点主题。顶级是 Tab，次级是该 Tab 里的菜单，再往下继续分级，每一级都可以改名字和图标。">
-      <FaButton :loading="model.saving" @click="model.saveChrome">
-        <FaIcon name="i-ri:save-line" />
+    <YdPageHeader title="启动器外观" description="各插件向适配器注册页面；本页只编排 Tab / 菜单树与站点主题。顶级是 Tab，次级是该 Tab 里的菜单，再往下继续分级，每一级都可以改名字和图标。">
+      <YdButton :loading="model.saving" @click="model.saveChrome">
+        <YdIcon name="i-ri:save-line" />
         保存
-      </FaButton>
-    </FaPageHeader>
-    <FaPageMain>
-      <div v-loading="model.loading" class="chrome-workbench">
+      </YdButton>
+    </YdPageHeader>
+    <YdPageMain>
+      <YdLoadingOverlay :loading="model.loading"><div  class="chrome-workbench">
         <aside class="chrome-sidebar">
           <div class="chrome-sidebar__header">
             <h2>导航结构</h2>
             <div class="chrome-actions">
-              <FaTooltip text="新增顶级 Tab" side="bottom">
-                <FaButton variant="ghost" size="sm" @click="addTab">
-                  <FaIcon name="i-ri:layout-top-line" />
-                </FaButton>
-              </FaTooltip>
-              <FaTooltip text="在当前节点下新增菜单" side="bottom">
-                <FaButton variant="ghost" size="sm" :disabled="!selectedNav" @click="selectedNav && addChild(selectedNav)">
-                  <FaIcon name="i-ri:add-line" />
-                </FaButton>
-              </FaTooltip>
+              <YdTooltip text="新增顶级 Tab" side="bottom">
+                <YdButton variant="ghost" size="sm" @click="addTab">
+                  <YdIcon name="i-ri:layout-top-line" />
+                </YdButton>
+              </YdTooltip>
+              <YdTooltip text="在当前节点下新增菜单" side="bottom">
+                <YdButton variant="ghost" size="sm" :disabled="!selectedNav" @click="selectedNav && addChild(selectedNav)">
+                  <YdIcon name="i-ri:add-line" />
+                </YdButton>
+              </YdTooltip>
             </div>
           </div>
           <div class="chrome-tree">
@@ -292,18 +293,18 @@ function depthLabel(node: ChromeTreeNode) {
             <div class="chrome-section__header">
               <h2>详情</h2>
               <div v-if="selectedNav" class="chrome-actions">
-                <FaButton size="sm" @click="addSibling">
-                  <FaIcon name="i-ri:node-tree" />
+                <YdButton size="sm" @click="addSibling">
+                  <YdIcon name="i-ri:node-tree" />
                   同级
-                </FaButton>
-                <FaButton size="sm" @click="addChild(selectedNav)">
-                  <FaIcon name="i-ri:add-line" />
+                </YdButton>
+                <YdButton size="sm" @click="addChild(selectedNav)">
+                  <YdIcon name="i-ri:add-line" />
                   子级
-                </FaButton>
-                <FaButton variant="destructive" size="sm" @click="removeSelected">
-                  <FaIcon name="i-ri:delete-bin-line" />
+                </YdButton>
+                <YdButton variant="destructive" size="sm" @click="removeSelected">
+                  <YdIcon name="i-ri:delete-bin-line" />
                   删除
-                </FaButton>
+                </YdButton>
               </div>
             </div>
 
@@ -311,15 +312,15 @@ function depthLabel(node: ChromeTreeNode) {
               <div class="detail-grid">
                 <div class="detail-cell detail-cell--label">节点类型</div>
                 <div class="detail-cell">
-                  <FaTag :variant="selectedNav.kind === 'tab' ? 'default' : 'secondary'">
+                  <YdTag :variant="selectedNav.kind === 'tab' ? 'default' : 'secondary'">
                     {{ kindLabel(selectedNav.kind) }}
-                  </FaTag>
+                  </YdTag>
                 </div>
                 <div class="detail-cell detail-cell--label">层级</div>
                 <div class="detail-cell">{{ depthLabel(selectedNode) }}</div>
                 <div class="detail-cell detail-cell--label">显示名称</div>
                 <div class="detail-cell">
-                  <FaInput v-model="selectedNav.title" placeholder="显示在启动器里的名字" />
+                  <YdInput v-model="selectedNav.title" placeholder="显示在启动器里的名字" />
                 </div>
                 <div class="detail-cell detail-cell--label">图标</div>
                 <div class="detail-cell detail-cell--wide">
@@ -330,7 +331,7 @@ function depthLabel(node: ChromeTreeNode) {
                 </div>
                 <div class="detail-cell detail-cell--label">绑定注册页</div>
                 <div class="detail-cell detail-cell--wide">
-                  <FaSelect
+                  <YdSelect
                     v-model="boundPageCode"
                     :options="pageOptions"
                     placeholder="可选：把该节点接到已注册页面"
@@ -338,11 +339,11 @@ function depthLabel(node: ChromeTreeNode) {
                 </div>
                 <div class="detail-cell detail-cell--label">显示</div>
                 <div class="detail-cell">
-                  <FaSwitch v-model="boundVisible" />
+                  <YdSwitch v-model="boundVisible" />
                 </div>
                 <div class="detail-cell detail-cell--label">编码</div>
                 <div class="detail-cell">
-                  <FaInput v-model="selectedNav.code" placeholder="稳定编码，可自定义" />
+                  <YdInput v-model="selectedNav.code" placeholder="稳定编码，可自定义" />
                 </div>
                 <template v-if="selectedPage">
                   <div class="detail-cell detail-cell--label">贡献插件</div>
@@ -371,12 +372,12 @@ function depthLabel(node: ChromeTreeNode) {
             <div class="launcher-form">
               <label>
                 <span>站点显示名</span>
-                <FaInput v-model="model.chromeForm.displayName" placeholder="例如 YuDream Minecraft" />
+                <YdInput v-model="model.chromeForm.displayName" placeholder="例如 YuDream Minecraft" />
               </label>
               <div class="launcher-chrome-uploads">
                 <div class="grid gap-2">
                   <span>Logo</span>
-                  <FaImageUpload
+                  <YdImageUpload
                     :model-value="logoList"
                     :max="1"
                     :width="96"
@@ -387,7 +388,7 @@ function depthLabel(node: ChromeTreeNode) {
                 </div>
                 <div class="grid gap-2">
                   <span>背景图</span>
-                  <FaImageUpload
+                  <YdImageUpload
                     :model-value="backgroundList"
                     :max="1"
                     :width="240"
@@ -400,7 +401,7 @@ function depthLabel(node: ChromeTreeNode) {
             </div>
           </section>
         </main>
-      </div>
-    </FaPageMain>
+      </div></YdLoadingOverlay>
+    </YdPageMain>
   </div>
 </template>
