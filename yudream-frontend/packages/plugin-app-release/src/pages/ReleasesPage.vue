@@ -1,16 +1,16 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { TableColumn } from '@yudream/components'
 import type { AppReleaseSettingsView, AppReleaseView } from '../types'
-import { Tag as ArcoTag } from '@arco-design/web-vue'
-import { FaButton, FaCard, FaIcon, FaInput, FaModal, FaNumberField, FaPageHeader, FaPageMain, FaResponsiveTable, FaSwitch, FaTag, FaTextarea, useFaModal, useFaToast } from '@yudream/components'
+import { YdButton, YdCard, YdIcon, YdInput, YdModal, YdNumberField, YdPageHeader, YdPageMain, YdResponsiveTable, YdSwitch, YdTag, YdTextarea, useYdModal, useYdToast, YdFilePicker } from '@yudream/components'
 import { computed, onMounted, ref } from 'vue'
 import { createAppReleaseApi, errorMessage } from '../api/app-release-api'
 
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 const api = createAppReleaseApi(props.sdk)
-const toast = useFaToast()
-const confirm = useFaModal()
+const toast = useYdToast()
+const confirm = useYdModal()
 
 const loading = ref(false)
 const rows = ref<AppReleaseView[]>([])
@@ -23,7 +23,6 @@ const deletingId = ref('')
 const uploadOpen = ref(false)
 const uploading = ref(false)
 const uploadFile = ref<File | null>(null)
-const fileInput = ref<HTMLInputElement | null>(null)
 const uploadForm = ref({
   platform: 'android',
   versionCode: 0,
@@ -107,18 +106,13 @@ function openUpload() {
   uploadOpen.value = true
 }
 
-function pickFile() {
-  fileInput.value?.click()
-}
-
 const uploadVersionCode = computed({
   get: () => uploadForm.value.versionCode,
   set: (value: number | undefined) => { uploadForm.value.versionCode = Math.max(0, Math.round(Number(value) || 0)) },
 })
 
-function onFileChange(event: Event) {
-  const input = event.target as HTMLInputElement
-  const file = input.files?.[0] ?? null
+function onFileSelect(files: File[]) {
+  const file = files[0] ?? null
   uploadFile.value = file
   if (file && !uploadForm.value.versionName) {
     // 从文件名推断版本号（ydam-0.2.1.apk / app-0.2.1-release.apk）
@@ -205,33 +199,33 @@ onMounted(load)
 </script>
 
 <template>
-  <FaPageMain>
-    <FaPageHeader title="更新发布" description="YDAM 更新包发布、更新日志与强制更新管理">
+  <YdPageMain>
+    <YdPageHeader title="更新发布" description="YDAM 更新包发布、更新日志与强制更新管理">
       <div class="app-release-toolbar">
         <span class="text-sm text-secondary-foreground/60">
           最新 versionCode {{ latestVersionCode }} · 强制更新线 {{ settings?.minVersionCode ?? 0 }}
         </span>
-        <FaButton @click="openUpload">
-          <FaIcon name="i-ri:upload-2-line" />发布新版本
-        </FaButton>
+        <YdButton @click="openUpload">
+          <YdIcon name="i-ri:upload-2-line" />发布新版本
+        </YdButton>
       </div>
-    </FaPageHeader>
+    </YdPageHeader>
 
-    <FaCard class="mb-4">
+    <YdCard class="mb-4">
       <div class="app-release-toolbar">
         <span class="text-sm font-medium">强制更新线（versionCode）</span>
-        <FaNumberField v-model="minVersionCode" class="app-release-filter-input" :min="0" :max="2147483647" />
-        <FaButton variant="outline" :loading="savingSettings" @click="saveSettings">
+        <YdNumberField v-model="minVersionCode" class="app-release-filter-input" :min="0" :max="2147483647" />
+        <YdButton variant="outline" :loading="savingSettings" @click="saveSettings">
           保存
-        </FaButton>
+        </YdButton>
         <span class="text-xs text-secondary-foreground/60">
           低于该 versionCode 的客户端必须更新后才能继续使用；发布时也可单独勾选「强制更新」。
         </span>
       </div>
-    </FaCard>
+    </YdCard>
 
-    <FaResponsiveTable
-      v-loading="loading"
+    <YdLoadingOverlay :loading="loading"><YdResponsiveTable
+
       :columns="columns"
       :data="rows"
       row-key="id"
@@ -247,9 +241,9 @@ onMounted(load)
       </template>
       <template #cell-state="{ row }">
         <div class="flex flex-wrap gap-1">
-          <FaTag v-if="row.original.published" color="green">已发布</FaTag>
-          <FaTag v-else color="gray">未发布</FaTag>
-          <FaTag v-if="row.original.forceUpdate" color="red">强制更新</FaTag>
+          <YdTag v-if="row.original.published" variant="default">已发布</YdTag>
+          <YdTag v-else variant="secondary">未发布</YdTag>
+          <YdTag v-if="row.original.forceUpdate" variant="destructive">强制更新</YdTag>
         </div>
       </template>
       <template #cell-file="{ row }">
@@ -262,39 +256,39 @@ onMounted(load)
       </template>
       <template #cell-operation="{ row }">
         <div class="flex-center gap-2">
-          <FaButton
+          <YdButton
             size="sm"
             :variant="row.original.published ? 'outline' : 'default'"
             :loading="publishingId === row.original.id"
             @click="togglePublish(row.original)"
           >
             {{ row.original.published ? '下架' : '发布' }}
-          </FaButton>
+          </YdButton>
           <a :href="api.downloadUrl(row.original.id)" target="_blank" rel="noopener">
-            <FaButton size="sm" variant="outline">
+            <YdButton size="sm" variant="outline">
               下载
-            </FaButton>
+            </YdButton>
           </a>
-          <FaButton size="sm" variant="destructive" :loading="deletingId === row.original.id" @click="confirmDelete(row.original)">
+          <YdButton size="sm" variant="destructive" :loading="deletingId === row.original.id" @click="confirmDelete(row.original)">
             删除
-          </FaButton>
+          </YdButton>
         </div>
       </template>
       <template #card="{ row }">
-        <FaCard class="w-full">
+        <YdCard class="w-full">
           <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between gap-2">
               <span class="min-w-0 break-words text-base font-semibold">{{ row.versionName }}</span>
               <div class="flex flex-wrap gap-1">
-                <FaTag v-if="row.published" color="green">
+                <YdTag v-if="row.published" variant="default">
                   已发布
-                </FaTag>
-                <FaTag v-else color="gray">
+                </YdTag>
+                <YdTag v-else variant="secondary">
                   未发布
-                </FaTag>
-                <FaTag v-if="row.forceUpdate" color="red">
+                </YdTag>
+                <YdTag v-if="row.forceUpdate" variant="destructive">
                   强制更新
-                </FaTag>
+                </YdTag>
               </div>
             </div>
             <div class="flex flex-col gap-1 text-sm">
@@ -316,33 +310,36 @@ onMounted(load)
               </div>
             </div>
             <div class="flex flex-wrap gap-2 border-t pt-3">
-              <FaButton size="sm" :variant="row.published ? 'outline' : 'default'" :loading="publishingId === row.id" @click="togglePublish(row)">
+              <YdButton size="sm" :variant="row.published ? 'outline' : 'default'" :loading="publishingId === row.id" @click="togglePublish(row)">
                 {{ row.published ? '下架' : '发布' }}
-              </FaButton>
+              </YdButton>
               <a :href="api.downloadUrl(row.id)" target="_blank" rel="noopener">
-                <FaButton size="sm" variant="outline">
+                <YdButton size="sm" variant="outline">
                   下载
-                </FaButton>
+                </YdButton>
               </a>
-              <FaButton size="sm" variant="destructive" :loading="deletingId === row.id" @click="confirmDelete(row)">
+              <YdButton size="sm" variant="destructive" :loading="deletingId === row.id" @click="confirmDelete(row)">
                 删除
-              </FaButton>
+              </YdButton>
             </div>
           </div>
-        </FaCard>
+        </YdCard>
       </template>
-    </FaResponsiveTable>
+    </YdResponsiveTable></YdLoadingOverlay>
 
-    <FaModal v-model:visible="uploadOpen" title="发布新版本" :width="560" :mask-closable="false" unmount-on-close>
+    <YdModal v-model="uploadOpen" title="发布新版本" class="sm:max-w-[560px]" :close-on-click-overlay="false">
       <div class="flex flex-col gap-4">
-        <input ref="fileInput" type="file" accept=".apk,application/vnd.android.package-archive" class="hidden" @change="onFileChange">
         <div>
           <div class="mb-1 text-sm font-medium">
             更新包（APK）
           </div>
-          <FaButton variant="outline" @click="pickFile">
-            <FaIcon name="i-ri:file-upload-line" />{{ uploadFile ? uploadFile.name : '选择 APK 文件' }}
-          </FaButton>
+          <YdFilePicker accept=".apk,application/vnd.android.package-archive" label="选择 APK 文件" @select="onFileSelect">
+            <template #default="{ open }">
+              <YdButton variant="outline" @click="open">
+                <YdIcon name="i-ri:file-upload-line" />{{ uploadFile ? uploadFile.name : '选择 APK 文件' }}
+              </YdButton>
+            </template>
+          </YdFilePicker>
           <div v-if="uploadFile" class="app-release-subtitle mt-1">
             {{ fmtSize(uploadFile.size) }}
           </div>
@@ -352,39 +349,39 @@ onMounted(load)
             <div class="mb-1 text-sm font-medium">
               versionCode
             </div>
-            <FaNumberField v-model="uploadVersionCode" :min="1" :max="2147483647" />
+            <YdNumberField v-model="uploadVersionCode" :min="1" :max="2147483647" />
           </div>
           <div class="flex-1">
             <div class="mb-1 text-sm font-medium">
               版本名
             </div>
-            <FaInput v-model="uploadForm.versionName" placeholder="如 0.2.1" clearable />
+            <YdInput v-model="uploadForm.versionName" placeholder="如 0.2.1" clearable />
           </div>
         </div>
         <div>
           <div class="mb-1 text-sm font-medium">
             更新日志
           </div>
-          <FaTextarea v-model="uploadForm.changelog" placeholder="本次更新内容（将展示在 App 更新弹窗与「关于软件」）" :auto-size="{ minRows: 4, maxRows: 10 }" />
+          <YdTextarea v-model="uploadForm.changelog" placeholder="本次更新内容（将展示在 App 更新弹窗与「关于软件」）" :auto-size="{ minRows: 4, maxRows: 10 }" />
         </div>
         <div class="flex items-center gap-2">
-          <FaSwitch v-model="uploadForm.forceUpdate" />
+          <YdSwitch v-model="uploadForm.forceUpdate" />
           <span class="text-sm">强制更新（低于该版本的客户端必须升级后才能继续使用）</span>
         </div>
-        <ArcoTag v-if="uploadForm.forceUpdate" color="red">
+        <YdTag v-if="uploadForm.forceUpdate" variant="destructive">
           注意：发布后将阻断所有旧版本客户端
-        </ArcoTag>
+        </YdTag>
       </div>
       <template #footer>
         <div class="flex justify-end gap-2">
-          <FaButton variant="outline" @click="uploadOpen = false">
+          <YdButton variant="outline" @click="uploadOpen = false">
             取消
-          </FaButton>
-          <FaButton :loading="uploading" @click="submitUpload">
+          </YdButton>
+          <YdButton :loading="uploading" @click="submitUpload">
             上传
-          </FaButton>
+          </YdButton>
         </div>
       </template>
-    </FaModal>
-  </FaPageMain>
+    </YdModal>
+  </YdPageMain>
 </template>
