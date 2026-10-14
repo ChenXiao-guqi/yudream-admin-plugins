@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { FaButton, FaDrawer, FaIcon } from '@yudream/components'
+import { YdButton, YdDrawer, YdIcon } from '@yudream/components'
 import { computed } from 'vue'
 
 const props = defineProps<{
@@ -18,7 +18,7 @@ function copyPayload() {
 </script>
 
 <template>
-  <FaDrawer
+  <YdDrawer
     :model-value="modelValue"
     :title="title"
     side="right"
@@ -28,11 +28,11 @@ function copyPayload() {
     @update:model-value="(value: boolean) => emit('update:modelValue', value)"
   >
     <div class="ymcl-json-drawer__body">
-      <FaButton size="sm" variant="outline" @click="copyPayload">
-        <FaIcon name="i-ri:file-copy-line" />
+      <YdButton size="sm" variant="outline" @click="copyPayload">
+        <YdIcon name="i-ri:file-copy-line" />
         复制 JSON
-      </FaButton>
+      </YdButton>
       <pre class="ymcl-json-pre">{{ formatted }}</pre>
     </div>
-  </FaDrawer>
+  </YdDrawer>
 </template>

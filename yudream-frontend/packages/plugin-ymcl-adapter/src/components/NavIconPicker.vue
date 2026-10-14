@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { FaButton, FaIcon, FaInput, FaTag } from '@yudream/components'
+import { YdAction, YdButton, YdIcon, YdInput, YdTag } from '@yudream/components'
 import { computed, ref } from 'vue'
 import {
   ICON_CATEGORIES,
@@ -156,20 +156,20 @@ function useFallback() {
   <div class="ymcl-icon-picker" :class="{ 'is-disabled': disabled }">
     <div class="ymcl-icon-picker__bar">
       <span class="ymcl-icon-picker__preview" :title="displayIcon || '未选择'">
-        <FaIcon v-if="displayIcon" :name="displayIcon" />
-        <FaIcon v-else name="i-ri:image-line" class="is-placeholder" />
+        <YdIcon v-if="displayIcon" :name="displayIcon" />
+        <YdIcon v-else name="i-ri:image-line" class="is-placeholder" />
       </span>
-      <FaInput
+      <YdInput
         v-model="search"
         class="ymcl-icon-picker__search"
         placeholder="搜索中文 / token / i-ri:xxx…"
         clearable
         :disabled="disabled"
       />
-      <FaButton size="sm" variant="ghost" :disabled="disabled" @click="toggleCustom">
+      <YdButton size="sm" variant="ghost" :disabled="disabled" @click="toggleCustom">
         自定义
-      </FaButton>
-      <FaButton
+      </YdButton>
+      <YdButton
         v-if="fallback && preferredIconValue(modelValue) !== preferredIconValue(fallback)"
         size="sm"
         variant="ghost"
@@ -177,26 +177,26 @@ function useFallback() {
         @click="useFallback"
       >
         用默认
-      </FaButton>
-      <FaButton size="sm" variant="ghost" :disabled="disabled || !modelValue" @click="clear">
+      </YdButton>
+      <YdButton size="sm" variant="ghost" :disabled="disabled || !modelValue" @click="clear">
         清除
-      </FaButton>
+      </YdButton>
     </div>
 
     <div v-if="showCustom" class="ymcl-icon-picker__custom">
-      <FaInput
+      <YdInput
         v-model="customName"
         placeholder="如 home 或 i-mdi:home-variant"
         :disabled="disabled"
         @keydown.enter.prevent="applyCustom"
       />
-      <FaButton size="sm" :disabled="disabled || !customName.trim()" @click="applyCustom">
+      <YdButton size="sm" :disabled="disabled || !customName.trim()" @click="applyCustom">
         应用
-      </FaButton>
+      </YdButton>
     </div>
 
     <div class="ymcl-icon-picker__chips" role="tablist" aria-label="图标分类">
-      <button
+      <YdAction
         v-for="item in categoryOptions"
         :key="item.key"
         type="button"
@@ -209,16 +209,16 @@ function useFallback() {
       >
         {{ item.label }}
         <span class="ymcl-icon-picker__chip-count">{{ item.count }}</span>
-      </button>
+      </YdAction>
     </div>
 
     <div class="ymcl-icon-picker__meta">
       <template v-if="currentValue">
         当前值：<code>{{ currentValue }}</code>
-        <FaTag v-if="nativeSelected" variant="outline">内置图标</FaTag>
-        <FaTag v-else-if="isCustomValue" variant="outline">自定义</FaTag>
-        <FaTag v-else-if="selectedMeta" variant="secondary">{{ selectedMeta.label }}</FaTag>
-        <FaIcon v-if="displayIcon" :name="displayIcon" class="ymcl-icon-picker__meta-icon" />
+        <YdTag v-if="nativeSelected" variant="outline">内置图标</YdTag>
+        <YdTag v-else-if="isCustomValue" variant="outline">自定义</YdTag>
+        <YdTag v-else-if="selectedMeta" variant="secondary">{{ selectedMeta.label }}</YdTag>
+        <YdIcon v-if="displayIcon" :name="displayIcon" class="ymcl-icon-picker__meta-icon" />
       </template>
       <span v-else class="ymcl-muted">
         未覆盖——使用页面默认图标{{ fallback ? `（${preferredIconValue(fallback) || fallback}）` : '' }}
@@ -231,7 +231,7 @@ function useFallback() {
       role="listbox"
       aria-label="选择图标"
     >
-      <button
+      <YdAction
         v-for="icon in filteredIcons"
         :key="icon.token || icon.name"
         type="button"
@@ -243,10 +243,10 @@ function useFallback() {
         :disabled="disabled"
         @click="select(icon)"
       >
-        <FaIcon :name="icon.name" />
+        <YdIcon :name="icon.name" />
         <span class="ymcl-icon-picker__cell-label">{{ icon.label }}</span>
         <span v-if="icon.token" class="ymcl-icon-picker__cell-badge">内置</span>
-      </button>
+      </YdAction>
     </div>
 
     <div class="ymcl-icon-picker__footer">

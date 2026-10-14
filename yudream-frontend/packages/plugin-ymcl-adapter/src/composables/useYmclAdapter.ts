@@ -13,7 +13,7 @@ import type {
   ServerView,
   ThemeProfile,
 } from '../types'
-import { useFaToast } from '@yudream/components'
+import { useYdToast } from '@yudream/components'
 import { computed, reactive, ref } from 'vue'
 import { createYmclApi } from '../api/ymcl-api'
 import { formatTime, openYmcl as openYmclProtocol, siteOrigin, ymclAddSiteUri } from './ymcl-protocol'
@@ -22,7 +22,7 @@ const MAX_BUNDLE_SIZE = 20 * 1024 * 1024
 
 export function useYmclAdapter(sdk: YuDreamPluginSdk) {
   const api = createYmclApi(sdk)
-  const toast = useFaToast()
+  const toast = useYdToast()
   const loading = ref(false)
   const saving = ref(false)
 

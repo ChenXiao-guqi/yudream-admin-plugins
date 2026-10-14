@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import {
-  FaButton,
-  FaCard,
-  FaIcon,
-  FaImageUpload,
-  FaInput,
-  FaPageHeader,
-  FaPageMain,
-  useFaToast,
+import { YdAction,
+  YdButton,
+  YdCard,
+  YdIcon,
+  YdImageUpload,
+  YdInput,
+  YdPageHeader,
+  YdPageMain,
+  useYdToast,
 } from '@yudream/components'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
@@ -17,7 +17,7 @@ import { useYmclAdapter } from '../composables/useYmclAdapter'
 
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 const model = useYmclAdapter(props.sdk)
-const toast = useFaToast()
+const toast = useYdToast()
 const router = useRouter()
 
 const manifestDrawer = ref(false)
@@ -137,23 +137,23 @@ function domainFormValid() {
 
 <template>
   <div class="ymcl-page">
-    <FaPageHeader
+    <YdPageHeader
       :title="domainDisplayName"
       description="用 YMCL-Axolotl 启动器加入本站，进入服务器、皮肤与社区内容。"
     >
-      <FaButton v-if="model.canDesign || model.canPublish" variant="outline" @click="manifestDrawer = true">
-        <FaIcon name="i-ri:code-s-slash-line" />
+      <YdButton v-if="model.canDesign || model.canPublish" variant="outline" @click="manifestDrawer = true">
+        <YdIcon name="i-ri:code-s-slash-line" />
         manifest 预览
-      </FaButton>
-      <FaButton @click="model.openYmcl">
-        <FaIcon name="i-ri:rocket-2-line" />
+      </YdButton>
+      <YdButton @click="model.openYmcl">
+        <YdIcon name="i-ri:rocket-2-line" />
         打开启动器
-      </FaButton>
-    </FaPageHeader>
+      </YdButton>
+    </YdPageHeader>
 
-    <FaPageMain>
+    <YdPageMain>
       <div class="ymcl-overview-grid">
-        <FaCard
+        <YdCard
           title="加入本站"
           description="把这台设备上的 YMCL 启动器连到本站"
           content-class="ymcl-card-content"
@@ -175,18 +175,18 @@ function domainFormValid() {
           </div>
 
           <div class="ymcl-action-row">
-            <FaButton @click="model.openYmcl">
-              <FaIcon name="i-ri:rocket-2-line" />
+            <YdButton @click="model.openYmcl">
+              <YdIcon name="i-ri:rocket-2-line" />
               一键加入
-            </FaButton>
-            <FaButton variant="outline" @click="model.copy(model.addSiteUri, '加域链接已复制')">
-              <FaIcon name="i-ri:links-line" />
+            </YdButton>
+            <YdButton variant="outline" @click="model.copy(model.addSiteUri, '加域链接已复制')">
+              <YdIcon name="i-ri:links-line" />
               复制加域链接
-            </FaButton>
-            <FaButton variant="ghost" @click="model.copy(model.origin, '站点地址已复制')">
-              <FaIcon name="i-ri:file-copy-line" />
+            </YdButton>
+            <YdButton variant="ghost" @click="model.copy(model.origin, '站点地址已复制')">
+              <YdIcon name="i-ri:file-copy-line" />
               复制站点地址
-            </FaButton>
+            </YdButton>
           </div>
 
           <ol class="ymcl-join-steps">
@@ -198,26 +198,26 @@ function domainFormValid() {
             一键加入依赖系统登记的 ymcl:// 协议。若拉起的是旧 SJMC/YMCL，请重新构建安装
             YMCL-Axolotl 后重试；也可复制加域链接粘贴到启动器的添加域入口。
           </p>
-        </FaCard>
+        </YdCard>
 
-        <FaCard
+        <YdCard
           title="在启动器里能做什么"
           description="登录本站域后，成员可直接使用这些能力"
           content-class="ymcl-card-content"
         >
           <ul class="ymcl-perk-list">
             <li v-for="perk in playerPerks" :key="perk.title" class="ymcl-perk">
-              <FaIcon :name="perk.icon" />
+              <YdIcon :name="perk.icon" />
               <div>
                 <strong>{{ perk.title }}</strong>
                 <p class="ymcl-muted">{{ perk.description }}</p>
               </div>
             </li>
           </ul>
-        </FaCard>
+        </YdCard>
 
         <template v-if="model.canDesign">
-          <FaCard
+          <YdCard
             title="域身份"
             description="启动器域列表里显示的名称与 Logo"
             content-class="ymcl-card-content"
@@ -225,15 +225,15 @@ function domainFormValid() {
             <template v-if="domainEditing">
               <div class="ymcl-form-row">
                 <label class="ymcl-label" for="ymcl-domain-name">显示名称</label>
-                <FaInput id="ymcl-domain-name" v-model="model.domainForm.name" placeholder="留空则使用站点地址" />
+                <YdInput id="ymcl-domain-name" v-model="model.domainForm.name" placeholder="留空则使用站点地址" />
               </div>
               <div class="ymcl-form-row">
                 <label class="ymcl-label" for="ymcl-domain-desc">简介</label>
-                <FaInput id="ymcl-domain-desc" v-model="model.domainForm.description" placeholder="域的一句话介绍（可选）" />
+                <YdInput id="ymcl-domain-desc" v-model="model.domainForm.description" placeholder="域的一句话介绍（可选）" />
               </div>
               <div class="ymcl-form-row">
                 <label class="ymcl-label" for="ymcl-domain-logo">Logo</label>
-                <FaImageUpload
+                <YdImageUpload
                   id="ymcl-domain-logo"
                   v-model="logoList"
                   :max="1"
@@ -244,12 +244,12 @@ function domainFormValid() {
                 />
               </div>
               <div class="ymcl-action-row">
-                <FaButton size="sm" :loading="model.saving" @click="saveDomain">
+                <YdButton size="sm" :loading="model.saving" @click="saveDomain">
                   保存
-                </FaButton>
-                <FaButton size="sm" variant="outline" @click="domainEditing = false">
+                </YdButton>
+                <YdButton size="sm" variant="outline" @click="domainEditing = false">
                   取消
-                </FaButton>
+                </YdButton>
               </div>
             </template>
             <template v-else>
@@ -276,36 +276,36 @@ function domainFormValid() {
                 </div>
               </dl>
               <div class="ymcl-action-row">
-                <FaButton size="sm" @click="domainEditing = true">
+                <YdButton size="sm" @click="domainEditing = true">
                   编辑身份
-                </FaButton>
+                </YdButton>
               </div>
             </template>
-          </FaCard>
+          </YdCard>
         </template>
 
-        <FaCard
+        <YdCard
           v-if="visibleShortcuts.length"
           title="管理入口"
           description="仅对具备 design / publish 权限的管理员显示"
           content-class="ymcl-card-content"
         >
           <div class="ymcl-shortcut-grid">
-            <button
+            <YdAction
               v-for="item in visibleShortcuts"
               :key="item.path"
               type="button"
               class="ymcl-shortcut"
               @click="openShortcut(item.path)"
             >
-              <FaIcon :name="item.icon" />
+              <YdIcon :name="item.icon" />
               <span class="ymcl-shortcut__title">{{ item.title }}</span>
               <span class="ymcl-shortcut__desc">{{ item.description }}</span>
-            </button>
+            </YdAction>
           </div>
-        </FaCard>
+        </YdCard>
       </div>
-    </FaPageMain>
+    </YdPageMain>
 
     <JsonViewDrawer v-model="manifestDrawer" title="manifest 预览（启动器视角）" :payload="model.manifest" />
   </div>

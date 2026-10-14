@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { CasFilePreview } from '../types'
-import { FaButton, FaDrawer, FaIcon, FaTag, useFaToast } from '@yudream/components'
+import { YdButton, YdDrawer, YdIcon, YdTag, useYdToast } from '@yudream/components'
 import { computed, ref, watch } from 'vue'
 import { formatSize } from '../composables/ymcl-protocol'
 
@@ -13,7 +14,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>()
-const toast = useFaToast()
+const toast = useYdToast()
 const loading = ref(false)
 const preview = ref<CasFilePreview | null>(null)
 
@@ -92,7 +93,7 @@ function copyContent() {
 </script>
 
 <template>
-  <FaDrawer
+  <YdDrawer
     :model-value="modelValue"
     :title="preview?.filename || path || '文件预览'"
     side="right"
@@ -101,23 +102,23 @@ function copyContent() {
     content-class="ymcl-file-preview-drawer"
     @update:model-value="(value: boolean) => emit('update:modelValue', value)"
   >
-    <div v-loading="loading" class="ymcl-drawer-body">
+    <YdLoadingOverlay :loading="loading"><div  class="ymcl-drawer-body">
       <div v-if="preview" class="ymcl-action-row">
-        <FaTag variant="secondary">{{ preview.kind }}</FaTag>
-        <FaTag variant="outline">{{ formatSize(preview.size || 0) }}</FaTag>
-        <FaTag v-if="preview.truncated" variant="outline">已截断</FaTag>
-        <FaButton as="a" size="sm" variant="outline" class="ml-auto" :href="downloadUrl" target="_blank" rel="noopener">
-          <FaIcon name="i-ri:download-line" />
+        <YdTag variant="secondary">{{ preview.kind }}</YdTag>
+        <YdTag variant="outline">{{ formatSize(preview.size || 0) }}</YdTag>
+        <YdTag v-if="preview.truncated" variant="outline">已截断</YdTag>
+        <YdButton as="a" size="sm" variant="outline" class="ml-auto" :href="downloadUrl" target="_blank" rel="noopener">
+          <YdIcon name="i-ri:download-line" />
           下载
-        </FaButton>
+        </YdButton>
       </div>
 
       <template v-if="preview?.kind === 'text'">
         <div class="ymcl-action-row">
-          <FaButton size="sm" variant="outline" @click="copyContent">
-            <FaIcon name="i-ri:file-copy-line" />
+          <YdButton size="sm" variant="outline" @click="copyContent">
+            <YdIcon name="i-ri:file-copy-line" />
             复制
-          </FaButton>
+          </YdButton>
           <span v-if="preview.truncated" class="ymcl-muted">内容超过 256KB，已截断展示</span>
         </div>
         <pre class="ymcl-json-pre">{{ preview.content }}</pre>
@@ -136,9 +137,9 @@ function copyContent() {
           {{ preview.message }}
         </p>
         <div v-if="preview.metaFiles?.length" class="ymcl-action-row">
-          <FaTag v-for="file in preview.metaFiles" :key="file" variant="outline">
+          <YdTag v-for="file in preview.metaFiles" :key="file" variant="outline">
             {{ file }}
-          </FaTag>
+          </YdTag>
         </div>
       </template>
 
@@ -161,6 +162,6 @@ function copyContent() {
       <p v-else-if="!loading" class="ymcl-muted">
         预览加载失败或文件不存在。
       </p>
-    </div>
-  </FaDrawer>
+    </div></YdLoadingOverlay>
+  </YdDrawer>
 </template>

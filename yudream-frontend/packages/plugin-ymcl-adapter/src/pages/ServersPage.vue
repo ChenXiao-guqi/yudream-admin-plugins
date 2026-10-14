@@ -1,18 +1,19 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { ServerView } from '../types'
 import {
-  FaButton,
-  FaCard,
-  FaIcon,
-  FaInput,
-  FaModal,
-  FaPageHeader,
-  FaPageMain,
-  FaResponsiveTable,
-  FaSelect,
-  FaTag,
-  useFaToast,
+  YdButton,
+  YdCard,
+  YdIcon,
+  YdInput,
+  YdModal,
+  YdPageHeader,
+  YdPageMain,
+  YdResponsiveTable,
+  YdSelect,
+  YdTag,
+  useYdToast,
 } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
@@ -21,7 +22,7 @@ import { formatTime } from '../composables/ymcl-protocol'
 
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 const model = useYmclAdapter(props.sdk)
-const toast = useFaToast()
+const toast = useYdToast()
 
 const editOpen = ref(false)
 const editingServer = ref<ServerView | null>(null)
@@ -151,13 +152,13 @@ onMounted(() => {
 
 <template>
   <div class="ymcl-page">
-    <FaPageHeader title="服务器绑定" description="MIP 附录 B 聚合视图：为启动器成员的服务器指定整合包与更新策略。" />
+    <YdPageHeader title="服务器绑定" description="MIP 附录 B 聚合视图：为启动器成员的服务器指定整合包与更新策略。" />
 
-    <FaPageMain>
-      <FaCard content-class="ymcl-card-content">
-        <FaResponsiveTable
+    <YdPageMain>
+      <YdCard content-class="ymcl-card-content">
+        <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable
           table-root-class="max-w-full overflow-x-auto rounded-lg overflow-hidden"
-          v-loading="model.loading"
+
           :columns="serverColumns"
           :data="model.servers"
           row-key="serverId"
@@ -176,9 +177,9 @@ onMounted(() => {
             <span v-else>-</span>
           </template>
           <template #cell-status="{ row }">
-            <FaTag :variant="statusOnline(row.original) ? 'default' : 'outline'">
+            <YdTag :variant="statusOnline(row.original) ? 'default' : 'outline'">
               {{ statusLabel(row.original) }}
-            </FaTag>
+            </YdTag>
           </template>
           <template #cell-binding="{ row }">
             <span :class="row.original.binding?.packId ? '' : 'ymcl-muted'">{{ bindingSummary(row.original) }}</span>
@@ -187,19 +188,19 @@ onMounted(() => {
             {{ formatTime(row.original.binding?.updatedAt) }}
           </template>
           <template #cell-operations="{ row }">
-            <FaButton size="sm" variant="outline" @click="openEdit(row.original)">
-              <FaIcon name="i-ri:link" />
+            <YdButton size="sm" variant="outline" @click="openEdit(row.original)">
+              <YdIcon name="i-ri:link" />
               绑定
-            </FaButton>
+            </YdButton>
           </template>
           <template #card="{ row }">
-            <FaCard class="w-full">
+            <YdCard class="w-full">
               <div class="flex flex-col gap-3">
                 <div class="flex items-center justify-between gap-2">
                   <span class="min-w-0 break-words text-base font-semibold">{{ serverName(row) }}</span>
-                  <FaTag :variant="statusOnline(row) ? 'default' : 'outline'">
+                  <YdTag :variant="statusOnline(row) ? 'default' : 'outline'">
                     {{ statusLabel(row) }}
-                  </FaTag>
+                  </YdTag>
                 </div>
                 <div class="flex flex-col gap-1 text-sm">
                   <div v-if="row.serverId" class="flex gap-2">
@@ -221,42 +222,42 @@ onMounted(() => {
                   </div>
                 </div>
                 <div class="flex flex-wrap gap-2 border-t pt-3">
-                  <FaButton size="sm" variant="outline" @click="openEdit(row)">
-                    <FaIcon name="i-ri:link" />
+                  <YdButton size="sm" variant="outline" @click="openEdit(row)">
+                    <YdIcon name="i-ri:link" />
                     绑定
-                  </FaButton>
+                  </YdButton>
                 </div>
               </div>
-            </FaCard>
+            </YdCard>
           </template>
-        </FaResponsiveTable>
-      </FaCard>
-    </FaPageMain>
+        </YdResponsiveTable></YdLoadingOverlay>
+      </YdCard>
+    </YdPageMain>
 
-    <FaModal v-model="editOpen" :title="`绑定整合包 · ${serverName(editingServer || {})}`">
+    <YdModal v-model="editOpen" :title="`绑定整合包 · ${serverName(editingServer || {})}`">
       <div class="ymcl-binding-form">
         <div class="ymcl-form-row">
           <label class="ymcl-label">整合包</label>
-          <FaSelect v-model="bindingForm.packId" :options="[{ label: '不绑定（纯服）', value: '' }, ...packOptions]" />
+          <YdSelect v-model="bindingForm.packId" :options="[{ label: '不绑定（纯服）', value: '' }, ...packOptions]" />
         </div>
         <div v-if="bindingForm.packId" class="ymcl-form-row">
           <label class="ymcl-label">渠道</label>
-          <FaSelect v-model="bindingForm.channel" :options="CHANNELS.map(value => ({ label: value, value }))" />
+          <YdSelect v-model="bindingForm.channel" :options="CHANNELS.map(value => ({ label: value, value }))" />
         </div>
         <div v-if="bindingForm.packId" class="ymcl-form-row">
           <label class="ymcl-label">钉住版本</label>
-          <FaSelect
+          <YdSelect
             v-model="bindingForm.pinnedVersion"
             :options="[{ label: '跟随渠道最新', value: '' }, ...pinnedVersions]"
           />
         </div>
         <div v-if="bindingForm.packId" class="ymcl-form-row">
           <label class="ymcl-label">更新策略</label>
-          <FaSelect v-model="bindingForm.updatePolicy" :options="UPDATE_POLICIES" />
+          <YdSelect v-model="bindingForm.updatePolicy" :options="UPDATE_POLICIES" />
         </div>
         <div v-if="!bindingForm.packId" class="ymcl-form-row">
           <label class="ymcl-label">版本要求</label>
-          <FaInput v-model="bindingForm.mcVersion" placeholder="如 1.21.1（原版/纯净服）" />
+          <YdInput v-model="bindingForm.mcVersion" placeholder="如 1.21.1（原版/纯净服）" />
         </div>
         <p class="ymcl-muted">
           绑定整合包 = 成员进服自动备齐整合包（版本不可变，钉住后固定该版本）；
@@ -265,14 +266,14 @@ onMounted(() => {
       </div>
       <template #footer>
         <div class="ymcl-action-row ymcl-action-row--end">
-          <FaButton variant="outline" @click="editOpen = false">
+          <YdButton variant="outline" @click="editOpen = false">
             取消
-          </FaButton>
-          <FaButton :loading="model.saving" @click="submitBinding">
+          </YdButton>
+          <YdButton :loading="model.saving" @click="submitBinding">
             保存绑定
-          </FaButton>
+          </YdButton>
         </div>
       </template>
-    </FaModal>
+    </YdModal>
   </div>
 </template>

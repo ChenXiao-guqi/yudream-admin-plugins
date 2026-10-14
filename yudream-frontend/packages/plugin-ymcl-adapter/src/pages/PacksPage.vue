@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { ManifestFileEntry, PackDoc, PackVersionSummary } from '../types'
-import { FaButton, FaCard, FaDrawer, FaIcon, FaInput, FaModal, FaPageHeader, FaPageMain, FaResponsiveTable, FaTag, FaTextarea, useFaModal, useFaToast } from '@yudream/components'
+import { YdButton, YdCard, YdDrawer, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdResponsiveTable, YdTag, YdTextarea, useYdModal, useYdToast } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import { computed, onMounted, reactive, ref } from 'vue'
 import FilePreviewDrawer from '../components/FilePreviewDrawer.vue'
@@ -11,8 +12,8 @@ import { formatSize, formatTime } from '../composables/ymcl-protocol'
 
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 const model = useYmclAdapter(props.sdk)
-const toast = useFaToast()
-const confirm = useFaModal()
+const toast = useYdToast()
+const confirm = useYdModal()
 
 const versionsDrawer = ref(false)
 const manifestDrawer = ref(false)
@@ -174,13 +175,13 @@ onMounted(() => {
 
 <template>
   <div class="ymcl-page">
-    <FaPageHeader title="整合包分发" description="MIP 分发面的 pack 与版本清单。版本发布后不可变；此处可维护展示信息、清理版本并预览包内文件。" />
+    <YdPageHeader title="整合包分发" description="MIP 分发面的 pack 与版本清单。版本发布后不可变；此处可维护展示信息、清理版本并预览包内文件。" />
 
-    <FaPageMain>
-      <FaCard content-class="ymcl-card-content">
-        <FaResponsiveTable
+    <YdPageMain>
+      <YdCard content-class="ymcl-card-content">
+        <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable
           table-root-class="max-w-full overflow-x-auto rounded-lg overflow-hidden"
-          v-loading="model.loading"
+
           :columns="packColumns"
           :data="model.packs"
           row-key="packId"
@@ -198,36 +199,36 @@ onMounted(() => {
             {{ packVersionCount(row.original) }}
           </template>
           <template #cell-latest="{ row }">
-            <FaTag v-if="packLatest(row.original) !== '-'" variant="secondary">{{ packLatest(row.original) }}</FaTag>
+            <YdTag v-if="packLatest(row.original) !== '-'" variant="secondary">{{ packLatest(row.original) }}</YdTag>
             <span v-else>-</span>
           </template>
           <template #cell-operations="{ row }">
             <div class="ymcl-row-actions">
-              <FaButton size="sm" variant="outline" @click="openVersions(row.original)">
-                <FaIcon name="i-ri:history-line" />
+              <YdButton size="sm" variant="outline" @click="openVersions(row.original)">
+                <YdIcon name="i-ri:history-line" />
                 版本
-              </FaButton>
-              <FaButton size="sm" variant="outline" @click="openEdit(row.original)">
-                <FaIcon name="i-ri:pencil-line" />
+              </YdButton>
+              <YdButton size="sm" variant="outline" @click="openEdit(row.original)">
+                <YdIcon name="i-ri:pencil-line" />
                 编辑
-              </FaButton>
-              <FaButton
+              </YdButton>
+              <YdButton
                 size="sm"
                 variant="destructive"
                 :disabled="!model.canPublish || model.saving"
                 @click="confirmDeletePack(row.original)"
               >
-                <FaIcon name="i-ri:delete-bin-line" />
+                <YdIcon name="i-ri:delete-bin-line" />
                 删除
-              </FaButton>
+              </YdButton>
             </div>
           </template>
           <template #card="{ row }">
-            <FaCard class="w-full">
+            <YdCard class="w-full">
               <div class="flex flex-col gap-3">
                 <div class="flex items-center justify-between gap-2">
                   <span class="min-w-0 break-words text-base font-semibold">{{ row.name || row.packId }}</span>
-                  <FaTag v-if="packLatest(row) !== '-'" variant="secondary">{{ packLatest(row) }}</FaTag>
+                  <YdTag v-if="packLatest(row) !== '-'" variant="secondary">{{ packLatest(row) }}</YdTag>
                 </div>
                 <div class="flex flex-col gap-1 text-sm">
                   <div class="flex gap-2">
@@ -244,32 +245,32 @@ onMounted(() => {
                   </div>
                 </div>
                 <div class="flex flex-wrap gap-2 border-t pt-3">
-                  <FaButton size="sm" variant="outline" @click="openVersions(row)">
-                    <FaIcon name="i-ri:history-line" />
+                  <YdButton size="sm" variant="outline" @click="openVersions(row)">
+                    <YdIcon name="i-ri:history-line" />
                     版本
-                  </FaButton>
-                  <FaButton size="sm" variant="outline" @click="openEdit(row)">
-                    <FaIcon name="i-ri:pencil-line" />
+                  </YdButton>
+                  <YdButton size="sm" variant="outline" @click="openEdit(row)">
+                    <YdIcon name="i-ri:pencil-line" />
                     编辑
-                  </FaButton>
-                  <FaButton
+                  </YdButton>
+                  <YdButton
                     size="sm"
                     variant="destructive"
                     :disabled="!model.canPublish || model.saving"
                     @click="confirmDeletePack(row)"
                   >
-                    <FaIcon name="i-ri:delete-bin-line" />
+                    <YdIcon name="i-ri:delete-bin-line" />
                     删除
-                  </FaButton>
+                  </YdButton>
                 </div>
               </div>
-            </FaCard>
+            </YdCard>
           </template>
-        </FaResponsiveTable>
-      </FaCard>
-    </FaPageMain>
+        </YdResponsiveTable></YdLoadingOverlay>
+      </YdCard>
+    </YdPageMain>
 
-    <FaModal
+    <YdModal
       v-model="editOpen"
       title="编辑整合包"
       class="sm:max-w-xl"
@@ -279,36 +280,36 @@ onMounted(() => {
       <form class="ymcl-form" @submit.prevent>
         <div class="ymcl-form-row">
           <label class="ymcl-label">整合包 ID</label>
-          <FaInput :model-value="editForm.packId" disabled />
+          <YdInput :model-value="editForm.packId" disabled />
         </div>
         <div class="ymcl-form-row">
           <label class="ymcl-label">显示名称</label>
-          <FaInput v-model="editForm.name" placeholder="展示给启动器的名称（可选）" clearable />
+          <YdInput v-model="editForm.name" placeholder="展示给启动器的名称（可选）" clearable />
         </div>
         <div class="ymcl-form-row">
           <label class="ymcl-label">简介</label>
-          <FaTextarea v-model="editForm.description" :rows="3" placeholder="一句话说明这个包（可选）" />
+          <YdTextarea v-model="editForm.description" :rows="3" placeholder="一句话说明这个包（可选）" />
         </div>
         <div class="ymcl-form-row">
           <label class="ymcl-label">图标 URL</label>
-          <FaInput v-model="editForm.icon" placeholder="https://…（可选）" clearable />
+          <YdInput v-model="editForm.icon" placeholder="https://…（可选）" clearable />
         </div>
         <div class="ymcl-form-row">
           <label class="ymcl-label">默认渠道</label>
-          <FaInput v-model="editForm.defaultChannel" placeholder="stable / beta（可选）" clearable />
+          <YdInput v-model="editForm.defaultChannel" placeholder="stable / beta（可选）" clearable />
         </div>
       </form>
       <template #footer>
-        <FaButton variant="outline" @click="editOpen = false">
+        <YdButton variant="outline" @click="editOpen = false">
           取消
-        </FaButton>
-        <FaButton :disabled="!model.canPublish" :loading="model.saving" @click="saveEdit">
+        </YdButton>
+        <YdButton :disabled="!model.canPublish" :loading="model.saving" @click="saveEdit">
           保存
-        </FaButton>
+        </YdButton>
       </template>
-    </FaModal>
+    </YdModal>
 
-    <FaDrawer
+    <YdDrawer
       v-model="versionsDrawer"
       :title="`版本清单 · ${activePack?.packId || ''}`"
       side="right"
@@ -316,8 +317,8 @@ onMounted(() => {
       :footer="false"
       content-class="ymcl-versions-drawer"
     >
-      <div v-loading="versionsLoading" class="ymcl-drawer-body">
-        <FaResponsiveTable
+      <YdLoadingOverlay :loading="versionsLoading"><div  class="ymcl-drawer-body">
+        <YdResponsiveTable
           table-root-class="max-w-full overflow-x-auto rounded-lg overflow-hidden"
           v-if="activeVersions.length"
           :columns="versionColumns"
@@ -332,25 +333,25 @@ onMounted(() => {
           </template>
           <template #cell-operations="{ row }">
             <div class="ymcl-row-actions">
-              <FaButton size="sm" variant="outline" @click="openManifest(row.original)">
+              <YdButton size="sm" variant="outline" @click="openManifest(row.original)">
                 manifest
-              </FaButton>
-              <FaButton
+              </YdButton>
+              <YdButton
                 size="sm"
                 variant="destructive"
                 :disabled="!model.canPublish || model.saving"
                 @click="confirmDeleteVersion(row.original)"
               >
                 删除
-              </FaButton>
+              </YdButton>
             </div>
           </template>
           <template #card="{ row }">
-            <FaCard class="w-full">
+            <YdCard class="w-full">
               <div class="flex flex-col gap-3">
                 <div class="flex items-center justify-between gap-2">
                   <span class="min-w-0 break-words text-base font-semibold">{{ row.version }}</span>
-                  <FaTag variant="outline">{{ row.channel || 'stable' }}</FaTag>
+                  <YdTag variant="outline">{{ row.channel || 'stable' }}</YdTag>
                 </div>
                 <div class="flex flex-col gap-1 text-sm">
                   <div class="flex gap-2">
@@ -359,29 +360,29 @@ onMounted(() => {
                   </div>
                 </div>
                 <div class="flex flex-wrap gap-2 border-t pt-3">
-                  <FaButton size="sm" variant="outline" @click="openManifest(row)">
+                  <YdButton size="sm" variant="outline" @click="openManifest(row)">
                     manifest
-                  </FaButton>
-                  <FaButton
+                  </YdButton>
+                  <YdButton
                     size="sm"
                     variant="destructive"
                     :disabled="!model.canPublish || model.saving"
                     @click="confirmDeleteVersion(row)"
                   >
                     删除
-                  </FaButton>
+                  </YdButton>
                 </div>
               </div>
-            </FaCard>
+            </YdCard>
           </template>
-        </FaResponsiveTable>
+        </YdResponsiveTable>
         <p v-else-if="!versionsLoading" class="ymcl-muted">
           该整合包还没有版本。
         </p>
-      </div>
-    </FaDrawer>
+      </div></YdLoadingOverlay>
+    </YdDrawer>
 
-    <FaDrawer
+    <YdDrawer
       v-model="manifestDrawer"
       :title="`manifest · ${activeVersion?.version || ''}`"
       side="right"
@@ -389,17 +390,17 @@ onMounted(() => {
       :footer="false"
       content-class="ymcl-manifest-drawer"
     >
-      <div v-loading="detailLoading" class="ymcl-drawer-body">
+      <YdLoadingOverlay :loading="detailLoading"><div  class="ymcl-drawer-body">
         <template v-if="versionDetail">
           <div class="ymcl-action-row">
-            <FaTag variant="secondary">不可变版本</FaTag>
-            <FaTag variant="outline">{{ fileCount() }} 个文件 · {{ formatSize(totalSize()) }}</FaTag>
-            <FaButton size="sm" variant="outline" class="ml-auto" @click="jsonDrawer = true">
-              <FaIcon name="i-ri:code-s-slash-line" />
+            <YdTag variant="secondary">不可变版本</YdTag>
+            <YdTag variant="outline">{{ fileCount() }} 个文件 · {{ formatSize(totalSize()) }}</YdTag>
+            <YdButton size="sm" variant="outline" class="ml-auto" @click="jsonDrawer = true">
+              <YdIcon name="i-ri:code-s-slash-line" />
               JSON 全文
-            </FaButton>
+            </YdButton>
           </div>
-          <FaResponsiveTable
+          <YdResponsiveTable
             table-root-class="max-w-full overflow-x-auto rounded-lg overflow-hidden"
             :columns="fileColumns"
             :data="versionFiles"
@@ -415,17 +416,17 @@ onMounted(() => {
               {{ formatSize(Number(row.original.size) || 0) }}
             </template>
             <template #cell-operations="{ row }">
-              <FaButton size="sm" variant="outline" @click="openFilePreview(row.original)">
-                <FaIcon name="i-ri:eye-line" />
+              <YdButton size="sm" variant="outline" @click="openFilePreview(row.original)">
+                <YdIcon name="i-ri:eye-line" />
                 预览
-              </FaButton>
+              </YdButton>
             </template>
             <template #card="{ row }">
-              <FaCard class="w-full">
+              <YdCard class="w-full">
                 <div class="flex flex-col gap-3">
                   <div class="flex items-center justify-between gap-2">
                     <span class="min-w-0 break-words text-base font-semibold">{{ row.path }}</span>
-                    <FaTag v-if="row.policy" variant="outline">{{ row.policy }}</FaTag>
+                    <YdTag v-if="row.policy" variant="outline">{{ row.policy }}</YdTag>
                   </div>
                   <div class="flex flex-col gap-1 text-sm">
                     <div class="flex gap-2">
@@ -438,21 +439,21 @@ onMounted(() => {
                     </div>
                   </div>
                   <div class="flex flex-wrap gap-2 border-t pt-3">
-                    <FaButton size="sm" variant="outline" @click="openFilePreview(row)">
-                      <FaIcon name="i-ri:eye-line" />
+                    <YdButton size="sm" variant="outline" @click="openFilePreview(row)">
+                      <YdIcon name="i-ri:eye-line" />
                       预览
-                    </FaButton>
+                    </YdButton>
                   </div>
                 </div>
-              </FaCard>
+              </YdCard>
             </template>
-          </FaResponsiveTable>
+          </YdResponsiveTable>
         </template>
         <p v-else-if="!detailLoading" class="ymcl-muted">
           manifest 加载失败或不存在。
         </p>
-      </div>
-    </FaDrawer>
+      </div></YdLoadingOverlay>
+    </YdDrawer>
 
     <JsonViewDrawer v-model="jsonDrawer" :title="`manifest JSON · ${activeVersion?.version || ''}`" :payload="versionDetail" />
 
