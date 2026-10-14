@@ -81,6 +81,7 @@ validate:yd-ui:
     - pnpm --dir yudream-frontend install --frozen-lockfile
   script:
     - pnpm --dir yudream-frontend exec node --test scripts/ui-source-scanner.test.mjs
+    - node tests/audit-ui-git-batch.integration.mjs
     - sh ci/verify-plugin-development-conformance.sh
   artifacts:
     when: always
