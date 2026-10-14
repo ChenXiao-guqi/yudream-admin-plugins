@@ -1,12 +1,13 @@
 <script setup lang="ts">
+import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { WordlePluginModel } from '../composables/useWordlePlugin'
 import type { WordEntryView } from '../types'
 import { computed, ref } from 'vue'
-import { FaButton, FaCard, FaIcon, FaInput, FaModal, FaPageHeader, FaPageMain, FaPagination, FaSearchBar, FaSelect, FaSwitch, FaResponsiveTable, FaTag, FaTextarea, useFaModal } from '@yudream/components'
+import { YdButton, YdCard, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdSearchBar, YdSelect, YdSwitch, YdResponsiveTable, YdTag, YdTextarea, useYdModal } from '@yudream/components'
 
 const props = defineProps<{ model: WordlePluginModel }>()
-const confirm = useFaModal()
+const confirm = useYdModal()
 const modalVisible = ref(false)
 const modalTitle = computed(() => props.model.editingWord ? '编辑词条' : '新建词条')
 const modeOptions = [
@@ -32,12 +33,12 @@ function confirmDelete(entry: WordEntryView) { confirm.confirm({ title: '删除�
 </script>
 
 <template>
-  <FaPageHeader title="词条管理" class="mb-0">
-    <FaButton @click="openCreate"><FaIcon name="i-ri:add-line" />新建词条</FaButton>
-  </FaPageHeader>
-  <FaPageMain>
-    <FaResponsiveTable
-      v-loading="model.loading"
+  <YdPageHeader title="词条管理" class="mb-0">
+    <YdButton @click="openCreate"><YdIcon name="i-ri:add-line" />新建词条</YdButton>
+  </YdPageHeader>
+  <YdPageMain>
+    <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable
+
       :columns="columns"
       :data="model.words"
       row-key="id"
@@ -47,35 +48,35 @@ function confirmDelete(entry: WordEntryView) { confirm.confirm({ title: '删除�
       empty-text="暂无自定义词条"
     >
       <template #toolbar>
-        <FaSearchBar class="w-full">
+        <YdSearchBar class="w-full">
           <div class="wordle-filter-bar">
-            <FaSelect v-model="model.wordFilters.mode" :options="modeOptions" @change="model.applyWordFilters" />
-            <FaInput v-model="model.wordFilters.keyword" placeholder="搜索词语" clearable @keyup.enter="model.applyWordFilters" />
-            <FaButton variant="outline" @click="model.applyWordFilters"><FaIcon name="i-ri:search-line" />查询</FaButton>
+            <YdSelect v-model="model.wordFilters.mode" :options="modeOptions" @change="model.applyWordFilters" />
+            <YdInput v-model="model.wordFilters.keyword" placeholder="搜索词语" clearable @keyup.enter="model.applyWordFilters" />
+            <YdButton variant="outline" @click="model.applyWordFilters"><YdIcon name="i-ri:search-line" />查询</YdButton>
           </div>
-        </FaSearchBar>
+        </YdSearchBar>
       </template>
       <template #cell-word="{ row }"><strong>{{ row.original.word }}</strong></template>
-      <template #cell-mode="{ row }"><FaTag variant="secondary">{{ row.original.modeLabel }}</FaTag></template>
+      <template #cell-mode="{ row }"><YdTag variant="secondary">{{ row.original.modeLabel }}</YdTag></template>
       <template #cell-length="{ row }">{{ row.original.length }}</template>
       <template #cell-hint="{ row }">{{ row.original.hint || '-' }}</template>
-      <template #cell-enabled="{ row }"><FaTag :variant="row.original.enabled ? 'default' : 'secondary'">{{ row.original.enabled ? '启用中' : '已停用' }}</FaTag></template>
+      <template #cell-enabled="{ row }"><YdTag :variant="row.original.enabled ? 'default' : 'secondary'">{{ row.original.enabled ? '启用中' : '已停用' }}</YdTag></template>
       <template #cell-createdAt="{ row }">{{ model.formatTime(row.original.createdAt) }}</template>
       <template #cell-operation="{ row }">
         <div class="wordle-actions">
-          <FaButton size="sm" variant="outline" @click="openEdit(row.original)">编辑</FaButton>
-          <FaButton size="sm" variant="outline" @click="model.toggleWord(row.original)">{{ row.original.enabled ? '停用' : '启用' }}</FaButton>
-          <FaButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</FaButton>
+          <YdButton size="sm" variant="outline" @click="openEdit(row.original)">编辑</YdButton>
+          <YdButton size="sm" variant="outline" @click="model.toggleWord(row.original)">{{ row.original.enabled ? '停用' : '启用' }}</YdButton>
+          <YdButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</YdButton>
         </div>
       </template>
       <template #card="{ row }">
-        <FaCard class="w-full">
+        <YdCard class="w-full">
           <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between gap-2">
               <span class="min-w-0 break-words text-base font-semibold">{{ row.word }}</span>
               <div class="flex gap-1">
-                <FaTag variant="secondary">{{ row.modeLabel }}</FaTag>
-                <FaTag :variant="row.enabled ? 'default' : 'secondary'">{{ row.enabled ? '启用中' : '已停用' }}</FaTag>
+                <YdTag variant="secondary">{{ row.modeLabel }}</YdTag>
+                <YdTag :variant="row.enabled ? 'default' : 'secondary'">{{ row.enabled ? '启用中' : '已停用' }}</YdTag>
               </div>
             </div>
             <div class="flex flex-col gap-1 text-sm">
@@ -84,26 +85,26 @@ function confirmDelete(entry: WordEntryView) { confirm.confirm({ title: '删除�
               <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">创建时间</span><span>{{ model.formatTime(row.createdAt) }}</span></div>
             </div>
             <div class="flex flex-wrap gap-2 border-t pt-3">
-              <FaButton size="sm" variant="outline" @click="openEdit(row)">编辑</FaButton>
-              <FaButton size="sm" variant="outline" @click="model.toggleWord(row)">{{ row.enabled ? '停用' : '启用' }}</FaButton>
-              <FaButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</FaButton>
+              <YdButton size="sm" variant="outline" @click="openEdit(row)">编辑</YdButton>
+              <YdButton size="sm" variant="outline" @click="model.toggleWord(row)">{{ row.enabled ? '停用' : '启用' }}</YdButton>
+              <YdButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</YdButton>
             </div>
           </div>
-        </FaCard>
+        </YdCard>
       </template>
-    </FaResponsiveTable>
-    <FaPagination v-model:page="model.wordPager.page" v-model:size="model.wordPager.size" :total="model.wordPager.total" class="mt-3" @page-change="model.loadWords" @size-change="model.applyWordFilters" />
+    </YdResponsiveTable></YdLoadingOverlay>
+    <YdPagination v-model:page="model.wordPager.page" v-model:size="model.wordPager.size" :total="model.wordPager.total" class="mt-3" @page-change="model.loadWords" @size-change="model.applyWordFilters" />
 
-    <FaModal v-model="modalVisible" :title="modalTitle" class="sm:max-w-xl" :show-confirm-button="false" show-cancel-button>
+    <YdModal v-model="modalVisible" :title="modalTitle" class="sm:max-w-xl" :show-confirm-button="false" show-cancel-button>
       <form class="wordle-form" @submit.prevent>
-        <label v-if="!model.editingWord"><span>模式</span><FaSelect v-model="model.wordForm.mode" :options="createModeOptions" /></label>
-        <label v-if="!model.editingWord"><span>词语</span><FaInput v-model="model.wordForm.word" placeholder="英文小写字母或四字成语" /></label>
-        <label v-else><span>词语</span><FaInput :model-value="model.wordForm.word" disabled /></label>
-        <label><span>提示（可选）</span><FaTextarea v-model="model.wordForm.hint" placeholder="开局时展示给玩家的释义提示" /></label>
-        <label v-if="model.editingWord"><span>启用状态</span><FaSwitch v-model="model.wordForm.enabled" /></label>
+        <label v-if="!model.editingWord"><span>模式</span><YdSelect v-model="model.wordForm.mode" :options="createModeOptions" /></label>
+        <label v-if="!model.editingWord"><span>词语</span><YdInput v-model="model.wordForm.word" placeholder="英文小写字母或四字成语" /></label>
+        <label v-else><span>词语</span><YdInput :model-value="model.wordForm.word" disabled /></label>
+        <label><span>提示（可选）</span><YdTextarea v-model="model.wordForm.hint" placeholder="开局时展示给玩家的释义提示" /></label>
+        <label v-if="model.editingWord"><span>启用状态</span><YdSwitch v-model="model.wordForm.enabled" /></label>
         <p class="wordle-form-help">英文单词词长 3-10 个字母；成语固定为 4 个汉字。内置词库无需在这里维护。</p>
       </form>
-      <template #footer><FaButton variant="outline" @click="modalVisible = false">取消</FaButton><FaButton :loading="model.saving" @click="saveWord">保存词条</FaButton></template>
-    </FaModal>
-  </FaPageMain>
+      <template #footer><YdButton variant="outline" @click="modalVisible = false">取消</YdButton><YdButton :loading="model.saving" @click="saveWord">保存词条</YdButton></template>
+    </YdModal>
+  </YdPageMain>
 </template>

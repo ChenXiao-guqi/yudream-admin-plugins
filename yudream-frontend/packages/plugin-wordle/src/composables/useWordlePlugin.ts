@@ -1,12 +1,12 @@
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { WordEntryForm, WordEntryView, WordFilters, WordleGameView, WordleMyStats, WordleOverview, WordlePlayerView } from '../types'
-import { useFaToast } from '@yudream/components'
+import { useYdToast } from '@yudream/components'
 import { computed, reactive, ref } from 'vue'
 import { createWordleApi } from '../api/wordle-api'
 
 export function useWordlePlugin(sdk: YuDreamPluginSdk) {
   const api = createWordleApi(sdk)
-  const toast = useFaToast()
+  const toast = useYdToast()
   const loading = ref(false)
   const saving = ref(false)
   const overview = ref<WordleOverview | null>(null)
