@@ -10,6 +10,9 @@ softdepend:
   # 方向必须是「面板 → 适配器」：反向声明会让宿主判定依赖环并静默丢弃该能力。
   - ymcl-adapter
 version: 0.22.6
+menu:
+  # 一级共享分类，见宿主 docs/plugin-system/specification.md 第 10 节
+  category: mc
 # 移动端（YuDream Mobile 宿主）接入声明：运维面板
 mobile:
   platforms:

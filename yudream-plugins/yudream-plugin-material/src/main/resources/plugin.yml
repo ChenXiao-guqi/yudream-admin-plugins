@@ -4,3 +4,6 @@ description: 统一管理文件、图片、视频和文档素材，支持分类�
 icon: i-ri:folder-2-line
 main: online.yudream.base.plugin.material.bootstrap.MaterialPlugin
 version: 1.11.1
+menu:
+  # 一级共享分类，见宿主 docs/plugin-system/specification.md 第 10 节
+  category: content

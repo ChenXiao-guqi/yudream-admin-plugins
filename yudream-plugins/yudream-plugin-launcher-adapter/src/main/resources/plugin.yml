@@ -4,5 +4,8 @@ description: 为 YMCL 启动器提供版本化 manifest、LauncherProvider 页�
 icon: i-ri:rocket-2-line
 main: online.yudream.base.plugin.launcher.bootstrap.LauncherAdapterPlugin
 version: 0.7.1
+menu:
+  # 一级共享分类，见宿主 docs/plugin-system/specification.md 第 10 节
+  category: client
 softdepend:
   - authlib-injector

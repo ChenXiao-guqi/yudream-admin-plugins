@@ -4,6 +4,9 @@ description: YMCL 启动器域适配协议（YAP）入口：capabilities、认�
 icon: i-ri:gamepad-line
 main: online.yudream.base.plugin.ymcl.bootstrap.YmclAdapterPlugin
 version: 0.11.3
+menu:
+  # 一级共享分类，见宿主 docs/plugin-system/specification.md 第 10 节
+  category: client
 softdepend:
   - yudream-skin
   # P2P 直连（玩家侧无感的实例直连）不走依赖：具备该能力的插件经 YmclP2pProvider

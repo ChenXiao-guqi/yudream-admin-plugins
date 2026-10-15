@@ -31,7 +31,7 @@ import online.yudream.base.plugin.wallet.api.PluginWalletService;
 })
 @PluginFrontend(
         moduleName = "yudreamAlipay",
-        menuTitle = "钱包",
+        menuTitle = "支付宝",
         menuIcon = "i-ri:wallet-3-line",
         menuSort = 30,
         parentCode = "plugin:yudream-wallet:module:yudreamWallet",

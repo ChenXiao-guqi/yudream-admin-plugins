@@ -4,3 +4,6 @@ description: 在 QQ 群中进行协作推理棋盘游戏，并记录对局与玩
 icon: i-ri:gamepad-line
 main: online.yudream.base.plugin.pony.bootstrap.PonyPlugin
 version: 1.0.4
+menu:
+  # 一级共享分类，见宿主 docs/plugin-system/specification.md 第 10 节
+  category: play

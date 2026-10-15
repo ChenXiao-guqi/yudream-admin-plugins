@@ -4,3 +4,6 @@ description: 将 Codex 任务状态私信通知给对应用户，并定期清理
 icon: i-ri:notification-3-line
 main: online.yudream.plugin.codextasknotify.bootstrap.CodexTaskNotifyPlugin
 version: 1.0.0
+menu:
+  # 一级共享分类，见宿主 docs/plugin-system/specification.md 第 10 节
+  category: tools

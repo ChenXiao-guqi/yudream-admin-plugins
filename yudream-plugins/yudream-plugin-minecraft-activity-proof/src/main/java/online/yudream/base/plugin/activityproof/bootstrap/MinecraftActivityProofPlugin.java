@@ -51,7 +51,7 @@ import online.yudream.base.plugin.spi.system.command.PluginCommandContext;
 )
 @PluginFrontend(
         moduleName = "minecraftActivityProof",
-        menuTitle = "学生信息",
+        menuTitle = "活动平台",
         menuIcon = "i-ri:id-card-line",
         menuSort = 35,
         parentCode = "plugin:yudream-student-info:module:yudreamStudentInfo",

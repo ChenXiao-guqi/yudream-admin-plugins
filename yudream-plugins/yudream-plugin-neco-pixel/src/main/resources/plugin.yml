@@ -4,6 +4,9 @@ description: Minecraft 风格像素主题：Vue 原生 chrome/首页接管公开
 icon: i-ri:gamepad-line
 main: online.yudream.base.plugin.necopixel.bootstrap.NecoPixelThemePlugin
 version: 2.0.14
+menu:
+  # 一级共享分类，见宿主 docs/plugin-system/specification.md 第 10 节
+  category: appearance
 softdepend:
   - minecraft-server
   - minecraft-activity-proof

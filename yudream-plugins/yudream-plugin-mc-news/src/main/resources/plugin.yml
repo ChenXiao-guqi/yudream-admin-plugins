@@ -4,6 +4,9 @@ description: 轮询 Minecraft 官网新闻与反馈隧道版本文章，AI 整�
 icon: i-ri:newspaper-line
 main: online.yudream.base.plugin.mcnews.bootstrap.McNewsPlugin
 version: 1.4.10
+menu:
+  # 一级共享分类，见宿主 docs/plugin-system/specification.md 第 10 节
+  category: content
 # 移动端（YuDream Mobile 宿主）接入声明：管理员新闻列表
 mobile:
   platforms:

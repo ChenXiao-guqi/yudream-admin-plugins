@@ -4,6 +4,9 @@ description: 发布和管理 Minecraft 活动，核验参与证明并支持结�
 icon: i-ri:calendar-check-line
 main: online.yudream.base.plugin.activityproof.bootstrap.MinecraftActivityProofPlugin
 version: 2.7.11
+menu:
+  # 一级共享分类，见宿主 docs/plugin-system/specification.md 第 10 节
+  category: campus
 depend:
   - yudream-student-info
 softdepend:

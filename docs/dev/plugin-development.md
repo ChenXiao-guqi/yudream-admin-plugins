@@ -16,7 +16,7 @@
 
 - Maven 唯一宿主编译契约：已发布 `online.yudream.base:yudream-plugin-spi`；前端唯一共享契约：已发布 `@yudream/plugin-sdk` 与 `@yudream/components`。严禁本地宿主 workspace、源码复制、vendoring、宿主内部包、私有宿主 HTTP client、Spring Bean 绕过。宿主缺能力先升级/发布稳定 SPI/SDK，再由本仓消费。
 - JAR 根权威 `plugin.yml` 必须声明 `name/main/version`；`name` 稳定 code，`displayName` 只展示。`depend` 硬依赖、`softdepend` 可选依赖。禁止 `META-INF/services/...YuDreamPlugin`，运行时从 `main` 建实例。
-- 新插件 menu 分类取主要业务大类 `mc/todo/social/other` 或 `{code,name,icon,sort}`，有 menu 块默认 CATEGORY；分类是宿主共享一级入口，功能放分类下。除明确例外用 INDEPENDENT/parentCode；无 menu 或 LEGACY 保持旧插件行为；不自动搬管理员已持久化菜单。旧宿主兼容需确认。
+- 新插件 menu **必须**声明语义分类：内置 `mc/social/play/todo/content/campus/client/trade/tools/appearance`，或用 `{code,name,icon,sort}` 自定义；**不提供「其他」兜底**，缺 `category` 的 menu 块会被宿主拒绝。有 menu 块默认 CATEGORY，分类是宿主共享一级入口，功能放分类下。**一级菜单名称（分类名与 INDEPENDENT 独立入口名）最多 5 个字**，超长在宿主 manifest 解析与菜单投影时失败；二级及以下名称由子侧栏承载，不受限。除明确例外用 INDEPENDENT/parentCode；无 menu 或 LEGACY 保持旧插件行为；不自动搬管理员已持久化菜单。旧宿主兼容需确认。
 - 硬依赖先于 consumer 加载启用；软依赖缺失不阻塞主体，相关贡献和 UI 显式降级。调用前查可用性、隔离 optional 类型引用以免 NoClassDefFoundError；provider disable/reload 间不缓存 API 对象。`depend/softdepend` 图必须无环；`launcher-adapter` 不得依赖 `minecraft-server`，服务器列表/YMCL scope 由后者以 LauncherProvider 贡献。
 - 插件业务 API 不放宿主 SPI。provider 在自身 JAR 的稳定最小 `*.api` 包声明；consumer `provided` 依赖、经依赖 ClassLoader 调用；禁止复制/shade/relocate/重复打包 API，也禁止用 registerExtension/getExtension、framework.extension(s)、私有 HTTP 代理或 Spring Bean 调用跨插件业务 API。
 - 插件之间的消费方向、类加载器快照、级联启停以主仓 `docs/dev/plugin-system.md` 为准；provider reload 前先按依赖顺序 unload consumer。

@@ -4,5 +4,8 @@ description: 接入支付宝收款创建充值订单并为用户钱包入账，�
 icon: i-ri:alipay-line
 main: online.yudream.base.plugin.alipay.bootstrap.AlipayPlugin
 version: 1.1.3
+menu:
+  # 一级共享分类，见宿主 docs/plugin-system/specification.md 第 10 节
+  category: trade
 depend:
   - yudream-wallet
