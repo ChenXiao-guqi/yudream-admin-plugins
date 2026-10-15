@@ -6,9 +6,9 @@ catalog:
   '@types/qrcode': ^1.5.5
   '@vitejs/plugin-vue': ^6.0.7
   '@vue/tsconfig': ^0.9.1
-  '@yudream/components': 1.6.0
+  '@yudream/components': 1.8.1
   '@yudream/dataviz': 0.1.2
-  '@yudream/plugin-sdk': 1.11.0
+  '@yudream/plugin-sdk': 1.12.0
   qrcode: ^1.5.4
   typescript: ^6.0.3
   vite: ^8.0.16
@@ -22,6 +22,8 @@ minimumReleaseAgeExclude:
   - '@yudream/components@1.4.0'
   - '@yudream/components@1.5.0'
   - '@yudream/components@1.6.0'
+  - '@yudream/components@1.8.0'
+  - '@yudream/components@1.8.1'
   - '@yudream/dataviz@0.1.0'
   - '@yudream/dataviz@0.1.1'
   - '@yudream/dataviz@0.1.2'
@@ -30,4 +32,5 @@ minimumReleaseAgeExclude:
   - '@yudream/plugin-sdk@1.9.0'
   - '@yudream/plugin-sdk@1.10.0'
   - '@yudream/plugin-sdk@1.11.0'
+  - '@yudream/plugin-sdk@1.12.0'
   - '@jboltai/tokui@0.1.7'
