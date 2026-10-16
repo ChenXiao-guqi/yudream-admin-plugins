@@ -576,6 +576,12 @@ public class McpanelPlugin implements YuDreamPlugin {
                     auditRecorder,
                     mapper);
             instanceService.attachTrashSink(trashService::record);
+            // 联动状态心跳：minecraft-server 用「面板确认实例在运行」兜底线路探测不可达
+            // （面板与节点同机的 NAT 回环），回推必须周期性刷新才持续有效。
+            var linkHeartbeat = new online.yudream.base.plugin.mcpanel.application.service.MinecraftLinkHeartbeat(
+                    instanceRepository, link);
+            linkHeartbeat.start();
+            context.onDispose(linkHeartbeat);
             context.registerHttpController(new online.yudream.base.plugin.mcpanel.interfaces.controller.McpanelTrashController(
                     trashService, framework.security()));
             // 实例状态展示口径唯一来源：stats 快照优先、DB 回退（列表/详情/总览共用）。
