@@ -26,9 +26,10 @@ class MinecraftLinkHeartbeatTest {
     private final McpanelInstanceRepository instances =
             new DocumentMcpanelInstanceRepository(documents, McpanelJson.mapper());
 
-    /** 记录回推目标的假联动服务（不回推真实提供方）。 */
+    /** 记录回推目标与人数上限的假联动服务（不回推真实提供方）。 */
     private static final class RecordingLink extends MinecraftLinkService {
         private final List<String> written = new ArrayList<>();
+        private final List<Integer> maxPlayers = new ArrayList<>();
         private boolean fail;
 
         private RecordingLink() {
@@ -36,12 +37,70 @@ class MinecraftLinkHeartbeatTest {
         }
 
         @Override
-        public void writebackState(McpanelInstance instance) {
+        public void writebackState(McpanelInstance instance, int reportedMaxPlayers) {
             if (fail) {
                 throw new IllegalStateException("提供方缺失");
             }
             written.add(instance.id());
+            maxPlayers.add(reportedMaxPlayers);
         }
+    }
+
+    /** 假 server.properties 读取：view() 会按 base64 解码 content 并解析 properties。 */
+    private ServerConfigService configsWith(String content) {
+        return new ServerConfigService(new ServerConfigService.InstanceFiles() {
+            @Override
+            public Map<String, Object> read(String scopeKey, String instanceId, Map<String, Object> args) {
+                return Map.of("content", java.util.Base64.getEncoder()
+                        .encodeToString(content.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+            }
+
+            @Override
+            public Map<String, Object> write(String scopeKey, String instanceId, Map<String, Object> args) {
+                return Map.of();
+            }
+        });
+    }
+
+    /** 假 server.properties 内容（平面 key=value 文件）。 */
+    private static final String PROPERTIES = """
+            max-players=20
+            motd=hello
+            """;
+
+    @Test
+    void pulseCarriesMaxPlayersReadFromServerProperties() {
+        instances.save(instance("inst-bound", "server-1", "running"));
+        RecordingLink link = new RecordingLink();
+
+        new MinecraftLinkHeartbeat(instances, link, configsWith(PROPERTIES)).pulseSafely();
+
+        // 人数上限随回推带给提供方：ping 不可达时列表仍能按「在线/上限」展示
+        assertEquals(List.of(20), link.maxPlayers);
+    }
+
+    @Test
+    void pulseFallsBackToZeroWhenConfigUnreadable() {
+        instances.save(instance("inst-bound", "server-1", "running"));
+        RecordingLink link = new RecordingLink();
+        ServerConfigService broken = new ServerConfigService(new ServerConfigService.InstanceFiles() {
+            @Override
+            public Map<String, Object> read(String scopeKey, String instanceId, Map<String, Object> args) {
+                throw new online.yudream.base.plugin.mcpanel.domain.McpanelBusinessException(
+                        "node.unreachable", 502, "节点不可达");
+            }
+
+            @Override
+            public Map<String, Object> write(String scopeKey, String instanceId, Map<String, Object> args) {
+                return Map.of();
+            }
+        });
+
+        new MinecraftLinkHeartbeat(instances, link, broken).pulseSafely();
+
+        // 读不到上限不阻断状态回推：仍回推、上限按 0
+        assertEquals(List.of("inst-bound"), link.written);
+        assertEquals(List.of(0), link.maxPlayers);
     }
 
     private McpanelInstance instance(String id, String mcServerId, String state) {
