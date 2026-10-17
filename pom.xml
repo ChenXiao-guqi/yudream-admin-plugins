@@ -71,6 +71,7 @@
         <module>yudream-plugins/yudream-plugin-forum</module>
         <module>yudream-plugins/yudream-plugin-playtime-points</module>
         <module>yudream-plugins/yudream-plugin-app-release</module>
+        <module>yudream-plugins/yudream-plugin-voxelith-map</module>
     </modules>
 
     <dependencyManagement>
