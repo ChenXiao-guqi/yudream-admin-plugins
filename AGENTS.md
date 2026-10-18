@@ -23,6 +23,7 @@
 - 修改本仓/主仓 AGENTS、docs/dev 或写入约束性记忆：先查主仓 `D:/code/yudream-admim/docs/dev/repo-sync.md`。
 - 故障经验：`docs/exp/README.md` 分类索引。
 - 本仓根 AGENTS 是硬规则入口；`docs/dev/` 是规范；`docs/exp/` 是经验。不得再建立 skill 作为项目规范权威。
+- 每次开始新任务，必须重新完整阅读本次任务对应的上述必读文件，并在首次工作进展中说明本次已读文件；不得以历史会话、已有摘要或此前读取结果代替；未完成阅读前不得分析、设计、给出修改方案或进行代码写入（2026-10-19 起）。
 
 ## 3. 硬规则
 
@@ -52,7 +53,13 @@
 - 插件契约发布顺序由主仓 `docs/dev/contract-release.md` 定义，本仓只消费已发布版本。
 - 组件主题资产的 token 声明边界按同步的 `docs/yd-ui-guidelines.md`：唯一 SITE scope 要有 SITE 页面/公开路由锚点，唯一 ADMIN scope 限 `:root`/`.dark`；token 消费仍违规；未证明隔离的双 scope fail-closed。扫描器按 Java 元数据、入口和构建输出精确定位资产，不给业务 CSS 目录豁免。
 
-## 6. 规则与经验入口
+## 6. 现状快照（2026-10-19）
+
+后端 36 个插件 JAR（`yudream-plugins/yudream-plugin-*`）· 前端 51 个远程包（`yudream-frontend/packages/plugin-*`，含 mobile 变体）· 契约：SPI `2.34.0`（根 pom）、`@yudream/components` `1.9.0` / `@yudream/plugin-sdk` `1.13.0`（workspace catalog）· 发布：`release/plugins.txt` 选择插件，受保护 `v*` tag 触发 CI 打包并发自托管插件市场源。
+
+结构性调整（增删插件、契约升版、发布机制变化）完成后必须同步更新本行与日期。
+
+## 7. 规则与经验入口
 
 - 独立仓总纲与版本/构建：`docs/dev/conventions.md`
 - 插件 DDD、权限/数据边界、remote frontend、主题与生命周期：`docs/dev/plugin-development.md`
