@@ -4,7 +4,8 @@
   "version": "0.0.0",
   "scripts": {
     "build": "vue-tsc -p tsconfig.json --noEmit && vite build",
-    "lint": "vue-tsc -p tsconfig.json --noEmit"
+    "lint": "vue-tsc -p tsconfig.json --noEmit",
+    "typecheck": "vue-tsc -p tsconfig.json --noEmit --pretty false --skipLibCheck --ignoreDeprecations 6.0"
   },
   "exports": {
     ".": "./src/index.ts",
