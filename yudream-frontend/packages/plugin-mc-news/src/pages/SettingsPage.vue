@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginAiProviderOption, YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { McNewsSettingsView, PollStatusView, TemplateMeta, TemplateVariable } from '../types'
 import { MdPreview } from 'md-editor-v3'
-import { YdButton, YdIcon, YdNumberField, YdPageHeader, YdPageMain, YdSwitch, YdTextarea, YdCombobox, useYdToast, YdAction } from '@yudream/components'
+import { YdButton, YdCombobox, YdForm, YdFormItem, YdIcon, YdLoadingOverlay, YdNumberField, YdPageHeader, YdSettingsLayout, YdSettingsSection, YdSwitch, YdTag, YdTextarea, YdAction, useYdToast } from '@yudream/components'
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import { createMcNewsApi } from '../api/mc-news-api'
 import { errorMessage, nextPollText } from '../composables/utils'
@@ -20,6 +19,14 @@ const aiProviders = ref<YuDreamPluginAiProviderOption[]>([])
 const pollStatus = ref<PollStatusView | null>(null)
 const remainSeconds = ref(0)
 let statusTimer: number | undefined
+
+/** 设置页分区：左导航按此切换，窄屏折叠成分区选择器 */
+const activeSection = ref('polling')
+const sectionList: { icon?: string, label: string, value: string }[] = [
+  { label: '轮询', value: 'polling', icon: 'morph:refresh' },
+  { label: 'AI 整合', value: 'ai', icon: 'morph:sparkles' },
+  { label: '消息模板', value: 'template', icon: 'morph:message' },
+]
 
 const form = reactive<McNewsSettingsView>({
   enabled: true,
@@ -209,140 +216,149 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <YdPageHeader title="推送设置" description="轮询节奏、AI 整合与推送消息模板">
-    <YdButton :loading="saving" @click="save">
-      <YdIcon name="i-ri:save-3-line" />保存设置
-    </YdButton>
-  </YdPageHeader>
-  <YdPageMain>
-    <YdLoadingOverlay :loading="loading"><div  class="mc-news-form">
-      <div class="mc-news-poll-status">
-        <span>上次轮询：{{ pollStatus?.lastPollAtLabel || '尚未轮询' }}</span>
-        <span v-if="pollStatus?.lastPollSummary">{{ pollStatus.lastPollSummary }}</span>
-        <span>下次轮询：{{ nextPollText(pollStatus, remainSeconds) || '加载中' }}</span>
-        <YdTag v-if="pollStatus?.polling" variant="default">轮询进行中</YdTag>
-        <YdTag v-else-if="pollStatus && !pollStatus.enabled" variant="outline">已暂停</YdTag>
-      </div>
+  <div class="mc-news-settings-shell">
+    <YdPageHeader title="推送设置" class="mb-0">
+      <YdButton :loading="saving" @click="save">
+        <YdIcon name="morph:save" />保存设置
+      </YdButton>
+    </YdPageHeader>
 
-      <div class="mc-news-form-row">
-        <div class="mc-news-form-item">
-          <span class="mc-news-form-label">定时轮询</span>
-          <YdSwitch v-model="form.enabled" />
-          <span class="mc-news-form-hint">关闭后暂停自动轮询，手动轮询仍可用。</span>
-        </div>
-        <div class="mc-news-form-item">
-          <span class="mc-news-form-label">轮询间隔（分钟）</span>
-          <YdNumberField v-model="form.pollIntervalMinutes" :min="5" :max="1440" />
-          <span class="mc-news-form-hint">最小 5 分钟，修改后下一轮生效。</span>
-        </div>
-        <div class="mc-news-form-item">
-          <span class="mc-news-form-label">新闻缓存条数</span>
-          <YdNumberField v-model="form.cacheSize" :min="5" :max="200" />
-          <span class="mc-news-form-hint">缓存最近 N 条已见新闻用于对比，超出自动淘汰。</span>
-        </div>
-        <div class="mc-news-form-item">
-          <span class="mc-news-form-label">首次运行即推送</span>
-          <YdSwitch v-model="form.pushOnFirstPoll" />
-          <span class="mc-news-form-hint">默认首次运行只建立缓存基线不推送，避免刚启用即轰炸群聊。</span>
-        </div>
-      </div>
+    <YdLoadingOverlay :loading="loading">
+      <YdSettingsLayout
+        v-model="activeSection"
+        :list="sectionList"
+        surface
+        scroll
+        width-class="max-w-[880px]"
+      >
+        <template #polling>
+          <YdSettingsSection
+            title="轮询"
+            description="定时抓取 Minecraft 官网新闻与反馈隧道文章；关闭后仍可手动轮询。"
+          >
+            <div class="mc-news-poll-meta">
+              <span>上次轮询：{{ pollStatus?.lastPollAtLabel || '尚未轮询' }}</span>
+              <span v-if="pollStatus?.lastPollSummary">{{ pollStatus.lastPollSummary }}</span>
+              <span>下次轮询：{{ nextPollText(pollStatus, remainSeconds) || '加载中' }}</span>
+              <YdTag v-if="pollStatus?.polling" variant="default">轮询进行中</YdTag>
+              <YdTag v-else-if="pollStatus && !pollStatus.enabled" variant="outline">已暂停</YdTag>
+            </div>
 
-      <div class="mc-news-form-row">
-        <div class="mc-news-form-item">
-          <span class="mc-news-form-label">AI 整合</span>
-          <YdSwitch v-model="form.aiEnabled" />
-          <span class="mc-news-form-hint">抓取文章正文，让推送保留修复项、变更点等具体信息；AI 不可用时回退官方摘要。</span>
-        </div>
-        <div class="mc-news-form-item">
-          <span class="mc-news-form-label">AI 供应商</span>
-          <YdCombobox
-            :model-value="form.aiProviderCode || undefined"
-            :options="providerOptions"
-            placeholder="留空走宿主默认"
-            clearable
-            allow-create
-            @change="value => onProviderChange(typeof value === 'string' ? value : '')"
-            @create="onProviderChange"
-           />
-          <span class="mc-news-form-hint">选项来自宿主 AI 配置，也可手动输入编码。</span>
-        </div>
-        <div class="mc-news-form-item">
-          <span class="mc-news-form-label">AI 模型</span>
-          <YdCombobox
-            :model-value="form.aiModelCode || undefined"
-            :options="modelOptions"
-            placeholder="留空走宿主默认"
-            clearable
-            allow-create
-            @change="value => (form.aiModelCode = String(value ?? ''))"
-            @create="value => (form.aiModelCode = value)"
-           />
-          <span class="mc-news-form-hint">按所选供应商联动；未选供应商时列出全部模型。</span>
-        </div>
-        <div class="mc-news-form-item">
-          <span class="mc-news-form-label">单轮 AI 整合条数上限</span>
-          <YdNumberField v-model="form.aiMaxItems" :min="0" :max="50" />
-          <span class="mc-news-form-hint">超出部分直接使用官方摘要，控制 AI 消耗。</span>
-        </div>
-      </div>
+            <YdForm :model="form" layout="vertical">
+              <div class="flex flex-col gap-4 max-w-xl">
+                <YdFormItem label="定时轮询" extra="关闭后暂停自动轮询，手动轮询仍可用。">
+                  <YdSwitch v-model="form.enabled" />
+                </YdFormItem>
+                <YdFormItem label="轮询间隔（分钟）" extra="最小 5 分钟，修改后下一轮生效。">
+                  <YdNumberField v-model="form.pollIntervalMinutes" :min="5" :max="1440" />
+                </YdFormItem>
+                <YdFormItem label="新闻缓存条数" extra="缓存最近 N 条已见新闻用于对比，超出自动淘汰。">
+                  <YdNumberField v-model="form.cacheSize" :min="5" :max="200" />
+                </YdFormItem>
+                <YdFormItem label="首次运行即推送" extra="默认首次运行只建立缓存基线不推送，避免刚启用即轰炸群聊。">
+                  <YdSwitch v-model="form.pushOnFirstPoll" />
+                </YdFormItem>
+              </div>
+            </YdForm>
+          </YdSettingsSection>
+        </template>
 
-      <div class="mc-news-form-row">
-        <div class="mc-news-form-item">
-          <span class="mc-news-form-label">正文截取长度（字符）</span>
-          <YdNumberField v-model="form.aiContentMaxChars" :min="500" :max="20000" />
-          <span class="mc-news-form-hint">AI 整合时抓取的文章正文上限，越长保留的细节越多，默认 6000。</span>
-        </div>
-      </div>
+        <template #ai>
+          <YdSettingsSection
+            title="AI 整合"
+            description="抓取文章正文，让推送保留修复项、变更点等具体信息；AI 不可用时回退官方摘要。"
+          >
+            <YdForm :model="form" layout="vertical">
+              <div class="flex flex-col gap-4 max-w-xl">
+                <YdFormItem label="AI 整合">
+                  <YdSwitch v-model="form.aiEnabled" />
+                </YdFormItem>
+                <YdFormItem label="AI 供应商" extra="选项来自宿主 AI 配置，也可手动输入编码。">
+                  <YdCombobox
+                    :model-value="form.aiProviderCode || undefined"
+                    :options="providerOptions"
+                    placeholder="留空走宿主默认"
+                    clearable
+                    allow-create
+                    @change="value => onProviderChange(typeof value === 'string' ? value : '')"
+                    @create="onProviderChange"
+                  />
+                </YdFormItem>
+                <YdFormItem label="AI 模型" extra="按所选供应商联动；未选供应商时列出全部模型。">
+                  <YdCombobox
+                    :model-value="form.aiModelCode || undefined"
+                    :options="modelOptions"
+                    placeholder="留空走宿主默认"
+                    clearable
+                    allow-create
+                    @change="value => (form.aiModelCode = String(value ?? ''))"
+                    @create="value => (form.aiModelCode = value)"
+                  />
+                </YdFormItem>
+                <YdFormItem label="单轮 AI 整合条数上限" extra="超出部分直接使用官方摘要，控制 AI 消耗。">
+                  <YdNumberField v-model="form.aiMaxItems" :min="0" :max="50" />
+                </YdFormItem>
+                <YdFormItem label="正文截取长度（字符）" extra="AI 整合时抓取的文章正文上限，越长保留的细节越多，默认 6000。">
+                  <YdNumberField v-model="form.aiContentMaxChars" :min="500" :max="20000" />
+                </YdFormItem>
+                <YdFormItem label="AI 系统提示词" extra="当前显示内置默认提示词，可直接修改；与默认完全一致时保存后仍跟随内置默认。">
+                  <div class="flex flex-col gap-2">
+                    <YdButton size="sm" variant="outline" class="self-start" @click="resetPrompt">
+                      恢复默认
+                    </YdButton>
+                    <YdTextarea v-model="form.aiSystemPrompt" :auto-size="{ minRows: 3, maxRows: 8 }" placeholder="内置默认提示词" />
+                  </div>
+                </YdFormItem>
+              </div>
+            </YdForm>
+          </YdSettingsSection>
+        </template>
 
-      <div class="mc-news-form-item">
-        <div class="mc-news-toolbar">
-          <span class="mc-news-form-label">AI 系统提示词</span>
-          <YdButton size="sm" variant="outline" @click="resetPrompt">
-            恢复默认
-          </YdButton>
-        </div>
-        <YdTextarea v-model="form.aiSystemPrompt" :auto-size="{ minRows: 3, maxRows: 8 }" placeholder="内置默认提示词" />
-        <span class="mc-news-form-hint">当前显示内置默认提示词，可直接修改；与默认完全一致时保存后仍跟随内置默认。</span>
-      </div>
-
-      <div class="mc-news-form-item">
-        <div class="mc-news-toolbar">
-          <span class="mc-news-form-label">推送消息模板</span>
-          <span style="flex: 1" />
-          <YdButton size="sm" variant="outline" @click="refreshPreview">
-            预览
-          </YdButton>
-          <YdButton size="sm" variant="outline" @click="resetTemplate">
-            恢复默认模板
-          </YdButton>
-        </div>
-        <YdTextarea v-model="form.messageTemplate" :auto-size="{ minRows: 5, maxRows: 12 }" placeholder="内置默认模板" />
-        <span class="mc-news-form-hint">当前显示内置默认模板，可直接修改；与默认完全一致时保存后仍跟随内置默认。点击参量插入：</span>
-        <div class="mc-news-variables">
-          <YdAction
-            v-for="variable in variableList()"
-            :key="variable.name"
-            class="mc-news-variable-chip"
-            :title="variable.description"
-            @click="insertVariable(variable.name)"
-          >{{ variable.name }}</YdAction>
-        </div>
-      </div>
-
-      <div class="mc-news-form-item">
-        <span class="mc-news-form-label">推送效果预览（支持 Markdown）</span>
-        <div class="mc-news-preview-box">
-          <MdPreview
-            class="mc-news-markdown"
-            language="zh-CN"
-            preview-theme="github"
-            code-theme="github"
-            :model-value="preview"
-          />
-        </div>
-        <span class="mc-news-form-hint">群聊推送使用 Markdown 渲染时，QQ 官方机器人将呈现与预览一致的标题、引用与链接效果；纯文本协议则按原文发送。</span>
-      </div>
-    </div></YdLoadingOverlay>
-  </YdPageMain>
+        <template #template>
+          <YdSettingsSection
+            title="消息模板"
+            description="推送消息的正文模板与渲染效果；点击参量插入占位符。"
+          >
+            <YdForm :model="form" layout="vertical">
+              <div class="flex flex-col gap-4 max-w-xl">
+                <YdFormItem label="推送消息模板" extra="当前显示内置默认模板，可直接修改；与默认完全一致时保存后仍跟随内置默认。">
+                  <div class="flex flex-col gap-2">
+                    <div class="flex gap-2">
+                      <YdButton size="sm" variant="outline" @click="refreshPreview">
+                        预览
+                      </YdButton>
+                      <YdButton size="sm" variant="outline" @click="resetTemplate">
+                        恢复默认模板
+                      </YdButton>
+                    </div>
+                    <YdTextarea v-model="form.messageTemplate" :auto-size="{ minRows: 5, maxRows: 12 }" placeholder="内置默认模板" />
+                    <div class="mc-news-variables">
+                      <YdAction
+                        v-for="variable in variableList()"
+                        :key="variable.name"
+                        class="mc-news-variable-chip"
+                        :title="variable.description"
+                        @click="insertVariable(variable.name)"
+                      >{{ variable.name }}</YdAction>
+                    </div>
+                  </div>
+                </YdFormItem>
+                <YdFormItem label="推送效果预览（支持 Markdown）" extra="群聊推送使用 Markdown 渲染时，QQ 官方机器人将呈现与预览一致的标题、引用与链接效果；纯文本协议则按原文发送。">
+                  <div class="mc-news-preview-box">
+                    <MdPreview
+                      class="mc-news-markdown"
+                      language="zh-CN"
+                      preview-theme="github"
+                      code-theme="github"
+                      :model-value="preview"
+                    />
+                  </div>
+                </YdFormItem>
+              </div>
+            </YdForm>
+          </YdSettingsSection>
+        </template>
+      </YdSettingsLayout>
+    </YdLoadingOverlay>
+  </div>
 </template>
-

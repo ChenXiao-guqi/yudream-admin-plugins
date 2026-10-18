@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import type { ActionMenuItem, TableColumn, YdTablePageAction } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import type { TableColumn } from '@yudream/components'
 import type { MySubscriptionView, PushTargetView, WebhookHeader } from '../types'
-import { YdButton, YdCard, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdResponsiveTable, YdSwitch, YdTag, useYdModal, useYdToast } from '@yudream/components'
+import { YdButton, YdForm, YdFormItem, YdIcon, YdInput, YdLoadingOverlay, YdModal, YdResponsiveEnhancedTable, YdSwitch, YdTablePageLayout, useYdModal, useYdToast } from '@yudream/components'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { createMcNewsApi } from '../api/mc-news-api'
 import { errorMessage } from '../composables/utils'
@@ -15,8 +14,6 @@ const confirm = useYdModal()
 
 const loading = ref(false)
 const view = ref<MySubscriptionView | null>(null)
-const directBusy = ref(false)
-const testingId = ref('')
 
 const editorOpen = ref(false)
 const editing = ref<PushTargetView | null>(null)
@@ -30,13 +27,23 @@ const webhookForm = reactive({
 })
 
 const columns: TableColumn<PushTargetView>[] = [
-  { accessorKey: 'name', header: '名称', minWidth: 140, fixed: 'left' },
+  { accessorKey: 'name', header: '名称', minWidth: 140 },
   { id: 'url', header: 'Webhook 地址', minWidth: 240 },
   { id: 'enabled', header: '启用', width: 80 },
-  { id: 'operation', header: '操作', width: 190, fixed: 'right' },
+]
+
+/** 行操作统一收进操作菜单，删除保持确认流程 */
+const rowActions: ActionMenuItem<PushTargetView>[] = [
+  { label: '测试', icon: 'morph:flask', onClick: row => void testWebhook(row) },
+  { label: '编辑', icon: 'morph:pencil', onClick: row => openEdit(row) },
+  { label: '删除', icon: 'morph:trash-2', danger: true, onClick: row => confirmDelete(row) },
 ]
 
 const canAddMore = computed(() => (view.value?.webhooks.length ?? 0) < (view.value?.maxWebhooks ?? 5))
+
+const pageActions = computed<YdTablePageAction[]>(() => [
+  { label: '新增 Webhook', icon: 'morph:plus', disabled: !canAddMore.value, onClick: openCreate },
+])
 
 async function load() {
   loading.value = true
@@ -52,7 +59,6 @@ async function load() {
 }
 
 async function toggleDirect(enabled: boolean) {
-  directBusy.value = true
   try {
     await api.setDirectEnabled(enabled)
     if (view.value)
@@ -62,13 +68,9 @@ async function toggleDirect(enabled: boolean) {
   catch (error) {
     toast.error(errorMessage(error, '更新订阅失败'))
   }
-  finally {
-    directBusy.value = false
-  }
 }
 
 async function testDirect() {
-  testingId.value = 'direct'
   try {
     const result = await api.testMyDirect()
     if (result.ok)
@@ -78,9 +80,6 @@ async function testDirect() {
   }
   catch (error) {
     toast.error(errorMessage(error, '测试私信发送失败'))
-  }
-  finally {
-    testingId.value = ''
   }
 }
 
@@ -141,7 +140,6 @@ async function saveWebhook() {
 }
 
 async function testWebhook(row: PushTargetView) {
-  testingId.value = row.id
   try {
     const result = await api.testMyWebhook(row.id)
     if (result.ok)
@@ -151,9 +149,6 @@ async function testWebhook(row: PushTargetView) {
   }
   catch (error) {
     toast.error(errorMessage(error, '测试推送失败'))
-  }
-  finally {
-    testingId.value = ''
   }
 }
 
@@ -180,117 +175,80 @@ onMounted(() => {
 </script>
 
 <template>
-  <YdPageHeader title="我的新闻订阅" description="订阅 Minecraft 新闻：绑定私信推送或配置个人 Webhook" />
-  <YdPageMain>
-    <YdLoadingOverlay :loading="loading"><div  class="mc-news-form">
-      <div class="mc-news-form-item">
-        <div class="mc-news-toolbar">
-          <span class="mc-news-form-label">私信推送</span>
-          <YdSwitch
-            :model-value="view?.directEnabled ?? false"
-            :disabled="directBusy"
-            @update:model-value="(value?: boolean) => toggleDirect(value === true)"
-          />
-          <YdButton size="sm" variant="outline" :loading="testingId === 'direct'" @click="testDirect">
-            发送测试私信
-          </YdButton>
-        </div>
-        <span class="mc-news-form-hint">开启后，每条新新闻都会通过平台消息绑定（如 QQ 绑定）私信发送给你。</span>
+  <YdTablePageLayout title="我的新闻订阅" :show-search="false" :actions="pageActions">
+    <template #page-title>
+      <div class="flex items-center gap-2">
+        <YdSwitch
+          :model-value="view?.directEnabled ?? false"
+          :disabled="loading"
+          @update:model-value="(value?: boolean) => toggleDirect(value === true)"
+        />
+        <span class="text-sm text-muted-foreground">私信推送</span>
+        <YdButton size="sm" variant="outline" @click="testDirect">
+          发送测试私信
+        </YdButton>
       </div>
+    </template>
 
-      <div class="mc-news-form-item">
-        <div class="mc-news-toolbar">
-          <span class="mc-news-form-label">我的 Webhook（{{ view?.webhooks.length ?? 0 }}/{{ view?.maxWebhooks ?? 5 }}）</span>
-          <span style="flex: 1" />
-          <YdButton :disabled="!canAddMore" @click="openCreate">
-            <YdIcon name="i-ri:add-line" />新增 Webhook
-          </YdButton>
-        </div>
-        <YdResponsiveTable
-          :columns="columns"
-          :data="view?.webhooks ?? []"
+    <template #table>
+      <YdLoadingOverlay :loading="loading">
+        <YdResponsiveEnhancedTable
           row-key="id"
-          table-root-class="mc-news-table-scroll"
-          table-class="mc-news-table-w700"
+          table-root-class="rounded-lg overflow-hidden"
+          table-class="min-w-[560px]"
           border
           stripe
-          empty-text="还没有个人 Webhook，点击上方按钮新增"
+          :actions="rowActions"
+          :columns="columns"
+          :data="view?.webhooks ?? []"
+          empty-text="还没有个人 Webhook，点击「新增 Webhook」创建；开启私信推送也可直接发送到绑定会话"
         >
           <template #cell-url="{ row }">
             <span class="mc-news-url" :title="row.original.webhookUrl">{{ row.original.webhookUrl || '-' }}</span>
           </template>
           <template #cell-enabled="{ row }">
-            <YdTag :color="row.original.enabled ? 'green' : 'gray'">{{ row.original.enabled ? '启用' : '停用' }}</YdTag>
+            <span class="yd-status-tone" :data-tone="row.original.enabled ? 'success' : 'neutral'">{{ row.original.enabled ? '启用' : '停用' }}</span>
           </template>
-          <template #cell-operation="{ row }">
-            <div class="flex-center gap-2">
-              <YdButton size="sm" variant="outline" :loading="testingId === row.original.id" @click="testWebhook(row.original)">测试</YdButton>
-              <YdButton size="sm" variant="outline" @click="openEdit(row.original)">编辑</YdButton>
-              <YdButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</YdButton>
-            </div>
-          </template>
-          <template #card="{ row }">
-            <YdCard class="w-full">
-              <div class="flex flex-col gap-3">
-                <div class="flex items-center justify-between gap-2">
-                  <span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span>
-                  <YdTag :color="row.enabled ? 'green' : 'gray'">{{ row.enabled ? '启用' : '停用' }}</YdTag>
-                </div>
-                <div class="flex flex-col gap-1 text-sm">
-                  <div class="flex gap-2">
-                    <span class="shrink-0 text-secondary-foreground/60">Webhook 地址</span>
-                    <span class="mc-news-url break-all" :title="row.webhookUrl">{{ row.webhookUrl || '-' }}</span>
-                  </div>
-                </div>
-                <div class="flex flex-wrap gap-2 border-t pt-3">
-                  <YdButton size="sm" variant="outline" :loading="testingId === row.id" @click="testWebhook(row)">测试</YdButton>
-                  <YdButton size="sm" variant="outline" @click="openEdit(row)">编辑</YdButton>
-                  <YdButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</YdButton>
-                </div>
-              </div>
-            </YdCard>
-          </template>
-        </YdResponsiveTable>
-      </div>
-    </div></YdLoadingOverlay>
+        </YdResponsiveEnhancedTable>
+      </YdLoadingOverlay>
+    </template>
+  </YdTablePageLayout>
 
-    <YdModal v-model="editorOpen" :title="editing ? '编辑 Webhook' : '新增 Webhook'" :show-confirm-button="false" :close-on-click-overlay="false">
-      <div class="mc-news-form">
-        <div class="mc-news-form-item">
-          <span class="mc-news-form-label">名称</span>
+  <YdModal v-model="editorOpen" :title="editing ? '编辑 Webhook' : '新增 Webhook'" :show-confirm-button="false" :close-on-click-overlay="false">
+    <YdForm :model="webhookForm" layout="vertical">
+      <div class="flex flex-col gap-4">
+        <YdFormItem label="名称" required>
           <YdInput v-model="webhookForm.name" placeholder="如：我的频道通知" />
-        </div>
-        <div class="mc-news-form-item">
-          <span class="mc-news-form-label">Webhook 地址</span>
+        </YdFormItem>
+        <YdFormItem label="Webhook 地址" required extra="新新闻时会 POST JSON：title / content / body / sourceName / category / url / timestamp 等。">
           <YdInput v-model="webhookForm.url" placeholder="https://..." />
-          <span class="mc-news-form-hint">新新闻时会 POST JSON：title / content / body / sourceName / category / url / timestamp 等。</span>
-        </div>
-        <div class="mc-news-form-item">
-          <div class="mc-news-toolbar">
-            <span class="mc-news-form-label">自定义 Header</span>
-            <YdButton size="sm" variant="outline" @click="addHeader">
-              <YdIcon name="i-ri:add-line" />添加
+        </YdFormItem>
+        <YdFormItem label="自定义 Header">
+          <div class="flex flex-col gap-2">
+            <YdButton size="sm" variant="outline" class="self-start" @click="addHeader">
+              <YdIcon name="morph:plus" />添加 Header
             </YdButton>
+            <div v-for="(header, index) in webhookForm.headers" :key="index" class="flex gap-2">
+              <YdInput :model-value="header.key" class="flex-1" placeholder="Header 名" @update:model-value="(value?: string) => updateHeader(index, { key: value ?? '' })" />
+              <YdInput :model-value="header.value" class="flex-1" placeholder="Header 值" @update:model-value="(value?: string) => updateHeader(index, { value: value ?? '' })" />
+              <YdButton size="sm" variant="destructive" @click="removeHeader(index)">
+                移除
+              </YdButton>
+            </div>
           </div>
-          <div v-for="(header, index) in webhookForm.headers" :key="index" class="mc-news-toolbar">
-            <YdInput :model-value="header.key" class="mc-news-grow" placeholder="Header 名" @update:model-value="(value?: string) => updateHeader(index, { key: value ?? '' })" />
-            <YdInput :model-value="header.value" class="mc-news-grow" placeholder="Header 值" @update:model-value="(value?: string) => updateHeader(index, { value: value ?? '' })" />
-            <YdButton size="sm" variant="destructive" @click="removeHeader(index)">移除</YdButton>
-          </div>
-        </div>
-        <div class="mc-news-form-item">
-          <span class="mc-news-form-label">启用</span>
+        </YdFormItem>
+        <YdFormItem label="启用">
           <YdSwitch v-model="webhookForm.enabled" />
-        </div>
+        </YdFormItem>
       </div>
-      <template #footer>
-        <YdButton variant="outline" :disabled="saving" @click="editorOpen = false">
-          取消
-        </YdButton>
-        <YdButton :loading="saving" @click="saveWebhook">
-          保存
-        </YdButton>
-      </template>
-    </YdModal>
-  </YdPageMain>
+    </YdForm>
+    <template #footer>
+      <YdButton variant="outline" :disabled="saving" @click="editorOpen = false">
+        取消
+      </YdButton>
+      <YdButton :loading="saving" @click="saveWebhook">
+        保存
+      </YdButton>
+    </template>
+  </YdModal>
 </template>

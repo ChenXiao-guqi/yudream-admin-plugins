@@ -1,16 +1,31 @@
 /* mc-news 语义样式：宿主 UnoCSS 不扫描插件包，布局类一律在此定义 */
 
-/* 轮询状态卡：独立于搜索栏与表格，避免挤压 */
-.mc-news-poll-status {
+/*
+ * 设置类页面外壳（对齐宿主 .settings-page-shell）：固定为「可视高度 - 布局占位」，
+ * 白底铺满，页头与分区导航固定在壳内，只有内容区滚动（YdSettingsLayout scroll 模式）。
+ */
+.mc-news-settings-shell {
+  display: flex;
+  flex-direction: column;
+  height: calc(
+    100dvh
+    - var(--g-slots-layout-top-height, 0px)
+    - var(--g-header-actual-height, 0px)
+    - var(--g-topbar-actual-height, 0px)
+    - var(--g-slots-layout-bottom-height, 0px)
+    - var(--g-main-container-padding-top, 0px)
+    - var(--g-main-container-padding-bottom, 0px)
+  );
+  overflow: hidden;
+  background-color: oklch(var(--card));
+}
+
+/* 统计区里的轮询状态行：依附统计卡内边距，不再自绘卡片 */
+.mc-news-poll-meta {
   display: flex;
   flex-wrap: wrap;
   gap: 8px 24px;
   align-items: center;
-  padding: 10px 16px;
-  margin-bottom: 12px;
-  border: 1px solid var(--color-border-2, #e5e6eb);
-  border-radius: 8px;
-  background: var(--color-fill-1, #f7f8fa);
   font-size: 13px;
   color: var(--color-text-2, #4e5969);
   min-width: 0;

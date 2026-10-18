@@ -1,84 +1,133 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
-import type { TableColumn } from '@yudream/components'
+import type { ActionMenuItem, TableColumn, YdTablePageAction } from '@yudream/components'
 import type { WalletPluginModel } from '../composables/useWalletPlugin'
 import type { WalletAsset } from '../types'
 import { ref } from 'vue'
-import { YdButton, YdCard, YdIcon, YdInput, YdModal, YdNumberField, YdPageHeader, YdPageMain, YdPagination, YdSwitch, YdResponsiveTable, YdTag, useYdModal } from '@yudream/components'
+import { YdForm, YdFormItem, YdInput, YdLoadingOverlay, YdModal, YdNumberField, YdPagination, YdResponsiveEnhancedTable, YdSwitch, YdTablePageLayout, useYdModal } from '@yudream/components'
 
 const props = defineProps<{ model: WalletPluginModel }>()
 const modal = useYdModal()
 const formVisible = ref(false)
+
 const assetColumns: TableColumn<WalletAsset>[] = [
-  { accessorKey: 'code', header: '编码', width: 100, fixed: 'left' }, { accessorKey: 'name', header: '名称', width: 140 },
-  { accessorKey: 'symbol', header: '符号', width: 90 }, { id: 'type', header: '类型', width: 90 }, { accessorKey: 'scale', header: '精度', width: 80 },
-  { id: 'transferEnabled', header: '转账', width: 90 }, { id: 'enabled', header: '状态', width: 90 },
-  { accessorKey: 'minTransferAmount', header: '最低转账', width: 130 }, { id: 'operation', header: '操作', align: 'center', fixed: 'right', width: 170 },
+  { accessorKey: 'code', header: '编码', width: 100 },
+  { accessorKey: 'name', header: '名称', width: 140 },
+  { accessorKey: 'symbol', header: '符号', width: 90 },
+  { accessorKey: 'scale', header: '精度', width: 80 },
+  { accessorKey: 'minTransferAmount', header: '最低转账', width: 130 },
 ]
-function confirmDeleteAsset(asset: WalletAsset) { modal.confirm({ title: '删除币种', content: `确认删除币种“${asset.name}（${asset.code}）”吗？已有余额或流水时后端会拒绝删除。`, onConfirm: () => props.model.deleteAsset(asset) }) }
-function onAssetPage() { props.model.loadAdminAssets() }
-function onAssetSize() { props.model.assetPager.page = 1; props.model.loadAdminAssets() }
-function openCreate() { props.model.resetAssetForm(); formVisible.value = true }
-function openEdit(asset: WalletAsset) { props.model.editAsset(asset); formVisible.value = true }
-async function saveAsset() { await props.model.saveAsset(); formVisible.value = false }
+
+/** 行操作统一收进操作菜单，删除保持确认流程 */
+const rowActions: ActionMenuItem<WalletAsset>[] = [
+  { label: '编辑', icon: 'morph:pencil', onClick: row => openEdit(row) },
+  { label: '删除', icon: 'morph:trash-2', danger: true, onClick: row => confirmDeleteAsset(row) },
+]
+
+const pageActions: YdTablePageAction[] = [
+  { label: '新增币种', icon: 'morph:plus', onClick: openCreate },
+]
+
+function confirmDeleteAsset(asset: WalletAsset) {
+  modal.confirm({
+    title: '删除币种',
+    content: `确认删除币种“${asset.name}（${asset.code}）”吗？已有余额或流水时后端会拒绝删除。`,
+    onConfirm: () => props.model.deleteAsset(asset),
+  })
+}
+
+function onAssetPage() {
+  props.model.loadAdminAssets()
+}
+
+function onAssetSize() {
+  props.model.assetPager.page = 1
+  props.model.loadAdminAssets()
+}
+
+function openCreate() {
+  props.model.resetAssetForm()
+  formVisible.value = true
+}
+
+function openEdit(asset: WalletAsset) {
+  props.model.editAsset(asset)
+  formVisible.value = true
+}
+
+async function saveAsset() {
+  await props.model.saveAsset()
+  formVisible.value = false
+}
 </script>
 
 <template>
-  <YdPageHeader title="币种管理" class="mb-0">
-    <YdButton @click="openCreate"><YdIcon name="i-ri:add-line" />新增币种</YdButton>
-  </YdPageHeader>
-  <YdPageMain>
-    <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable  row-key="code" table-root-class="max-w-full overflow-x-auto rounded-lg" table-class="min-w-[1050px]" border stripe column-visibility :columns="assetColumns" :data="model.managedAssets" empty-text="暂无币种">
-      <template #cell-type="{ row }"><YdTag>{{ row.original.money ? '货币' : '积分' }}</YdTag></template>
-      <template #cell-transferEnabled="{ row }"><YdTag>{{ row.original.transferEnabled ? '允许' : '关闭' }}</YdTag></template>
-      <template #cell-enabled="{ row }"><YdTag>{{ row.original.enabled ? '启用' : '停用' }}</YdTag></template>
-      <template #cell-operation="{ row }"><div class="flex-center gap-2"><YdButton size="sm" variant="outline" @click="openEdit(row.original)">编辑</YdButton><YdButton size="sm" variant="destructive" :loading="model.saving" @click="confirmDeleteAsset(row.original)">删除</YdButton></div></template>
-      <template #card="{ row }">
-        <YdCard class="w-full">
-          <div class="flex flex-col gap-3">
-            <div class="flex items-center justify-between gap-2">
-              <span class="min-w-0 break-words text-base font-semibold">{{ row.name }} ({{ row.code }})</span>
-              <div class="flex gap-1">
-                <YdTag>{{ row.money ? '货币' : '积分' }}</YdTag>
-                <YdTag>{{ row.transferEnabled ? '允许' : '关闭' }}</YdTag>
-                <YdTag>{{ row.enabled ? '启用' : '停用' }}</YdTag>
-              </div>
-            </div>
-            <div class="flex flex-col gap-1 text-sm">
-              <div v-if="row.symbol" class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">符号</span>
-                <span class="break-all">{{ row.symbol }}</span>
-              </div>
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">精度</span>
-                <span class="break-all">{{ row.scale }}</span>
-              </div>
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">最低转账</span>
-                <span class="break-all">{{ row.minTransferAmount ?? '-' }}</span>
-              </div>
-            </div>
-            <div class="flex flex-wrap gap-2 border-t pt-3">
-              <YdButton size="sm" variant="outline" @click="openEdit(row)">编辑</YdButton>
-              <YdButton size="sm" variant="destructive" :loading="model.saving" @click="confirmDeleteAsset(row)">删除</YdButton>
-            </div>
-          </div>
-        </YdCard>
-      </template>
-    </YdResponsiveTable></YdLoadingOverlay>
-    <YdPagination v-model:page="model.assetPager.page" v-model:size="model.assetPager.size" :total="model.assetPager.total" class="mt-3" @page-change="onAssetPage" @size-change="onAssetSize" />
+  <YdTablePageLayout title="币种管理" :show-search="false" :actions="pageActions">
+    <template #table>
+      <YdLoadingOverlay :loading="model.loading">
+        <YdResponsiveEnhancedTable
+          row-key="code"
+          table-root-class="rounded-lg overflow-hidden"
+          table-class="min-w-[820px]"
+          border
+          stripe
+          column-visibility
+          :actions="rowActions"
+          :columns="assetColumns"
+          :data="model.managedAssets"
+          empty-text="暂无币种"
+        >
+          <template #cell-type="{ row }">
+            <span class="yd-status-tone" :data-tone="row.original.money ? 'info' : 'neutral'">{{ row.original.money ? '货币' : '积分' }}</span>
+          </template>
+          <template #cell-transferEnabled="{ row }">
+            <span class="yd-status-tone" :data-tone="row.original.transferEnabled ? 'success' : 'neutral'">{{ row.original.transferEnabled ? '允许转账' : '禁止转账' }}</span>
+          </template>
+          <template #cell-enabled="{ row }">
+            <span class="yd-status-tone" :data-tone="row.original.enabled ? 'success' : 'neutral'">{{ row.original.enabled ? '启用' : '停用' }}</span>
+          </template>
+        </YdResponsiveEnhancedTable>
+      </YdLoadingOverlay>
+    </template>
 
-    <YdModal v-model="formVisible" title="币种配置" show-cancel-button class="sm:max-w-2xl" :confirm-loading="model.saving" @confirm="saveAsset">
-        <form class="wallet-form gap-3" @submit.prevent="saveAsset">
-          <label><span>编码</span><YdInput v-model="model.assetForm.code" placeholder="POINT" /></label>
-          <label><span>名称</span><YdInput v-model="model.assetForm.name" placeholder="积分" /></label>
-          <label><span>符号</span><YdInput v-model="model.assetForm.symbol" placeholder="¥ / 积分" /></label>
-          <label><span>精度</span><YdNumberField v-model="model.assetForm.scale" :min="0" :max="8" /></label>
-          <label><span>最低转账</span><YdInput v-model="model.assetForm.minTransferAmount" inputmode="decimal" /></label>
-          <label><span>货币资产</span><YdSwitch v-model="model.assetForm.money" /></label>
-          <label><span>允许转账</span><YdSwitch v-model="model.assetForm.transferEnabled" /></label>
-          <label><span>启用</span><YdSwitch v-model="model.assetForm.enabled" /></label>
-        </form>
-    </YdModal>
-  </YdPageMain>
+    <template #footer>
+      <YdPagination
+        v-model:page="model.assetPager.page"
+        v-model:size="model.assetPager.size"
+        :total="model.assetPager.total"
+        @page-change="onAssetPage"
+        @size-change="onAssetSize"
+      />
+    </template>
+  </YdTablePageLayout>
+
+  <YdModal v-model="formVisible" title="币种配置" show-cancel-button class="sm:max-w-2xl" :confirm-loading="model.saving" @confirm="saveAsset">
+    <YdForm :model="model.assetForm" layout="vertical">
+      <div class="flex flex-col gap-4">
+        <YdFormItem label="编码" required>
+          <YdInput v-model="model.assetForm.code" placeholder="POINT" />
+        </YdFormItem>
+        <YdFormItem label="名称" required>
+          <YdInput v-model="model.assetForm.name" placeholder="积分" />
+        </YdFormItem>
+        <YdFormItem label="符号">
+          <YdInput v-model="model.assetForm.symbol" placeholder="¥ / 积分" />
+        </YdFormItem>
+        <YdFormItem label="精度">
+          <YdNumberField v-model="model.assetForm.scale" :min="0" :max="8" />
+        </YdFormItem>
+        <YdFormItem label="最低转账">
+          <YdInput v-model="model.assetForm.minTransferAmount" inputmode="decimal" />
+        </YdFormItem>
+        <YdFormItem label="货币资产">
+          <YdSwitch v-model="model.assetForm.money" />
+        </YdFormItem>
+        <YdFormItem label="允许转账">
+          <YdSwitch v-model="model.assetForm.transferEnabled" />
+        </YdFormItem>
+        <YdFormItem label="启用">
+          <YdSwitch v-model="model.assetForm.enabled" />
+        </YdFormItem>
+      </div>
+    </YdForm>
+  </YdModal>
 </template>

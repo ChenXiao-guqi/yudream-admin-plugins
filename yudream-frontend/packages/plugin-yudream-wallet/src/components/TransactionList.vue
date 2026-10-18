@@ -1,37 +1,46 @@
 <script setup lang="ts">
-import type { TableColumn } from '@yudream/components'
+import type { StatusColumn, TableColumn } from '@yudream/components'
 import type { WalletPluginModel } from '../composables/useWalletPlugin'
 import type { WalletTransaction } from '../types'
-import { YdCard, YdResponsiveTable, YdTag } from '@yudream/components'
+import { YdResponsiveEnhancedTable } from '@yudream/components'
 
 defineProps<{ model: WalletPluginModel, items: WalletTransaction[] }>()
 
 const columns: TableColumn<WalletTransaction>[] = [
-  { accessorKey: 'type', header: '类型', width: 100 },
   { accessorKey: 'source', header: '来源', width: 110 },
   { accessorKey: 'assetCode', header: '资产', width: 100 },
   { id: 'amount', header: '金额', width: 140 },
   { id: 'user', header: '用户', minWidth: 240 },
-  { accessorKey: 'businessNo', header: '业务单号', minWidth: 220 },
-  { id: 'createdAt', header: '时间', width: 180 },
+  { accessorKey: 'businessNo', header: '业务单号', minWidth: 220, defaultHidden: true },
+  { accessorKey: 'createdAt', header: '时间', width: 180 },
 ]
+
+/** 交易类型：入账/扣账/转账语义色胶囊 */
+const typeStatusColumn: StatusColumn<WalletTransaction> = {
+  statusKey: 'type',
+  header: '类型',
+  width: 100,
+  statusMap: {
+    CREDIT: { label: '入账', variant: 'default', tone: 'success' },
+    DEBIT: { label: '扣账', variant: 'default', tone: 'danger' },
+    TRANSFER: { label: '转账', variant: 'default', tone: 'info' },
+  },
+}
 </script>
 
 <template>
-  <YdResponsiveTable
+  <YdResponsiveEnhancedTable
     row-key="id"
-    table-root-class="max-w-full overflow-x-auto rounded-lg"
-    table-class="min-w-[1050px]"
+    table-root-class="rounded-lg overflow-hidden"
+    table-class="min-w-[1000px]"
     border
     stripe
     column-visibility
+    :status-column="typeStatusColumn"
     :columns="columns"
     :data="items"
     empty-text="暂无流水"
   >
-    <template #cell-type="{ row }">
-      <YdTag>{{ model.transactionLabel(row.original.type) }}</YdTag>
-    </template>
     <template #cell-source="{ row }">{{ model.sourceLabel(row.original.source) }}</template>
     <template #cell-assetCode="{ row }">{{ model.assetName(row.original.assetCode) }}</template>
     <template #cell-amount="{ row }">
@@ -47,38 +56,5 @@ const columns: TableColumn<WalletTransaction>[] = [
     </template>
     <template #cell-businessNo="{ row }">{{ row.original.businessNo || '-' }}</template>
     <template #cell-createdAt="{ row }">{{ model.formatTime(row.original.createdAt) }}</template>
-    <template #card="{ row }">
-      <YdCard class="w-full">
-        <div class="flex flex-col gap-3">
-          <div class="flex items-center justify-between gap-2">
-            <span class="min-w-0 break-words text-base font-semibold">{{ row.businessNo || '-' }}</span>
-            <div class="flex gap-1">
-              <YdTag>{{ model.transactionLabel(row.type) }}</YdTag>
-            </div>
-          </div>
-          <div class="flex flex-col gap-1 text-sm">
-            <div v-if="row.source" class="flex gap-2">
-              <span class="shrink-0 text-secondary-foreground/60">来源</span>
-              <span class="break-all">{{ model.sourceLabel(row.source) }}</span>
-            </div>
-            <div class="flex gap-2">
-              <span class="shrink-0 text-secondary-foreground/60">金额</span>
-              <span class="break-all">{{ model.assetSymbol(row.assetCode) }}{{ model.formatAmount(row.amount, row.assetCode) }}</span>
-            </div>
-            <div class="flex gap-2">
-              <span class="shrink-0 text-secondary-foreground/60">用户</span>
-              <span class="break-all">
-                <template v-if="row.type === 'TRANSFER'">{{ model.userLabel(row.fromUser, row.fromUserId) }} → {{ model.userLabel(row.toUser, row.toUserId) }}</template>
-                <template v-else>{{ model.userLabel(row.toUser || row.fromUser, row.toUserId || row.fromUserId) }}</template>
-              </span>
-            </div>
-            <div class="flex gap-2">
-              <span class="shrink-0 text-secondary-foreground/60">时间</span>
-              <span>{{ model.formatTime(row.createdAt) }}</span>
-            </div>
-          </div>
-        </div>
-      </YdCard>
-    </template>
-  </YdResponsiveTable>
+  </YdResponsiveEnhancedTable>
 </template>

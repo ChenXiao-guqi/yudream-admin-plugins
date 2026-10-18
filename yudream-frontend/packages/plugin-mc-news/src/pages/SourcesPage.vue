@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import type { ActionMenuItem, TableColumn, YdTablePageAction } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import type { TableColumn } from '@yudream/components'
 import type { NewsSourceView } from '../types'
 
-import { YdButton, YdCard, YdIcon, YdPageHeader, YdPageMain, YdResponsiveTable, YdSwitch, YdTag, YdTooltip, useYdModal, useYdToast } from '@yudream/components'
+import { YdIcon, YdLoadingOverlay, YdResponsiveEnhancedTable, YdSwitch, YdTablePageLayout, YdTooltip, useYdModal, useYdToast } from '@yudream/components'
 import { onMounted, ref } from 'vue'
 import { createMcNewsApi } from '../api/mc-news-api'
 import { checkKeywordDraft, describeKeywordDraft, errorMessage, parseKeywordDraft, SOURCE_TYPE_OPTIONS } from '../composables/utils'
@@ -19,20 +18,29 @@ const loading = ref(false)
 const rows = ref<NewsSourceView[]>([])
 const editorOpen = ref(false)
 const editing = ref<NewsSourceView | null>(null)
-const testingId = ref('')
 
 function typeLabel(type: string) {
   return SOURCE_TYPE_OPTIONS.find(option => option.value === type)?.label ?? type
 }
 
 const columns: TableColumn<NewsSourceView>[] = [
-  { accessorKey: 'name', header: '名称', minWidth: 180, fixed: 'left' },
+  { accessorKey: 'name', header: '名称', minWidth: 180 },
   { id: 'type', header: '类型', width: 180 },
   { id: 'url', header: '地址', minWidth: 260 },
   { id: 'keywords', header: '关键词', minWidth: 160 },
   { id: 'enabled', header: '启用', width: 80 },
-  { accessorKey: 'createdAtLabel', header: '创建时间', width: 150 },
-  { id: 'operation', header: '操作', width: 220, fixed: 'right' },
+  { accessorKey: 'createdAtLabel', header: '创建时间', width: 150, defaultHidden: true },
+]
+
+/** 行操作统一收进操作菜单；内置源不可删除，菜单里直接隐藏 */
+const rowActions: ActionMenuItem<NewsSourceView>[] = [
+  { label: '测试', icon: 'morph:flask', onClick: row => void test(row) },
+  { label: '编辑', icon: 'morph:pencil', onClick: row => openEdit(row) },
+  { label: '删除', icon: 'morph:trash-2', danger: true, visible: row => !row.builtin, onClick: row => confirmDelete(row) },
+]
+
+const pageActions: YdTablePageAction[] = [
+  { label: '新增源', icon: 'morph:plus', onClick: openCreate },
 ]
 
 async function load() {
@@ -67,17 +75,11 @@ function keywordChipTitle(rule: string) {
   return describeKeywordDraft(draft)
 }
 
-/** 测试结果里回显规则时也用大白话，避免出现 title:re:^Version 这种看不懂的写法。 */
-function keywordText(rule: string) {
-  return describeKeywordDraft(parseKeywordDraft(rule))
-}
-
 /**
  * 在线抓取该源验证可用性：不写缓存、不推送。
  * 除收录条数外还回显源原始条数、被排除数与逐条模板命中情况，便于定位「为什么没匹配上」。
  */
 async function test(row: NewsSourceView) {
-  testingId.value = row.id
   try {
     const result = await api.testSource(row.id)
     const elapsed = `${(result.elapsedMs / 1000).toFixed(1)}s`
@@ -93,7 +95,7 @@ async function test(row: NewsSourceView) {
     const suffix = detail.length ? `（源 ${result.beforeFilter} 条：${detail.join('，')}）` : ''
     if (result.count > 0) {
       const zeroHit = (result.rules ?? []).filter(rule => rule.hits === 0)
-      const zero = zeroHit.length ? `；${zeroHit.length} 条规则一次都没命中（如「${keywordText(zeroHit[0].rule)}」）` : ''
+      const zero = zeroHit.length ? `；${zeroHit.length} 条规则一次都没命中（如「${describeKeywordDraft(parseKeywordDraft(zeroHit[0].rule))}」）` : ''
       toast.success(`「${row.name}」收录 ${result.count} 条${suffix}，用时 ${elapsed}，最新：${result.titles[0]?.title ?? ''}${zero}`)
     }
     else if (result.beforeFilter > 0) {
@@ -105,9 +107,6 @@ async function test(row: NewsSourceView) {
   }
   catch (error) {
     toast.error(`「${row.name}」测试失败：${errorMessage(error, '未知错误')}`)
-  }
-  finally {
-    testingId.value = ''
   }
 }
 
@@ -156,103 +155,49 @@ onMounted(() => {
 </script>
 
 <template>
-  <YdPageHeader title="新闻源" description="维护轮询的新闻来源：官网新闻 JSON 与反馈隧道文章 API；可用关键词规则筛选（包含这几个字 / 通配符 / 正则，支持排除）">
-    <YdButton @click="openCreate">
-      <YdIcon name="i-ri:add-line" />新增源
-    </YdButton>
-  </YdPageHeader>
-  <YdPageMain>
-    <YdLoadingOverlay :loading="loading"><YdResponsiveTable
+  <YdTablePageLayout title="新闻源" :show-search="false" :actions="pageActions">
+    <template #table>
+      <YdLoadingOverlay :loading="loading">
+        <YdResponsiveEnhancedTable
+          row-key="id"
+          table-root-class="rounded-lg overflow-hidden"
+          table-class="min-w-[880px]"
+          border
+          stripe
+          column-visibility
+          :actions="rowActions"
+          :columns="columns"
+          :data="rows"
+          empty-text="暂无新闻源"
+        >
+          <template #cell-type="{ row }">
+            <span class="yd-status-tone" :data-tone="row.original.type === 'mcnet' ? 'info' : 'neutral'">{{ typeLabel(row.original.type) }}</span>
+          </template>
+          <template #cell-url="{ row }">
+            <span class="mc-news-url" :title="row.original.url">{{ row.original.url }}</span>
+          </template>
+          <template #cell-keywords="{ row }">
+            <div class="mc-news-variables mc-news-variables-readonly">
+              <span
+                v-for="keyword in row.original.keywords"
+                :key="keyword"
+                class="mc-news-variable-chip"
+                :class="keywordChipClass(keyword)"
+                :title="keywordChipTitle(keyword)"
+              >{{ keyword }}</span>
+              <span v-if="!row.original.keywords.length" class="mc-news-form-hint">不过滤</span>
+            </div>
+          </template>
+          <template #cell-enabled="{ row }">
+            <YdTooltip v-if="row.original.builtin" text="内置源可停用，不可删除">
+              <YdSwitch :model-value="row.original.enabled" @update:model-value="(value?: boolean) => toggleEnabled(row.original, value === true)" />
+            </YdTooltip>
+            <YdSwitch v-else :model-value="row.original.enabled" @update:model-value="(value?: boolean) => toggleEnabled(row.original, value === true)" />
+          </template>
+        </YdResponsiveEnhancedTable>
+      </YdLoadingOverlay>
+    </template>
+  </YdTablePageLayout>
 
-      :columns="columns"
-      :data="rows"
-      row-key="id"
-      table-root-class="mc-news-table-scroll"
-      table-class="mc-news-table-w900"
-      border
-      stripe
-      column-visibility
-      empty-text="暂无新闻源"
-    >
-      <template #cell-type="{ row }">
-        <YdTag>{{ typeLabel(row.original.type) }}</YdTag>
-      </template>
-      <template #cell-url="{ row }">
-        <span class="mc-news-url" :title="row.original.url">{{ row.original.url }}</span>
-      </template>
-      <template #cell-keywords="{ row }">
-        <div class="mc-news-variables mc-news-variables-readonly">
-          <span
-            v-for="keyword in row.original.keywords"
-            :key="keyword"
-            class="mc-news-variable-chip"
-            :class="keywordChipClass(keyword)"
-            :title="keywordChipTitle(keyword)"
-          >{{ keyword }}</span>
-          <span v-if="!row.original.keywords.length" class="mc-news-form-hint">不过滤</span>
-        </div>
-      </template>
-      <template #cell-enabled="{ row }">
-        <YdSwitch :model-value="row.original.enabled" @update:model-value="(value?: boolean) => toggleEnabled(row.original, value === true)" />
-      </template>
-      <template #cell-operation="{ row }">
-        <div class="flex-center gap-2">
-          <YdButton size="sm" variant="outline" :loading="testingId === row.original.id" @click="test(row.original)">测试</YdButton>
-          <YdButton size="sm" variant="outline" @click="openEdit(row.original)">编辑</YdButton>
-          <YdButton v-if="!row.original.builtin" size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</YdButton>
-          <YdTooltip v-else text="内置源不可删除，可停用">
-            <YdButton size="sm" variant="outline" disabled>删除</YdButton>
-          </YdTooltip>
-        </div>
-      </template>
-      <template #card="{ row }">
-        <YdCard class="w-full">
-          <div class="flex flex-col gap-3">
-            <div class="flex items-center justify-between gap-2">
-              <span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span>
-              <YdSwitch :model-value="row.enabled" @update:model-value="(value?: boolean) => toggleEnabled(row, value === true)" />
-            </div>
-            <div class="flex flex-col gap-1 text-sm">
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">类型</span>
-                <span><YdTag>{{ typeLabel(row.type) }}</YdTag></span>
-              </div>
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">地址</span>
-                <span class="mc-news-url break-all" :title="row.url">{{ row.url }}</span>
-              </div>
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">关键词</span>
-                <div class="mc-news-variables mc-news-variables-readonly">
-                  <span
-                    v-for="keyword in row.keywords"
-                    :key="keyword"
-                    class="mc-news-variable-chip"
-                    :class="keywordChipClass(keyword)"
-                    :title="keywordChipTitle(keyword)"
-                  >{{ keyword }}</span>
-                  <span v-if="!row.keywords.length" class="mc-news-form-hint">不过滤</span>
-                </div>
-              </div>
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">创建时间</span>
-                <span class="break-all">{{ row.createdAtLabel }}</span>
-              </div>
-            </div>
-            <div class="flex flex-wrap gap-2 border-t pt-3">
-              <YdButton size="sm" variant="outline" :loading="testingId === row.id" @click="test(row)">测试</YdButton>
-              <YdButton size="sm" variant="outline" @click="openEdit(row)">编辑</YdButton>
-              <YdButton v-if="!row.builtin" size="sm" variant="destructive" @click="confirmDelete(row)">删除</YdButton>
-              <YdTooltip v-else text="内置源不可删除，可停用">
-                <YdButton size="sm" variant="outline" disabled>删除</YdButton>
-              </YdTooltip>
-            </div>
-          </div>
-        </YdCard>
-      </template>
-    </YdResponsiveTable></YdLoadingOverlay>
-
-    <SourceEditorModal v-model:open="editorOpen" :sdk="props.sdk" :source="editing" @saved="load" />
-  </YdPageMain>
+  <SourceEditorModal v-model:open="editorOpen" :sdk="props.sdk" :source="editing" @saved="() => load()" />
 </template>
-

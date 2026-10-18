@@ -7,7 +7,7 @@ import { YdButton, YdCard, YdIcon, YdInput, YdPageHeader, YdPageMain, YdSwitch, 
 defineProps<{ model: WalletPluginModel }>()
 
 const columns: TableColumn<RechargeRuleForm>[] = [
-  { accessorKey: 'assetCode', header: '币种', minWidth: 160, fixed: 'left' },
+  { accessorKey: 'assetCode', header: '币种', minWidth: 160 },
   { id: 'enabled', header: '启用', width: 90 },
   { id: 'ratio', header: '支付 1 元到账', width: 160 },
   { id: 'minPayAmount', header: '最低支付', width: 150 },
@@ -16,9 +16,13 @@ const columns: TableColumn<RechargeRuleForm>[] = [
 </script>
 
 <template>
-  <YdPageHeader title="充值配置" class="mb-0" />
+  <YdPageHeader title="充值配置" class="mb-0">
+    <YdButton :loading="model.saving" @click="model.saveRechargeSettings">
+      <YdIcon name="morph:save" />保存充值配置
+    </YdButton>
+  </YdPageHeader>
   <YdPageMain>
-    <form class="grid gap-4" @submit.prevent="model.saveRechargeSettings">
+    <div class="flex flex-col gap-4">
       <div class="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-4">
         <div class="grid gap-1">
           <strong>充值总开关</strong>
@@ -26,7 +30,16 @@ const columns: TableColumn<RechargeRuleForm>[] = [
         </div>
         <YdSwitch v-model="model.rechargeSettingsForm.enabled" />
       </div>
-      <YdResponsiveTable row-key="assetCode" table-root-class="max-w-full overflow-x-auto rounded-lg" table-class="min-w-[720px]" border stripe :columns="columns" :data="model.rechargeSettingsForm.rules">
+      <YdResponsiveTable
+        row-key="assetCode"
+        table-root-class="rounded-lg overflow-hidden"
+        table-class="min-w-[720px]"
+        border
+        stripe
+        :columns="columns"
+        :data="model.rechargeSettingsForm.rules"
+        empty-text="暂无可配置的充值币种"
+      >
         <template #cell-assetCode="{ row }">{{ model.assetName(row.original.assetCode) }} ({{ row.original.assetCode }})</template>
         <template #cell-enabled="{ row }"><YdSwitch v-model="row.original.enabled" /></template>
         <template #cell-ratio="{ row }"><YdInput v-model="row.original.ratio" inputmode="decimal" /></template>
@@ -37,9 +50,7 @@ const columns: TableColumn<RechargeRuleForm>[] = [
             <div class="flex flex-col gap-3">
               <div class="flex items-center justify-between gap-2">
                 <span class="min-w-0 break-words text-base font-semibold">{{ model.assetName(row.assetCode) }} ({{ row.assetCode }})</span>
-                <div class="flex gap-1">
-                  <YdSwitch v-model="row.enabled" />
-                </div>
+                <YdSwitch v-model="row.enabled" />
               </div>
               <div class="flex flex-col gap-2 text-sm">
                 <div class="flex items-center gap-2">
@@ -59,9 +70,6 @@ const columns: TableColumn<RechargeRuleForm>[] = [
           </YdCard>
         </template>
       </YdResponsiveTable>
-      <div class="flex flex-wrap justify-end gap-2">
-        <YdButton :loading="model.saving" type="submit"><YdIcon name="i-ri:save-3-line" />保存充值配置</YdButton>
-      </div>
-    </form>
+    </div>
   </YdPageMain>
 </template>

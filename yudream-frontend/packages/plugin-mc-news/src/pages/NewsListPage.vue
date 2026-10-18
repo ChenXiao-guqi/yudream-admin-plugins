@@ -1,15 +1,14 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import type { ActionMenuItem, SearchConfig, SearchFieldConfig, SearchOptionsSource, StatusColumn, TableColumn, YdTablePageAction } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import type { TableColumn } from '@yudream/components'
 import type { NewsArticleView, NewsSourceView, PollStatusView } from '../types'
 
-import { YdButton, YdCard, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdSelect, YdSwitch, YdTag, useYdModal, useYdToast, YdAction } from '@yudream/components'
+import { YdAction, YdButton, YdDynamicSearchForm, YdIcon, YdLoadingOverlay, YdPagination, YdResponsiveEnhancedTable, YdStat, YdStats, YdSwitch, YdTablePageLayout, YdTag, useYdModal, useYdToast } from '@yudream/components'
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
 import { createMcNewsApi } from '../api/mc-news-api'
 import ClearNewsModal from '../components/ClearNewsModal.vue'
 import PushNewsModal from '../components/PushNewsModal.vue'
-import { errorMessage, nextPollText, PUSH_STATE_META, tagVariant } from '../composables/utils'
+import { errorMessage, nextPollText, PUSH_STATE_META } from '../composables/utils'
 
 const props = defineProps<{ sdk: YuDreamPluginSdk }>()
 const api = createMcNewsApi(props.sdk)
@@ -22,11 +21,9 @@ const clearOpen = ref(false)
 const pushOpen = ref(false)
 const pushRow = ref<NewsArticleView | null>(null)
 const clearingIgnored = ref(false)
-const deletingId = ref('')
 const rows = ref<NewsArticleView[]>([])
 const sources = ref<NewsSourceView[]>([])
 const pager = reactive({ page: 1, size: 10, total: 0 })
-const filters = reactive({ sourceId: '', keyword: '' })
 const pollStatus = ref<PollStatusView | null>(null)
 const remainSeconds = ref(0)
 const ignoredCount = ref(0)
@@ -45,21 +42,65 @@ const columns: TableColumn<NewsArticleView>[] = [
   { id: 'title', header: '新闻', minWidth: 320 },
   { accessorKey: 'sourceName', header: '来源', width: 170 },
   { accessorKey: 'category', header: '分类', width: 100 },
-  { id: 'pushState', header: '推送状态', width: 100 },
-  { accessorKey: 'pushedAtLabel', header: '推送时间', width: 150 },
-  { id: 'operation', header: '操作', width: 150, fixed: 'right' },
+  { accessorKey: 'pushedAtLabel', header: '推送时间', width: 150, defaultHidden: true },
 ]
 
-const sourceOptions = ref<{ label: string, value: string }[]>([])
-
-function stateMeta(state: string) {
-  return PUSH_STATE_META[state] ?? PUSH_STATE_META['']
+/** 推送状态列：语义色胶囊，长列表里能一眼扫出失败行 */
+const pushStatusColumn: StatusColumn<NewsArticleView> = {
+  statusKey: 'pushState',
+  header: '推送状态',
+  width: 100,
+  statusMap: {
+    pushed: { label: PUSH_STATE_META.pushed.label, variant: 'default', tone: 'success' },
+    failed: { label: PUSH_STATE_META.failed.label, variant: 'destructive', tone: 'danger' },
+    skipped: { label: PUSH_STATE_META.skipped.label, variant: 'secondary', tone: 'neutral' },
+    deduped: { label: PUSH_STATE_META.deduped.label, variant: 'secondary', tone: 'neutral' },
+    '': { label: PUSH_STATE_META[''].label, variant: 'default', tone: 'info' },
+  },
 }
+
+/** 行操作统一收进操作菜单，危险操作保持确认流程 */
+const rowActions: ActionMenuItem<NewsArticleView>[] = [
+  { label: '推送', icon: 'morph:send', onClick: row => openPush(row) },
+  { label: '删除', icon: 'morph:trash-2', danger: true, onClick: row => confirmDelete(row) },
+]
+
+/** 页头操作：立即轮询为主操作，清空动态是危险操作且折叠收纳 */
+const pageActions = computed<YdTablePageAction[]>(() => [
+  { label: '立即轮询', icon: 'morph:refresh', disabled: pollDisabled.value, onClick: () => void triggerPoll() },
+  { label: '清空动态', icon: 'morph:delete', variant: 'outline', danger: true, disabled: !canClear.value, autoFold: true, onClick: openClear },
+])
+
+/* ------------------------------------------------------------------ *
+ * 搜索：本插件后端不走宿主 @Searchable，配置由前端声明（控件契约与宿主一致）
+ * ------------------------------------------------------------------ */
+
+/** ControlType 是 components 内部的字符串枚举，桥接层只出类型，这里用字面量收敛一次 */
+type SearchFieldInput = Partial<Omit<SearchFieldConfig, 'controlType'>> & Pick<SearchFieldConfig, 'fieldName' | 'label'> & { controlType?: 'TEXT' | 'SELECT' | 'DATE_RANGE' | 'NUMBER_RANGE' | 'CHECKBOX' | 'RADIO' }
+
+function searchField(config: SearchFieldInput): SearchFieldConfig {
+  const { controlType = 'TEXT', order = 0, showWhenFolded = false, width = '200px', ...rest } = config
+  return { ...rest, fieldName: config.fieldName, label: config.label, controlType: controlType as SearchFieldConfig['controlType'], order, showWhenFolded, width }
+}
+
+const searchQuery = ref<Record<string, any>>({ keyword: '', sourceId: '' })
+
+const searchConfig: SearchConfig = {
+  fields: [
+    searchField({ fieldName: 'keyword', label: '关键词', placeholder: '搜索标题、摘要或 AI 正文', order: 1, showWhenFolded: true, width: '240px' }),
+    searchField({ fieldName: 'sourceId', label: '来源', controlType: 'SELECT', order: 2, width: '200px' }),
+  ],
+}
+
+const sourceOptions = ref<{ label: string, value: string }[]>([])
+const optionsSources: SearchOptionsSource[] = [
+  { id: 'sourceOptions', loader: () => sourceOptions.value },
+]
 
 async function load() {
   loading.value = true
   try {
-    const page = await api.news(pager.page, pager.size, filters.sourceId, filters.keyword)
+    const page = await api.news(pager.page, pager.size, String(searchQuery.value.sourceId ?? ''), String(searchQuery.value.keyword ?? ''))
     rows.value = page.records ?? []
     pager.total = Number(page.total ?? 0)
     ignoredCount.value = Number(page.ignored ?? 0)
@@ -110,6 +151,11 @@ function applyFilters() {
   void load()
 }
 
+function resetFilters() {
+  searchQuery.value = { keyword: '', sourceId: '' }
+  applyFilters()
+}
+
 function onPageChange() {
   void load()
 }
@@ -132,7 +178,6 @@ function confirmDelete(row: NewsArticleView) {
     title: '删除新闻',
     content: `确认从动态中删除「${row.title}」吗？已推送的消息不受影响；删除后该新闻不会再推送，也不会因下轮轮询重新出现。`,
     onConfirm: async () => {
-      deletingId.value = row.id
       try {
         await api.deleteNews(row.id)
         toast.success('已删除')
@@ -140,9 +185,6 @@ function confirmDelete(row: NewsArticleView) {
       }
       catch (error) {
         toast.error(errorMessage(error, '删除失败'))
-      }
-      finally {
-        deletingId.value = ''
       }
     },
   })
@@ -231,138 +273,96 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <YdPageHeader title="新闻动态" description="已发现的 Minecraft 新闻与版本文章缓存，仅展示最近缓存的条目">
-    <YdButton variant="destructive" :disabled="!canClear" @click="openClear">
-      <YdIcon name="i-ri:delete-bin-line" />清空动态
-    </YdButton>
-    <YdButton :loading="pollDisabled" @click="triggerPoll">
-      <YdIcon name="i-ri:refresh-line" />立即轮询
-    </YdButton>
-    <div class="mc-news-poll-switch" :class="{ 'mc-news-poll-switch-on': pushOnPoll, 'mc-news-poll-switch-disabled': pollDisabled }">
-      <YdSwitch v-model="pushOnPoll" :disabled="pollDisabled" />
-      <YdAction
-        class="mc-news-switch-label"
-        :title="pollDisabled ? '轮询进行中，暂不可切换' : pushOnPoll ? '轮询完成后自动推送新内容' : '轮询只回填列表，本次不推送'"
-        @click="togglePushOnPoll"
-      >轮询后推送</YdAction>
-    </div>
-  </YdPageHeader>
-  <YdPageMain>
-    <ClearNewsModal
-      v-model:open="clearOpen"
-      :sdk="props.sdk"
-      :total="pager.total"
-      :seen="seenCount"
-      :pending="pendingCount"
-      @cleared="onCleared"
-    />
-    <PushNewsModal
-      v-model:open="pushOpen"
-      :sdk="props.sdk"
-      :article="pushRow"
-      @pushed="onPushed"
-    />
-    <div class="mc-news-poll-status">
-      <span>上次轮询：{{ pollStatus?.lastPollAtLabel || '尚未轮询' }}</span>
-      <span v-if="pollStatus?.lastPollSummary">{{ pollStatus.lastPollSummary }}</span>
-      <span>下次轮询：{{ nextPollText(pollStatus, remainSeconds) || '加载中' }}</span>
-      <span v-if="ignoredCount > 0" class="mc-news-status-warn">忽略名单：{{ ignoredCount }} 条（被删除的新闻不再推送）</span>
-      <span v-if="seenCount > 0" class="mc-news-status-muted">去重记录：{{ seenCount }} 条（标题 + 链接指纹，重复内容不再推送）</span>
-      <span v-if="pendingCount > 0" class="mc-news-status-muted">未送达待补推：{{ pendingCount }} 条（下轮轮询自动重试）</span>
-      <YdButton v-if="ignoredCount > 0" size="sm" variant="outline" :loading="clearingIgnored" @click="confirmClearIgnored">
-        清空忽略名单
-      </YdButton>
-      <YdTag v-if="pollStatus?.polling" variant="default">轮询进行中</YdTag>
-      <YdTag v-else-if="pollStatus && !pollStatus.enabled" variant="outline">已暂停</YdTag>
-    </div>
+  <YdTablePageLayout title="新闻动态" stats-title="轮询与统计" :actions="pageActions">
+    <template #page-title>
+      <div class="mc-news-poll-switch" :class="{ 'mc-news-poll-switch-on': pushOnPoll, 'mc-news-poll-switch-disabled': pollDisabled }">
+        <YdSwitch v-model="pushOnPoll" :disabled="pollDisabled" />
+        <YdAction
+          class="mc-news-switch-label"
+          :title="pollDisabled ? '轮询进行中，暂不可切换' : pushOnPoll ? '轮询完成后自动推送新内容' : '轮询只回填列表，本次不推送'"
+          @click="togglePushOnPoll"
+        >轮询后推送</YdAction>
+      </div>
+    </template>
 
-    <YdLoadingOverlay :loading="loading"><YdResponsiveTable
+    <template #stats>
+      <YdStats>
+        <YdStat title="缓存动态" :value="pager.total" description="当前缓存的新闻与版本文章" />
+        <YdStat title="待补推" :value="pendingCount" description="下轮轮询自动重试的未送达条目" />
+        <YdStat title="忽略名单" :value="ignoredCount" description="被删除的新闻不再推送" />
+        <YdStat title="去重记录" :value="seenCount" description="标题 + 链接指纹，重复内容不再推送" />
+      </YdStats>
+      <div class="mc-news-poll-meta">
+        <span>上次轮询：{{ pollStatus?.lastPollAtLabel || '尚未轮询' }}</span>
+        <span v-if="pollStatus?.lastPollSummary">{{ pollStatus.lastPollSummary }}</span>
+        <span>下次轮询：{{ nextPollText(pollStatus, remainSeconds) || '加载中' }}</span>
+        <YdTag v-if="pollStatus?.polling" variant="default">轮询进行中</YdTag>
+        <YdTag v-else-if="pollStatus && !pollStatus.enabled" variant="outline">已暂停</YdTag>
+        <YdButton v-if="ignoredCount > 0" size="sm" variant="outline" :loading="clearingIgnored" @click="confirmClearIgnored">
+          清空忽略名单
+        </YdButton>
+      </div>
+    </template>
 
-      :columns="columns"
-      :data="rows"
-      row-key="id"
-      table-root-class="mc-news-table-scroll"
-      table-class="mc-news-table-w1000"
-      border
-      stripe
-      column-visibility
-      empty-text="暂无新闻，点击右上角立即轮询或等待定时轮询"
-    >
-      <template #toolbar>
-        <YdSearchBar class="w-full">
-          <div class="mc-news-toolbar">
-            <YdInput
-              v-model="filters.keyword"
-              class="mc-news-filter-input"
-              placeholder="搜索标题、摘要或 AI 正文"
-              clearable
-              @keydown.enter="applyFilters"
-              @clear="applyFilters"
-            />
-            <YdSelect v-model="filters.sourceId" class="mc-news-filter-select" :options="sourceOptions" @change="applyFilters" />
-            <YdButton variant="outline" @click="applyFilters">
-              <YdIcon name="i-ri:search-line" />查询
-            </YdButton>
-          </div>
-        </YdSearchBar>
-      </template>
-      <template #cell-title="{ row }">
-        <div class="mc-news-title-cell">
-          <a class="mc-news-link mc-news-title" :href="row.original.url" target="_blank" rel="noopener">{{ row.original.title }}</a>
-          <span v-if="row.original.summary" class="mc-news-subtitle">{{ row.original.summary }}</span>
-          <span v-else-if="row.original.aiSummary" class="mc-news-subtitle">AI：{{ row.original.aiSummary }}</span>
-        </div>
-      </template>
-      <template #cell-pushState="{ row }">
-        <YdTag :variant="tagVariant(stateMeta(row.original.pushState).color)">{{ stateMeta(row.original.pushState).label }}</YdTag>
-      </template>
-      <template #cell-operation="{ row }">
-        <div class="flex-center gap-2">
-          <YdButton size="sm" variant="outline" @click="openPush(row.original)">推送</YdButton>
-          <YdButton size="sm" variant="destructive" :loading="deletingId === row.original.id" @click="confirmDelete(row.original)">删除</YdButton>
-        </div>
-      </template>
-      <template #card="{ row }">
-        <YdCard class="w-full">
-          <div class="flex flex-col gap-3">
-            <div class="flex items-center justify-between gap-2">
-              <a class="mc-news-link min-w-0 break-words text-base font-semibold" :href="row.url" target="_blank" rel="noopener">{{ row.title }}</a>
-              <YdTag :variant="tagVariant(stateMeta(row.pushState).color)">{{ stateMeta(row.pushState).label }}</YdTag>
-            </div>
-            <div class="flex flex-col gap-1 text-sm">
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">来源</span>
-                <span class="break-all">{{ row.sourceName }}</span>
-              </div>
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">分类</span>
-                <span class="break-all">{{ row.category }}</span>
-              </div>
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">发现时间</span>
-                <span class="break-all">{{ row.discoveredAtLabel }}</span>
-              </div>
-              <div v-if="row.pushedAtLabel" class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">推送时间</span>
-                <span class="break-all">{{ row.pushedAtLabel }}</span>
-              </div>
-            </div>
-            <div class="flex flex-wrap gap-2 border-t pt-3">
-              <YdButton size="sm" variant="outline" @click="openPush(row)">推送</YdButton>
-              <YdButton size="sm" variant="destructive" :loading="deletingId === row.id" @click="confirmDelete(row)">删除</YdButton>
-            </div>
-          </div>
-        </YdCard>
-      </template>
-    </YdResponsiveTable></YdLoadingOverlay>
+    <template #search="{ fold }">
+      <YdDynamicSearchForm
+        v-model="searchQuery"
+        :config="searchConfig"
+        :fold="fold"
+        :options-sources="optionsSources"
+        @search="applyFilters"
+        @reset="resetFilters"
+      />
+    </template>
 
-    <YdPagination
-      v-model:page="pager.page"
-      v-model:size="pager.size"
-      :total="pager.total"
-      class="mt-3"
-      @page-change="onPageChange"
-      @size-change="onSizeChange"
-    />
-  </YdPageMain>
+    <template #table>
+      <ClearNewsModal
+        v-model:open="clearOpen"
+        :sdk="props.sdk"
+        :total="pager.total"
+        :seen="seenCount"
+        :pending="pendingCount"
+        @cleared="onCleared"
+      />
+      <PushNewsModal
+        v-model:open="pushOpen"
+        :sdk="props.sdk"
+        :article="pushRow"
+        @pushed="onPushed"
+      />
+      <YdLoadingOverlay :loading="loading">
+        <YdResponsiveEnhancedTable
+          row-key="id"
+          table-root-class="rounded-lg overflow-hidden"
+          table-class="min-w-[1000px]"
+          border
+          stripe
+          column-visibility
+          :status-column="pushStatusColumn"
+          :actions="rowActions"
+          :columns="columns"
+          :data="rows"
+          empty-text="暂无新闻，点击「立即轮询」或等待定时轮询"
+        >
+          <template #cell-title="{ row }">
+            <div class="mc-news-title-cell">
+              <a class="mc-news-link mc-news-title" :href="row.original.url" target="_blank" rel="noopener">{{ row.original.title }}</a>
+              <span v-if="row.original.summary" class="mc-news-subtitle">{{ row.original.summary }}</span>
+              <span v-else-if="row.original.aiSummary" class="mc-news-subtitle">AI：{{ row.original.aiSummary }}</span>
+            </div>
+          </template>
+        </YdResponsiveEnhancedTable>
+      </YdLoadingOverlay>
+    </template>
+
+    <template #footer>
+      <YdPagination
+        v-model:page="pager.page"
+        v-model:size="pager.size"
+        :total="pager.total"
+        @page-change="onPageChange"
+        @size-change="onSizeChange"
+      />
+    </template>
+  </YdTablePageLayout>
 </template>

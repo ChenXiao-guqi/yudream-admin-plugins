@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import type { ActionMenuItem, TableColumn, YdTablePageAction } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import type { TableColumn } from '@yudream/components'
 import type { PushTargetView } from '../types'
-import { YdButton, YdCard, YdIcon, YdPageHeader, YdPageMain, YdResponsiveTable, YdSwitch, YdTag, useYdModal, useYdToast } from '@yudream/components'
+import { YdButton, YdIcon, YdLoadingOverlay, YdResponsiveEnhancedTable, YdSwitch, YdTablePageLayout, useYdModal, useYdToast } from '@yudream/components'
 import { onMounted, ref } from 'vue'
 import { createMcNewsApi } from '../api/mc-news-api'
 import { errorMessage } from '../composables/utils'
@@ -15,18 +14,27 @@ const toast = useYdToast()
 const confirm = useYdModal()
 
 const loading = ref(false)
-const testingId = ref('')
 const rows = ref<PushTargetView[]>([])
 const editorOpen = ref(false)
 const editing = ref<PushTargetView | null>(null)
 
 const columns: TableColumn<PushTargetView>[] = [
-  { accessorKey: 'name', header: '名称', minWidth: 160, fixed: 'left' },
+  { accessorKey: 'name', header: '名称', minWidth: 160 },
   { id: 'type', header: '类型', width: 110 },
   { id: 'target', header: '推送位置', minWidth: 240 },
   { id: 'enabled', header: '启用', width: 80 },
-  { accessorKey: 'markdown', header: 'Markdown', width: 100 },
-  { id: 'operation', header: '操作', width: 200, fixed: 'right' },
+  { accessorKey: 'markdown', header: 'Markdown', width: 100, defaultHidden: true },
+]
+
+/** 行操作统一收进操作菜单，删除保持确认流程 */
+const rowActions: ActionMenuItem<PushTargetView>[] = [
+  { label: '测试', icon: 'morph:flask', onClick: row => void test(row) },
+  { label: '编辑', icon: 'morph:pencil', onClick: row => openEdit(row) },
+  { label: '删除', icon: 'morph:trash-2', danger: true, onClick: row => confirmDelete(row) },
+]
+
+const pageActions: YdTablePageAction[] = [
+  { label: '新增目标', icon: 'morph:plus', onClick: openCreate },
 ]
 
 async function load() {
@@ -71,7 +79,6 @@ async function toggleEnabled(row: PushTargetView, enabled: boolean) {
 }
 
 async function test(row: PushTargetView) {
-  testingId.value = row.id
   try {
     const result = await api.testTarget(row.id)
     if (result.ok)
@@ -81,9 +88,6 @@ async function test(row: PushTargetView) {
   }
   catch (error) {
     toast.error(errorMessage(error, '测试推送失败'))
-  }
-  finally {
-    testingId.value = ''
   }
 }
 
@@ -110,78 +114,40 @@ onMounted(() => {
 </script>
 
 <template>
-  <YdPageHeader title="推送目标" description="配置新新闻的推送目的地：机器人群聊或通用 Webhook">
-    <YdButton @click="openCreate">
-      <YdIcon name="i-ri:add-line" />新增目标
-    </YdButton>
-  </YdPageHeader>
-  <YdPageMain>
-    <YdLoadingOverlay :loading="loading"><YdResponsiveTable
+  <YdTablePageLayout title="推送目标" :show-search="false" :actions="pageActions">
+    <template #table>
+      <YdLoadingOverlay :loading="loading">
+        <YdResponsiveEnhancedTable
+          row-key="id"
+          table-root-class="rounded-lg overflow-hidden"
+          table-class="min-w-[820px]"
+          border
+          stripe
+          column-visibility
+          :actions="rowActions"
+          :columns="columns"
+          :data="rows"
+          empty-text="暂无推送目标，点击「新增目标」创建"
+        >
+          <template #cell-type="{ row }">
+            <span class="yd-status-tone" :data-tone="row.original.type === 'messaging' ? 'info' : 'neutral'">
+              {{ row.original.type === 'messaging' ? '机器人群聊' : 'Webhook' }}
+            </span>
+          </template>
+          <template #cell-target="{ row }">
+            <span class="mc-news-url" :title="targetLabel(row.original)">{{ targetLabel(row.original) || '-' }}</span>
+          </template>
+          <template #cell-enabled="{ row }">
+            <YdSwitch :model-value="row.original.enabled" @update:model-value="(value?: boolean) => toggleEnabled(row.original, value === true)" />
+          </template>
+          <template #cell-markdown="{ row }">
+            <span v-if="row.original.type === 'messaging'">{{ row.original.markdown ? '开' : '关' }}</span>
+            <span v-else class="text-muted-foreground/40">-</span>
+          </template>
+        </YdResponsiveEnhancedTable>
+      </YdLoadingOverlay>
+    </template>
+  </YdTablePageLayout>
 
-      :columns="columns"
-      :data="rows"
-      row-key="id"
-      table-root-class="mc-news-table-scroll"
-      table-class="mc-news-table-w900"
-      border
-      stripe
-      column-visibility
-      empty-text="暂无推送目标，点击右上角新增"
-    >
-      <template #cell-type="{ row }">
-        <YdTag :variant="row.original.type === 'messaging' ? 'default' : 'secondary'">
-          {{ row.original.type === 'messaging' ? '机器人群聊' : 'Webhook' }}
-        </YdTag>
-      </template>
-      <template #cell-target="{ row }">
-        <span class="mc-news-url" :title="targetLabel(row.original)">{{ targetLabel(row.original) || '-' }}</span>
-      </template>
-      <template #cell-enabled="{ row }">
-        <YdSwitch :model-value="row.original.enabled" @update:model-value="(value?: boolean) => toggleEnabled(row.original, value === true)" />
-      </template>
-      <template #cell-markdown="{ row }">
-        <span v-if="row.original.type === 'messaging'">{{ row.original.markdown ? '开' : '关' }}</span>
-        <span v-else class="mc-news-form-hint">-</span>
-      </template>
-      <template #cell-operation="{ row }">
-        <div class="flex-center gap-2">
-          <YdButton size="sm" variant="outline" :loading="testingId === row.original.id" @click="test(row.original)">测试</YdButton>
-          <YdButton size="sm" variant="outline" @click="openEdit(row.original)">编辑</YdButton>
-          <YdButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</YdButton>
-        </div>
-      </template>
-      <template #card="{ row }">
-        <YdCard class="w-full">
-          <div class="flex flex-col gap-3">
-            <div class="flex items-center justify-between gap-2">
-              <span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span>
-              <div class="flex shrink-0 items-center gap-2">
-                <YdTag :variant="row.type === 'messaging' ? 'default' : 'secondary'">
-                  {{ row.type === 'messaging' ? '机器人群聊' : 'Webhook' }}
-                </YdTag>
-                <YdSwitch :model-value="row.enabled" @update:model-value="(value?: boolean) => toggleEnabled(row, value === true)" />
-              </div>
-            </div>
-            <div class="flex flex-col gap-1 text-sm">
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">推送位置</span>
-                <span class="mc-news-url break-all" :title="targetLabel(row)">{{ targetLabel(row) || '-' }}</span>
-              </div>
-              <div v-if="row.type === 'messaging'" class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">Markdown</span>
-                <span>{{ row.markdown ? '开' : '关' }}</span>
-              </div>
-            </div>
-            <div class="flex flex-wrap gap-2 border-t pt-3">
-              <YdButton size="sm" variant="outline" :loading="testingId === row.id" @click="test(row)">测试</YdButton>
-              <YdButton size="sm" variant="outline" @click="openEdit(row)">编辑</YdButton>
-              <YdButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</YdButton>
-            </div>
-          </div>
-        </YdCard>
-      </template>
-    </YdResponsiveTable></YdLoadingOverlay>
-
-    <TargetEditorModal v-model:open="editorOpen" :sdk="props.sdk" :target="editing" @saved="load" />
-  </YdPageMain>
+  <TargetEditorModal v-model:open="editorOpen" :sdk="props.sdk" :target="editing" @saved="() => load()" />
 </template>
