@@ -41,7 +41,7 @@
         :enable-rotate="controls"
         :enable-zoom="controls"
         :enable-pan="false"
-        :global-light="1.7"
+        :global-light="2.2"
         :camera-light="1.35"
         :zoom="zoom"
         :background="previewBackground"

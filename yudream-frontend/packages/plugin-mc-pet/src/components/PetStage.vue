@@ -13,7 +13,7 @@
       :enable-rotate="false"
       :enable-zoom="false"
       :enable-pan="false"
-      :global-light="1.7"
+      :global-light="2.2"
       :camera-light="1.35"
     />
   </div>
