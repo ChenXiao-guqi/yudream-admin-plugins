@@ -2,16 +2,7 @@
 import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { LaunchEventView, StatsScopeEntry } from '../types'
-import {
-  YdButton,
-  YdCard,
-  YdIcon,
-  YdPageHeader,
-  YdPageMain,
-  YdResponsiveTable,
-  YdTag,
-  useYdToast,
-} from '@yudream/components'
+import { YdButton, YdCard, YdIcon, YdPageHeader, YdPageMain, YdTag, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import { computed, onMounted, ref } from 'vue'
 import { createYmclApi } from '../api/ymcl-api'
@@ -161,7 +152,7 @@ onMounted(() => {
 
         <div class="ymcl-stats-grid">
           <YdCard title="Top 服务器" content-class="ymcl-card-content">
-            <YdResponsiveTable
+            <YdResponsiveEnhancedTable
               table-root-class="max-w-full overflow-x-auto rounded-lg overflow-hidden"
               :columns="scopeColumns"
               :data="summary?.topServers || []"
@@ -184,33 +175,11 @@ onMounted(() => {
               <template #cell-lastLaunchAt="{ row }">
                 {{ formatTime(row.original.lastLaunchAt || null) }}
               </template>
-              <template #card="{ row }">
-                <YdCard class="w-full">
-                  <div class="flex flex-col gap-3">
-                    <div class="flex items-center justify-between gap-2">
-                      <span class="min-w-0 break-words text-base font-semibold" :class="row.name === row.refId ? 'ymcl-muted' : ''">
-                        {{ row.name || scopeRef(row) }}
-                      </span>
-                      <YdTag variant="secondary">{{ row.launches.toLocaleString() }} 次</YdTag>
-                    </div>
-                    <div class="flex flex-col gap-1 text-sm">
-                      <div class="flex gap-2">
-                        <span class="shrink-0 text-secondary-foreground/60">ID</span>
-                        <code class="ymcl-hash">{{ scopeRef(row) }}</code>
-                      </div>
-                      <div class="flex gap-2">
-                        <span class="shrink-0 text-secondary-foreground/60">最近启动</span>
-                        <span class="break-all">{{ formatTime(row.lastLaunchAt || null) }}</span>
-                      </div>
-                    </div>
-                  </div>
-                </YdCard>
-              </template>
-            </YdResponsiveTable>
+</YdResponsiveEnhancedTable>
           </YdCard>
 
           <YdCard title="Top 整合包" content-class="ymcl-card-content">
-            <YdResponsiveTable
+            <YdResponsiveEnhancedTable
               table-root-class="max-w-full overflow-x-auto rounded-lg overflow-hidden"
               :columns="scopeColumns"
               :data="summary?.topPacks || []"
@@ -233,29 +202,7 @@ onMounted(() => {
               <template #cell-lastLaunchAt="{ row }">
                 {{ formatTime(row.original.lastLaunchAt || null) }}
               </template>
-              <template #card="{ row }">
-                <YdCard class="w-full">
-                  <div class="flex flex-col gap-3">
-                    <div class="flex items-center justify-between gap-2">
-                      <span class="min-w-0 break-words text-base font-semibold" :class="row.name === row.refId ? 'ymcl-muted' : ''">
-                        {{ row.name || scopeRef(row) }}
-                      </span>
-                      <YdTag variant="secondary">{{ row.launches.toLocaleString() }} 次</YdTag>
-                    </div>
-                    <div class="flex flex-col gap-1 text-sm">
-                      <div class="flex gap-2">
-                        <span class="shrink-0 text-secondary-foreground/60">ID</span>
-                        <code class="ymcl-hash">{{ scopeRef(row) }}</code>
-                      </div>
-                      <div class="flex gap-2">
-                        <span class="shrink-0 text-secondary-foreground/60">最近启动</span>
-                        <span class="break-all">{{ formatTime(row.lastLaunchAt || null) }}</span>
-                      </div>
-                    </div>
-                  </div>
-                </YdCard>
-              </template>
-            </YdResponsiveTable>
+</YdResponsiveEnhancedTable>
           </YdCard>
         </div>
 
@@ -279,7 +226,7 @@ onMounted(() => {
         </div>
 
         <YdCard title="最近启动动态" content-class="ymcl-card-content">
-          <YdResponsiveTable
+          <YdResponsiveEnhancedTable
             table-root-class="max-w-full overflow-x-auto rounded-lg overflow-hidden"
             :columns="eventColumns"
             :data="launches"
@@ -308,37 +255,7 @@ onMounted(() => {
             <template #cell-client="{ row }">
               <span class="ymcl-hash">{{ clientLabel(row.original) }}</span>
             </template>
-            <template #card="{ row }">
-              <YdCard class="w-full">
-                <div class="flex flex-col gap-3">
-                  <div class="flex items-center justify-between gap-2">
-                    <span class="min-w-0 break-words text-base font-semibold">{{ userLabel(row) }}</span>
-                    <YdTag :variant="row.quickPlay === 'server' ? 'default' : 'outline'">
-                      {{ quickPlayLabel(row) }}
-                    </YdTag>
-                  </div>
-                  <div class="flex flex-col gap-1 text-sm">
-                    <div class="flex gap-2">
-                      <span class="shrink-0 text-secondary-foreground/60">时间</span>
-                      <span class="break-all">{{ formatTime(row.occurredAt || null) }}</span>
-                    </div>
-                    <div class="flex gap-2">
-                      <span class="shrink-0 text-secondary-foreground/60">服务器 / 整合包</span>
-                      <code class="ymcl-hash ymcl-break">{{ eventTarget(row) }}</code>
-                    </div>
-                    <div class="flex gap-2">
-                      <span class="shrink-0 text-secondary-foreground/60">版本</span>
-                      <span class="break-all">{{ row.packVersion || '-' }}</span>
-                    </div>
-                    <div class="flex gap-2">
-                      <span class="shrink-0 text-secondary-foreground/60">客户端</span>
-                      <span class="ymcl-hash">{{ clientLabel(row) }}</span>
-                    </div>
-                  </div>
-                </div>
-              </YdCard>
-            </template>
-          </YdResponsiveTable>
+</YdResponsiveEnhancedTable>
           </YdCard>
       </div>
     </YdPageMain>

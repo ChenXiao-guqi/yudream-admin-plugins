@@ -2,19 +2,8 @@
 import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { BundleDoc } from '../types'
-import { YdAction,
-  YdButton,
-  YdCard,
-  YdIcon,
-  YdFilePicker,
-  YdInput,
-  YdPageHeader,
-  YdPageMain,
-  YdResponsiveTable,
-  YdTag,
-  useYdToast,
-} from '@yudream/components'
-import type { TableColumn, YdFilePickerInstance } from '@yudream/components'
+import { YdAction, YdButton, YdIcon, YdFilePicker, YdInput, YdPageHeader, YdPageMain, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
+import type { TableColumn, YdFilePickerInstance, ActionMenuItem } from '@yudream/components'
 import { onMounted, reactive, ref } from 'vue'
 import { useYmclAdapter } from '../composables/useYmclAdapter'
 import { formatSize, formatTime } from '../composables/ymcl-protocol'
@@ -72,6 +61,12 @@ function copyDownloadUrl(row: BundleDoc) {
 onMounted(() => {
   void model.loadBundles()
 })
+
+/** 行操作：复制 bundle 下载地址 */
+const rowActions: ActionMenuItem<BundleDoc>[] = [
+  { label: '下载地址', icon: 'morph:link', onClick: row => copyDownloadUrl(row) },
+]
+
 </script>
 
 <template>
@@ -119,9 +114,11 @@ onMounted(() => {
         </YdCard>
 
         <YdCard title="已注册包" description="启动器按 manifest 中的 sha256 校验后加载" content-class="ymcl-card-content ymcl-card-content--wide">
-          <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable
-            table-root-class="max-w-full overflow-x-auto rounded-lg overflow-hidden"
+          <YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable
+              :actions="rowActions"
 
+            table-root-class="max-w-full overflow-x-auto rounded-lg overflow-hidden"
+            
             :columns="bundleColumns"
             :data="model.bundles"
             row-key="bundleId"
@@ -140,45 +137,7 @@ onMounted(() => {
             <template #cell-uploadedAt="{ row }">
               {{ formatTime(row.original.uploadedAt) }}
             </template>
-            <template #cell-operations="{ row }">
-              <YdButton size="sm" variant="outline" @click="copyDownloadUrl(row.original)">
-                <YdIcon name="i-ri:links-line" />
-                下载地址
-              </YdButton>
-            </template>
-            <template #card="{ row }">
-              <YdCard class="w-full">
-                <div class="flex flex-col gap-3">
-                  <div class="flex items-center justify-between gap-2">
-                    <span class="min-w-0 break-words text-base font-semibold">{{ row.bundleId }}</span>
-                    <YdTag variant="secondary">{{ row.version }}</YdTag>
-                  </div>
-                  <div class="flex flex-col gap-1 text-sm">
-                    <div class="flex gap-2">
-                      <span class="shrink-0 text-secondary-foreground/60">sha256</span>
-                      <YdAction type="button" class="ymcl-hash ymcl-hash--button" title="点击复制完整 sha256" @click="copyHash(row)">
-                        {{ String(row.sha256 || '').slice(0, 12) }}…
-                      </YdAction>
-                    </div>
-                    <div class="flex gap-2">
-                      <span class="shrink-0 text-secondary-foreground/60">大小</span>
-                      <span class="break-all">{{ formatSize(Number(row.size) || 0) }}</span>
-                    </div>
-                    <div class="flex gap-2">
-                      <span class="shrink-0 text-secondary-foreground/60">上传时间</span>
-                      <span class="break-all">{{ formatTime(row.uploadedAt) }}</span>
-                    </div>
-                  </div>
-                  <div class="flex flex-wrap gap-2 border-t pt-3">
-                    <YdButton size="sm" variant="outline" @click="copyDownloadUrl(row)">
-                      <YdIcon name="i-ri:links-line" />
-                      下载地址
-                    </YdButton>
-                  </div>
-                </div>
-              </YdCard>
-            </template>
-          </YdResponsiveTable></YdLoadingOverlay>
+</YdResponsiveEnhancedTable></YdLoadingOverlay>
         </YdCard>
       </div>
     </YdPageMain>

@@ -2,8 +2,8 @@
 import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { ManifestFileEntry, PackDoc, PackVersionSummary } from '../types'
-import { YdButton, YdCard, YdDrawer, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdResponsiveTable, YdTag, YdTextarea, useYdModal, useYdToast } from '@yudream/components'
-import type { TableColumn } from '@yudream/components'
+import { YdButton, YdDrawer, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdTag, YdTextarea, useYdModal, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
+import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import { computed, onMounted, reactive, ref } from 'vue'
 import FilePreviewDrawer from '../components/FilePreviewDrawer.vue'
 import JsonViewDrawer from '../components/JsonViewDrawer.vue'
@@ -151,14 +151,6 @@ const versionFiles = computed<ManifestFileEntry[]>(
   () => (versionDetail.value?.manifest as { files?: ManifestFileEntry[] } | undefined)?.files || [],
 )
 
-function openFilePreview(file: ManifestFileEntry) {
-  if (!file.sha512) {
-    toast.warning('该条目缺少 sha512，无法预览')
-    return
-  }
-  previewTarget.value = { sha512: String(file.sha512), path: file.path || '' }
-  previewOpen.value = true
-}
 
 function fileCount() {
   return versionFiles.value.length
@@ -171,6 +163,19 @@ function totalSize() {
 onMounted(() => {
   void model.loadPacks()
 })
+
+/** 行操作统一收进操作菜单，删除保持确认流程 */
+const rowActions: ActionMenuItem<PackDoc>[] = [
+  { label: '版本', icon: 'morph:history', onClick: row => openVersions(row) },
+  { label: '编辑', icon: 'morph:pencil', onClick: row => openEdit(row) },
+  { label: '删除', icon: 'morph:trash-2', danger: true, disabled: () => !model.canPublish || model.saving, onClick: row => confirmDeletePack(row) },
+]
+
+/** 版本子表行操作：manifest 查看 / 删除 */
+const versionActions: ActionMenuItem<unknown>[] = [
+  { label: 'manifest', icon: 'morph:file-code', onClick: row => openManifest(row as never) },
+  { label: '删除', icon: 'morph:trash-2', danger: true, disabled: () => !model.canPublish || model.saving, onClick: row => confirmDeleteVersion(row as never) },
+]
 </script>
 
 <template>
@@ -179,9 +184,11 @@ onMounted(() => {
 
     <YdPageMain>
       <YdCard content-class="ymcl-card-content">
-        <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable
-          table-root-class="max-w-full overflow-x-auto rounded-lg overflow-hidden"
+        <YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable
+              :actions="rowActions"
 
+          table-root-class="max-w-full overflow-x-auto rounded-lg overflow-hidden"
+          
           :columns="packColumns"
           :data="model.packs"
           row-key="packId"
@@ -202,71 +209,7 @@ onMounted(() => {
             <YdTag v-if="packLatest(row.original) !== '-'" variant="secondary">{{ packLatest(row.original) }}</YdTag>
             <span v-else>-</span>
           </template>
-          <template #cell-operations="{ row }">
-            <div class="ymcl-row-actions">
-              <YdButton size="sm" variant="outline" @click="openVersions(row.original)">
-                <YdIcon name="i-ri:history-line" />
-                版本
-              </YdButton>
-              <YdButton size="sm" variant="outline" @click="openEdit(row.original)">
-                <YdIcon name="i-ri:pencil-line" />
-                编辑
-              </YdButton>
-              <YdButton
-                size="sm"
-                variant="destructive"
-                :disabled="!model.canPublish || model.saving"
-                @click="confirmDeletePack(row.original)"
-              >
-                <YdIcon name="i-ri:delete-bin-line" />
-                删除
-              </YdButton>
-            </div>
-          </template>
-          <template #card="{ row }">
-            <YdCard class="w-full">
-              <div class="flex flex-col gap-3">
-                <div class="flex items-center justify-between gap-2">
-                  <span class="min-w-0 break-words text-base font-semibold">{{ row.name || row.packId }}</span>
-                  <YdTag v-if="packLatest(row) !== '-'" variant="secondary">{{ packLatest(row) }}</YdTag>
-                </div>
-                <div class="flex flex-col gap-1 text-sm">
-                  <div class="flex gap-2">
-                    <span class="shrink-0 text-secondary-foreground/60">整合包 ID</span>
-                    <span class="break-all">{{ row.packId }}</span>
-                  </div>
-                  <div v-if="row.description" class="flex gap-2">
-                    <span class="shrink-0 text-secondary-foreground/60">简介</span>
-                    <span class="break-all">{{ row.description }}</span>
-                  </div>
-                  <div class="flex gap-2">
-                    <span class="shrink-0 text-secondary-foreground/60">版本数</span>
-                    <span>{{ packVersionCount(row) }}</span>
-                  </div>
-                </div>
-                <div class="flex flex-wrap gap-2 border-t pt-3">
-                  <YdButton size="sm" variant="outline" @click="openVersions(row)">
-                    <YdIcon name="i-ri:history-line" />
-                    版本
-                  </YdButton>
-                  <YdButton size="sm" variant="outline" @click="openEdit(row)">
-                    <YdIcon name="i-ri:pencil-line" />
-                    编辑
-                  </YdButton>
-                  <YdButton
-                    size="sm"
-                    variant="destructive"
-                    :disabled="!model.canPublish || model.saving"
-                    @click="confirmDeletePack(row)"
-                  >
-                    <YdIcon name="i-ri:delete-bin-line" />
-                    删除
-                  </YdButton>
-                </div>
-              </div>
-            </YdCard>
-          </template>
-        </YdResponsiveTable></YdLoadingOverlay>
+        </YdResponsiveEnhancedTable></YdLoadingOverlay>
       </YdCard>
     </YdPageMain>
 
@@ -318,12 +261,13 @@ onMounted(() => {
       content-class="ymcl-versions-drawer"
     >
       <YdLoadingOverlay :loading="versionsLoading"><div  class="ymcl-drawer-body">
-        <YdResponsiveTable
+        <YdResponsiveEnhancedTable
           table-root-class="max-w-full overflow-x-auto rounded-lg overflow-hidden"
           v-if="activeVersions.length"
           :columns="versionColumns"
           :data="activeVersions"
           row-key="version"
+          :actions="versionActions"
         >
           <template #empty>
             <span class="ymcl-muted">暂无版本</span>
@@ -331,51 +275,7 @@ onMounted(() => {
           <template #cell-releasedAt="{ row }">
             {{ formatTime(row.original.releasedAt) }}
           </template>
-          <template #cell-operations="{ row }">
-            <div class="ymcl-row-actions">
-              <YdButton size="sm" variant="outline" @click="openManifest(row.original)">
-                manifest
-              </YdButton>
-              <YdButton
-                size="sm"
-                variant="destructive"
-                :disabled="!model.canPublish || model.saving"
-                @click="confirmDeleteVersion(row.original)"
-              >
-                删除
-              </YdButton>
-            </div>
-          </template>
-          <template #card="{ row }">
-            <YdCard class="w-full">
-              <div class="flex flex-col gap-3">
-                <div class="flex items-center justify-between gap-2">
-                  <span class="min-w-0 break-words text-base font-semibold">{{ row.version }}</span>
-                  <YdTag variant="outline">{{ row.channel || 'stable' }}</YdTag>
-                </div>
-                <div class="flex flex-col gap-1 text-sm">
-                  <div class="flex gap-2">
-                    <span class="shrink-0 text-secondary-foreground/60">发布时间</span>
-                    <span class="break-all">{{ formatTime(row.releasedAt) }}</span>
-                  </div>
-                </div>
-                <div class="flex flex-wrap gap-2 border-t pt-3">
-                  <YdButton size="sm" variant="outline" @click="openManifest(row)">
-                    manifest
-                  </YdButton>
-                  <YdButton
-                    size="sm"
-                    variant="destructive"
-                    :disabled="!model.canPublish || model.saving"
-                    @click="confirmDeleteVersion(row)"
-                  >
-                    删除
-                  </YdButton>
-                </div>
-              </div>
-            </YdCard>
-          </template>
-        </YdResponsiveTable>
+        </YdResponsiveEnhancedTable>
         <p v-else-if="!versionsLoading" class="ymcl-muted">
           该整合包还没有版本。
         </p>
@@ -400,7 +300,7 @@ onMounted(() => {
               JSON 全文
             </YdButton>
           </div>
-          <YdResponsiveTable
+          <YdResponsiveEnhancedTable
             table-root-class="max-w-full overflow-x-auto rounded-lg overflow-hidden"
             :columns="fileColumns"
             :data="versionFiles"
@@ -415,39 +315,7 @@ onMounted(() => {
             <template #cell-size="{ row }">
               {{ formatSize(Number(row.original.size) || 0) }}
             </template>
-            <template #cell-operations="{ row }">
-              <YdButton size="sm" variant="outline" @click="openFilePreview(row.original)">
-                <YdIcon name="i-ri:eye-line" />
-                预览
-              </YdButton>
-            </template>
-            <template #card="{ row }">
-              <YdCard class="w-full">
-                <div class="flex flex-col gap-3">
-                  <div class="flex items-center justify-between gap-2">
-                    <span class="min-w-0 break-words text-base font-semibold">{{ row.path }}</span>
-                    <YdTag v-if="row.policy" variant="outline">{{ row.policy }}</YdTag>
-                  </div>
-                  <div class="flex flex-col gap-1 text-sm">
-                    <div class="flex gap-2">
-                      <span class="shrink-0 text-secondary-foreground/60">sha512</span>
-                      <code class="ymcl-hash">{{ String(row.sha512 || '').slice(0, 12) }}</code>
-                    </div>
-                    <div class="flex gap-2">
-                      <span class="shrink-0 text-secondary-foreground/60">大小</span>
-                      <span class="break-all">{{ formatSize(Number(row.size) || 0) }}</span>
-                    </div>
-                  </div>
-                  <div class="flex flex-wrap gap-2 border-t pt-3">
-                    <YdButton size="sm" variant="outline" @click="openFilePreview(row)">
-                      <YdIcon name="i-ri:eye-line" />
-                      预览
-                    </YdButton>
-                  </div>
-                </div>
-              </YdCard>
-            </template>
-          </YdResponsiveTable>
+</YdResponsiveEnhancedTable>
         </template>
         <p v-else-if="!detailLoading" class="ymcl-muted">
           manifest 加载失败或不存在。

@@ -1,27 +1,10 @@
 <script setup lang="ts">
 import { YdLoadingOverlay } from '@yudream/components'
 
-import type { TableColumn, YdFilePickerInstance, YdSortableTreeDropEvent, YdSortableTreeNode } from '@yudream/components'
+import type { TableColumn, YdFilePickerInstance, YdSortableTreeDropEvent, YdSortableTreeNode, ActionMenuItem } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { NavigationConfigItem, NavigationPageInfo } from '../types'
-import {
-  YdButton,
-  YdCard,
-  YdIcon,
-  YdFilePicker,
-  YdInput,
-  YdModal,
-  YdPageHeader,
-  YdPageMain,
-  YdResponsiveTable,
-  YdSortableTree,
-  YdSelect,
-  YdSwitch,
-  YdTag,
-  YdTextarea,
-  useYdModal,
-  useYdToast,
-} from '@yudream/components'
+import { YdButton, YdIcon, YdFilePicker, YdInput, YdModal, YdPageHeader, YdPageMain, YdSortableTree, YdSelect, YdSwitch, YdTag, YdTextarea, useYdModal, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
 import { computed, onMounted, reactive, ref } from 'vue'
 import NavIconPicker from '../components/NavIconPicker.vue'
 import {
@@ -587,6 +570,11 @@ onMounted(() => {
   void model.loadCustomPages()
   void model.loadBundles()
 })
+/** 行操作：仅自定义页可编辑/删除 */
+const rowActions: ActionMenuItem<unknown>[] = [
+  { label: '编辑', icon: 'morph:pencil', visible: row => (row as { source: string }).source === 'custom', disabled: () => !model.canDesign, onClick: row => openCustomEdit(row as never) },
+  { label: '删除', icon: 'morph:trash-2', danger: true, visible: row => (row as { source: string }).source === 'custom', disabled: () => !model.canDesign, onClick: row => confirmDeleteCustomPage(row as never) },
+]
 </script>
 
 <template>
@@ -798,8 +786,10 @@ onMounted(() => {
                 </YdButton>
               </div>
             </div>
-            <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable
+            <YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable
+              :actions="rowActions"
 
+              
               table-root-class="max-w-full overflow-x-auto rounded-lg overflow-hidden"
               :columns="registryColumns"
               :data="model.navForm.pages"
@@ -835,64 +825,7 @@ onMounted(() => {
                   {{ isUsed(row.original.pageId) ? '导航中' : '未使用' }}
                 </YdTag>
               </template>
-              <template #cell-operation="{ row }">
-                <div v-if="row.original.source === 'custom'" class="ymcl-action-row">
-                  <YdButton variant="ghost" size="sm" title="编辑" :disabled="!model.canDesign" @click="openCustomEdit(row.original)">
-                    <YdIcon name="i-ri:edit-2-line" />
-                  </YdButton>
-                  <YdButton variant="ghost" size="sm" title="删除" :disabled="!model.canDesign" @click="confirmDeleteCustomPage(row.original)">
-                    <YdIcon name="i-ri:delete-bin-line" />
-                  </YdButton>
-                </div>
-                <span v-else class="ymcl-muted">—</span>
-              </template>
-              <template #card="{ row }">
-                <YdCard class="w-full">
-                  <div class="flex flex-col gap-3">
-                    <div class="flex items-center justify-between gap-2">
-                      <span class="ymcl-action-row">
-                        <YdIcon
-                          v-if="remixIcon(preferredIconValue(row.icon))"
-                          :name="remixIcon(preferredIconValue(row.icon))!"
-                        />
-                        <span class="min-w-0 break-words text-base font-semibold">{{ row.title }}</span>
-                        <YdTag v-if="isNativeIconValue(row.icon)" variant="outline">内置图标</YdTag>
-                      </span>
-                      <YdTag :variant="sourceVariant(row.source)">
-                        {{ sourceText(row.source) }}
-                      </YdTag>
-                    </div>
-                    <div class="flex flex-col gap-1 text-sm">
-                      <div class="flex gap-2">
-                        <span class="shrink-0 text-secondary-foreground/60">路由 / 标识</span>
-                        <code class="ymcl-hash">{{ row.route || row.pageId }}</code>
-                      </div>
-                      <div class="flex gap-2">
-                        <span class="shrink-0 text-secondary-foreground/60">所需权限</span>
-                        <span v-if="row.requiredPermission" class="ymcl-break">{{ row.requiredPermission }}</span>
-                        <span v-else class="ymcl-muted">公开</span>
-                      </div>
-                      <div class="flex gap-2">
-                        <span class="shrink-0 text-secondary-foreground/60">状态</span>
-                        <YdTag :variant="isUsed(row.pageId) ? 'default' : 'outline'">
-                          {{ isUsed(row.pageId) ? '导航中' : '未使用' }}
-                        </YdTag>
-                      </div>
-                    </div>
-                    <div v-if="row.source === 'custom'" class="flex flex-wrap gap-2 border-t pt-3">
-                      <YdButton variant="outline" size="sm" :disabled="!model.canDesign" @click="openCustomEdit(row)">
-                        <YdIcon name="i-ri:edit-2-line" />
-                        编辑
-                      </YdButton>
-                      <YdButton variant="destructive" size="sm" :disabled="!model.canDesign" @click="confirmDeleteCustomPage(row)">
-                        <YdIcon name="i-ri:delete-bin-line" />
-                        删除
-                      </YdButton>
-                    </div>
-                  </div>
-                </YdCard>
-              </template>
-            </YdResponsiveTable></YdLoadingOverlay>
+</YdResponsiveEnhancedTable></YdLoadingOverlay>
             <p class="ymcl-muted">
               自定义页面由页面包驱动：extension=沙箱 iframe 页面，module=域内可信 ESM 模块（remoteEntry 热下发）。先上传 zip 包，再登记页面并加入导航。
             </p>
