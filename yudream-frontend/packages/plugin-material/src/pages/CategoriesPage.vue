@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
-import type { TableColumn } from '@yudream/components'
+import type { ActionMenuItem, TableColumn, YdTablePageAction } from '@yudream/components'
 import type { MaterialPluginModel } from '../composables/useMaterialPlugin'
 import type { CategoryView } from '../types'
-import { YdButton, YdIcon, YdInput, YdModal, YdNumberField, YdPageHeader, YdPageMain, YdResponsiveTable, useYdModal } from '@yudream/components'
+import { YdForm, YdFormItem, YdInput, YdLoadingOverlay, YdModal, YdNumberField, YdResponsiveEnhancedTable, YdTablePageLayout, useYdModal } from '@yudream/components'
 import { onMounted, ref } from 'vue'
 import { formatTime } from '../types'
 
@@ -18,11 +17,20 @@ const editSort = ref(0)
 const saving = ref(false)
 
 const columns: TableColumn<CategoryView>[] = [
-  { accessorKey: 'name', header: '分类名称', minWidth: 180, fixed: 'left' },
+  { accessorKey: 'name', header: '分类名称', minWidth: 180 },
   { accessorKey: 'sort', header: '排序', width: 90 },
   { id: 'materials', header: '物料数', width: 100 },
   { accessorKey: 'createdAt', header: '创建时间', width: 180 },
-  { id: 'operation', header: '操作', width: 160 },
+]
+
+/** 行操作统一收进操作菜单，删除保持确认流程 */
+const rowActions: ActionMenuItem<CategoryView>[] = [
+  { label: '编辑', icon: 'morph:pencil', onClick: row => openEdit(row) },
+  { label: '删除', icon: 'morph:trash-2', danger: true, onClick: row => confirmDelete(row) },
+]
+
+const pageActions: YdTablePageAction[] = [
+  { label: '新建分类', icon: 'morph:plus', onClick: openCreate },
 ]
 
 function openCreate() {
@@ -65,53 +73,38 @@ onMounted(() => model.loadCategories())
 </script>
 
 <template>
-  <YdPageHeader title="物料分类" description="分类对所有用户共享，删除前需移出其中物料">
-    <YdButton @click="openCreate"><YdIcon name="i-ri:add-line" />新建分类</YdButton>
-  </YdPageHeader>
-  <YdPageMain>
-    <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable
+  <YdTablePageLayout title="物料分类" :show-search="false" :actions="pageActions">
+    <template #table>
+      <YdLoadingOverlay :loading="model.loading">
+        <YdResponsiveEnhancedTable
+          :columns="columns"
+          :data="model.categories"
+          row-key="id"
+          table-root-class="rounded-lg overflow-hidden"
+          table-class="min-w-[620px]"
+          border
+          stripe
+          column-visibility
+          :actions="rowActions"
+          empty-text="还没有分类"
+        >
+          <template #cell-materials="{ row }">{{ row.original.materials }}</template>
+          <template #cell-createdAt="{ row }">{{ formatTime(row.original.createdAt) }}</template>
+        </YdResponsiveEnhancedTable>
+      </YdLoadingOverlay>
+    </template>
+  </YdTablePageLayout>
 
-      :columns="columns"
-      :data="model.categories"
-      row-key="id"
-      table-root-class="max-w-full overflow-x-auto rounded-lg"
-      table-class="min-w-[720px]"
-      border stripe
-      empty-text="还没有分类"
-    >
-      <template #cell-materials="{ row }">{{ row.original.materials }}</template>
-      <template #cell-createdAt="{ row }">{{ formatTime(row.original.createdAt) }}</template>
-      <template #cell-operation="{ row }">
-        <div class="flex-center gap-2">
-          <YdButton size="sm" variant="outline" @click="openEdit(row.original)">编辑</YdButton>
-          <YdButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</YdButton>
-        </div>
-      </template>
-      <template #card="{ row }">
-        <div class="flex flex-col gap-2 text-sm">
-          <div class="flex items-center justify-between">
-            <strong class="text-base">{{ row.name }}</strong>
-            <span class="text-secondary-foreground/60">{{ row.materials }} 个物料</span>
-          </div>
-          <div class="text-secondary-foreground/60">排序 {{ row.sort }} · 创建于 {{ formatTime(row.createdAt) }}</div>
-          <div class="flex gap-2">
-            <YdButton size="sm" variant="outline" @click="openEdit(row)">编辑</YdButton>
-            <YdButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</YdButton>
-          </div>
-        </div>
-      </template>
-    </YdResponsiveTable></YdLoadingOverlay>
-    <YdModal v-model="editOpen" :title="editTarget ? '编辑分类' : '新建分类'" :confirm-button-loading="saving" @confirm="submit">
-      <div class="flex flex-col gap-3">
-        <label class="flex flex-col gap-1 text-sm">
-          <span class="text-secondary-foreground/80">分类名称</span>
+  <YdModal v-model="editOpen" :title="editTarget ? '编辑分类' : '新建分类'" :confirm-button-loading="saving" @confirm="submit">
+    <YdForm :model="{ name: editName, sort: editSort }" layout="vertical">
+      <div class="flex flex-col gap-4">
+        <YdFormItem label="分类名称" required>
           <YdInput v-model="editName" maxlength="30" placeholder="如：宣传物料" />
-        </label>
-        <label class="flex flex-col gap-1 text-sm">
-          <span class="text-secondary-foreground/80">排序（越小越靠前）</span>
+        </YdFormItem>
+        <YdFormItem label="排序" extra="越小越靠前。">
           <YdNumberField v-model="editSort" :min="0" :max="9999" />
-        </label>
+        </YdFormItem>
       </div>
-    </YdModal>
-  </YdPageMain>
+    </YdForm>
+  </YdModal>
 </template>

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 // yudream-self-chrome 页面自管页头与卡片
-import type { TableColumn } from '@yudream/components'
+import type { ActionMenuItem, TableColumn } from '@yudream/components'
 import type { ProjectProgressModel } from '../composables/useProjectProgress'
 import type { ProjectWorkDetail } from '../types'
-import { YdButton, YdCard, YdFileUpload, YdModal, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdTag, YdTextarea } from '@yudream/components'
+import { YdButton, YdFileUpload, YdModal, YdPageHeader, YdPageMain, YdPagination, YdTextarea, YdResponsiveEnhancedTable } from '@yudream/components'
 import { computed, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import EvidenceFileList from '../components/EvidenceFileList.vue'
@@ -54,19 +54,18 @@ async function confirmSubmitAcceptance() {
 function localUploadRequest() {
   return Promise.resolve({})
 }
+/** 行操作统一收进操作菜单 */
+const rowActions: ActionMenuItem<unknown>[] = [
+  { label: '项目打卡', icon: 'morph:clipboard-check', onClick: row => goCheckIn((row as { projectId: string }).projectId) },
+  { label: 'MC 打卡', icon: 'morph:gamepad', visible: row => props.model.canMinecraftCheckIn(row as never), onClick: row => props.model.minecraftCheckIn((row as { projectId: string }).projectId) },
+  { label: '提交验收', icon: 'morph:send', disabled: row => !props.model.canSubmitAcceptance(row as never), onClick: row => openSubmitAcceptance(row as never) },
+]
 </script>
 
 <template>
 
   <YdPageHeader title="我的任务" class="mb-0" />
   <YdPageMain>  <section class="pp-page">
-    <section class="pp-toolbar">
-      <div>
-        <span>个人任务</span>
-        <h2>我的任务</h2>
-      </div>
-      <YdButton variant="outline" :loading="model.loading" @click="model.loadMyTasks">刷新</YdButton>
-    </section>
 
     <section class="pp-panel">
       <div class="pp-stat-grid">
@@ -104,38 +103,13 @@ function localUploadRequest() {
           <span>完成任务后提交验收，通过后才计入完成进度</span>
         </div>
       </header>
-      <YdResponsiveTable row-key="id" table-root-class="max-w-full overflow-x-auto rounded-lg" table-class="min-w-[1310px]" border stripe column-visibility :columns="columns" :data="pagedTasks" empty-text="暂无分配给你的任务">
+      <YdResponsiveEnhancedTable row-key="id" table-root-class="rounded-lg overflow-hidden" table-class="min-w-[1180px]" border stripe column-visibility :actions="rowActions" :columns="columns" :data="pagedTasks" empty-text="暂无分配给你的任务">
         <template #cell-project="{ row }">{{ model.projectName(row.original.projectId) }}</template>
         <template #cell-task="{ row }"><strong>{{ row.original.title }}</strong><div class="pp-table-sub">{{ row.original.description || '暂无说明' }}</div><div v-if="row.original.acceptanceSummary || row.original.acceptanceFiles.length" class="pp-material-box mt-3"><p>{{ row.original.acceptanceSummary || '暂无验收说明' }}</p><EvidenceFileList :model="model" :files="row.original.acceptanceFiles" compact /></div></template>
-        <template #cell-status="{ row }"><div class="pp-chip-list"><YdTag variant="secondary">{{ model.detailStatusLabel(row.original) }}</YdTag><YdTag v-if="row.original.pendingAcceptance">待验收</YdTag></div></template>
+        <template #cell-status="{ row }"><div class="pp-chip-list"><span class="yd-status-tone" data-tone="neutral">{{ model.detailStatusLabel(row.original) }}</span><span v-if="row.original.pendingAcceptance" class="yd-status-tone" data-tone="warning">待验收</span></div></template>
         <template #cell-assignment="{ row }">{{ model.assignmentLabel(row.original) }}</template>
         <template #cell-dueAt="{ row }">{{ model.formatTime(row.original.dueAt) }}</template>
-        <template #cell-operation="{ row }"><div class="pp-actions"><YdButton size="sm" variant="outline" @click="goCheckIn(row.original.projectId)">项目打卡</YdButton><YdButton v-if="model.canMinecraftCheckIn(row.original)" size="sm" variant="outline" @click="model.minecraftCheckIn(row.original.projectId)">MC 打卡</YdButton><YdButton size="sm" :disabled="!model.canSubmitAcceptance(row.original)" :loading="model.saving" @click="openSubmitAcceptance(row.original)">提交验收</YdButton></div></template>
-        <template #card="{ row }">
-          <YdCard class="w-full">
-            <div class="flex flex-col gap-3">
-              <div class="flex items-center justify-between gap-2">
-                <span class="min-w-0 break-words text-base font-semibold">{{ row.title }}</span>
-                <div class="flex gap-1">
-                  <YdTag variant="secondary">{{ model.detailStatusLabel(row) }}</YdTag>
-                  <YdTag v-if="row.pendingAcceptance">待验收</YdTag>
-                </div>
-              </div>
-              <div class="flex flex-col gap-1 text-sm">
-                <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">项目</span><span class="break-all">{{ model.projectName(row.projectId) }}</span></div>
-                <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">分配方式</span><span class="break-all">{{ model.assignmentLabel(row) }}</span></div>
-                <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">截止时间</span><span class="break-all">{{ model.formatTime(row.dueAt) }}</span></div>
-                <div v-if="row.description" class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">说明</span><span class="break-all">{{ row.description }}</span></div>
-              </div>
-              <div class="flex flex-wrap gap-2 border-t pt-3">
-                <YdButton size="sm" variant="outline" @click="goCheckIn(row.projectId)">项目打卡</YdButton>
-                <YdButton v-if="model.canMinecraftCheckIn(row)" size="sm" variant="outline" @click="model.minecraftCheckIn(row.projectId)">MC 打卡</YdButton>
-                <YdButton size="sm" :disabled="!model.canSubmitAcceptance(row)" :loading="model.saving" @click="openSubmitAcceptance(row)">提交验收</YdButton>
-              </div>
-            </div>
-          </YdCard>
-        </template>
-      </YdResponsiveTable>
+      </YdResponsiveEnhancedTable>
       <YdPagination v-model:page="pagination.page" v-model:size="pagination.size" :total="model.myTasks.length" class="mt-3" />
     </section>
 

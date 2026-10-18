@@ -1,20 +1,18 @@
 <script setup lang="ts">
 import { YdLoadingOverlay } from '@yudream/components'
-import type { FileItem, FileUploadRequestOptions, TableColumn, YdFilePickerInstance } from '@yudream/components'
+import type { ActionMenuItem, FileItem, FileUploadRequestOptions, TableColumn, YdFilePickerInstance, YdTablePageAction } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import {
   YdButton,
-  YdCard,
   YdFilePicker,
   YdFileUpload,
   YdIcon,
   YdInput,
   YdModal,
-  YdPageHeader,
-  YdPageMain,
   YdSelect,
   YdSwitch,
-  YdResponsiveTable,
+  YdResponsiveEnhancedTable,
+  YdTablePageLayout,
   YdTag,
   YdTextarea,
   useYdModal,
@@ -26,7 +24,6 @@ import {
   CHANNEL_OPTIONS,
   createUpdateApi,
   UPDATE_CHANGE_CATEGORIES,
-  type UpdateArtifactRecord,
   type UpdateChangeCategory,
   type UpdateChanges,
   type UpdateReleaseRecord,
@@ -95,8 +92,20 @@ const columns = ref<TableColumn<UpdateReleaseRecord>[]>([
   { accessorKey: 'publishedAt', header: '发布时间', width: 150 },
   { id: 'artifacts', header: '制品', width: 70 },
   { id: 'status', header: '状态', width: 110 },
-  { id: 'operations', header: '操作', width: 330 },
 ])
+
+/** 行操作统一收进操作菜单；撤回/删除保持确认流程 */
+const rowActions: ActionMenuItem<UpdateReleaseRecord>[] = [
+  { label: '编辑', icon: 'morph:pencil', onClick: row => openEditRelease(row) },
+  { label: '制品', icon: 'morph:paperclip', onClick: row => openArtifactEditor(row.version) },
+  { label: '日志', icon: 'morph:file-text', onClick: row => openChangelog(row) },
+  { label: row => (row.yanked ? '恢复' : '撤回'), icon: 'morph:undo', disabled: () => saving.value, onClick: row => toggleYank(row) },
+  { label: '删除', icon: 'morph:trash-2', danger: true, disabled: () => saving.value, onClick: row => removeRelease(row) },
+]
+
+const pageActions: YdTablePageAction[] = [
+  { label: '新建发布', icon: 'morph:plus', onClick: openCreateRelease },
+]
 
 function loadChanges(raw?: UpdateChanges | null) {
   const next = emptyChanges()
@@ -383,22 +392,6 @@ function removeRelease(row: UpdateReleaseRecord) {
   })
 }
 
-async function removeArtifact(version: string, artifact: UpdateArtifactRecord) {
-  confirm.confirm({
-    title: '删除制品',
-    content: `删除 ${version} 的 ${artifact.filename || artifact.id}？`,
-    onConfirm: async () => {
-      try {
-        await api.removeArtifact(version, artifact.id)
-        toast.success('已删除制品')
-        await reload()
-      }
-      catch (error) {
-        toast.error((error as Error).message || '删除失败')
-      }
-    },
-  })
-}
 
 function artifactSummary(row: UpdateReleaseRecord) {
   const list = row.artifacts || []
@@ -415,50 +408,34 @@ onMounted(() => {
 
 <template>
 	<section class="ymcl-releases-page">
-		<YdPageHeader
+		<YdTablePageLayout
 			title="更新发包"
-			description="YMCL 自有更新平台：维护版本发布与制品（外部 URL 或站内文件）。发布时间与更新日志公开页自动生成。"
-			class="mb-0"
+			:show-search="false"
+			:actions="pageActions"
 		>
-			<YdButton type="primary" @click="openCreateRelease">
-				<YdIcon name="i-ri:add-line" />
-				新建发布
-			</YdButton>
-		</YdPageHeader>
-
-		<YdPageMain>
-			<YdCard content-class="ymcl-card-content">
-				<div class="ymcl-toolbar">
-					<p class="ymcl-muted">
-						公开 API 前缀：
-						<code>/api/plugins/ymcl-content/v1/update</code>
-						·
-						<YdButton size="sm" variant="ghost" @click="openChangelogIndex">
-							<YdIcon name="i-ri:file-text-line" />
-							打开更新日志公开页
-						</YdButton>
-					</p>
-					<YdButton type="primary" @click="openCreateRelease">
-						<YdIcon name="i-ri:add-line" />
-						新建发布
+			<template #page-title>
+				<p class="ymcl-muted ymcl-api-hint">
+					公开 API 前缀：<code>/api/plugins/ymcl-content/v1/update</code>
+					<YdButton size="sm" variant="ghost" @click="openChangelogIndex">
+						<YdIcon name="i-ri:file-text-line" />
+						打开更新日志公开页
 					</YdButton>
-				</div>
-				<YdLoadingOverlay :loading="loading"><YdResponsiveTable
-					table-root-class="max-w-full overflow-x-auto rounded-lg overflow-hidden"
+				</p>
+			</template>
 
+			<template #table>
+				<YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+					table-root-class="rounded-lg overflow-hidden"
+					table-class="min-w-[860px]"
+					border
+					stripe
+					column-visibility
+					:actions="rowActions"
 					:columns="columns"
 					:data="records"
 					row-key="version"
+					empty-text="暂无发布。先新建发布，再添加 updater / 安装包制品。"
 				>
-					<template #empty>
-						<div class="ymcl-empty">
-							<span class="ymcl-muted">暂无发布。先新建发布，再添加 updater / 安装包制品。</span>
-							<YdButton type="primary" @click="openCreateRelease">
-								<YdIcon name="i-ri:add-line" />
-								新建发布
-							</YdButton>
-						</div>
-					</template>
 					<template #cell-title="{ row }">
 						<span class="ymcl-break">{{ row.original.title || `YMCL ${row.original.version}` }}</span>
 					</template>
@@ -477,64 +454,13 @@ onMounted(() => {
 						<span>{{ artifactSummary(row.original) }}</span>
 					</template>
 					<template #cell-status="{ row }">
-						<div class="ymcl-row-actions">
-							<YdTag v-if="row.original.yanked" variant="outline">已撤回</YdTag>
-							<YdTag v-else-if="row.original.enabled === false" variant="outline">停用</YdTag>
-							<YdTag v-else variant="default">发布中</YdTag>
-						</div>
+						<span class="yd-status-tone" :data-tone="row.original.yanked || row.original.enabled === false ? 'neutral' : 'success'">
+							{{ row.original.yanked ? '已撤回' : row.original.enabled === false ? '停用' : '发布中' }}
+						</span>
 					</template>
-					<template #cell-operations="{ row }">
-						<div class="ymcl-row-actions">
-							<YdButton size="sm" variant="outline" @click="openEditRelease(row.original)">
-								<YdIcon name="i-ri:pencil-line" />
-								编辑
-							</YdButton>
-							<YdButton size="sm" variant="outline" @click="openArtifactEditor(row.original.version)">
-								<YdIcon name="i-ri:attachment-line" />
-								制品
-							</YdButton>
-							<YdButton size="sm" variant="outline" @click="openChangelog(row.original)">
-								<YdIcon name="i-ri:file-text-line" />
-								日志
-							</YdButton>
-							<YdButton size="sm" variant="outline" @click="toggleYank(row.original)">
-								{{ row.original.yanked ? '恢复' : '撤回' }}
-							</YdButton>
-							<YdButton
-								size="sm"
-								variant="destructive"
-								:disabled="saving"
-								@click="removeRelease(row.original)"
-							>
-								删除
-							</YdButton>
-						</div>
-						<div
-							v-if="row.original.artifacts?.length"
-							class="ymcl-artifact-list"
-						>
-							<div
-								v-for="artifact in row.original.artifacts"
-								:key="artifact.id"
-								class="ymcl-artifact-item"
-							>
-								<span class="ymcl-break">
-									{{ artifact.kind }} · {{ artifact.platform }}/{{ artifact.architecture }}
-									· {{ artifact.filename }}
-									· {{ artifact.hostedLocally ? '站内' : 'URL' }}
-								</span>
-								<YdButton size="sm" variant="ghost" @click="removeArtifact(row.original.version, artifact)">
-									移除
-								</YdButton>
-							</div>
-						</div>
-					</template>
-
-					<template #card="{ row }">
-						<YdCard class="w-full"><div class="flex flex-col gap-3"><div class="flex items-start justify-between gap-3"><strong>{{ row.title || `YMCL ${row.version}` }}</strong><YdTag :variant="row.channel === 'beta' ? 'outline' : 'default'">{{ row.channel === 'beta' ? '测试版' : '正式版' }}</YdTag></div><p class="ymcl-muted">版本 {{ row.version }} · {{ formatPublishedAt(row.publishedAt) }} · {{ artifactSummary(row) }}</p><div class="ymcl-row-actions"><YdButton size="sm" variant="outline" @click="openEditRelease(row)">编辑</YdButton><YdButton size="sm" variant="outline" @click="openArtifactEditor(row.version)">制品</YdButton><YdButton size="sm" variant="outline" @click="openChangelog(row)">日志</YdButton><YdButton size="sm" variant="outline" @click="toggleYank(row)">{{ row.yanked ? '恢复' : '撤回' }}</YdButton><YdButton size="sm" variant="destructive" :disabled="saving" @click="removeRelease(row)">删除</YdButton></div><div v-for="artifact in row.artifacts || []" :key="artifact.id" class="ymcl-artifact-item"><span class="ymcl-break">{{ artifact.kind }} · {{ artifact.platform }}/{{ artifact.architecture }} · {{ artifact.filename }}</span><YdButton size="sm" variant="ghost" @click="removeArtifact(row.version, artifact)">移除</YdButton></div></div></YdCard>
-					</template>
-				</YdResponsiveTable></YdLoadingOverlay>
-			</YdCard>
+				</YdResponsiveEnhancedTable></YdLoadingOverlay>
+			</template>
+		</YdTablePageLayout>
 
 			<YdModal
 				v-model="releaseModalOpen"
@@ -741,7 +667,6 @@ onMounted(() => {
 				</YdButton>
 			</template>
 			</YdModal>
-		</YdPageMain>
 	</section>
 </template>
 

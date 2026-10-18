@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { YdLoadingOverlay } from '@yudream/components'
-import type { TableColumn } from '@yudream/components'
+import type { ActionMenuItem, TableColumn } from '@yudream/components'
 import type { MaterialItemView } from '../types'
-import { YdButton, YdIcon, YdResponsiveTable, YdTag } from '@yudream/components'
+import { YdIcon, YdResponsiveEnhancedTable, YdTag } from '@yudream/components'
+import { computed, ref } from 'vue'
 import { formatSize, formatTime, TYPE_ICONS } from '../types'
 
 /**
@@ -39,8 +40,19 @@ const columns: TableColumn<MaterialItemView>[] = [
   { id: 'currentVersion', header: '版本', width: 76 },
   { id: 'size', header: '大小', width: 96 },
   { accessorKey: 'updatedAt', header: '更新时间', width: 168 },
-  { id: 'operation', header: '操作', width: 380 },
 ]
+
+/** 行操作统一收进操作菜单；readonly（他人物料）隐藏全部写操作 */
+const rowActions = computed<ActionMenuItem<MaterialItemView>[]>(() => [
+  { label: '版本', icon: 'morph:git-branch', onClick: row => emit('versions', row) },
+  { label: row => (isPreviewItem(row) ? '取消主文件' : '设为主文件'), icon: 'morph:star', visible: () => !props.readonly, onClick: (row) => { if (isPreviewItem(row)) { emit('clear-preview') } else { emit('set-preview', row) } } },
+  { label: '新版本', icon: 'morph:cloud-upload', visible: () => !props.readonly, onClick: row => emit('new-version', row) },
+  { label: '下载', icon: 'morph:download', onClick: row => emit('download', row) },
+  { label: '重命名', icon: 'morph:pencil', visible: () => !props.readonly, onClick: row => emit('rename', row) },
+  { label: '删除', icon: 'morph:trash-2', danger: true, visible: () => !props.readonly, onClick: row => emit('remove', row) },
+])
+
+const rowRef = computed(() => props.items[0])
 
 function typeIcon(item: MaterialItemView) {
   return TYPE_ICONS[item.type] || TYPE_ICONS.OTHER
@@ -52,14 +64,15 @@ function isPreviewItem(item: MaterialItemView) {
 </script>
 
 <template>
-  <YdLoadingOverlay :loading="props.loading"><YdResponsiveTable
-
+  <YdLoadingOverlay :loading="props.loading"><YdResponsiveEnhancedTable
     :columns="columns"
     :data="props.items"
     row-key="id"
-    table-root-class="max-w-full overflow-x-auto rounded-lg"
-    table-class="min-w-[960px]"
+    table-root-class="rounded-lg overflow-hidden"
+    table-class="min-w-[820px]"
     border stripe
+    column-visibility
+    :actions="rowActions"
     empty-text="暂无子物料"
   >
     <template #cell-name="{ row }">
@@ -77,35 +90,5 @@ function isPreviewItem(item: MaterialItemView) {
     <template #cell-currentVersion="{ row }">v{{ row.original.currentVersion }}</template>
     <template #cell-size="{ row }">{{ formatSize(row.original.size) }}</template>
     <template #cell-updatedAt="{ row }">{{ formatTime(row.original.updatedAt) }}</template>
-    <template #cell-operation="{ row }">
-      <div class="flex-center flex-wrap gap-2">
-        <YdButton size="sm" variant="outline" @click="emit('versions', row.original)"><YdIcon name="i-ri:git-branch-line" />版本</YdButton>
-        <YdButton v-if="!props.readonly && !isPreviewItem(row.original)" size="sm" variant="ghost" @click="emit('set-preview', row.original)"><YdIcon name="i-ri:star-line" />设为主文件</YdButton>
-        <YdButton v-else-if="!props.readonly" size="sm" variant="ghost" @click="emit('clear-preview')"><YdIcon name="i-ri:star-fill" />取消主文件</YdButton>
-        <YdButton v-if="!props.readonly" size="sm" variant="outline" @click="emit('new-version', row.original)"><YdIcon name="i-ri:upload-cloud-2-line" />新版本</YdButton>
-        <YdButton size="sm" variant="outline" @click="emit('download', row.original)"><YdIcon name="i-ri:download-line" />下载</YdButton>
-        <YdButton v-if="!props.readonly" size="sm" variant="outline" @click="emit('rename', row.original)"><YdIcon name="i-ri:edit-line" />重命名</YdButton>
-        <YdButton v-if="!props.readonly" size="sm" variant="destructive" @click="emit('remove', row.original)"><YdIcon name="i-ri:delete-bin-line" />删除</YdButton>
-      </div>
-    </template>
-    <template #card="{ row }">
-      <div class="flex flex-col gap-2 text-sm">
-        <div class="flex items-center justify-between gap-2">
-          <strong class="truncate">{{ row.name }}</strong>
-          <YdTag variant="secondary">{{ row.typeLabel }}</YdTag>
-        </div>
-        <div class="text-secondary-foreground/80">v{{ row.currentVersion }} · {{ formatSize(row.size) }} · {{ formatTime(row.updatedAt) }}</div>
-        <YdTag v-if="isPreviewItem(row)" variant="secondary">预览主文件</YdTag>
-        <div class="flex flex-wrap gap-2">
-          <YdButton size="sm" variant="outline" @click="emit('versions', row)">版本</YdButton>
-          <YdButton v-if="!props.readonly && !isPreviewItem(row)" size="sm" variant="ghost" @click="emit('set-preview', row)">设为主文件</YdButton>
-          <YdButton v-else-if="!props.readonly" size="sm" variant="ghost" @click="emit('clear-preview')">取消主文件</YdButton>
-          <YdButton v-if="!props.readonly" size="sm" variant="outline" @click="emit('new-version', row)">新版本</YdButton>
-          <YdButton size="sm" variant="outline" @click="emit('download', row)">下载</YdButton>
-          <YdButton v-if="!props.readonly" size="sm" variant="outline" @click="emit('rename', row)">重命名</YdButton>
-          <YdButton v-if="!props.readonly" size="sm" variant="destructive" @click="emit('remove', row)">删除</YdButton>
-        </div>
-      </div>
-    </template>
-  </YdResponsiveTable></YdLoadingOverlay>
+  </YdResponsiveEnhancedTable></YdLoadingOverlay>
 </template>

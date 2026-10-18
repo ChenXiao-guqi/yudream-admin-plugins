@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
-import type { TableColumn } from '@yudream/components'
+import type { ActionMenuItem, SearchConfig, SearchFieldConfig, SearchOptionsSource, StatusColumn, TableColumn, YdTablePageAction } from '@yudream/components'
 import type { TimelinePluginModel } from '../composables/useTimelinePlugin'
-import type { TimelineEventSummary } from '../types'
-import { YdButton, YdCard, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdSelect, YdTag, useYdModal } from '@yudream/components'
+import type { TimelineEventSummary, TimelineStatusFilter, TimelineTypeFilter } from '../types'
+import { YdButton, YdDynamicSearchForm, YdIcon, YdLoadingOverlay, YdPagination, YdResponsiveEnhancedTable, YdTablePageLayout, YdTag, useYdModal } from '@yudream/components'
 import { onMounted, ref } from 'vue'
 import CoverThumb from '../components/CoverThumb.vue'
 import EventEditorModal from '../components/EventEditorModal.vue'
@@ -27,14 +26,68 @@ const typeOptions = [
   ...EVENT_TYPE_OPTIONS.map(item => ({ label: item.label, value: item.value })),
 ]
 
+/** ControlType 是 components 内部的字符串枚举，桥接层只出类型，这里用字面量收敛一次 */
+type SearchFieldInput = Partial<Omit<SearchFieldConfig, 'controlType'>> & Pick<SearchFieldConfig, 'fieldName' | 'label'> & { controlType?: 'TEXT' | 'SELECT' | 'DATE_RANGE' | 'NUMBER_RANGE' | 'CHECKBOX' | 'RADIO' }
+
+function searchField(config: SearchFieldInput): SearchFieldConfig {
+  const { controlType = 'TEXT', order = 0, showWhenFolded = false, width = '200px', ...rest } = config
+  return { ...rest, fieldName: config.fieldName, label: config.label, controlType: controlType as SearchFieldConfig['controlType'], order, showWhenFolded, width }
+}
+
+const searchQuery = ref<Record<string, any>>({
+  keyword: model.adminFilters.keyword ?? '',
+  status: model.adminFilters.status ?? '',
+  type: model.adminFilters.type ?? '',
+})
+
+const searchConfig: SearchConfig = {
+  fields: [
+    searchField({ fieldName: 'keyword', label: '关键词', placeholder: '搜索标题、简述或时间文案', order: 1, showWhenFolded: true, width: '240px' }),
+    searchField({ fieldName: 'status', label: '状态', controlType: 'SELECT', order: 2, width: '160px' }),
+    searchField({ fieldName: 'type', label: '类型', controlType: 'SELECT', order: 3, width: '160px' }),
+  ],
+}
+
+const optionsSources: SearchOptionsSource[] = [
+  { id: 'statusOptions', loader: () => statusOptions },
+  { id: 'typeOptions', loader: () => typeOptions },
+]
+
+function applySearch() {
+  model.adminFilters.keyword = String(searchQuery.value.keyword ?? '')
+  model.adminFilters.status = String(searchQuery.value.status ?? '') as TimelineStatusFilter
+  model.adminFilters.type = String(searchQuery.value.type ?? '') as TimelineTypeFilter
+  applyFilters()
+}
+
 const columns: TableColumn<TimelineEventSummary>[] = [
   { accessorKey: 'eventDate', header: '事件时间', width: 130 },
   { id: 'title', header: '事件', minWidth: 260 },
   { accessorKey: 'imageCount', header: '图集', width: 70 },
   { accessorKey: 'sort', header: '排序', width: 70 },
-  { id: 'published', header: '状态', width: 90 },
   { accessorKey: 'updatedAt', header: '更新时间', width: 170 },
-  { id: 'operation', header: '操作', width: 230 },
+]
+
+/** 发布状态：语义色胶囊 */
+const publishedStatusColumn: StatusColumn<TimelineEventSummary> = {
+  statusKey: 'published',
+  header: '状态',
+  width: 100,
+  statusMap: {
+    'true': { label: '已发布', variant: 'default', tone: 'success' },
+    'false': { label: '草稿', variant: 'secondary', tone: 'neutral' },
+  },
+}
+
+/** 行操作统一收进操作菜单，删除保持确认流程 */
+const rowActions: ActionMenuItem<TimelineEventSummary>[] = [
+  { label: '编辑', icon: 'morph:pencil', onClick: row => openEdit(row) },
+  { label: row => (row.published ? '下架' : '发布'), icon: 'morph:eye', disabled: () => model.toggling, onClick: row => togglePublish(row) },
+  { label: '删除', icon: 'morph:trash-2', danger: true, onClick: row => confirmDelete(row) },
+]
+
+const pageActions: YdTablePageAction[] = [
+  { label: '新建事件', icon: 'morph:plus', onClick: openCreate },
 ]
 
 function applyFilters() {
@@ -83,137 +136,73 @@ onMounted(() => {
 </script>
 
 <template>
-  <YdPageHeader title="事件管理" description="维护大事记时间轴：新建与编辑事件、Markdown 图文详情、发布到公开站点">
-    <YdButton @click="openCreate">
-      <YdIcon name="i-ri:add-line" />新建事件
-    </YdButton>
-  </YdPageHeader>
-  <YdPageMain>
-    <YdSearchBar class="w-full">
-      <div class="tl-toolbar">
-        <YdInput
-          v-model="model.adminFilters.keyword"
-          placeholder="搜索标题、简述或时间文案"
-          clearable
-          @keydown.enter="applyFilters"
-          @clear="applyFilters"
-        />
-        <YdSelect v-model="model.adminFilters.status" :options="statusOptions" @change="applyFilters" />
-        <YdSelect v-model="model.adminFilters.type" :options="typeOptions" @change="applyFilters" />
-        <YdButton variant="outline" @click="applyFilters">
-          <YdIcon name="i-ri:search-line" />查询
-        </YdButton>
-      </div>
-    </YdSearchBar>
+  <YdTablePageLayout title="事件管理" :actions="pageActions">
+    <template #search="{ fold }">
+      <YdDynamicSearchForm
+        v-model="searchQuery"
+        :config="searchConfig"
+        :fold="fold"
+        :options-sources="optionsSources"
+        @search="applySearch"
+        @reset="applySearch"
+      />
+    </template>
 
-    <YdLoadingOverlay :loading="model.adminLoading"><YdResponsiveTable
-
-      :columns="columns"
-      :data="model.adminEvents"
-      row-key="id"
-      table-root-class="tl-table-scroll"
-      table-class="tl-table-w1000"
-      border
-      stripe
-      column-visibility
-      empty-text="暂无事件，点击右上角新建第一条大事记"
-    >
-      <template #cell-eventDate="{ row }">
-        <span>{{ formatEventDate(row.original.eventDate, row.original.dateLabel) }}</span>
-      </template>
-      <template #cell-title="{ row }">
-        <div class="tl-event-cell">
-          <CoverThumb
-            v-if="row.original.coverImage"
-            :src="coverThumb(row.original)"
-            :fallback-src="coverUrl(row.original)"
-            :alt="row.original.title"
-            img-class="tl-event-thumb"
-          />
-          <div class="tl-event-cell-text">
-            <span class="tl-event-cell-title" :title="row.original.title">
-              <YdTag :variant="eventTypeMeta(row.original.eventType).tagVariant" class="tl-event-type-tag">
-                {{ eventTypeMeta(row.original.eventType).label }}
-              </YdTag>
-              {{ row.original.title }}
-            </span>
-            <span v-if="row.original.summary" class="tl-event-cell-summary" :title="row.original.summary">{{ row.original.summary }}</span>
-          </div>
-        </div>
-      </template>
-      <template #cell-published="{ row }">
-        <YdTag :variant="row.original.published ? 'default' : 'outline'">
-          {{ row.original.published ? '已发布' : '草稿' }}
-        </YdTag>
-      </template>
-      <template #cell-updatedAt="{ row }">
-        {{ formatTime(row.original.updatedAt) }}
-      </template>
-      <template #cell-operation="{ row }">
-        <div class="flex-center gap-2">
-          <YdButton size="sm" variant="outline" @click="openEdit(row.original)">
-            编辑
-          </YdButton>
-          <YdButton size="sm" variant="outline" :disabled="model.toggling" @click="togglePublish(row.original)">
-            {{ row.original.published ? '下架' : '发布' }}
-          </YdButton>
-          <YdButton size="sm" variant="destructive" @click="confirmDelete(row.original)">
-            删除
-          </YdButton>
-        </div>
-      </template>
-      <template #card="{ row }">
-        <YdCard class="w-full">
-          <div class="tl-mobile-card">
-            <div class="tl-mobile-card-head">
+    <template #table>
+      <YdLoadingOverlay :loading="model.adminLoading">
+        <YdResponsiveEnhancedTable
+          :columns="columns"
+          :data="model.adminEvents"
+          row-key="id"
+          table-root-class="rounded-lg overflow-hidden"
+          table-class="min-w-[860px]"
+          border
+          stripe
+          column-visibility
+          :status-column="publishedStatusColumn"
+          :actions="rowActions"
+          empty-text="暂无事件，点击「新建事件」创建第一条大事记"
+        >
+          <template #cell-eventDate="{ row }">
+            <span>{{ formatEventDate(row.original.eventDate, row.original.dateLabel) }}</span>
+          </template>
+          <template #cell-title="{ row }">
+            <div class="tl-event-cell">
               <CoverThumb
-                v-if="row.coverImage"
-                :src="coverThumb(row)"
-                :fallback-src="coverUrl(row)"
-                :alt="row.title"
+                v-if="row.original.coverImage"
+                :src="coverThumb(row.original)"
+                :fallback-src="coverUrl(row.original)"
+                :alt="row.original.title"
                 img-class="tl-event-thumb"
               />
               <div class="tl-event-cell-text">
-                <span class="tl-event-cell-title">
-                  <YdTag :variant="eventTypeMeta(row.eventType).tagVariant" class="tl-event-type-tag">
-                    {{ eventTypeMeta(row.eventType).label }}
+                <span class="tl-event-cell-title" :title="row.original.title">
+                  <YdTag :variant="eventTypeMeta(row.original.eventType).tagVariant" class="tl-event-type-tag">
+                    {{ eventTypeMeta(row.original.eventType).label }}
                   </YdTag>
-                  {{ row.title }}
+                  {{ row.original.title }}
                 </span>
-                <span class="tl-event-cell-summary">{{ formatEventDate(row.eventDate, row.dateLabel) }}</span>
+                <span v-if="row.original.summary" class="tl-event-cell-summary" :title="row.original.summary">{{ row.original.summary }}</span>
               </div>
-              <YdTag :variant="row.published ? 'default' : 'outline'">
-                {{ row.published ? '已发布' : '草稿' }}
-              </YdTag>
             </div>
-            <div v-if="row.summary" class="tl-mobile-card-summary">
-              {{ row.summary }}
-            </div>
-            <div class="tl-mobile-card-actions">
-              <YdButton size="sm" variant="outline" @click="openEdit(row)">
-                编辑
-              </YdButton>
-              <YdButton size="sm" variant="outline" :disabled="model.toggling" @click="togglePublish(row)">
-                {{ row.published ? '下架' : '发布' }}
-              </YdButton>
-              <YdButton size="sm" variant="destructive" @click="confirmDelete(row)">
-                删除
-              </YdButton>
-            </div>
-          </div>
-        </YdCard>
-      </template>
-    </YdResponsiveTable></YdLoadingOverlay>
+          </template>
+          <template #cell-updatedAt="{ row }">
+            {{ formatTime(row.original.updatedAt) }}
+          </template>
+        </YdResponsiveEnhancedTable>
+      </YdLoadingOverlay>
+    </template>
 
-    <YdPagination
-      v-model:page="model.adminPager.page"
-      v-model:size="model.adminPager.size"
-      :total="model.adminPager.total"
-      class="mt-3"
-      @page-change="model.loadAdminEvents()"
-      @size-change="applyFilters"
-    />
+    <template #footer>
+      <YdPagination
+        v-model:page="model.adminPager.page"
+        v-model:size="model.adminPager.size"
+        :total="model.adminPager.total"
+        @page-change="model.loadAdminEvents()"
+        @size-change="applyFilters"
+      />
+    </template>
+  </YdTablePageLayout>
 
-    <EventEditorModal v-model:open="editorOpen" :event-id="editingId" :model="model" @saved="onSaved" />
-  </YdPageMain>
+  <EventEditorModal v-model:open="editorOpen" :event-id="editingId" :model="model" @saved="onSaved" />
 </template>

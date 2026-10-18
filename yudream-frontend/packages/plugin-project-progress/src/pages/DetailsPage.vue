@@ -1,11 +1,11 @@
 <script setup lang="ts">
 // yudream-self-chrome 页面自管页头与卡片
 import { YdLoadingOverlay, YdPageHeader, YdPageMain } from '@yudream/components'
-import type { TableColumn } from '@yudream/components'
+import type { ActionMenuItem, TableColumn } from '@yudream/components'
 import type { ProjectProgressModel } from '../composables/useProjectProgress'
 import type { ProjectWorkDetail } from '../types'
 
-import { YdButton, YdCard, YdInput, YdModal, YdNumberField, YdPagination, YdRadioGroup, YdResponsiveTable, YdSelect, YdTag, YdTextarea, useYdModal } from '@yudream/components'
+import { YdButton, YdInput, YdModal, YdNumberField, YdPagination, YdRadioGroup, YdSelect, YdTag, YdTextarea, useYdModal, YdResponsiveEnhancedTable } from '@yudream/components'
 import { computed, reactive, ref, watch } from 'vue'
 import EvidenceFileList from '../components/EvidenceFileList.vue'
 import PeoplePicker from '../components/PeoplePicker.vue'
@@ -47,16 +47,26 @@ function changeAssignmentMode(value: unknown) { props.model.detailForm.candidate
 function confirmDelete(detail: ProjectWorkDetail) {
   confirm.confirm({ title: '删除工作细节', content: `确认删除“${detail.title}”吗？删除后无法恢复。`, onConfirm: () => props.model.deleteDetail(detail) })
 }
+/** 行操作统一收进操作菜单，删除保持确认流程 */
+const rowActions: ActionMenuItem<unknown>[] = [
+  { label: '编辑', icon: 'morph:pencil', onClick: row => editDetail(row as never) },
+  { label: '发布', icon: 'morph:upload', disabled: row => Boolean((row as { published: boolean }).published), onClick: row => props.model.publish(row as never) },
+  { label: '随机分配', icon: 'morph:shuffle', visible: row => (row as { assignmentMode: string }).assignmentMode === 'RANDOM', onClick: row => props.model.randomAssign(row as never) },
+  { label: '删除', icon: 'morph:trash-2', danger: true, onClick: row => confirmDelete(row as never) },
+]
 </script>
 
 <template>
 
-  <YdPageHeader title="工作细节" class="mb-0" />
+  <YdPageHeader title="工作细节" class="mb-0">
+    <YdSelect :model-value="model.selectedProjectId" :options="projectOptions" placeholder="选择项目" class="pp-project-select" @update:model-value="selectProject" />
+    <YdButton variant="outline" :disabled="!model.details.length" @click="model.exportDetails">导出</YdButton>
+    <YdButton :disabled="!model.selectedProjectId" @click="createDetail">新建细节</YdButton>
+  </YdPageHeader>
   <YdPageMain>  <section class="pp-page">
-    <section class="pp-toolbar"><div><span>任务拆分</span><h2>工作细节</h2></div><div class="pp-actions"><YdSelect :model-value="model.selectedProjectId" :options="projectOptions" placeholder="选择项目" class="pp-project-select" @update:model-value="selectProject" /><YdButton variant="outline" :loading="model.loading" @click="model.load">刷新</YdButton><YdButton variant="outline" :disabled="!model.details.length" @click="model.exportDetails">导出</YdButton><YdButton :disabled="!model.selectedProjectId" @click="createDetail">新建细节</YdButton></div></section>
 
     <section class="pp-panel">
-      <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable  row-key="id" table-root-class="max-w-full overflow-x-auto rounded-lg" table-class="min-w-[1740px]" border stripe column-visibility :columns="columns" :data="pagedRows" empty-text="暂无工作细节">
+      <YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable row-key="id" table-root-class="rounded-lg overflow-hidden" table-class="min-w-[1480px]" border stripe column-visibility :actions="rowActions" :columns="columns" :data="pagedRows" empty-text="暂无工作细节">
         <template #cell-detail="{ row }"><strong>{{ row.original.title }}</strong><div class="pp-table-sub">{{ row.original.description || '暂无说明' }}</div><div v-if="row.original.acceptanceSummary || row.original.acceptanceFiles.length" class="pp-material-box mt-3"><p>{{ row.original.acceptanceSummary || '暂无验收说明' }}</p><EvidenceFileList :model="model" :files="row.original.acceptanceFiles" compact /></div></template>
         <template #cell-status="{ row }"><div class="pp-chip-list"><YdTag variant="secondary">{{ model.detailStatusLabel(row.original) }}</YdTag><YdTag v-if="row.original.pendingAcceptance">待验收</YdTag></div></template>
         <template #cell-assignment="{ row }">{{ model.assignmentLabel(row.original) }}</template>
@@ -64,34 +74,7 @@ function confirmDelete(detail: ProjectWorkDetail) {
         <template #cell-acceptors="{ row }"><div class="pp-chip-list"><YdTag v-if="!row.original.acceptorUserIds.length" variant="secondary">项目负责人</YdTag><YdTag v-for="user in model.userOptionsForIds(row.original.acceptorUserIds)" :key="user.id" variant="secondary">{{ model.userLabel(user) }}</YdTag></div></template>
         <template #cell-published="{ row }"><YdTag :variant="row.original.published ? 'default' : 'secondary'">{{ row.original.published ? '已发布' : '草稿' }}</YdTag></template>
         <template #cell-dueAt="{ row }">{{ model.formatTime(row.original.dueAt) }}</template>
-        <template #cell-operation="{ row }"><div class="pp-actions"><YdButton size="sm" variant="outline" @click="editDetail(row.original)">编辑</YdButton><YdButton size="sm" variant="outline" :disabled="row.original.published" @click="model.publish(row.original)">发布</YdButton><YdButton v-if="row.original.assignmentMode === 'RANDOM'" size="sm" variant="outline" @click="model.randomAssign(row.original)">随机分配</YdButton><YdButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</YdButton></div></template>
-        <template #card="{ row }">
-          <YdCard class="w-full">
-            <div class="flex flex-col gap-3">
-              <div class="flex items-center justify-between gap-2">
-                <span class="min-w-0 break-words text-base font-semibold">{{ row.title }}</span>
-                <div class="flex gap-1">
-                  <YdTag variant="secondary">{{ model.detailStatusLabel(row) }}</YdTag>
-                  <YdTag v-if="row.pendingAcceptance">待验收</YdTag>
-                  <YdTag :variant="row.published ? 'default' : 'secondary'">{{ row.published ? '已发布' : '草稿' }}</YdTag>
-                </div>
-              </div>
-              <div class="flex flex-col gap-1 text-sm">
-                <div v-if="row.description" class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">说明</span><span class="break-all">{{ row.description }}</span></div>
-                <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">分配方式</span><span class="break-all">{{ model.assignmentLabel(row) }}</span></div>
-                <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">负责人</span><span class="break-all">{{ model.userOptionsForIds(row.assigneeUserIds).map(user => model.userLabel(user)).join('、') || '未分配' }}</span></div>
-                <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">截止时间</span><span class="break-all">{{ model.formatTime(row.dueAt) }}</span></div>
-              </div>
-              <div class="flex flex-wrap gap-2 border-t pt-3">
-                <YdButton size="sm" variant="outline" @click="editDetail(row)">编辑</YdButton>
-                <YdButton size="sm" variant="outline" :disabled="row.published" @click="model.publish(row)">发布</YdButton>
-                <YdButton v-if="row.assignmentMode === 'RANDOM'" size="sm" variant="outline" @click="model.randomAssign(row)">随机分配</YdButton>
-                <YdButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</YdButton>
-              </div>
-            </div>
-          </YdCard>
-        </template>
-      </YdResponsiveTable></YdLoadingOverlay>
+      </YdResponsiveEnhancedTable></YdLoadingOverlay>
       <YdPagination v-model:page="pagination.page" v-model:size="pagination.size" :total="model.details.length" class="mt-3" />
     </section>
 

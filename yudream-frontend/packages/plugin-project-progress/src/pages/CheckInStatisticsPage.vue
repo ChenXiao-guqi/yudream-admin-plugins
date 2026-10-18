@@ -3,7 +3,7 @@
 import { YdLoadingOverlay, YdPageHeader, YdPageMain } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { ProjectProgressModel } from '../composables/useProjectProgress'
-import { YdButton, YdCard, YdPagination, YdResponsiveTable, YdSelect } from '@yudream/components'
+import { YdButton, YdPagination, YdSelect, YdResponsiveEnhancedTable } from '@yudream/components'
 import { computed, reactive, watch } from 'vue'
 
 interface MemberCheckInRow { userId: string, total: number, image: number, file: number, location: number, minecraft: number, lastAt: number }
@@ -59,25 +59,10 @@ async function selectProject(projectId: unknown) {
     <section class="pp-panel"><div class="pp-stat-grid"><article class="pp-stat-card"><span>打卡总数</span><strong>{{ model.checkIns.length }}</strong></article><article class="pp-stat-card"><span>参与成员</span><strong>{{ participantCount }}</strong></article><article v-for="item in typeCounts" :key="item.type" class="pp-stat-card"><span>{{ item.label }}</span><strong>{{ item.count }}</strong></article></div></section>
     <section class="pp-panel">
       <header class="pp-panel-head"><div><h3>成员打卡明细</h3><span>按打卡次数与最近打卡时间排序</span></div></header>
-      <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable  row-key="userId" table-root-class="max-w-full overflow-x-auto rounded-lg" table-class="min-w-[910px]" border stripe column-visibility :columns="columns" :data="pagedRows" empty-text="暂无打卡记录">
+      <YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable  row-key="userId" table-root-class="max-w-full overflow-x-auto rounded-lg" table-class="min-w-[910px]" border stripe column-visibility :columns="columns" :data="pagedRows" empty-text="暂无打卡记录">
         <template #cell-member="{ row }">{{ model.userLabel(model.usersById[row.original.userId]) }}</template>
         <template #cell-lastAt="{ row }">{{ model.formatTime(row.original.lastAt) }}</template>
-        <template #card="{ row }">
-          <YdCard class="w-full">
-            <div class="flex flex-col gap-3">
-              <div class="flex items-center justify-between gap-2">
-                <span class="min-w-0 break-words text-base font-semibold">{{ model.userLabel(model.usersById[row.userId]) }}</span>
-              </div>
-              <div class="flex flex-col gap-1 text-sm">
-                <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">总计</span><span class="break-all">{{ row.total }} 次</span></div>
-                <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">图片</span><span class="break-all">{{ row.image }}</span></div>
-                <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">文件</span><span class="break-all">{{ row.file }}</span></div>
-                <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">最近打卡</span><span class="break-all">{{ model.formatTime(row.lastAt) }}</span></div>
-              </div>
-            </div>
-          </YdCard>
-        </template>
-      </YdResponsiveTable></YdLoadingOverlay>
+</YdResponsiveEnhancedTable></YdLoadingOverlay>
       <YdPagination v-model:page="pagination.page" v-model:size="pagination.size" :total="memberRows.length" class="mt-3" />
     </section>
   </section>

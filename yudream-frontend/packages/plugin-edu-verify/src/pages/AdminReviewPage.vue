@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
-import type { TableColumn } from '@yudream/components'
+import type { ActionMenuItem, SearchConfig, SearchFieldConfig, SearchOptionsSource, TableColumn, YdTablePageAction } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { MaterialItem, VerificationRecord } from '../types'
-import { YdAlert, YdButton, YdCard, YdDrawer, YdIcon, YdInput, YdLabel, YdModal, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdSelect, YdTag, YdTextarea, useYdToast } from '@yudream/components'
+import { YdAlert, YdButton, YdDrawer, YdIcon, YdInput, YdLabel, YdLoadingOverlay, YdModal, YdDynamicSearchForm, YdPagination, YdResponsiveEnhancedTable, YdTablePageLayout, YdTextarea, useYdToast } from '@yudream/components'
 import { computed, onMounted, ref } from 'vue'
 import { createEduVerifyApi } from '../api/edu-verify-api'
 import { channelLabel, errorMessage, formatSize, formatTime, isImageMaterial, kindLabel, statusLabel, statusVariant } from '../types'
@@ -50,14 +49,71 @@ const channelOptions = [
   { label: '人工审核', value: 'MANUAL' },
 ]
 const columns: TableColumn<VerificationRecord>[] = [
-  { id: 'email', header: '申请人', minWidth: 220, fixed: 'left' },
+  { id: 'email', header: '申请人', minWidth: 220 },
   { accessorKey: 'channel', header: '渠道', width: 110 },
-  { accessorKey: 'status', header: '状态', width: 100 },
   { accessorKey: 'realName', header: '姓名', width: 110 },
   { accessorKey: 'schoolName', header: '学校', minWidth: 160 },
   { accessorKey: 'submittedAt', header: '提交时间', width: 170 },
-  { id: 'operation', header: '操作', width: 240, fixed: 'right' },
 ]
+
+/** 行操作统一收进操作菜单；通过/驳回/撤销按行状态出现并保持确认流程 */
+const rowActions: ActionMenuItem<VerificationRecord>[] = [
+  { label: '详情', icon: 'morph:eye', onClick: row => openDetail(row) },
+  { label: '通过', icon: 'morph:check', visible: row => row.status === 'PENDING' || row.status === 'REJECTED', disabled: () => acting.value, onClick: row => openApprove(row) },
+  { label: '驳回', icon: 'morph:ban', danger: true, visible: row => row.status === 'PENDING', disabled: () => acting.value, onClick: row => openReason(row, 'reject') },
+  { label: '撤销', icon: 'morph:undo', danger: true, visible: row => row.status === 'PASSED' && !row.userId, disabled: () => acting.value, onClick: row => openReason(row, 'revoke') },
+]
+
+const pageActions: YdTablePageAction[] = [
+  { label: '刷新', icon: 'morph:refresh', disabled: loading.value, onClick: () => load() },
+]
+
+/** ControlType 是 components 内部的字符串枚举，桥接层只出类型，这里用字面量收敛一次 */
+type SearchFieldInput = Partial<Omit<SearchFieldConfig, 'controlType'>> & Pick<SearchFieldConfig, 'fieldName' | 'label'> & { controlType?: 'TEXT' | 'SELECT' | 'DATE_RANGE' | 'NUMBER_RANGE' | 'CHECKBOX' | 'RADIO' }
+
+function searchField(config: SearchFieldInput): SearchFieldConfig {
+  const { controlType = 'TEXT', order = 0, showWhenFolded = false, width = '200px', ...rest } = config
+  return { ...rest, fieldName: config.fieldName, label: config.label, controlType: controlType as SearchFieldConfig['controlType'], order, showWhenFolded, width }
+}
+
+const searchQuery = ref<Record<string, any>>({ keyword: keyword.value, status: status.value, channel: channel.value })
+
+const searchConfig: SearchConfig = {
+  fields: [
+    searchField({ fieldName: 'keyword', label: '关键词', placeholder: '邮箱 / 姓名 / 学校', order: 1, showWhenFolded: true, width: '240px' }),
+    searchField({ fieldName: 'status', label: '状态', controlType: 'SELECT', order: 2, width: '200px' }),
+    searchField({ fieldName: 'channel', label: '渠道', controlType: 'SELECT', order: 3, width: '180px' }),
+  ],
+}
+
+const optionsSources: SearchOptionsSource[] = [
+  { id: 'statusOptions', loader: () => statusOptions },
+  { id: 'channelOptions', loader: () => channelOptions },
+]
+
+function applySearch() {
+  keyword.value = String(searchQuery.value.keyword ?? '')
+  status.value = String(searchQuery.value.status ?? '')
+  channel.value = String(searchQuery.value.channel ?? '')
+  search()
+}
+
+function resetSearch() {
+  keyword.value = ''
+  status.value = ''
+  channel.value = ''
+  searchQuery.value = { keyword: '', status: '', channel: '' }
+  search()
+}
+
+/** 状态语义色：通过绿、待处理橙、拒绝/撤销红、过期与待邮灰 */
+function statusTone(status: string): 'info' | 'success' | 'warning' | 'danger' | 'neutral' {
+  if (status === 'PASSED') return 'success'
+  if (status === 'PENDING') return 'warning'
+  if (status === 'REJECTED' || status === 'REVOKED') return 'danger'
+  if (status === 'PENDING_MAIL') return 'info'
+  return 'neutral'
+}
 
 const reasonTitle = computed(() => reasonAction.value === 'reject' ? '驳回认证' : '撤销认证')
 
@@ -211,37 +267,33 @@ onMounted(load)
 
 <template>
   <section class="ev-page">
-    <YdPageHeader title="认证审核" :description="`共 ${total} 条认证记录`">
-      <YdButton variant="outline" :loading="loading" @click="load">
-        <YdIcon name="i-ri:refresh-line" />
-        刷新
-      </YdButton>
-    </YdPageHeader>
+    <YdTablePageLayout title="认证审核" :actions="pageActions">
+      <template #stats>
+        <YdAlert v-if="error" variant="destructive" title="加载失败" :description="error" />
+      </template>
 
-    <YdPageMain>
-      <YdAlert v-if="error" variant="destructive" title="加载失败" :description="error" />
-      <YdSearchBar class="w-full">
-        <div class="ev-toolbar">
-          <YdInput v-model="keyword" placeholder="邮箱 / 姓名 / 学校" clearable @keydown.enter="search" @clear="search" />
-          <YdSelect v-model="status" :options="statusOptions" @change="search" />
-          <YdSelect v-model="channel" :options="channelOptions" @change="search" />
-          <YdButton variant="outline" @click="search">
-            <YdIcon name="i-ri:search-line" />
-            查询
-          </YdButton>
-        </div>
-      </YdSearchBar>
+      <template #search="{ fold }">
+        <YdDynamicSearchForm
+          v-model="searchQuery"
+          :config="searchConfig"
+          :fold="fold"
+          :options-sources="optionsSources"
+          @search="applySearch"
+          @reset="resetSearch"
+        />
+      </template>
 
-      <YdLoadingOverlay :loading="loading"><YdResponsiveTable
-
+      <template #table>
+      <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
         :columns="columns"
         :data="records"
         row-key="id"
-        table-root-class="ev-table-scroll rounded-lg overflow-hidden"
-        table-class="ev-table-w1080"
+        table-root-class="rounded-lg overflow-hidden"
+        table-class="min-w-[900px]"
         border
         stripe
         column-visibility
+        :actions="rowActions"
         empty-text="暂无认证记录"
       >
         <template #cell-email="{ row }">
@@ -254,77 +306,27 @@ onMounted(load)
           {{ channelLabel(row.original.channel, row.original.channelName) }}
         </template>
         <template #cell-status="{ row }">
-          <YdTag :variant="statusVariant(row.original.status)">
+          <span class="yd-status-tone" :data-tone="statusTone(row.original.status)">
             {{ statusLabel(row.original.status, row.original.statusName) }}
-          </YdTag>
+          </span>
         </template>
         <template #cell-realName="{ row }">{{ row.original.realName || '-' }}</template>
         <template #cell-schoolName="{ row }">{{ row.original.schoolName || '-' }}</template>
         <template #cell-submittedAt="{ row }">{{ formatTime(row.original.submittedAt) }}</template>
-        <template #cell-operation="{ row }">
-          <div class="ev-row-actions">
-            <YdButton size="sm" variant="outline" @click="openDetail(row.original)">详情</YdButton>
-            <YdButton
-              v-if="row.original.status === 'PENDING' || row.original.status === 'REJECTED'"
-              size="sm"
-              :disabled="acting"
-              @click="openApprove(row.original)"
-            >
-              通过
-            </YdButton>
-            <YdButton
-              v-if="row.original.status === 'PENDING'"
-              size="sm"
-              variant="destructive"
-              :disabled="acting"
-              @click="openReason(row.original, 'reject')"
-            >
-              驳回
-            </YdButton>
-            <YdButton
-              v-if="row.original.status === 'PASSED' && !row.original.userId"
-              size="sm"
-              variant="destructive"
-              :disabled="acting"
-              @click="openReason(row.original, 'revoke')"
-            >
-              撤销
-            </YdButton>
-          </div>
-        </template>
-        <template #card="{ row }">
-          <YdCard class="w-full">
-            <div class="ev-record-card">
-              <div class="ev-record-head">
-                <div class="ev-record-title">
-                  <YdTag :variant="statusVariant(row.status)">{{ statusLabel(row.status, row.statusName) }}</YdTag>
-                  <strong>{{ row.email || '-' }}</strong>
-                </div>
-                <span class="ev-record-meta">{{ channelLabel(row.channel, row.channelName) }}</span>
-              </div>
-              <div class="ev-muted">{{ row.realName || '-' }} · {{ row.schoolName || '-' }}</div>
-              <div class="ev-record-meta">提交于 {{ formatTime(row.submittedAt) }}</div>
-              <div class="ev-actions ev-actions-end">
-                <YdButton size="sm" variant="outline" @click="openDetail(row)">详情</YdButton>
-                <YdButton v-if="row.status === 'PENDING' || row.status === 'REJECTED'" size="sm" :disabled="acting" @click="openApprove(row)">通过</YdButton>
-                <YdButton v-if="row.status === 'PENDING'" size="sm" variant="destructive" :disabled="acting" @click="openReason(row, 'reject')">驳回</YdButton>
-                <YdButton v-if="row.status === 'PASSED'" size="sm" variant="destructive" :disabled="acting" @click="openReason(row, 'revoke')">撤销</YdButton>
-              </div>
-            </div>
-          </YdCard>
-        </template>
-      </YdResponsiveTable></YdLoadingOverlay>
+      </YdResponsiveEnhancedTable></YdLoadingOverlay>
+      </template>
 
-      <YdPagination
-        v-model:page="page"
-        v-model:size="size"
-        :total="total"
-        :sizes="pageSizes"
-        class="mt-3"
-        @page-change="load"
-        @size-change="search"
-      />
-    </YdPageMain>
+      <template #footer>
+        <YdPagination
+          v-model:page="page"
+          v-model:size="size"
+          :total="total"
+          :sizes="pageSizes"
+          @page-change="load"
+          @size-change="search"
+        />
+      </template>
+    </YdTablePageLayout>
 
     <YdDrawer
       v-model="drawerOpen"

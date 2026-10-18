@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { YdLoadingOverlay } from '@yudream/components'
-import type { TableColumn } from '@yudream/components'
+import type { ActionMenuItem, TableColumn } from '@yudream/components'
 import type { MaterialPluginModel } from '../composables/useMaterialPlugin'
 import type { MaterialItemView, MaterialSummary, PreviewInfo } from '../types'
-import { YdButton, YdDrawer, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdSearchBar, YdSelect, YdResponsiveTable, YdCheckbox, YdTag, useYdModal } from '@yudream/components'
+import { YdButton, YdDrawer, YdIcon, YdInput, YdListToolbar, YdModal, YdPageHeader, YdPageMain, YdPagination, YdSelect, YdResponsiveEnhancedTable, YdCheckbox, YdTag, useYdModal } from '@yudream/components'
 import { onMounted, ref, watch } from 'vue'
 import CategoryPicker from '../components/CategoryPicker.vue'
 import EditMaterialModal from '../components/EditMaterialModal.vue'
@@ -166,6 +166,18 @@ function previewItem(payload: { item: MaterialItemView, version: number }) {
 }
 
 /** 组合物料没有主文件，主文件预览/下载/新版本对它无意义，只在有主文件时开放。 */
+/** 行操作统一收进操作菜单，危险操作保持确认流程 */
+const rowActions: ActionMenuItem<MaterialSummary>[] = [
+  { label: '预览', icon: 'morph:eye', onClick: row => openPreview(row) },
+  { label: '子物料', icon: 'morph:layers', onClick: row => openItems(row) },
+  { label: '编辑', icon: 'morph:pencil', onClick: row => openEdit(row) },
+  { label: '新版本', icon: 'morph:cloud-upload', visible: row => hasMainFile(row), onClick: row => openNewVersion(row) },
+  { label: '分享', icon: 'morph:share', visible: row => hasMainFile(row), onClick: row => openShare(row) },
+  { label: '下载', icon: 'morph:download', visible: row => hasMainFile(row), onClick: row => model.adminDownload(row) },
+  { label: row => (row.status !== 'ARCHIVED' ? '归档' : '恢复'), icon: 'morph:archive', onClick: row => (row.status !== 'ARCHIVED' ? confirmArchive(row) : model.adminSetStatus(row, 'ACTIVE')) },
+  { label: '删除', icon: 'morph:trash-2', danger: true, onClick: row => confirmDelete(row) },
+]
+
 function hasMainFile(row: MaterialSummary) {
   return !isBundle(row)
 }
@@ -259,30 +271,36 @@ onMounted(() => {
   <YdPageHeader title="物料管理" description="跨用户查看全部物料，支持编辑、代传新版本、分享、归档/恢复、删除与批量操作" />
   <YdPageMain>
     <!-- YdResponsiveTable 的事件会落到包装 div 上无法透传（selectionChange 收不到），需要勾选事件的表格直接用 FaTable -->
-    <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable v-model:row-selection="rowSelection"
-
+    <YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable v-model:row-selection="rowSelection"
       :columns="columns"
       :data="model.adminList"
       row-key="id"
       selectable
       multiple
-      table-root-class="max-w-full overflow-x-auto rounded-lg"
-      table-class="min-w-[1400px]"
+      table-root-class="rounded-lg overflow-hidden"
+      table-class="min-w-[1240px]"
       border stripe column-visibility
+      :actions="rowActions"
       empty-text="暂无物料"
       @selection-change="onSelectionChange"
     >
       <template #toolbar>
-        <YdSearchBar class="w-full">
-          <div class="material-filter-bar">
-            <YdInput v-model="model.adminFilters.keyword" placeholder="搜索名称或标签" clearable @keydown.enter="model.applyAdminFilters" @clear="model.applyAdminFilters" />
+        <YdListToolbar
+          v-model:keyword="model.adminFilters.keyword"
+          placeholder="搜索名称或标签"
+          @search="model.applyAdminFilters"
+          @clear="model.applyAdminFilters"
+        >
+          <template #filters>
             <YdInput v-model="model.adminFilters.owner" placeholder="归属用户（昵称或 ID）" clearable @keydown.enter="model.applyAdminFilters" @clear="model.applyAdminFilters" />
             <YdSelect v-model="model.adminFilters.type" :options="MATERIAL_TYPES" @change="model.applyAdminFilters" />
             <CategoryPicker v-model="model.adminFilters.categoryId" :categories="model.categories" placeholder="全部分类" @update:model-value="model.applyAdminFilters" />
             <YdSelect v-model="model.adminFilters.status" :options="statusOptions" @change="model.applyAdminFilters" />
-            <YdButton variant="outline" @click="model.applyAdminFilters"><YdIcon name="i-ri:search-line" />查询</YdButton>
-          </div>
-        </YdSearchBar>
+          </template>
+          <template #actions>
+            <YdButton variant="outline" @click="model.applyAdminFilters">查询</YdButton>
+          </template>
+        </YdListToolbar>
         <div v-if="selectedRows.length" class="mt-2 flex flex-wrap items-center gap-2">
           <span class="text-sm text-secondary-foreground/70">已选 {{ selectedRows.length }} 项</span>
           <YdButton size="sm" variant="outline" @click="openBatchCategory"><YdIcon name="i-ri:folder-transfer-line" />移动分组</YdButton>
@@ -310,26 +328,10 @@ onMounted(() => {
         <span v-else>{{ row.original.itemCount }} 项</span>
       </template>
       <template #cell-status="{ row }">
-        <YdTag :variant="row.original.status === 'ARCHIVED' ? 'outline' : 'default'">{{ row.original.status === 'ARCHIVED' ? '已归档' : '正常' }}</YdTag>
+        <span class="yd-status-tone" :data-tone="row.original.status === 'ARCHIVED' ? 'neutral' : 'success'">{{ row.original.status === 'ARCHIVED' ? '已归档' : '正常' }}</span>
       </template>
       <template #cell-updatedAt="{ row }">{{ formatTime(row.original.updatedAt) }}</template>
-      <template #cell-operation="{ row }">
-        <div class="flex-center flex-wrap gap-2">
-          <YdButton size="sm" variant="outline" @click="openPreview(row.original)"><YdIcon name="i-ri:eye-line" />预览</YdButton>
-          <YdButton size="sm" variant="outline" @click="openItems(row.original)"><YdIcon name="i-ri:stack-line" />子物料</YdButton>
-          <YdButton size="sm" variant="outline" @click="openEdit(row.original)"><YdIcon name="i-ri:edit-line" />编辑</YdButton>
-          <YdButton v-if="hasMainFile(row.original)" size="sm" variant="outline" @click="openNewVersion(row.original)"><YdIcon name="i-ri:upload-cloud-2-line" />新版本</YdButton>
-          <YdButton v-if="hasMainFile(row.original)" size="sm" variant="outline" @click="openShare(row.original)"><YdIcon name="i-ri:share-forward-line" />分享</YdButton>
-          <YdButton v-if="hasMainFile(row.original)" size="sm" variant="outline" @click="model.adminDownload(row.original)"><YdIcon name="i-ri:download-line" />下载</YdButton>
-          <YdButton v-if="row.original.status !== 'ARCHIVED'" size="sm" variant="outline" @click="confirmArchive(row.original)">归档</YdButton>
-          <YdButton v-else size="sm" variant="outline" @click="model.adminSetStatus(row.original, 'ACTIVE')">恢复</YdButton>
-          <YdButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</YdButton>
-        </div>
-      </template>
-      <template #card="{ row, selected, selectDisabled, toggleSelected }">
-        <YdCard class="w-full"><div class="flex flex-col gap-3"><div class="flex items-start gap-2"><YdCheckbox :model-value="selected" :disabled="selectDisabled" @change="value => toggleSelected(value === true)" /><strong class="min-w-0 break-words">{{ row.name }}</strong></div><div class="flex flex-wrap items-center gap-2"><YdTag variant="secondary">{{ hasMainFile(row) ? row.typeLabel : '组合物料' }}</YdTag><YdTag :variant="row.status === 'ARCHIVED' ? 'outline' : 'default'">{{ row.status === 'ARCHIVED' ? '已归档' : '正常' }}</YdTag><span>{{ row.ownerName || row.ownerId }}</span></div><div class="grid gap-1 text-sm"><span>分类：{{ row.categoryName || '-' }}</span><span>大小：{{ hasMainFile(row) ? formatSize(row.size) : '-' }}</span><span>版本：{{ hasMainFile(row) ? 'v' + row.currentVersion : row.itemCount + ' 项' }}</span><span>更新时间：{{ formatTime(row.updatedAt) }}</span></div><div class="flex flex-wrap gap-2"><YdButton size="sm" variant="outline" @click="openPreview(row)">预览</YdButton><YdButton size="sm" variant="outline" @click="openItems(row)">子物料</YdButton><YdButton size="sm" variant="outline" @click="openEdit(row)">编辑</YdButton><YdButton v-if="hasMainFile(row)" size="sm" variant="outline" @click="openNewVersion(row)">新版本</YdButton><YdButton v-if="hasMainFile(row)" size="sm" variant="outline" @click="openShare(row)">分享</YdButton><YdButton v-if="hasMainFile(row)" size="sm" variant="outline" @click="model.adminDownload(row)">下载</YdButton><YdButton v-if="row.status !== 'ARCHIVED'" size="sm" variant="outline" @click="confirmArchive(row)">归档</YdButton><YdButton v-else size="sm" variant="outline" @click="model.adminSetStatus(row, 'ACTIVE')">恢复</YdButton><YdButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</YdButton></div></div></YdCard>
-      </template>
-    </YdResponsiveTable></YdLoadingOverlay>
+    </YdResponsiveEnhancedTable></YdLoadingOverlay>
     <YdPagination
       v-model:page="model.adminPager.page"
       v-model:size="model.adminPager.size"

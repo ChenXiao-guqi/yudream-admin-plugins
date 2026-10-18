@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
-import type { TableColumn } from '@yudream/components'
+import type { ActionMenuItem, TableColumn, YdTablePageAction } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { DomainRecord } from '../types'
-import { YdAlert, YdButton, YdIcon, YdInput, YdLabel, YdModal, YdPageHeader, YdPageMain, YdResponsiveTable, YdSwitch, useYdModal, useYdToast } from '@yudream/components'
+import { YdAlert, YdButton, YdForm, YdFormItem, YdIcon, YdInput, YdLoadingOverlay, YdModal, YdResponsiveEnhancedTable, YdSwitch, YdTablePageLayout, useYdModal, useYdToast } from '@yudream/components'
 import { onMounted, ref } from 'vue'
 import { createEduVerifyApi } from '../api/edu-verify-api'
 import { errorMessage, formatTime } from '../types'
@@ -25,13 +24,21 @@ const enabled = ref(true)
 const source = ref('CUSTOM')
 
 const columns: TableColumn<DomainRecord>[] = [
-  { accessorKey: 'domain', header: '域名', minWidth: 220, fixed: 'left' },
+  { accessorKey: 'domain', header: '域名', minWidth: 220 },
   { accessorKey: 'chineseName', header: '中文校名', minWidth: 160 },
-  { accessorKey: 'englishName', header: '英文校名', minWidth: 240 },
+  { accessorKey: 'englishName', header: '英文校名', minWidth: 240, defaultHidden: true },
   { id: 'enabled', header: '启用', width: 90 },
   { accessorKey: 'source', header: '来源', width: 120 },
-  { accessorKey: 'createdAt', header: '创建时间', width: 180 },
-  { id: 'operation', header: '操作', width: 180 },
+  { accessorKey: 'createdAt', header: '创建时间', width: 180, defaultHidden: true },
+]
+
+/** 行操作统一收进操作菜单，删除保持确认流程 */
+const rowActions: ActionMenuItem<DomainRecord>[] = [
+  { label: '删除', icon: 'morph:trash-2', danger: true, onClick: row => remove(row) },
+]
+
+const pageActions: YdTablePageAction[] = [
+  { label: '新增域名', icon: 'morph:plus', onClick: openCreate },
 ]
 
 async function load() {
@@ -120,73 +127,57 @@ onMounted(load)
 
 <template>
   <section class="ev-page">
-    <YdPageHeader title="邮箱域名" description="教育邮箱认证仅接受白名单中的高校域名。默认包含 edu.cn。">
-      <YdButton @click="openCreate">
-        <YdIcon name="i-ri:add-line" />
-        新增域名
-      </YdButton>
-    </YdPageHeader>
-
-    <YdPageMain>
-      <YdAlert v-if="error" variant="destructive" title="加载失败" :description="error" />
-      <YdLoadingOverlay :loading="loading"><YdResponsiveTable
-
-        :columns="columns"
-        :data="rows"
-        row-key="domain"
-        table-root-class="ev-table-scroll rounded-lg overflow-hidden"
-        table-class="ev-table-w720"
-        border
-        stripe
-        empty-text="还没有域名白名单"
-      >
-        <template #cell-enabled="{ row }">
-          <YdSwitch :model-value="row.original.enabled" @update:model-value="value => toggle(row.original, Boolean(value))" />
-        </template>
-        <template #cell-createdAt="{ row }">{{ formatTime(row.original.createdAt) }}</template>
-        <template #cell-operation="{ row }">
-          <div class="ev-row-actions">
-            <YdButton size="sm" variant="destructive" @click="remove(row.original)">删除</YdButton>
-          </div>
-        </template>
-        <template #card="{ row }">
-          <div class="ev-record-card">
-            <div class="ev-record-head">
-              <strong>{{ row.domain }}</strong>
-              <YdSwitch :model-value="row.enabled" @update:model-value="value => toggle(row, Boolean(value))" />
-            </div>
-            <div class="ev-muted">{{ row.chineseName || '未设置中文校名' }}<span v-if="row.englishName"> · {{ row.englishName }}</span></div>
-            <div class="ev-muted">{{ row.source || 'CUSTOM' }} · {{ formatTime(row.createdAt) }}</div>
-            <div class="ev-actions ev-actions-end">
-              <YdButton size="sm" variant="destructive" @click="remove(row)">删除</YdButton>
-            </div>
-          </div>
-        </template>
-      </YdResponsiveTable></YdLoadingOverlay>
-    </YdPageMain>
+    <YdTablePageLayout title="邮箱域名" :show-search="false" :actions="pageActions">
+      <template #table>
+        <YdAlert v-if="error" class="mb-3" variant="destructive" title="加载失败" :description="error" />
+        <YdLoadingOverlay :loading="loading">
+          <YdResponsiveEnhancedTable
+            :columns="columns"
+            :data="rows"
+            row-key="domain"
+            table-root-class="rounded-lg overflow-hidden"
+            table-class="min-w-[720px]"
+            border
+            stripe
+            column-visibility
+            :actions="rowActions"
+            empty-text="还没有域名白名单"
+          >
+            <template #cell-enabled="{ row }">
+              <YdSwitch :model-value="row.original.enabled" @update:model-value="value => toggle(row.original, Boolean(value))" />
+            </template>
+            <template #cell-createdAt="{ row }">{{ formatTime(row.original.createdAt) }}</template>
+          </YdResponsiveEnhancedTable>
+        </YdLoadingOverlay>
+      </template>
+    </YdTablePageLayout>
 
     <YdModal v-model="open" title="新增域名" :confirm-button-loading="saving" :before-close="handleSaveClose">
-      <div class="ev-form">
-        <YdLabel label="域名" class="ev-field">
-          <YdInput v-model="domain" class="w-full" maxlength="80" placeholder="如 edu.cn 或 stu.pku.edu.cn" />
-        </YdLabel>
-        <YdLabel label="中文校名" class="ev-field">
-          <YdInput v-model="chineseName" class="w-full" maxlength="80" placeholder="如：西南科技大学" />
-        </YdLabel>
-        <YdLabel label="英文校名" class="ev-field">
-          <YdInput v-model="englishName" class="w-full" maxlength="160" placeholder="如：Southwest University of Science and Technology" />
-        </YdLabel>
-        <YdLabel label="来源" class="ev-field">
-          <YdInput v-model="source" class="w-full" maxlength="40" placeholder="CUSTOM" />
-        </YdLabel>
-        <div class="ev-switch-row">
-          <YdSwitch v-model="enabled" />
-          <div class="ev-switch-copy">
-            <strong>{{ enabled ? '立即启用' : '先保存为停用' }}</strong>
-            <small>停用后该域名邮箱无法通过教育邮箱认证。</small>
-          </div>
+      <YdForm :model="{ domain, chineseName, englishName, source }" layout="vertical">
+        <div class="flex flex-col gap-4">
+          <YdFormItem label="域名" required>
+            <YdInput v-model="domain" maxlength="80" placeholder="如 edu.cn 或 stu.pku.edu.cn" />
+          </YdFormItem>
+          <YdFormItem label="中文校名">
+            <YdInput v-model="chineseName" maxlength="80" placeholder="如：西南科技大学" />
+          </YdFormItem>
+          <YdFormItem label="英文校名">
+            <YdInput v-model="englishName" maxlength="160" placeholder="如：Southwest University of Science and Technology" />
+          </YdFormItem>
+          <YdFormItem label="来源">
+            <YdInput v-model="source" maxlength="40" placeholder="CUSTOM" />
+          </YdFormItem>
+          <YdFormItem label="启用状态">
+            <div class="flex items-center gap-3">
+              <YdSwitch v-model="enabled" />
+              <div class="text-sm">
+                <strong>{{ enabled ? '立即启用' : '先保存为停用' }}</strong>
+                <p class="text-muted-foreground">停用后该域名邮箱无法通过教育邮箱认证。</p>
+              </div>
+            </div>
+          </YdFormItem>
         </div>
-      </div>
+      </YdForm>
     </YdModal>
   </section>
 </template>

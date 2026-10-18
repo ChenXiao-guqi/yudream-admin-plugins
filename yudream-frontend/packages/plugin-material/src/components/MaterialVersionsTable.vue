@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { YdLoadingOverlay } from '@yudream/components'
-import type { TableColumn } from '@yudream/components'
+import type { ActionMenuItem, TableColumn } from '@yudream/components'
 import type { VersionView } from '../types'
-import { YdButton, YdResponsiveTable, YdTag } from '@yudream/components'
+import { YdButton, YdResponsiveEnhancedTable, YdTag } from '@yudream/components'
 import { formatSize, formatTime } from '../types'
 
 /**
@@ -33,7 +33,14 @@ const columns: TableColumn<VersionView>[] = [
   { accessorKey: 'note', header: '备注', minWidth: 140 },
   { accessorKey: 'uploaderName', header: '上传者', width: 110 },
   { accessorKey: 'createdAt', header: '上传时间', width: 170 },
-  { id: 'operation', header: '操作', width: 250 },
+]
+
+/** 行操作统一收进操作菜单；canWrite=false（他人物料）隐藏回滚与删除 */
+const rowActions: ActionMenuItem<VersionView>[] = [
+  { label: '预览', icon: 'morph:eye', onClick: row => emit('preview', row) },
+  { label: '下载', icon: 'morph:download', onClick: row => emit('download', row) },
+  { label: '回滚到此', icon: 'morph:history', visible: row => Boolean(props.canWrite) && !row.current, onClick: row => emit('restore', row) },
+  { label: '删除', icon: 'morph:trash-2', danger: true, visible: row => Boolean(props.canWrite) && !row.current, onClick: row => emit('remove', row) },
 ]
 </script>
 
@@ -45,14 +52,15 @@ const columns: TableColumn<VersionView>[] = [
       <YdButton v-if="props.canUpload" size="sm" variant="outline" @click="emit('upload')">上传新版本</YdButton>
     </div>
   </div>
-  <YdLoadingOverlay :loading="props.loading"><YdResponsiveTable
-
+  <YdLoadingOverlay :loading="props.loading"><YdResponsiveEnhancedTable
     :columns="columns"
     :data="props.versions"
     row-key="version"
-    table-root-class="max-w-full overflow-x-auto rounded-lg"
-    table-class="min-w-[980px]"
+    table-root-class="rounded-lg overflow-hidden"
+    table-class="min-w-[820px]"
     border stripe
+    column-visibility
+    :actions="rowActions"
     empty-text="暂无版本"
   >
     <template #cell-version="{ row }">
@@ -64,30 +72,5 @@ const columns: TableColumn<VersionView>[] = [
     <template #cell-note="{ row }">{{ row.original.note || '-' }}</template>
     <template #cell-uploaderName="{ row }">{{ row.original.uploaderName || row.original.uploaderId }}</template>
     <template #cell-createdAt="{ row }">{{ formatTime(row.original.createdAt) }}</template>
-    <template #cell-operation="{ row }">
-      <div class="flex-center gap-2">
-        <YdButton size="sm" variant="outline" @click="emit('preview', row.original)">预览</YdButton>
-        <YdButton size="sm" variant="outline" @click="emit('download', row.original)">下载</YdButton>
-        <YdButton v-if="props.canWrite && !row.original.current" size="sm" variant="outline" @click="emit('restore', row.original)">回滚到此</YdButton>
-        <YdButton v-if="props.canWrite && !row.original.current" size="sm" variant="destructive" @click="emit('remove', row.original)">删除</YdButton>
-      </div>
-    </template>
-    <template #card="{ row }">
-      <div class="flex flex-col gap-2 text-sm">
-        <div class="flex items-center justify-between gap-2">
-          <strong>v{{ row.version }}</strong>
-          <YdTag v-if="row.current" variant="secondary">当前</YdTag>
-        </div>
-        <div class="text-secondary-foreground/80">{{ row.originalName || '-' }} · {{ formatSize(row.size) }}</div>
-        <div v-if="row.note" class="text-secondary-foreground/80">备注：{{ row.note }}</div>
-        <div class="text-secondary-foreground/60">{{ row.uploaderName || row.uploaderId }} · {{ formatTime(row.createdAt) }}</div>
-        <div class="flex flex-wrap gap-2">
-          <YdButton size="sm" variant="outline" @click="emit('preview', row)">预览</YdButton>
-          <YdButton size="sm" variant="outline" @click="emit('download', row)">下载</YdButton>
-          <YdButton v-if="props.canWrite && !row.current" size="sm" variant="outline" @click="emit('restore', row)">回滚到此</YdButton>
-          <YdButton v-if="props.canWrite && !row.current" size="sm" variant="destructive" @click="emit('remove', row)">删除</YdButton>
-        </div>
-      </div>
-    </template>
-  </YdResponsiveTable></YdLoadingOverlay>
+  </YdResponsiveEnhancedTable></YdLoadingOverlay>
 </template>

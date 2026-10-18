@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { YdLoadingOverlay, YdPageHeader, YdPageMain } from '@yudream/components'
-import type { TableColumn } from '@yudream/components'
+import { YdLoadingOverlay, YdTablePageLayout } from '@yudream/components'
+import type { ActionMenuItem, StatusColumn, TableColumn, YdTablePageAction } from '@yudream/components'
 import type { ProjectProgressModel } from '../composables/useProjectProgress'
 import type { ProjectProgressProject } from '../types'
-import { YdButton, YdCard, YdCheckboxGroup, YdInput, YdModal, YdNumberField, YdPagination, YdResponsiveTable, YdSelect, YdSwitch, YdTag, YdTextarea, useYdModal } from '@yudream/components'
+import { YdButton, YdCheckboxGroup, YdInput, YdModal, YdNumberField, YdPagination, YdResponsiveEnhancedTable, YdSelect, YdSwitch, YdTag, YdTextarea, useYdModal } from '@yudream/components'
 import { computed, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import PeoplePicker from '../components/PeoplePicker.vue'
@@ -39,7 +39,29 @@ const minecraftSubServerOptions = computed(() => [
 ])
 const pagedRows = computed(() => props.model.projects.slice((pagination.page - 1) * pagination.size, pagination.page * pagination.size))
 const columns: TableColumn<ProjectProgressProject>[] = [
-  { id: 'project', header: '项目', width: 300, fixed: 'left' }, { id: 'status', header: '状态', width: 110 }, { id: 'managers', header: '负责人', width: 220 }, { id: 'members', header: '成员', width: 90 }, { id: 'checkInTypes', header: '打卡方式', width: 240 }, { id: 'server', header: 'MC 服务器', width: 170 }, { id: 'updatedAt', header: '更新时间', width: 180 }, { id: 'operation', header: '操作', width: 220, align: 'center', fixed: 'right' },
+  { id: 'project', header: '项目', width: 300 }, { id: 'managers', header: '负责人', width: 220 }, { id: 'members', header: '成员', width: 90 }, { id: 'checkInTypes', header: '打卡方式', width: 240 }, { id: 'server', header: 'MC 服务器', width: 170 }, { accessorKey: 'updatedAt', header: '更新时间', width: 180 },
+]
+
+/** 项目状态：语义色胶囊 */
+const projectStatusColumn: StatusColumn<ProjectProgressProject> = {
+  statusKey: 'enabled',
+  header: '状态',
+  width: 110,
+  statusMap: {
+    'true': { label: '启用中', variant: 'default', tone: 'success' },
+    'false': { label: '已停用', variant: 'secondary', tone: 'neutral' },
+  },
+}
+
+/** 行操作统一收进操作菜单，删除保持确认流程 */
+const rowActions: ActionMenuItem<ProjectProgressProject>[] = [
+  { label: '查看', icon: 'morph:eye', onClick: row => void openProject(row) },
+  { label: '编辑', icon: 'morph:pencil', onClick: row => void editProject(row) },
+  { label: '删除', icon: 'morph:trash-2', danger: true, onClick: row => confirmDelete(row) },
+]
+
+const pageActions: YdTablePageAction[] = [
+  { label: '新建项目', icon: 'morph:plus', onClick: () => void createProject() },
 ]
 
 watch(() => props.model.projects.length, total => { pagination.page = Math.min(pagination.page, Math.max(1, Math.ceil(total / pagination.size))) })
@@ -54,45 +76,21 @@ function confirmDelete(project: ProjectProgressProject) { confirm.confirm({ titl
 
 <template>
 
-  <YdPageHeader title="项目管理" class="mb-0" />
-  <YdPageMain>  <section class="pp-page">
-    <section class="pp-toolbar"><div><span>项目配置</span><h2>项目管理</h2></div><div class="pp-actions"><YdButton variant="outline" :loading="model.loading" @click="model.load">刷新</YdButton><YdButton @click="createProject">新建项目</YdButton></div></section>
-    <section class="pp-panel">
-      <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable  row-key="id" table-root-class="max-w-full overflow-x-auto rounded-lg" table-class="min-w-[1530px]" border stripe column-visibility :columns="columns" :data="pagedRows" empty-text="暂无项目">
+  <YdTablePageLayout title="项目管理" :show-search="false" :actions="pageActions">
+    <section class="pp-page">
+      <YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable row-key="id" table-root-class="rounded-lg overflow-hidden" table-class="min-w-[1240px]" border stripe column-visibility :status-column="projectStatusColumn" :actions="rowActions" :columns="columns" :data="pagedRows" empty-text="暂无项目">
         <template #cell-project="{ row }"><strong>{{ row.original.name }}</strong><div class="pp-table-sub">{{ row.original.description || '暂无描述' }}</div></template>
-        <template #cell-status="{ row }"><YdTag :variant="row.original.enabled ? 'default' : 'secondary'">{{ row.original.enabled ? '启用中' : '已停用' }}</YdTag></template>
         <template #cell-managers="{ row }"><div class="pp-chip-list"><YdTag v-for="user in model.userOptionsForIds(row.original.managerUserIds)" :key="user.id" variant="secondary">{{ model.userLabel(user) }}</YdTag></div></template>
         <template #cell-members="{ row }">{{ model.projectMemberCount(row.original) }} 人</template>
         <template #cell-checkInTypes="{ row }"><div class="pp-chip-list"><YdTag v-for="type in row.original.allowedCheckInTypes" :key="type" variant="secondary">{{ typeLabel(type) }}</YdTag></div></template>
         <template #cell-server="{ row }">{{ row.original.minecraftPolicy.enabled ? model.serverLabel(row.original.minecraftPolicy.serverId) : '未启用' }}</template>
         <template #cell-updatedAt="{ row }">{{ model.formatTime(row.original.updatedAt) }}</template>
-        <template #cell-operation="{ row }"><div class="pp-actions"><YdButton size="sm" variant="outline" @click="openProject(row.original)">查看</YdButton><YdButton size="sm" variant="outline" @click="editProject(row.original)">编辑</YdButton><YdButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</YdButton></div></template>
-        <template #card="{ row }">
-          <YdCard class="w-full">
-            <div class="flex flex-col gap-3">
-              <div class="flex items-center justify-between gap-2">
-                <span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span>
-                <div class="flex gap-1">
-                  <YdTag :variant="row.enabled ? 'default' : 'secondary'">{{ row.enabled ? '启用中' : '已停用' }}</YdTag>
-                </div>
-              </div>
-              <div class="flex flex-col gap-1 text-sm">
-                <div v-if="row.description" class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">描述</span><span class="break-all">{{ row.description }}</span></div>
-                <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">负责人</span><span class="break-all">{{ model.userOptionsForIds(row.managerUserIds).map(user => model.userLabel(user)).join('、') }}</span></div>
-                <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">成员</span><span class="break-all">{{ model.projectMemberCount(row) }} 人</span></div>
-                <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">更新时间</span><span class="break-all">{{ model.formatTime(row.updatedAt) }}</span></div>
-              </div>
-              <div class="flex flex-wrap gap-2 border-t pt-3">
-                <YdButton size="sm" variant="outline" @click="openProject(row)">查看</YdButton>
-                <YdButton size="sm" variant="outline" @click="editProject(row)">编辑</YdButton>
-                <YdButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</YdButton>
-              </div>
-            </div>
-          </YdCard>
-        </template>
-      </YdResponsiveTable></YdLoadingOverlay>
-      <YdPagination v-model:page="pagination.page" v-model:size="pagination.size" :total="model.projects.length" class="mt-3" />
+      </YdResponsiveEnhancedTable></YdLoadingOverlay>
     </section>
+    <template #footer>
+      <YdPagination v-model:page="pagination.page" v-model:size="pagination.size" :total="model.projects.length" />
+    </template>
+  </YdTablePageLayout>
 
     <YdModal v-model="modalVisible" :title="modalTitle" class="max-w-[860px]" :show-confirm-button="false" :show-cancel-button="false">
       <div class="pp-form">
@@ -110,6 +108,4 @@ function confirmDelete(project: ProjectProgressProject) { confirm.confirm({ titl
       </div>
       <template #footer><YdButton variant="outline" @click="modalVisible = false">取消</YdButton><YdButton :loading="model.saving" @click="saveProject">保存项目</YdButton></template>
     </YdModal>
-  </section>
-</YdPageMain>
 </template>

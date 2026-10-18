@@ -1,7 +1,18 @@
 <script setup lang="ts">
+
+/** 设置页分区：左导航按此切换，窄屏折叠成分区选择器 */
+const activeSection = ref('channels')
+const sectionList: { icon?: string, label: string, value: string }[] = [
+  { label: '渠道开关', value: 'channels', icon: 'morph:toggle' },
+  { label: '限额与有效期', value: 'limits', icon: 'morph:clock' },
+  { label: '渠道教程', value: 'tutorials', icon: 'morph:book' },
+  { label: '群通知', value: 'notify', icon: 'morph:bell' },
+  { label: '邮件二次确认', value: 'mail-confirm', icon: 'morph:mail' },
+  { label: '报告页解析', value: 'parser', icon: 'morph:code' },
+]
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { NotifyGroupTarget, VerifySettings } from '../types'
-import { YdAlert, YdButton, YdCard, YdIcon, YdInput, YdLabel, YdNumberField, YdPageHeader, YdPageMain, YdSelect, YdSwitch, useYdToast, YdMultiSelect , YdMarkdownEditor } from '@yudream/components'
+import { YdAlert, YdButton, YdIcon, YdInput, YdLabel, YdNumberField, YdPageHeader, YdSelect, YdSettingsLayout, YdSettingsSection, YdSwitch, useYdToast, YdMultiSelect , YdMarkdownEditor } from '@yudream/components'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { createEduVerifyApi } from '../api/edu-verify-api'
 import { errorMessage } from '../types'
@@ -204,17 +215,27 @@ onMounted(load)
 
 <template>
   <section class="ev-page">
-    <YdPageHeader title="认证设置" description="控制教育邮箱、学信网与人工审核三个渠道，以及有效期与材料保留策略。">
+    <YdPageHeader title="认证设置" class="mb-0">
       <YdButton variant="outline" :loading="loading" @click="load">
         <YdIcon name="i-ri:refresh-line" />
         刷新
       </YdButton>
+      <YdButton :loading="saving" :disabled="loading" @click="save">
+        <YdIcon name="i-ri:save-3-line" />
+        保存设置
+      </YdButton>
     </YdPageHeader>
 
-    <YdPageMain>
-      <form class="ev-stack" @submit.prevent="save">
+    <YdSettingsLayout
+      v-model="activeSection"
+      :list="sectionList"
+      surface
+      scroll
+      width-class="max-w-[880px]"
+    >
+      <div>
         <YdAlert v-if="error" variant="destructive" title="操作未完成" :description="error" />
-        <YdCard title="渠道开关" description="CARSI 仍为预留渠道，无法在此开启。" content-class="ev-card-content">
+        <YdSettingsSection title="渠道开关" description="CARSI 仍为预留渠道，无法在此开启。">
           <div class="ev-switch-row">
             <YdSwitch v-model="form.emailEnabled" />
             <div class="ev-switch-copy">
@@ -236,9 +257,9 @@ onMounted(load)
               <small>作为兜底渠道，也承接学信网降级申请。姓名与学校必填，管理员可纠正并写入人员管理。</small>
             </div>
           </div>
-        </YdCard>
+        </YdSettingsSection>
 
-        <YdCard title="限额与有效期" content-class="ev-card-content">
+        <YdSettingsSection title="限额与有效期">
           <div class="ev-settings-grid">
             <YdLabel label="验证码有效期（分钟）" class="ev-field">
               <YdNumberField v-model="form.codeTtlMinutes" :min="1" :max="60" class="w-full" />
@@ -261,9 +282,9 @@ onMounted(load)
               <span class="ev-field-hint">审核完成后到期清理证明材料。</span>
             </YdLabel>
           </div>
-        </YdCard>
+        </YdSettingsSection>
 
-        <YdCard title="渠道教程" description="用户在认证弹窗中选择渠道后可查看对应说明。仅支持 Markdown 文本与链接。" content-class="ev-card-content">
+        <YdSettingsSection title="渠道教程" description="用户在认证弹窗中选择渠道后可查看对应说明。仅支持 Markdown 文本与链接。">
           <YdLabel label="教育邮箱教程" class="ev-field">
             <YdMarkdownEditor v-model="form.emailTutorialMarkdown" height="320px" />
           </YdLabel>
@@ -273,9 +294,9 @@ onMounted(load)
           <YdLabel label="人工审核教程" class="ev-field">
             <YdMarkdownEditor v-model="form.manualTutorialMarkdown" height="320px" />
           </YdLabel>
-        </YdCard>
+        </YdSettingsSection>
 
-        <YdCard title="人工审核群通知" description="人工审核提交后向选定的 QQ 群推送不含验证码和材料地址的待审提醒。" content-class="ev-card-content">
+        <YdSettingsSection title="人工审核群通知" description="人工审核提交后向选定的 QQ 群推送不含验证码和材料地址的待审提醒。">
           <div class="ev-switch-row">
             <YdSwitch v-model="form.manualNotifyEnabled" />
             <div class="ev-switch-copy">
@@ -299,9 +320,9 @@ onMounted(load)
             <YdInput v-model="form.manualNotifyTemplate" class="w-full" maxlength="2000" />
             <span class="ev-field-hint">可用变量：{email}、{realName}、{schoolName}、{materialCount}</span>
           </YdLabel>
-        </YdCard>
+        </YdSettingsSection>
 
-        <YdCard title="学信网邮件二次确认" description="开启后，官方报告页解析成功不会立即放行，须再匹配学信网官方发出的同一 16 位验证码邮件。收件箱由宿主「平台能力 › 入站邮箱」统一配置，插件不会代发或代登录。" content-class="ev-card-content">
+        <YdSettingsSection title="学信网邮件二次确认" description="开启后，官方报告页解析成功不会立即放行，须再匹配学信网官方发出的同一 16 位验证码邮件。收件箱由宿主「平台能力 › 入站邮箱」统一配置，插件不会代发或代登录。">
           <div class="ev-switch-row">
             <YdSwitch v-model="form.chsiMailConfirmationEnabled" />
             <div class="ev-switch-copy">
@@ -326,9 +347,9 @@ onMounted(load)
             <YdInput v-model="mailKeywordsText" class="w-full" maxlength="400" placeholder="在线验证报告" />
             <span class="ev-field-hint">主题、正文或 PDF 附件必须同时包含验证码和这些关键词。验证码会忽略空格与大小写。</span>
           </YdLabel>
-        </YdCard>
+        </YdSettingsSection>
 
-        <YdCard title="学信网报告页解析" description="留空则使用当前官方报告页默认选择器。模板必须包含 {code}，且仅允许 www.chsi.com.cn。" content-class="ev-card-content">
+        <YdSettingsSection title="学信网报告页解析" description="留空则使用当前官方报告页默认选择器。模板必须包含 {code}，且仅允许 www.chsi.com.cn。">
           <YdLabel label="报告页地址模板" class="ev-field">
             <YdInput v-model="reportUrlTemplate" class="w-full" maxlength="240" placeholder="https://www.chsi.com.cn/xlcx/bg.do?vcode={code}&srcid=bgcx" />
           </YdLabel>
@@ -346,15 +367,9 @@ onMounted(load)
               <YdInput v-model="selectors.vcode" class="w-full" maxlength="200" />
             </YdLabel>
           </div>
-        </YdCard>
+        </YdSettingsSection>
 
-        <div class="ev-actions ev-actions-end">
-          <YdButton type="submit" :loading="saving" :disabled="loading">
-            <YdIcon name="i-ri:save-3-line" />
-            保存设置
-          </YdButton>
-        </div>
-      </form>
-    </YdPageMain>
+      </div>
+    </YdSettingsLayout>
   </section>
 </template>

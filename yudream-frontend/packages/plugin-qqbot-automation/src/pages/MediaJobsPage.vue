@@ -4,7 +4,6 @@ import { computed, onMounted, ref, watch } from 'vue'
 import {
   YdAlert,
   YdButton,
-  YdCard,
   YdIcon,
   YdInput,
   YdModal,
@@ -12,10 +11,10 @@ import {
   YdPageMain,
   YdPagination,
   YdSelect,
-  YdResponsiveTable,
-  YdTag,
+  YdResponsiveEnhancedTable,
   useYdModal,
   useYdToast,
+  type StatusColumn,
   type TableColumn,
 } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
@@ -66,11 +65,23 @@ const columns: TableColumn<MediaJob>[] = [
   { accessorKey: 'sourceUrl', header: '媒体链接', minWidth: 280, fixed: 'left' },
   { accessorKey: 'connectionId', header: '连接', width: 150 },
   { accessorKey: 'channelId', header: '群聊', width: 150 },
-  { id: 'trigger', header: '触发方式', width: 120, align: 'center' },
-  { id: 'status', header: '状态', width: 110, align: 'center' },
+  { id: 'trigger', header: '触发方式', width: 120 },
   { id: 'result', header: '结果', minWidth: 180 },
-  { id: 'createdAt', header: '创建时间', width: 180 },
+  { accessorKey: 'createdAt', header: '创建时间', width: 180 },
 ]
+
+/** 任务状态：语义色胶囊 */
+const jobStatusColumn: StatusColumn<MediaJob> = {
+  statusKey: 'status',
+  header: '状态',
+  width: 110,
+  statusMap: {
+    PENDING: { label: statusLabel('PENDING'), variant: 'default', tone: 'info' },
+    RUNNING: { label: statusLabel('RUNNING'), variant: 'default', tone: 'warning' },
+    SUCCESS: { label: statusLabel('SUCCESS'), variant: 'default', tone: 'success' },
+    FAILED: { label: statusLabel('FAILED'), variant: 'destructive', tone: 'danger' },
+  },
+}
 
 function showError(cause: unknown, fallback: string) {
   error.value = responseMessage(cause) || (cause instanceof Error && cause.message ? cause.message : fallback)
@@ -88,11 +99,6 @@ function responseMessage(cause: unknown) {
   return typeof payload.data?.message === 'string' ? payload.data.message : ''
 }
 
-function statusVariant(status: string) {
-  if (status === 'COMPLETED') return 'default' as const
-  if (status === 'FAILED' || status === 'SEND_FAILED') return 'destructive' as const
-  return 'secondary' as const
-}
 
 function statusLabel(status: string) {
   if (status === 'COMPLETED') return '已完成'
@@ -278,14 +284,15 @@ onMounted(load)
     <YdPageMain class="space-y-4">
       <YdAlert v-if="error" variant="destructive" title="操作未完成" :description="error" />
 
-      <YdLoadingOverlay :loading="loading"><YdResponsiveTable
-
+      <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+        
         row-key="id"
         table-root-class="overflow-hidden rounded-lg"
         table-class="min-w-[860px]"
         border
         stripe
         column-visibility
+        :status-column="jobStatusColumn"
         :columns="columns"
         :data="jobs"
         empty-text="暂无媒体任务"
@@ -294,7 +301,6 @@ onMounted(load)
           <a class="break-all text-primary hover:underline" :href="row.original.sourceUrl" target="_blank" rel="noreferrer">{{ row.original.sourceUrl }}</a>
         </template>
         <template #cell-trigger="{ row }">{{ triggerLabel(row.original.trigger) }}</template>
-        <template #cell-status="{ row }"><YdTag :variant="statusVariant(row.original.status)">{{ statusLabel(row.original.status) }}</YdTag></template>
         <template #cell-result="{ row }">
           <div class="space-y-1">
             <a v-if="row.original.downloadUrl" class="block text-primary hover:underline" :href="row.original.downloadUrl" target="_blank" rel="noreferrer">打开解析结果</a>
@@ -304,37 +310,7 @@ onMounted(load)
           </div>
         </template>
         <template #cell-createdAt="{ row }">{{ formatTime(row.original.createdAt) }}</template>
-        <template #card="{ row }">
-          <YdCard class="w-full">
-            <div class="flex flex-col gap-3">
-              <div class="flex items-center justify-between gap-2">
-                <a class="min-w-0 break-all text-base font-semibold text-primary hover:underline" :href="row.sourceUrl" target="_blank" rel="noreferrer">{{ row.sourceUrl }}</a>
-                <div class="flex shrink-0 gap-1">
-                  <YdTag :variant="statusVariant(row.status)">{{ statusLabel(row.status) }}</YdTag>
-                </div>
-              </div>
-              <div class="flex flex-col gap-1 text-sm">
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">连接</span>
-                  <span class="break-all">{{ row.connectionId }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">群聊</span>
-                  <span class="break-all">{{ row.channelId }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">触发方式</span>
-                  <span>{{ triggerLabel(row.trigger) }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">创建时间</span>
-                  <span>{{ formatTime(row.createdAt) }}</span>
-                </div>
-              </div>
-            </div>
-          </YdCard>
-        </template>
-      </YdResponsiveTable></YdLoadingOverlay>
+</YdResponsiveEnhancedTable></YdLoadingOverlay>
 
       <YdPagination v-model:page="page" v-model:size="size" :total="total" class="mt-3" />
     </YdPageMain>

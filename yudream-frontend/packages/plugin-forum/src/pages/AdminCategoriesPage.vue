@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { YdButton, YdCard, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdResponsiveTable, YdTag, useYdModal, useYdToast } from '@yudream/components'
+import { YdButton, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdResponsiveEnhancedTable, YdTag, useYdModal, useYdToast, type ActionMenuItem } from '@yudream/components'
 import { onMounted, ref } from 'vue'
 import { createForumApi } from '../api/forum-api'
 import type { Category } from '../api/forum-api'
@@ -42,6 +42,12 @@ function openCreate() {
   editDescription.value = ''
   editOpen.value = true
 }
+
+/** 行操作统一收进操作菜单，删除保持确认流程 */
+const rowActions: ActionMenuItem<Category>[] = [
+  { label: '编辑', icon: 'morph:pencil', onClick: row => openEdit(row) },
+  { label: '删除', icon: 'morph:trash-2', danger: true, onClick: row => remove(row) },
+]
 
 function openEdit(category: Category) {
   editTarget.value = category
@@ -110,43 +116,9 @@ onMounted(load)
       <YdButton @click="openCreate"><YdIcon name="i-ri:add-line" />新增分类</YdButton>
     </YdPageHeader>
     <YdPageMain>
-      <YdResponsiveTable row-key="id" :columns="columns" :data="rows" border stripe table-root-class="rounded-lg overflow-hidden" table-class="min-w-[1100px]">
+      <YdResponsiveEnhancedTable row-key="id" :columns="columns" :data="rows" border stripe column-visibility :actions="rowActions" table-root-class="rounded-lg overflow-hidden" table-class="min-w-[920px]" empty-text="暂无分类">
         <template #cell-moderation="{ row }"><YdTag variant="outline">{{ row.original.moderation }}</YdTag></template>
-        <template #cell-operation="{ row }">
-          <div class="flex gap-2">
-            <YdButton size="sm" variant="outline" @click="openEdit(row.original)">编辑</YdButton>
-            <YdButton size="sm" variant="destructive" @click="remove(row.original)">删除</YdButton>
-          </div>
-        </template>
-        <template #card="{ row }">
-          <YdCard class="w-full">
-            <div class="flex flex-col gap-3">
-              <div class="flex items-center justify-between gap-2">
-                <span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span>
-                <YdTag variant="outline">{{ row.moderation }}</YdTag>
-              </div>
-              <div class="flex flex-col gap-1 text-sm">
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">Slug</span>
-                  <span class="break-all">{{ row.slug }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">查看权限</span>
-                  <span class="break-all">{{ row.viewPermission }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">发帖权限</span>
-                  <span class="break-all">{{ row.postPermission }}</span>
-                </div>
-              </div>
-              <div class="flex flex-wrap gap-2 border-t pt-3">
-                <YdButton size="sm" variant="outline" @click="openEdit(row)">编辑</YdButton>
-                <YdButton size="sm" variant="destructive" @click="remove(row)">删除</YdButton>
-              </div>
-            </div>
-          </YdCard>
-        </template>
-      </YdResponsiveTable>
+      </YdResponsiveEnhancedTable>
       <YdModal v-model="editOpen" :title="editTarget ? '编辑分类' : '新增分类'" :confirm-button-loading="saving" @confirm="save">
         <div class="forum-editor">
           <label>分类名称<YdInput v-model="editName" placeholder="例如：服务器技术" maxlength="40" /></label>

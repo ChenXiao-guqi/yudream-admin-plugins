@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { YdCard, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdTag, useYdToast } from '@yudream/components'
+import { YdPageHeader, YdPageMain, YdPagination, YdResponsiveEnhancedTable, YdTag, useYdToast } from '@yudream/components'
 import { onMounted, ref } from 'vue'
 import { createForumApi } from '../api/forum-api'
 const props=defineProps<{sdk:YuDreamPluginSdk}>(); const api=createForumApi(props.sdk); const toast=useYdToast(); const rows=ref<Record<string,string|number>[]>([]); const page=ref(1); const size=ref(20); const total=ref(0)
@@ -8,18 +8,4 @@ const columns=[{id:'createdAt',header:'时间',accessorKey:'createdAt'},{id:'act
 async function load(){try{const result=await api.audit(page.value,size.value);rows.value=result.records;total.value=result.total}catch(e){toast.error(e instanceof Error?e.message:'审计加载失败')}}
 onMounted(load)
 </script>
-<template><div class="forum-page"><YdPageHeader title="操作审计" description="审核、置顶、精华和论坛设置变更记录"/><YdPageMain><YdResponsiveTable row-key="id" :columns="columns" :data="rows" border stripe table-root-class="rounded-lg overflow-hidden" table-class="min-w-[900px]"><template #cell-action="{row}"><YdTag variant="outline">{{row.original.action}}</YdTag></template><template #card="{ row }">
-  <YdCard class="w-full">
-    <div class="flex flex-col gap-3">
-      <div class="flex items-center justify-between gap-2">
-        <span class="min-w-0 break-words text-base font-semibold">{{ row.action }}</span>
-        <span class="break-all text-sm text-secondary-foreground/60">{{ row.createdAt }}</span>
-      </div>
-      <div class="flex flex-col gap-1 text-sm">
-        <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">操作者</span><span class="break-all">{{ row.actorId }}</span></div>
-        <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">对象</span><span class="break-all">{{ row.targetType }}</span></div>
-        <div v-if="row.detail" class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">说明</span><span class="break-all">{{ row.detail }}</span></div>
-      </div>
-    </div>
-  </YdCard>
-</template></YdResponsiveTable><YdPagination v-model:page="page" v-model:size="size" :total="total" class="mt-3" @page-change="load" @size-change="page = 1; load()"/></YdPageMain></div></template>
+<template><div class="forum-page"><YdPageHeader title="操作审计" description="审核、置顶、精华和论坛设置变更记录"/><YdPageMain><YdResponsiveEnhancedTable row-key="id" :columns="columns" :data="rows" border stripe column-visibility table-root-class="rounded-lg overflow-hidden" table-class="min-w-[820px]" empty-text="暂无审计记录"><template #cell-action="{row}"><YdTag variant="outline">{{row.original.action}}</YdTag></template></YdResponsiveEnhancedTable><YdPagination v-model:page="page" v-model:size="size" :total="total" class="mt-3" @page-change="load" @size-change="page = 1; load()"/></YdPageMain></div></template>
