@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import type { TableColumn } from '@yudream/components'
+import type { TableColumn, ActionMenuItem, StatusColumn } from '@yudream/components'
 import type { AppReleaseSettingsView, AppReleaseView } from '../types'
-import { YdButton, YdCard, YdIcon, YdInput, YdModal, YdNumberField, YdPageHeader, YdPageMain, YdResponsiveTable, YdSwitch, YdTag, YdTextarea, useYdModal, useYdToast, YdFilePicker } from '@yudream/components'
+import { YdButton, YdIcon, YdInput, YdModal, YdNumberField, YdPageHeader, YdPageMain, YdSwitch, YdTag, YdTextarea, useYdModal, useYdToast, YdFilePicker, YdResponsiveEnhancedTable } from '@yudream/components'
 import { computed, onMounted, ref } from 'vue'
 import { createAppReleaseApi, errorMessage } from '../api/app-release-api'
 
@@ -40,8 +40,7 @@ const columns: TableColumn<AppReleaseView>[] = [
   { id: 'state', header: '状态', width: 150 },
   { id: 'file', header: '更新包', width: 220 },
   { id: 'changelog', header: '更新日志', minWidth: 260 },
-  { id: 'publishedAtLabel', header: '发布时间', width: 150 },
-  { id: 'operation', header: '操作', width: 230, fixed: 'right' },
+  { accessorKey: 'publishedAtLabel', header: '发布时间', width: 150 },
 ]
 
 function fmtSize(size: number): string {
@@ -159,6 +158,24 @@ async function submitUpload() {
   }
 }
 
+/** 发布状态列：语义色胶囊 + 强制更新标记单独成格 */
+const stateColumn: StatusColumn<AppReleaseView> = {
+  statusKey: 'published',
+  header: '发布状态',
+  width: 110,
+  statusMap: {
+    'true': { label: '已发布', variant: 'default', tone: 'success' },
+    'false': { label: '未发布', variant: 'secondary', tone: 'neutral' },
+  },
+}
+
+/** 行操作统一收进操作菜单，删除保持确认流程 */
+const rowActions: ActionMenuItem<AppReleaseView>[] = [
+  { label: row => (row.published ? '下架' : '发布'), icon: 'morph:eye', disabled: () => publishingId.value !== '', onClick: row => togglePublish(row) },
+  { label: '下载', icon: 'morph:download', onClick: (row) => { window.open(api.downloadUrl(row.id), '_blank', 'noopener') } },
+  { label: '删除', icon: 'morph:trash-2', danger: true, disabled: () => deletingId.value !== '', onClick: row => confirmDelete(row) },
+]
+
 async function togglePublish(row: AppReleaseView) {
   publishingId.value = row.id
   try {
@@ -224,15 +241,17 @@ onMounted(load)
       </div>
     </YdCard>
 
-    <YdLoadingOverlay :loading="loading"><YdResponsiveTable
-
+    <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
       :columns="columns"
       :data="rows"
       row-key="id"
-      table-root-class="app-release-table-scroll"
-      table-class="app-release-table-w900"
+      table-root-class="rounded-lg overflow-hidden"
+      table-class="min-w-[820px]"
       border
       stripe
+      column-visibility
+      :status-column="stateColumn"
+      :actions="rowActions"
       empty-text="暂无版本包，点击右上角「发布新版本」上传 APK"
     >
       <template #cell-version="{ row }">
@@ -240,11 +259,7 @@ onMounted(load)
         <span class="app-release-subtitle">versionCode {{ row.original.versionCode }}</span>
       </template>
       <template #cell-state="{ row }">
-        <div class="flex flex-wrap gap-1">
-          <YdTag v-if="row.original.published" variant="default">已发布</YdTag>
-          <YdTag v-else variant="secondary">未发布</YdTag>
-          <YdTag v-if="row.original.forceUpdate" variant="destructive">强制更新</YdTag>
-        </div>
+        <span v-if="row.original.forceUpdate" class="yd-status-tone" data-tone="danger">强制更新</span>
       </template>
       <template #cell-file="{ row }">
         <span class="break-all">{{ row.original.fileName }}</span>
@@ -254,78 +269,7 @@ onMounted(load)
         <span v-if="row.original.changelog" class="app-release-changelog line-clamp-3">{{ row.original.changelog }}</span>
         <span v-else class="app-release-subtitle">未填写</span>
       </template>
-      <template #cell-operation="{ row }">
-        <div class="flex-center gap-2">
-          <YdButton
-            size="sm"
-            :variant="row.original.published ? 'outline' : 'default'"
-            :loading="publishingId === row.original.id"
-            @click="togglePublish(row.original)"
-          >
-            {{ row.original.published ? '下架' : '发布' }}
-          </YdButton>
-          <a :href="api.downloadUrl(row.original.id)" target="_blank" rel="noopener">
-            <YdButton size="sm" variant="outline">
-              下载
-            </YdButton>
-          </a>
-          <YdButton size="sm" variant="destructive" :loading="deletingId === row.original.id" @click="confirmDelete(row.original)">
-            删除
-          </YdButton>
-        </div>
-      </template>
-      <template #card="{ row }">
-        <YdCard class="w-full">
-          <div class="flex flex-col gap-3">
-            <div class="flex items-center justify-between gap-2">
-              <span class="min-w-0 break-words text-base font-semibold">{{ row.versionName }}</span>
-              <div class="flex flex-wrap gap-1">
-                <YdTag v-if="row.published" variant="default">
-                  已发布
-                </YdTag>
-                <YdTag v-else variant="secondary">
-                  未发布
-                </YdTag>
-                <YdTag v-if="row.forceUpdate" variant="destructive">
-                  强制更新
-                </YdTag>
-              </div>
-            </div>
-            <div class="flex flex-col gap-1 text-sm">
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">版本线</span>
-                <span>versionCode {{ row.versionCode }} · {{ row.platform }}</span>
-              </div>
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">更新包</span>
-                <span class="break-all">{{ row.fileName }}（{{ fmtSize(row.fileSize) }}）</span>
-              </div>
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">发布时间</span>
-                <span>{{ fmtTime(row.publishedAt) }}</span>
-              </div>
-              <div v-if="row.changelog" class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">更新日志</span>
-                <span class="break-all">{{ row.changelog }}</span>
-              </div>
-            </div>
-            <div class="flex flex-wrap gap-2 border-t pt-3">
-              <YdButton size="sm" :variant="row.published ? 'outline' : 'default'" :loading="publishingId === row.id" @click="togglePublish(row)">
-                {{ row.published ? '下架' : '发布' }}
-              </YdButton>
-              <a :href="api.downloadUrl(row.id)" target="_blank" rel="noopener">
-                <YdButton size="sm" variant="outline">
-                  下载
-                </YdButton>
-              </a>
-              <YdButton size="sm" variant="destructive" :loading="deletingId === row.id" @click="confirmDelete(row)">
-                删除
-              </YdButton>
-            </div>
-          </div>
-        </YdCard>
-      </template>
-    </YdResponsiveTable></YdLoadingOverlay>
+    </YdResponsiveEnhancedTable></YdLoadingOverlay>
 
     <YdModal v-model="uploadOpen" title="发布新版本" class="sm:max-w-[560px]" :close-on-click-overlay="false">
       <div class="flex flex-col gap-4">
