@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { AuthlibEndpoint } from '../types'
 import type { AuthlibPluginModel } from '../composables/useAuthlibPlugin'
-import { YdButton, YdCard, YdIcon, YdPageHeader, YdPageMain, YdResponsiveTable, YdTag } from '@yudream/components'
+import { YdCard, YdCopyButton, YdLoadingOverlay, YdPageHeader, YdPageMain, YdResponsiveEnhancedTable, YdTag } from '@yudream/components'
 
 defineProps<{ model: AuthlibPluginModel }>()
 
 const columns: TableColumn<AuthlibEndpoint>[] = [
-  { accessorKey: 'method', header: '方法', width: 100, fixed: 'left' },
+  { accessorKey: 'method', header: '方法', width: 100 },
   { accessorKey: 'path', header: '协议路径', width: 420 },
   { accessorKey: 'note', header: '用途', width: 360 },
 ]
@@ -17,10 +16,7 @@ const columns: TableColumn<AuthlibEndpoint>[] = [
 <template>
   <section class="authlib-home">
     <YdPageHeader title="Authlib 运行状态" description="查看 Yggdrasil 协议服务地址、依赖状态和固定协议端点。" class="mb-0">
-      <YdButton @click="model.copy(model.launcherUrl)">
-        <YdIcon name="i-ri:file-copy-line" />
-        复制 API 地址
-      </YdButton>
+      <YdCopyButton :text="model.launcherUrl" label="复制 API 地址" />
     </YdPageHeader>
 
     <YdPageMain>
@@ -28,10 +24,7 @@ const columns: TableColumn<AuthlibEndpoint>[] = [
         <YdCard title="启动器配置" description="Yggdrasil 服务根地址" content-class="authlib-card-content">
           <div class="authlib-address-row">
             <code>{{ model.launcherUrl }}</code>
-            <YdButton size="sm" variant="outline" @click="model.copy(model.launcherUrl)">
-              <YdIcon name="i-ri:file-copy-line" />
-              复制
-            </YdButton>
+            <YdCopyButton :text="model.launcherUrl" label="复制" size="sm" variant="outline" />
           </div>
           <p class="authlib-muted">将此地址填写到支持 authlib-injector 的启动器或服务端配置中。</p>
         </YdCard>
@@ -39,57 +32,41 @@ const columns: TableColumn<AuthlibEndpoint>[] = [
         <YdCard title="服务状态" description="仅管理端可见" content-class="authlib-card-content">
           <div class="authlib-status-line">
             <span>连接状态</span>
-            <YdTag :variant="model.status ? 'default' : 'secondary'">{{ model.statusText }}</YdTag>
+            <span class="yd-status-tone" :data-tone="model.status ? 'success' : 'warning'">{{ model.statusText }}</span>
           </div>
           <div class="authlib-status-line"><span>账号来源</span><strong>{{ model.status?.accountSource || '-' }}</strong></div>
-          <div class="authlib-status-line"><span>皮肤插件</span><strong>{{ model.status?.skinPluginEnabled ? '已启用' : '未启用' }}</strong></div>
+          <div class="authlib-status-line">
+            <span>皮肤插件</span>
+            <span class="yd-status-tone" :data-tone="model.status?.skinPluginEnabled ? 'success' : 'neutral'">{{ model.status?.skinPluginEnabled ? '已启用' : '未启用' }}</span>
+          </div>
           <div class="authlib-status-line"><span>材质地址</span><code>{{ model.status?.textureBaseUrl || '-' }}</code></div>
         </YdCard>
       </div>
 
-      <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable
+      <div class="authlib-endpoint-head mt-4">
+        <strong>协议端点</strong>
+        <span>固定协议清单，不作为管理 CRUD 数据。</span>
+        <YdTag variant="secondary">{{ model.endpoints.length }} 个端点</YdTag>
+      </div>
 
-        row-key="path"
-        table-root-class="authlib-endpoint-table-root rounded-lg overflow-hidden"
-        table-class="min-w-[880px]"
-        border
-        stripe
-        column-visibility
-        :columns="columns"
-        :data="model.endpoints"
-      >
-        <template #toolbar>
-          <div class="authlib-table-toolbar">
-            <div>
-              <strong>协议端点</strong>
-              <span>固定协议清单，不作为管理 CRUD 数据。</span>
-            </div>
-            <YdTag variant="secondary">{{ model.endpoints.length }} 个端点</YdTag>
-          </div>
-        </template>
-        <template #cell-method="{ row }">
-          <YdTag :variant="row.original.method === 'GET' ? 'secondary' : 'default'">{{ row.original.method }}</YdTag>
-        </template>
-        <template #cell-path="{ row }"><code>{{ row.original.path }}</code></template>
-        <template #card="{ row }">
-          <YdCard class="w-full">
-            <div class="flex flex-col gap-3">
-              <div class="flex items-center justify-between gap-2">
-                <span class="text-base font-semibold break-all">{{ row.path }}</span>
-                <div class="flex gap-1">
-                  <YdTag :variant="row.method === 'GET' ? 'secondary' : 'default'">{{ row.method }}</YdTag>
-                </div>
-              </div>
-              <div class="flex flex-col gap-1 text-sm">
-                <div v-if="row.note" class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">用途</span>
-                  <span class="break-all">{{ row.note }}</span>
-                </div>
-              </div>
-            </div>
-          </YdCard>
-        </template>
-      </YdResponsiveTable></YdLoadingOverlay>
+      <YdLoadingOverlay :loading="model.loading">
+        <YdResponsiveEnhancedTable
+          row-key="path"
+          table-root-class="rounded-lg overflow-hidden"
+          table-class="min-w-[860px]"
+          border
+          stripe
+          column-visibility
+          :columns="columns"
+          :data="model.endpoints"
+          empty-text="暂无协议端点"
+        >
+          <template #cell-method="{ row }">
+            <span class="yd-status-tone" :data-tone="row.original.method === 'GET' ? 'neutral' : 'info'">{{ row.original.method }}</span>
+          </template>
+          <template #cell-path="{ row }"><code>{{ row.original.path }}</code></template>
+        </YdResponsiveEnhancedTable>
+      </YdLoadingOverlay>
     </YdPageMain>
   </section>
 </template>

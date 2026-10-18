@@ -1,50 +1,37 @@
 <script setup lang="ts">
 import { YdLoadingOverlay } from '@yudream/components'
 import type { PonyPluginModel } from '../composables/usePonyPlugin'
-import { YdButton, YdCard, YdIcon, YdPageHeader, YdPageMain, YdTag } from '@yudream/components'
+import { YdButton, YdCard, YdEmpty, YdIcon, YdPageHeader, YdPageMain, YdStat, YdStats, YdTag } from '@yudream/components'
 
 defineProps<{ model: PonyPluginModel }>()
 </script>
 
 <template>
   <YdPageHeader title="我的小马战绩" class="mb-0">
-    <YdButton variant="outline" :loading="model.loading" @click="model.loadMyStats"><YdIcon name="i-ri:refresh-line" />刷新</YdButton>
+    <YdButton variant="outline" :loading="model.loading" @click="model.loadMyStats">
+      <YdIcon name="morph:refresh" />刷新
+    </YdButton>
   </YdPageHeader>
   <YdPageMain>
-    <YdLoadingOverlay :loading="model.loading" v-if="model.myStatsEmpty"><YdCard   class="pony-empty-card">
-      <YdIcon name="i-ri:gamepad-line" />
-      <h3>还没有小马归位战绩</h3>
-      <p>在 QQ 群内发送 <code>/小马</code> 开局，成功放马后会自动记录战绩。未绑定 QQ 时请先完成绑定。</p>
-    </YdCard></YdLoadingOverlay>
+    <YdEmpty
+      v-if="model.myStatsEmpty"
+      icon="morph:gamepad"
+      title="还没有小马归位战绩"
+      description="在 QQ 群内发送 /小马 开局，成功放马后会自动记录战绩。未绑定 QQ 时请先完成绑定。"
+    />
     <template v-else-if="model.myStatsView">
-      <YdLoadingOverlay :loading="model.loading"><div  class="pony-stat-grid">
-        <YdCard class="pony-stat-card">
-          <span>总场次</span>
-          <strong>{{ model.myStatsView.played }}</strong>
-        </YdCard>
-        <YdCard class="pony-stat-card">
-          <span>总胜场</span>
-          <strong>{{ model.myStatsView.wins }}</strong>
-        </YdCard>
-        <YdCard class="pony-stat-card">
-          <span>胜率</span>
-          <strong>{{ model.winRate }}</strong>
-        </YdCard>
-        <YdCard class="pony-stat-card">
-          <span>累计放马</span>
-          <strong>{{ model.myStatsView.horsesPlaced }}</strong>
-        </YdCard>
-        <YdCard class="pony-stat-card">
-          <span>当前连胜</span>
-          <strong>{{ model.myStatsView.currentStreak }}</strong>
-        </YdCard>
-        <YdCard class="pony-stat-card">
-          <span>最佳连胜</span>
-          <strong>{{ model.myStatsView.bestStreak }}</strong>
-        </YdCard>
-      </div></YdLoadingOverlay>
+      <YdLoadingOverlay :loading="model.loading">
+        <YdStats>
+          <YdStat title="总场次" :value="model.myStatsView.played" />
+          <YdStat title="总胜场" :value="model.myStatsView.wins" />
+          <YdStat title="胜率" :value="model.winRate" />
+          <YdStat title="累计放马" :value="model.myStatsView.horsesPlaced" />
+          <YdStat title="当前连胜" :value="model.myStatsView.currentStreak" />
+          <YdStat title="最佳连胜" :value="model.myStatsView.bestStreak" />
+        </YdStats>
+      </YdLoadingOverlay>
 
-      <YdCard class="pony-panel-card">
+      <YdCard class="pony-panel-card mt-4">
         <h3>战绩概览</h3>
         <div class="pony-mode-row">
           <div>
@@ -59,8 +46,12 @@ defineProps<{ model: PonyPluginModel }>()
           </div>
         </div>
       </YdCard>
-      <p class="pony-muted">最近参与：{{ model.formatTime(model.myStatsView.updatedAt) }}</p>
+      <p class="pony-muted mt-3">最近参与：{{ model.formatTime(model.myStatsView.updatedAt) }}</p>
     </template>
-    <YdLoadingOverlay :loading="true" v-else><YdCard   class="pony-empty-card"><p class="pony-muted">战绩加载中…</p></YdCard></YdLoadingOverlay>
+    <YdLoadingOverlay v-else :loading="true">
+      <YdCard class="pony-empty-card">
+        <p class="pony-muted">战绩加载中…</p>
+      </YdCard>
+    </YdLoadingOverlay>
   </YdPageMain>
 </template>

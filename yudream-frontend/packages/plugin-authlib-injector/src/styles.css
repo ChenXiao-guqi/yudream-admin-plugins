@@ -19,7 +19,7 @@
 
 .authlib-address-row,
 .authlib-status-line,
-.authlib-table-toolbar {
+.authlib-endpoint-head {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
@@ -38,8 +38,7 @@
 }
 
 .authlib-muted,
-.authlib-status-line span,
-.authlib-table-toolbar span {
+.authlib-status-line span {
   margin: 0;
   color: var(--color-text-3);
   font-size: 13px;
@@ -55,9 +54,14 @@
   border-bottom: 0;
 }
 
-.authlib-table-toolbar > div {
-  display: grid;
-  gap: 3px;
+.authlib-endpoint-head {
+  gap: 10px;
+  justify-content: flex-start;
+}
+
+.authlib-endpoint-head span {
+  color: var(--color-text-3);
+  font-size: 13px;
 }
 
 /* 宿主远程卡片外包一层无高度的 div，必须先把这一层接进首页网格的 flex 高度链。 */
@@ -186,8 +190,12 @@
   }
 
   .authlib-address-row,
-  .authlib-status-line,
-  .authlib-table-toolbar {
+  .authlib-status-line {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .authlib-endpoint-head {
     align-items: stretch;
     flex-direction: column;
   }

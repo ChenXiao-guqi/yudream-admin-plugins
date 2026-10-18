@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import type { SearchConfig, SearchFieldConfig, SearchOptionsSource, TableColumn, YdTablePageAction } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import type { TableColumn } from '@yudream/components'
 import type { SettlementRecord } from '../types'
-import { YdButton, YdCard, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdSelect, YdTag } from '@yudream/components'
-import { onMounted } from 'vue'
+import { YdDynamicSearchForm, YdLoadingOverlay, YdPagination, YdResponsiveEnhancedTable, YdTablePageLayout } from '@yudream/components'
+import { computed, onMounted, ref } from 'vue'
 import { createPlaytimePointsApi } from '../api/playtime-points-api'
 import { useSettlements } from '../composables/useSettlements'
 import { formatDuration, formatTime, subDetails, weightLabel } from '../composables/utils'
@@ -15,22 +14,57 @@ const api = createPlaytimePointsApi(props.sdk)
 const model = useSettlements(api)
 const { loading, running, records, serverOptions, pager, filters } = model
 
+/** ControlType 是 components 内部的字符串枚举，桥接层只出类型，这里用字面量收敛一次 */
+type SearchFieldInput = Partial<Omit<SearchFieldConfig, 'controlType'>> & Pick<SearchFieldConfig, 'fieldName' | 'label'> & { controlType?: 'TEXT' | 'SELECT' | 'DATE_RANGE' | 'NUMBER_RANGE' | 'CHECKBOX' | 'RADIO' }
+
+function searchField(config: SearchFieldInput): SearchFieldConfig {
+  const { controlType = 'TEXT', order = 0, showWhenFolded = false, width = '200px', ...rest } = config
+  return { ...rest, fieldName: config.fieldName, label: config.label, controlType: controlType as SearchFieldConfig['controlType'], order, showWhenFolded, width }
+}
+
+const searchQuery = ref<Record<string, any>>({
+  serverId: filters.serverId ?? '',
+  keyword: filters.keyword ?? '',
+})
+
+const searchConfig: SearchConfig = {
+  fields: [
+    searchField({ fieldName: 'keyword', label: '玩家', placeholder: '按玩家名搜索', order: 1, showWhenFolded: true, width: '220px' }),
+    searchField({ fieldName: 'serverId', label: '服务器', controlType: 'SELECT', order: 2, width: '200px' }),
+  ],
+}
+
+const optionsSources: SearchOptionsSource[] = [
+  { id: 'serverOptions', loader: () => [{ label: '全部服务器', value: '' }, ...serverOptions.value] },
+]
+
+function applySearch() {
+  filters.serverId = String(searchQuery.value.serverId ?? '')
+  filters.keyword = String(searchQuery.value.keyword ?? '')
+  model.search()
+}
+
+function resetSearch() {
+  model.resetFilters()
+  searchQuery.value = { serverId: '', keyword: '' }
+}
+
 const columns: TableColumn<SettlementRecord>[] = [
   { id: 'windowEnd', header: '退出时间', width: 180 },
   { accessorKey: 'serverName', header: '服务器', width: 160 },
   { accessorKey: 'playerName', header: '玩家', width: 140 },
-  { id: 'effective', header: '有效时长', width: 150 },
-  { id: 'detail', header: '在线 / 挂机', width: 200 },
+  { id: 'effective', header: '有效时长', width: 130 },
+  { id: 'detail', header: '在线 / 挂机', width: 180 },
   { id: 'subServers', header: '子服拆分', width: 260 },
-  { id: 'weight', header: '权重', width: 90, align: 'center' },
-  { id: 'points', header: '积分', width: 110, align: 'center' },
-  { id: 'credited', header: '入账', width: 110, align: 'center' },
-  { accessorKey: 'assetCode', header: '货币', width: 100, align: 'center' },
+  { id: 'weight', header: '权重', width: 90 },
+  { id: 'points', header: '积分', width: 110 },
+  { id: 'credited', header: '入账', width: 110 },
+  { accessorKey: 'assetCode', header: '货币', width: 100 },
 ]
 
-function creditedLabel(row: SettlementRecord): string {
-  return Number(row.credited) > 0 ? row.credited : '累计中'
-}
+const pageActions = computed<YdTablePageAction[]>(() => [
+  { label: '立即结算', icon: 'morph:play', disabled: running.value, onClick: () => void model.runNow() },
+])
 
 onMounted(() => {
   void model.load()
@@ -39,135 +73,65 @@ onMounted(() => {
 </script>
 
 <template>
-  <YdPageHeader title="结算记录">
-    <YdButton :loading="running" @click="model.runNow()">
-      <YdIcon name="i-ri:play-circle-line" />
-      立即结算
-    </YdButton>
-  </YdPageHeader>
+  <YdTablePageLayout title="结算记录" :actions="pageActions">
+    <template #search="{ fold }">
+      <YdDynamicSearchForm
+        v-model="searchQuery"
+        :config="searchConfig"
+        :fold="fold"
+        :options-sources="optionsSources"
+        @search="applySearch"
+        @reset="resetSearch"
+      />
+    </template>
 
-  <YdPageMain>
-    <YdLoadingOverlay :loading="loading"><YdResponsiveTable
-
-      row-key="id"
-      table-root-class="rounded-lg overflow-hidden"
-      table-class="ptp-table-w1360"
-      border
-      stripe
-      column-visibility
-      :columns="columns"
-      :data="records"
-      empty-text="暂无结算记录：玩家退出服务器并达到 1 积分后这里会出现流水。"
-    >
-      <template #toolbar>
-        <YdSearchBar class="w-full">
-          <div class="ptp-filters">
-            <YdSelect
-              v-model="filters.serverId"
-              :options="serverOptions"
-              placeholder="全部服务器"
-              clearable
-              class="ptp-filter-control"
-              @change="model.search()"
-            />
-            <YdInput
-              v-model="filters.keyword"
-              placeholder="按玩家名搜索"
-              clearable
-              class="ptp-filter-control"
-              @keyup.enter="model.search()"
-            />
-            <div class="flex items-center gap-2">
-              <YdButton size="sm" @click="model.search()">
-                <YdIcon name="i-ri:search-line" />
-                查询
-              </YdButton>
-              <YdButton size="sm" variant="outline" @click="model.resetFilters()">
-                重置
-              </YdButton>
-            </div>
-          </div>
-        </YdSearchBar>
-      </template>
-      <template #cell-windowEnd="{ row }">{{ formatTime(row.original.windowEnd) }}</template>
-      <template #cell-effective="{ row }">{{ row.original.effectiveMinutes }} 分钟</template>
-      <template #cell-detail="{ row }">
-        {{ formatDuration(row.original.onlineMillis) }} / {{ formatDuration(row.original.afkMillis) }}
-      </template>
-      <template #cell-subServers="{ row }">
-        <div v-if="!subDetails(row.original).length" class="ptp-sub-empty">整服结算</div>
-        <div v-else class="ptp-sub-list">
-          <div v-for="sub in subDetails(row.original)" :key="sub.subServer" class="ptp-sub-item">
-            <span class="ptp-sub-name">{{ sub.subServer }}</span>
-            <span class="ptp-sub-meta">{{ sub.effectiveMinutes }} 分钟 × {{ sub.weight }}</span>
-            <span class="ptp-sub-points">{{ sub.enabled ? `+${sub.points}` : '停算' }}</span>
-          </div>
-        </div>
-      </template>
-      <template #cell-weight="{ row }">{{ weightLabel(row.original) }}</template>
-      <template #cell-points="{ row }">{{ row.original.points }}</template>
-      <template #cell-credited="{ row }">
-        <YdTag :variant="Number(row.original.credited) > 0 ? 'default' : 'secondary'">
-          {{ creditedLabel(row.original) }}
-        </YdTag>
-      </template>
-      <template #card="{ row }">
-        <YdCard class="w-full">
-          <div class="flex flex-col gap-3">
-            <div class="flex items-center justify-between gap-2">
-              <span class="min-w-0 break-words text-base font-semibold">{{ row.playerName }}</span>
-              <YdTag :variant="Number(row.credited) > 0 ? 'default' : 'secondary'">
-                {{ creditedLabel(row) }}
-              </YdTag>
-            </div>
-            <div class="flex flex-col gap-1 text-sm">
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">退出时间</span>
-                <span class="break-all">{{ formatTime(row.windowEnd) }}</span>
-              </div>
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">服务器</span>
-                <span class="break-all">{{ row.serverName }}</span>
-              </div>
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">有效时长</span>
-                <span class="break-all">{{ row.effectiveMinutes }} 分钟</span>
-              </div>
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">在线 / 挂机</span>
-                <span class="break-all">{{ formatDuration(row.onlineMillis) }} / {{ formatDuration(row.afkMillis) }}</span>
-              </div>
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">权重</span>
-                <span class="break-all">×{{ row.weight }}</span>
-              </div>
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">积分</span>
-                <span class="break-all">{{ row.points }}</span>
-              </div>
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">货币</span>
-                <span class="break-all">{{ row.assetCode }}</span>
+    <template #table>
+      <YdLoadingOverlay :loading="loading">
+        <YdResponsiveEnhancedTable
+          row-key="id"
+          table-root-class="rounded-lg overflow-hidden"
+          table-class="min-w-[1360px]"
+          border
+          stripe
+          column-visibility
+          :columns="columns"
+          :data="records"
+          empty-text="暂无结算记录：玩家退出服务器并达到 1 积分后这里会出现流水。"
+        >
+          <template #cell-windowEnd="{ row }">{{ formatTime(row.original.windowEnd) }}</template>
+          <template #cell-effective="{ row }">{{ row.original.effectiveMinutes }} 分钟</template>
+          <template #cell-detail="{ row }">
+            {{ formatDuration(row.original.onlineMillis) }} / {{ formatDuration(row.original.afkMillis) }}
+          </template>
+          <template #cell-subServers="{ row }">
+            <div v-if="!subDetails(row.original).length" class="ptp-sub-empty">整服结算</div>
+            <div v-else class="ptp-sub-list">
+              <div v-for="sub in subDetails(row.original)" :key="sub.subServer" class="ptp-sub-item">
+                <span class="ptp-sub-name">{{ sub.subServer }}</span>
+                <span class="ptp-sub-meta">{{ sub.effectiveMinutes }} 分钟 × {{ sub.weight }}</span>
+                <span class="ptp-sub-points">{{ sub.enabled ? `+${sub.points}` : '停算' }}</span>
               </div>
             </div>
-          </div>
-        </YdCard>
-      </template>
-      <template #empty>
-        <div class="ptp-empty">
-          <YdIcon name="i-ri:file-list-3-line" />
-          <span>暂无结算记录：玩家退出服务器并达到 1 积分后这里会出现流水。</span>
-        </div>
-      </template>
-    </YdResponsiveTable></YdLoadingOverlay>
+          </template>
+          <template #cell-weight="{ row }">{{ weightLabel(row.original) }}</template>
+          <template #cell-points="{ row }">{{ row.original.points }}</template>
+          <template #cell-credited="{ row }">
+            <span class="yd-status-tone" :data-tone="Number(row.original.credited) > 0 ? 'success' : 'neutral'">
+              {{ Number(row.original.credited) > 0 ? row.original.credited : '累计中' }}
+            </span>
+          </template>
+        </YdResponsiveEnhancedTable>
+      </YdLoadingOverlay>
+    </template>
 
-    <YdPagination
-      v-model:page="pager.page"
-      v-model:size="pager.size"
-      :total="pager.total"
-      class="mt-3"
-      @page-change="model.onPageChange"
-      @size-change="model.onSizeChange"
-    />
-  </YdPageMain>
+    <template #footer>
+      <YdPagination
+        v-model:page="pager.page"
+        v-model:size="pager.size"
+        :total="pager.total"
+        @page-change="model.onPageChange"
+        @size-change="model.onSizeChange"
+      />
+    </template>
+  </YdTablePageLayout>
 </template>

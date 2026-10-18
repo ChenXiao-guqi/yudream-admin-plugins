@@ -3,7 +3,7 @@ import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { TableColumn } from '@yudream/components'
 import type { CheckInRewardRecord, SettlementRecord } from '../types'
-import { YdCard, YdIcon, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdTag } from '@yudream/components'
+import { YdCard, YdPageHeader, YdPageMain, YdPagination, YdResponsiveEnhancedTable, YdStat, YdStats } from '@yudream/components'
 import { computed, onMounted } from 'vue'
 import { createPlaytimePointsApi } from '../api/playtime-points-api'
 import { useMyPoints } from '../composables/useMyPoints'
@@ -22,17 +22,17 @@ const columns: TableColumn<SettlementRecord>[] = [
   { id: 'effective', header: '有效时长', width: 140 },
   { id: 'detail', header: '在线 / 挂机', width: 200 },
   { id: 'subServers', header: '子服拆分', width: 240 },
-  { id: 'points', header: '积分', width: 110, align: 'center' },
-  { id: 'credited', header: '入账', width: 110, align: 'center' },
+  { id: 'points', header: '积分', width: 110 },
+  { id: 'credited', header: '入账', width: 110 },
 ]
 
 const checkInColumns: TableColumn<CheckInRewardRecord>[] = [
   { id: 'acceptedAt', header: '验收通过时间', width: 180 },
   { accessorKey: 'projectName', header: '项目', width: 160 },
   { accessorKey: 'detailTitle', header: '工作细节', width: 180 },
-  { id: 'points', header: '积分', width: 100, align: 'center' },
+  { id: 'points', header: '积分', width: 110 },
   { id: 'calc', header: '折算方式', width: 300 },
-  { id: 'source', header: '来源', width: 110, align: 'center' },
+  { id: 'source', header: '来源', width: 110 },
 ]
 
 const subServerSummary = computed(() => summary.value?.bySubServer ?? [])
@@ -58,10 +58,6 @@ const statCards = computed(() => {
   ]
 })
 
-function creditedLabel(row: SettlementRecord): string {
-  return Number(row.credited) > 0 ? row.credited : '累计中'
-}
-
 onMounted(() => {
   void model.load()
 })
@@ -74,181 +70,126 @@ onMounted(() => {
   />
 
   <YdPageMain>
-    <YdLoadingOverlay :loading="loading"><div class="ptp-my" >
-      <div class="ptp-stat-grid">
-        <YdCard v-for="card in statCards" :key="card.label" class="ptp-stat-card">
-          <div class="ptp-stat-label">{{ card.label }}</div>
-          <div class="ptp-stat-value">
-            <span v-if="card.label === '钱包余额' && summary?.assetSymbol">{{ summary.assetSymbol }}</span>
-            {{ card.value }}
+    <YdLoadingOverlay :loading="loading">
+      <div class="ptp-my flex flex-col gap-4">
+        <YdStats>
+          <YdStat
+            v-for="card in statCards"
+            :key="card.label"
+            :title="card.label"
+            :value="String(card.value)"
+            :description="card.hint"
+          />
+        </YdStats>
+
+        <YdCard v-if="summary && summary.byServer.length">
+          <div class="ptp-section-title">各服务器明细</div>
+          <div class="ptp-server-list">
+            <div v-for="item in summary.byServer" :key="item.serverId" class="ptp-server-row">
+              <span class="ptp-server-name">{{ item.serverName || item.serverId }}</span>
+              <span class="ptp-server-meta">{{ item.effectiveMinutes }} 分钟 · {{ item.sessions }} 次结算</span>
+              <span class="yd-status-tone" data-tone="success">+{{ item.points }}</span>
+            </div>
           </div>
-          <div class="ptp-stat-hint">{{ card.hint }}</div>
+        </YdCard>
+
+        <YdCard v-if="subServerSummary.length">
+          <div class="ptp-section-title">各子服明细</div>
+          <p class="ptp-hint">
+            群组服下同一段在线时长会按子服拆分计分，下表是各子服累计的有效时长与积分（不含被设置为「不参与结算」的子服）。
+          </p>
+          <div class="ptp-server-list">
+            <div v-for="item in subServerSummary" :key="`${item.serverId}::${item.subServer}`" class="ptp-server-row">
+              <span class="ptp-server-name">{{ item.subServer }}</span>
+              <span class="ptp-server-meta">
+                {{ item.serverName || item.serverId }} · {{ item.effectiveMinutes }} 分钟 · {{ item.sessions }} 次结算
+              </span>
+              <span class="yd-status-tone" data-tone="success">+{{ item.points }}</span>
+            </div>
+          </div>
+        </YdCard>
+
+        <YdCard v-if="checkInSummary && checkInSummary.enabled">
+          <div class="ptp-section-title">最近打卡积分</div>
+          <p class="ptp-hint">
+            项目工作细节验收通过后，该细节下的每条打卡各计一次积分：固定金额模式按每次金额发放；
+            按时薪折算模式下，有有效在线时长的打卡按「有效在线时长 × 时薪」发放，没有时长的打卡
+            （图片/文件/定位等非 MC 打卡）按「非时长打卡每次积分」发放，并在这里展示折算过程；
+            「来源」表示这笔是由定时拉取还是验收实时回调发放的。没有发放的打卡也会列出并写明原因。
+          </p>
+          <YdResponsiveEnhancedTable
+            row-key="checkInId"
+            table-root-class="rounded-lg overflow-hidden"
+            table-class="min-w-[960px]"
+            border
+            stripe
+            :columns="checkInColumns"
+            :data="checkInSummary.recent"
+            empty-text="还没有打卡积分：项目工作细节验收通过后会自动计入。"
+          >
+            <template #cell-acceptedAt="{ row }">{{ formatTime(row.original.acceptedAt) }}</template>
+            <template #cell-points="{ row }">
+              <span class="yd-status-tone" :data-tone="Number(row.original.credit) > 0 ? 'success' : 'neutral'">
+                {{ Number(row.original.credit) > 0 ? `+${row.original.credit}` : '未发放' }}
+              </span>
+            </template>
+            <template #cell-calc="{ row }">
+              <span class="ptp-calc-text" :class="{ 'ptp-calc-skipped': !(Number(row.original.credit) > 0) }">
+                {{ checkInRewardLabel(row.original) }}
+              </span>
+            </template>
+            <template #cell-source="{ row }">
+              <span class="yd-status-tone" :data-tone="row.original.source === 'REALTIME' ? 'info' : 'neutral'">
+                {{ sourceLabel(row.original.source) }}
+              </span>
+            </template>
+          </YdResponsiveEnhancedTable>
+        </YdCard>
+
+        <YdCard>
+          <div class="ptp-section-title">结算流水</div>
+          <YdResponsiveEnhancedTable
+            row-key="id"
+            table-root-class="rounded-lg overflow-hidden"
+            table-class="min-w-[1080px]"
+            border
+            stripe
+            :columns="columns"
+            :data="records"
+            empty-text="还没有结算记录：进入服务器并退出一次后，这里会出现第一笔结算。"
+          >
+            <template #cell-windowEnd="{ row }">{{ formatTime(row.original.windowEnd) }}</template>
+            <template #cell-effective="{ row }">{{ row.original.effectiveMinutes }} 分钟</template>
+            <template #cell-detail="{ row }">
+              {{ formatDuration(row.original.onlineMillis) }} / {{ formatDuration(row.original.afkMillis) }}
+            </template>
+            <template #cell-subServers="{ row }">
+              <div v-if="!subDetails(row.original).length" class="ptp-sub-empty">整服结算</div>
+              <div v-else class="ptp-sub-list">
+                <div v-for="sub in subDetails(row.original)" :key="sub.subServer" class="ptp-sub-item">
+                  <span class="ptp-sub-name">{{ sub.subServer }}</span>
+                  <span class="ptp-sub-meta">{{ sub.effectiveMinutes }} 分钟 × {{ sub.weight }}</span>
+                  <span class="ptp-sub-points">{{ sub.enabled ? `+${sub.points}` : '停算' }}</span>
+                </div>
+              </div>
+            </template>
+            <template #cell-points="{ row }">{{ row.original.points }}</template>
+            <template #cell-credited="{ row }">
+              <span class="yd-status-tone" :data-tone="Number(row.original.credited) > 0 ? 'success' : 'neutral'">
+                {{ Number(row.original.credited) > 0 ? row.original.credited : '累计中' }}
+              </span>
+            </template>
+          </YdResponsiveEnhancedTable>
+          <YdPagination
+            v-model:page="pager.page"
+            v-model:size="pager.size"
+            :total="pager.total"
+            class="mt-3"
+            @page-change="model.onPageChange"
+            @size-change="model.onSizeChange"
+          />
         </YdCard>
       </div>
-
-      <YdCard v-if="summary && summary.byServer.length">
-        <div class="ptp-section-title">各服务器明细</div>
-        <div class="ptp-server-list">
-          <div v-for="item in summary.byServer" :key="item.serverId" class="ptp-server-row">
-            <span class="ptp-server-name">{{ item.serverName || item.serverId }}</span>
-            <span class="ptp-server-meta">{{ item.effectiveMinutes }} 分钟 · {{ item.sessions }} 次结算</span>
-            <YdTag variant="secondary">+{{ item.points }}</YdTag>
-          </div>
-        </div>
-      </YdCard>
-
-      <YdCard v-if="subServerSummary.length">
-        <div class="ptp-section-title">各子服明细</div>
-        <p class="ptp-hint">
-          群组服下同一段在线时长会按子服拆分计分，下表是各子服累计的有效时长与积分（不含被设置为「不参与结算」的子服）。
-        </p>
-        <div class="ptp-server-list">
-          <div v-for="item in subServerSummary" :key="`${item.serverId}::${item.subServer}`" class="ptp-server-row">
-            <span class="ptp-server-name">{{ item.subServer }}</span>
-            <span class="ptp-server-meta">
-              {{ item.serverName || item.serverId }} · {{ item.effectiveMinutes }} 分钟 · {{ item.sessions }} 次结算
-            </span>
-            <YdTag variant="secondary">+{{ item.points }}</YdTag>
-          </div>
-        </div>
-      </YdCard>
-
-      <YdCard v-if="checkInSummary && checkInSummary.enabled">
-        <div class="ptp-section-title">最近打卡积分</div>
-        <p class="ptp-hint">
-          项目工作细节验收通过后，该细节下的每条打卡各计一次积分：固定金额模式按每次金额发放；
-          按时薪折算模式下，有有效在线时长的打卡按「有效在线时长 × 时薪」发放，没有时长的打卡
-          （图片/文件/定位等非 MC 打卡）按「非时长打卡每次积分」发放，并在这里展示折算过程；
-          「来源」表示这笔是由定时拉取还是验收实时回调发放的。没有发放的打卡也会列出并写明原因。
-        </p>
-        <YdResponsiveTable
-          row-key="checkInId"
-          table-root-class="rounded-lg overflow-hidden"
-          table-class="ptp-table-w1030"
-          border
-          stripe
-          :columns="checkInColumns"
-          :data="checkInSummary.recent"
-        >
-          <template #cell-acceptedAt="{ row }">{{ formatTime(row.original.acceptedAt) }}</template>
-          <template #cell-points="{ row }">
-            <YdTag :variant="Number(row.original.credit) > 0 ? 'secondary' : 'outline'">
-              {{ Number(row.original.credit) > 0 ? `+${row.original.credit}` : '未发放' }}
-            </YdTag>
-          </template>
-          <template #cell-calc="{ row }">
-            <span class="ptp-calc-text" :class="{ 'ptp-calc-skipped': !(Number(row.original.credit) > 0) }">
-              {{ checkInRewardLabel(row.original) }}
-            </span>
-          </template>
-          <template #cell-source="{ row }">
-            <YdTag :variant="row.original.source === 'REALTIME' ? 'default' : 'outline'">
-              {{ sourceLabel(row.original.source) }}
-            </YdTag>
-          </template>
-          <template #empty>
-            <div class="ptp-empty">
-              <YdIcon name="i-ri:map-pin-time-line" />
-              <span>还没有打卡积分：项目工作细节验收通过后会自动计入。</span>
-            </div>
-          </template>
-
-          <template #card="{ row }"><YdCard class="w-full"><div class="flex flex-col gap-2"><div class="flex items-start justify-between gap-3"><strong>{{ row.projectName || row.projectId }} · {{ row.detailTitle || row.detailId }}</strong><YdTag :variant="Number(row.credit) > 0 ? 'secondary' : 'outline'">{{ Number(row.credit) > 0 ? `+${row.credit}` : '未发放' }}</YdTag></div><span class="ptp-muted">验收通过 {{ formatTime(row.acceptedAt) }}</span><span>{{ checkInRewardLabel(row) }}</span><span>来源：{{ sourceLabel(row.source) }}</span></div></YdCard></template>
-</YdResponsiveTable>
-      </YdCard>
-
-      <YdCard>
-        <div class="ptp-section-title">结算流水</div>
-        <YdLoadingOverlay :loading="loading"><YdResponsiveTable
-
-          row-key="id"
-          table-root-class="rounded-lg overflow-hidden"
-          table-class="ptp-table-w1240"
-          border
-          stripe
-          :columns="columns"
-          :data="records"
-          empty-text="还没有结算记录：进入服务器并退出一次后，这里会出现第一笔结算。"
-        >
-          <template #cell-windowEnd="{ row }">{{ formatTime(row.original.windowEnd) }}</template>
-          <template #cell-effective="{ row }">{{ row.original.effectiveMinutes }} 分钟</template>
-          <template #cell-detail="{ row }">
-            {{ formatDuration(row.original.onlineMillis) }} / {{ formatDuration(row.original.afkMillis) }}
-          </template>
-          <template #cell-subServers="{ row }">
-            <div v-if="!subDetails(row.original).length" class="ptp-sub-empty">整服结算</div>
-            <div v-else class="ptp-sub-list">
-              <div v-for="sub in subDetails(row.original)" :key="sub.subServer" class="ptp-sub-item">
-                <span class="ptp-sub-name">{{ sub.subServer }}</span>
-                <span class="ptp-sub-meta">{{ sub.effectiveMinutes }} 分钟 × {{ sub.weight }}</span>
-                <span class="ptp-sub-points">{{ sub.enabled ? `+${sub.points}` : '停算' }}</span>
-              </div>
-            </div>
-          </template>
-          <template #cell-points="{ row }">{{ row.original.points }}</template>
-          <template #cell-credited="{ row }">
-            <YdTag :variant="Number(row.original.credited) > 0 ? 'default' : 'secondary'">
-              {{ creditedLabel(row.original) }}
-            </YdTag>
-          </template>
-          <template #card="{ row }">
-            <YdCard class="w-full">
-              <div class="flex flex-col gap-3">
-                <div class="flex items-center justify-between gap-2">
-                  <span class="min-w-0 break-words text-base font-semibold">{{ row.playerName }}</span>
-                  <YdTag :variant="Number(row.credited) > 0 ? 'default' : 'secondary'">
-                    {{ creditedLabel(row) }}
-                  </YdTag>
-                </div>
-                <div class="flex flex-col gap-1 text-sm">
-                  <div class="flex gap-2">
-                    <span class="shrink-0 text-secondary-foreground/60">退出时间</span>
-                    <span class="break-all">{{ formatTime(row.windowEnd) }}</span>
-                  </div>
-                  <div class="flex gap-2">
-                    <span class="shrink-0 text-secondary-foreground/60">服务器</span>
-                    <span class="break-all">{{ row.serverName }}</span>
-                  </div>
-                  <div class="flex gap-2">
-                    <span class="shrink-0 text-secondary-foreground/60">有效时长</span>
-                    <span class="break-all">{{ row.effectiveMinutes }} 分钟</span>
-                  </div>
-                  <div class="flex gap-2">
-                    <span class="shrink-0 text-secondary-foreground/60">在线 / 挂机</span>
-                    <span class="break-all">{{ formatDuration(row.onlineMillis) }} / {{ formatDuration(row.afkMillis) }}</span>
-                  </div>
-                  <div class="flex gap-2">
-                    <span class="shrink-0 text-secondary-foreground/60">积分</span>
-                    <span class="break-all">{{ row.points }}</span>
-                  </div>
-                  <template v-if="subDetails(row).length">
-                    <div class="flex gap-2">
-                      <span class="shrink-0 text-secondary-foreground/60">子服拆分</span>
-                      <span class="break-all">
-                        {{ subDetails(row).map(sub => `${sub.subServer} ${sub.effectiveMinutes} 分钟 × ${sub.weight} ${sub.enabled ? `+${sub.points}` : '停算'}`).join('；') }}
-                      </span>
-                    </div>
-                  </template>
-                </div>
-              </div>
-            </YdCard>
-          </template>
-          <template #empty>
-            <div class="ptp-empty">
-              <YdIcon name="i-ri:coins-line" />
-              <span>还没有结算记录：进入服务器并退出一次后，这里会出现第一笔结算。</span>
-            </div>
-          </template>
-        </YdResponsiveTable></YdLoadingOverlay>
-        <YdPagination
-          v-model:page="pager.page"
-          v-model:size="pager.size"
-          :total="pager.total"
-          class="mt-3"
-          @page-change="model.onPageChange"
-          @size-change="model.onSizeChange"
-        />
-      </YdCard>
-    </div></YdLoadingOverlay>
+    </YdLoadingOverlay>
   </YdPageMain>
 </template>

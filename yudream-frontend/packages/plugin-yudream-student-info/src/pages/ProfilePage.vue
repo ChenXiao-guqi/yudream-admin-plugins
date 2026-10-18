@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { YdButton, YdCard, YdIcon, YdInput, YdLabel, YdPageHeader, YdPageMain, YdTag } from '@yudream/components'
+import { YdButton, YdCard, YdForm, YdFormItem, YdIcon, YdInput, YdPageHeader, YdPageMain, YdTag } from '@yudream/components'
 import { onMounted } from 'vue'
 import { useMyStudentProfile } from '../composables/useMyStudentProfile'
 
@@ -21,26 +21,28 @@ onMounted(model.load)
     <YdPageMain>
       <div class="student-info-profile-grid">
         <YdCard title="学籍资料" :description="model.accountName" content-class="student-info-card-content">
-          <form class="student-info-form" @submit.prevent="model.save">
-            <YdLabel label="姓名" class="student-info-field">
-              <YdInput v-model="model.form.studentName" class="w-full" maxlength="40" />
-            </YdLabel>
-            <YdLabel label="学号" class="student-info-field">
-              <YdInput v-model="model.form.studentNo" class="w-full" maxlength="64" />
-            </YdLabel>
-            <YdLabel label="班级" class="student-info-field">
-              <YdInput v-model="model.form.className" class="w-full" maxlength="80" />
-            </YdLabel>
-            <YdLabel label="学院" class="student-info-field">
-              <YdInput v-model="model.form.college" class="w-full" maxlength="80" />
-            </YdLabel>
-            <div class="student-info-actions">
-              <YdButton type="submit" :loading="model.saving" :disabled="model.loading">
-                <YdIcon name="i-ri:save-3-line" />
-                保存
-              </YdButton>
+          <YdForm :model="model.form" layout="vertical" @submit.prevent="model.save">
+            <div class="flex flex-col gap-4">
+              <YdFormItem label="姓名">
+                <YdInput v-model="model.form.studentName" maxlength="40" />
+              </YdFormItem>
+              <YdFormItem label="学号">
+                <YdInput v-model="model.form.studentNo" maxlength="64" />
+              </YdFormItem>
+              <YdFormItem label="班级">
+                <YdInput v-model="model.form.className" maxlength="80" />
+              </YdFormItem>
+              <YdFormItem label="学院">
+                <YdInput v-model="model.form.college" maxlength="80" />
+              </YdFormItem>
+              <YdFormItem>
+                <YdButton html-type="submit" :loading="model.saving" :disabled="model.loading">
+                  <YdIcon name="morph:save" />
+                  保存
+                </YdButton>
+              </YdFormItem>
             </div>
-          </form>
+          </YdForm>
         </YdCard>
 
         <YdCard title="当前记录" description="仅展示当前登录账号的资料" content-class="student-info-card-content">

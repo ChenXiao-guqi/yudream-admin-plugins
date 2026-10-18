@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { YdLoadingOverlay } from '@yudream/components'
 import type { WordlePluginModel } from '../composables/useWordlePlugin'
-import { YdButton, YdCard, YdIcon, YdPageHeader, YdPageMain, YdTag } from '@yudream/components'
+import { YdButton, YdCard, YdEmpty, YdIcon, YdPageHeader, YdPageMain, YdStat, YdStats, YdTag } from '@yudream/components'
 
 const props = defineProps<{ model: WordlePluginModel }>()
 
@@ -16,39 +16,29 @@ function distributionEntries() {
 
 <template>
   <YdPageHeader title="我的猜词战绩" class="mb-0">
-    <YdButton variant="outline" :loading="model.loading" @click="model.loadMyStats"><YdIcon name="i-ri:refresh-line" />刷新</YdButton>
+    <YdButton variant="outline" :loading="model.loading" @click="model.loadMyStats">
+      <YdIcon name="morph:refresh" />刷新
+    </YdButton>
   </YdPageHeader>
   <YdPageMain>
-    <YdLoadingOverlay :loading="model.loading" v-if="model.myStatsEmpty"><YdCard   class="wordle-empty-card">
-      <YdIcon name="i-ri:gamepad-line" />
-      <h3>还没有猜词战绩</h3>
-      <p>在 QQ 群内发送 <code>/猜单词</code> 或 <code>/猜成语</code> 开局，猜词后会自动记录战绩。未绑定 QQ 时请先完成绑定。</p>
-    </YdCard></YdLoadingOverlay>
+    <YdEmpty
+      v-if="model.myStatsEmpty"
+      icon="morph:gamepad"
+      title="还没有猜词战绩"
+      description="在 QQ 群内发送 /猜单词 或 /猜成语 开局，猜词后会自动记录战绩。未绑定 QQ 时请先完成绑定。"
+    />
     <template v-else-if="model.myStatsView">
-      <YdLoadingOverlay :loading="model.loading"><div  class="wordle-stat-grid">
-        <YdCard class="wordle-stat-card">
-          <span>总场次</span>
-          <strong>{{ model.totalPlayed }}</strong>
-        </YdCard>
-        <YdCard class="wordle-stat-card">
-          <span>总胜场</span>
-          <strong>{{ model.totalWins }}</strong>
-        </YdCard>
-        <YdCard class="wordle-stat-card">
-          <span>胜率</span>
-          <strong>{{ model.winRate }}</strong>
-        </YdCard>
-        <YdCard class="wordle-stat-card">
-          <span>当前连胜</span>
-          <strong>{{ model.myStatsView.currentStreak }}</strong>
-        </YdCard>
-        <YdCard class="wordle-stat-card">
-          <span>最佳连胜</span>
-          <strong>{{ model.myStatsView.bestStreak }}</strong>
-        </YdCard>
-      </div></YdLoadingOverlay>
+      <YdLoadingOverlay :loading="model.loading">
+        <YdStats>
+          <YdStat title="总场次" :value="model.totalPlayed" />
+          <YdStat title="总胜场" :value="model.totalWins" />
+          <YdStat title="胜率" :value="model.winRate" />
+          <YdStat title="当前连胜" :value="model.myStatsView.currentStreak" />
+          <YdStat title="最佳连胜" :value="model.myStatsView.bestStreak" />
+        </YdStats>
+      </YdLoadingOverlay>
 
-      <div class="wordle-two-col">
+      <div class="wordle-two-col mt-4">
         <YdCard class="wordle-panel-card">
           <h3>模式战绩</h3>
           <div class="wordle-mode-row">
@@ -75,11 +65,17 @@ function distributionEntries() {
               <span>{{ count }}</span>
             </div>
           </div>
-          <p v-else class="wordle-muted">还没有猜中记录。</p>
+          <p v-else class="wordle-muted">
+            还没有猜中记录。
+          </p>
         </YdCard>
       </div>
-      <p class="wordle-muted">最近参与：{{ model.formatTime(model.myStatsView.updatedAt) }}</p>
+      <p class="wordle-muted mt-3">最近参与：{{ model.formatTime(model.myStatsView.updatedAt) }}</p>
     </template>
-    <YdLoadingOverlay :loading="true" v-else><YdCard   class="wordle-empty-card"><p class="wordle-muted">战绩加载中…</p></YdCard></YdLoadingOverlay>
+    <YdLoadingOverlay v-else :loading="true">
+      <YdCard class="wordle-empty-card">
+        <p class="wordle-muted">战绩加载中…</p>
+      </YdCard>
+    </YdLoadingOverlay>
   </YdPageMain>
 </template>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { YdLoadingOverlay } from '@yudream/components'
 import type { McguessPluginModel } from '../composables/useMcguessPlugin'
-import { YdAlert, YdButton, YdCard, YdIcon, YdModal, YdPageHeader, YdPageMain, YdSelect } from '@yudream/components'
+import { YdAlert, YdButton, YdCard, YdIcon, YdModal, YdPageHeader, YdPageMain, YdStat, YdStats, YdSelect } from '@yudream/components'
 import { computed, ref } from 'vue'
 
 const props = defineProps<{ model: McguessPluginModel }>()
@@ -51,52 +51,19 @@ async function saveSettings() {
     <YdButton variant="outline" :loading="model.loading" @click="model.loadOverview"><YdIcon name="i-ri:refresh-line" />刷新</YdButton>
   </YdPageHeader>
   <YdPageMain>
-    <YdLoadingOverlay :loading="model.loading"><div  class="mcguess-stat-grid">
-      <YdCard class="mcguess-stat-card">
-        <span>猜物 · 累计 / 进行中 / 已获胜</span>
-        <strong>{{ overview() ? `${overview()!.item.total} / ${overview()!.item.playing} / ${overview()!.item.won}` : '-' }}</strong>
-      </YdCard>
-      <YdCard class="mcguess-stat-card">
-        <span>猜生物 · 累计 / 进行中 / 已获胜</span>
-        <strong>{{ overview() ? `${overview()!.mob.total} / ${overview()!.mob.playing} / ${overview()!.mob.won}` : '-' }}</strong>
-      </YdCard>
-      <YdCard class="mcguess-stat-card">
-        <span>猜合成 · 累计 / 进行中 / 已获胜</span>
-        <strong>{{ overview() ? `${overview()!.recipe.total} / ${overview()!.recipe.playing} / ${overview()!.recipe.won}` : '-' }}</strong>
-      </YdCard>
-      <YdCard class="mcguess-stat-card">
-        <span>迷雾 · 累计 / 进行中 / 已获胜</span>
-        <strong>{{ overview() ? `${overview()!.fog.total} / ${overview()!.fog.playing} / ${overview()!.fog.won}` : '-' }}</strong>
-      </YdCard>
-      <YdCard class="mcguess-stat-card">
-        <span>快答 · 累计 / 进行中 / 已获胜</span>
-        <strong>{{ overview() ? `${overview()!.quiz.total} / ${overview()!.quiz.playing} / ${overview()!.quiz.won}` : '-' }}</strong>
-      </YdCard>
-      <YdCard class="mcguess-stat-card">
-        <span>宾果 · 累计 / 进行中 / 已获胜</span>
-        <strong>{{ overview() ? `${overview()!.bingo.total} / ${overview()!.bingo.playing} / ${overview()!.bingo.won}` : '-' }}</strong>
-      </YdCard>
-      <YdCard class="mcguess-stat-card">
-        <span>找茬 · 累计 / 进行中 / 已获胜</span>
-        <strong>{{ overview() ? `${overview()!.spot.total} / ${overview()!.spot.playing} / ${overview()!.spot.won}` : '-' }}</strong>
-      </YdCard>
-      <YdCard class="mcguess-stat-card">
-        <span>参与玩家</span>
-        <strong>{{ overview()?.playerCount ?? '-' }}</strong>
-      </YdCard>
-      <YdCard class="mcguess-stat-card">
-        <span>物品总数</span>
-        <strong>{{ overview()?.itemCount ?? '-' }}</strong>
-      </YdCard>
-      <YdCard class="mcguess-stat-card">
-        <span>可合成 / 目标池</span>
-        <strong>{{ overview() ? `${overview()!.craftableCount} / ${overview()!.guessTargetCount}` : '-' }}</strong>
-      </YdCard>
-      <YdCard class="mcguess-stat-card">
-        <span>生物 / 条件</span>
-        <strong>{{ overview() ? `${overview()!.mobCount} / ${overview()!.conditionCount}` : '-' }}</strong>
-      </YdCard>
-    </div></YdLoadingOverlay>
+    <YdLoadingOverlay :loading="model.loading"><YdStats>
+      <YdStat title="猜物 · 累计 / 进行中 / 已获胜" :value="overview() ? `${overview()!.item.total} / ${overview()!.item.playing} / ${overview()!.item.won}` : '-'" />
+      <YdStat title="猜生物 · 累计 / 进行中 / 已获胜" :value="overview() ? `${overview()!.mob.total} / ${overview()!.mob.playing} / ${overview()!.mob.won}` : '-'" />
+      <YdStat title="猜合成 · 累计 / 进行中 / 已获胜" :value="overview() ? `${overview()!.recipe.total} / ${overview()!.recipe.playing} / ${overview()!.recipe.won}` : '-'" />
+      <YdStat title="迷雾 · 累计 / 进行中 / 已获胜" :value="overview() ? `${overview()!.fog.total} / ${overview()!.fog.playing} / ${overview()!.fog.won}` : '-'" />
+      <YdStat title="快答 · 累计 / 进行中 / 已获胜" :value="overview() ? `${overview()!.quiz.total} / ${overview()!.quiz.playing} / ${overview()!.quiz.won}` : '-'" />
+      <YdStat title="宾果 · 累计 / 进行中 / 已获胜" :value="overview() ? `${overview()!.bingo.total} / ${overview()!.bingo.playing} / ${overview()!.bingo.won}` : '-'" />
+      <YdStat title="找茬 · 累计 / 进行中 / 已获胜" :value="overview() ? `${overview()!.spot.total} / ${overview()!.spot.playing} / ${overview()!.spot.won}` : '-'" />
+      <YdStat title="参与玩家" :value="overview()?.playerCount ?? '-'" />
+      <YdStat title="物品总数" :value="overview()?.itemCount ?? '-'" />
+      <YdStat title="可合成 / 目标池" :value="overview() ? `${overview()!.craftableCount} / ${overview()!.guessTargetCount}` : '-'" />
+      <YdStat title="生物 / 条件" :value="overview() ? `${overview()!.mobCount} / ${overview()!.conditionCount}` : '-'" />
+    </YdStats></YdLoadingOverlay>
 
     <YdCard class="mcguess-help-card">
       <h3>群内玩法（群回合制，一局结束后可立即再开新局）</h3>
