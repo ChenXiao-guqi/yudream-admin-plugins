@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { TableColumn } from '@yudream/components'
+import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { SkinPlayer } from '../types'
 import type { SkinPluginModel } from '../composables/useSkinPlugin'
 import { computed, reactive, ref, watch } from 'vue'
-import { YdLabel, YdButton, YdCard, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdSelect, YdTag, useYdModal } from '@yudream/components'
+import { YdLabel, YdButton, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdSelect, YdTag, useYdModal, YdResponsiveEnhancedTable, YdListToolbar } from '@yudream/components'
 
 const props = defineProps<{
   model: SkinPluginModel
@@ -82,8 +82,7 @@ const tableColumns = computed<TableColumn<SkinPlayer>[]>(() => [
   { id: 'status', header: '状态', width: 96, align: 'center' },
   { id: 'lastModified', header: '更新时间', width: 150 },
   { id: 'uuid', header: 'UUID', width: 180 },
-  { id: 'operation', header: '操作', width: 142, align: 'center', fixed: 'right' },
-])
+  ])
 
 watch([() => search.keyword, () => search.ownerId, () => search.status], () => {
   pagination.page = 1
@@ -196,6 +195,13 @@ function shortHash(hash?: string) {
   }
   return hash.length > 18 ? `${hash.slice(0, 10)}...${hash.slice(-6)}` : hash
 }
+
+/** 行操作统一收进操作菜单，删除保持确认流程 */
+const rowActions: ActionMenuItem<SkinPlayer>[] = [
+  { label: '编辑', icon: 'morph:pencil', onClick: row => openEdit(row) },
+  { label: '删除', icon: 'morph:trash-2', danger: true, onClick: row => confirmDelete(row) },
+]
+
 </script>
 
 <template>
@@ -203,20 +209,13 @@ function shortHash(hash?: string) {
     <YdButton @click="openCreate"><YdIcon name="i-ri:add-line" />新增角色</YdButton>
   </YdPageHeader>
   <YdPageMain><div class="skin-admin-table-page">
-    <YdResponsiveTable
-      row-key="uuid"
-      table-root-class="skin-admin-player-table-root rounded-lg overflow-hidden"
-      table-class="skin-admin-player-table"
-      column-visibility
-      border
-      stripe
-      :columns="tableColumns"
-      :data="pagedRows"
+    <YdListToolbar
+      v-model:keyword="search.keyword"
+      placeholder="角色名 / UUID / 材质 / 用户"
+      @search="pagination.page = 1"
+      @clear="pagination.page = 1"
     >
-      <template #toolbar>
-        <YdSearchBar class="w-full">
-          <div class="skin-admin-filter-grid">
-            <YdInput v-model="search.keyword" clearable placeholder="角色名 / UUID / 材质 / 用户" class="skin-admin-filter-grid__keyword" @keydown.enter="pagination.page = 1" @clear="pagination.page = 1" />
+      <template #filters>
             <YdInput v-model="search.ownerId" clearable placeholder="系统用户 ID / 昵称 / 用户名" class="skin-admin-filter-grid__select" @keydown.enter="pagination.page = 1" @clear="pagination.page = 1" />
             <YdSelect v-model="search.status" :options="statusOptions" class="skin-admin-filter-grid__select" />
             <div class="skin-admin-filter-grid__actions">
@@ -228,9 +227,29 @@ function shortHash(hash?: string) {
                 筛选
               </YdButton>
             </div>
-          </div>
-        </YdSearchBar>
       </template>
+      <template #actions>
+        <YdButton variant="outline" @click="resetSearch">
+          重置
+        </YdButton>
+        <YdButton @click="pagination.page = 1">
+          <YdIcon name="i-ri:search-line" />
+          筛选
+        </YdButton>
+      </template>
+    </YdListToolbar>
+
+    <YdResponsiveEnhancedTable
+      :actions="rowActions"
+      row-key="uuid"
+      table-root-class="skin-admin-player-table-root rounded-lg overflow-hidden"
+      table-class="skin-admin-player-table"
+      column-visibility
+      border
+      stripe
+      :columns="tableColumns"
+      :data="pagedRows"
+    >
       <template #cell-name="{ row }">
         <span class="skin-admin-texture-name" :title="row.original.name">{{ row.original.name }}</span>
       </template>
@@ -257,57 +276,8 @@ function shortHash(hash?: string) {
       <template #cell-uuid="{ row }">
         <code class="skin-admin-code" :title="row.original.uuid">{{ row.original.uuid }}</code>
       </template>
-      <template #cell-operation="{ row }">
-        <div class="flex-center gap-2">
-          <YdButton variant="outline" size="sm" @click="openEdit(row.original)">
-            编辑
-          </YdButton>
-          <YdButton variant="destructive" size="sm" @click="confirmDelete(row.original)">
-            删除
-          </YdButton>
-        </div>
-      </template>
-      <template #card="{ row }">
-        <YdCard class="w-full">
-          <div class="flex flex-col gap-3">
-            <div class="flex items-center justify-between gap-2">
-              <span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span>
-              <div class="flex gap-1">
-                <YdTag :variant="row.skinHash || row.capeHash ? 'default' : 'secondary'">
-                  {{ row.skinHash || row.capeHash ? '已配置' : '待换装' }}
-                </YdTag>
-              </div>
-            </div>
-            <div class="flex flex-col gap-1 text-sm">
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">系统用户</span>
-                <span class="break-all">{{ ownerText(row) }}</span>
-              </div>
-              <div v-if="row.skinHash" class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">皮肤</span>
-                <span class="break-all">{{ model.textureName(row.skinHash) }}</span>
-              </div>
-              <div v-if="row.capeHash" class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">披风</span>
-                <span class="break-all">{{ model.textureName(row.capeHash) }}</span>
-              </div>
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">更新时间</span>
-                <span>{{ model.dateText(row.lastModified) }}</span>
-              </div>
-            </div>
-            <div class="flex flex-wrap gap-2 border-t pt-3">
-              <YdButton variant="outline" size="sm" @click="openEdit(row)">
-                编辑
-              </YdButton>
-              <YdButton variant="destructive" size="sm" @click="confirmDelete(row)">
-                删除
-              </YdButton>
-            </div>
-          </div>
-        </YdCard>
-      </template>
-    </YdResponsiveTable>
+      
+</YdResponsiveEnhancedTable>
 
     <YdPagination
       v-model:page="pagination.page"

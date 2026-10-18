@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { TableColumn } from '@yudream/components'
+import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { SkinPluginModel } from '../composables/useSkinPlugin'
 import type { SkinClosetItem } from '../types'
 import { computed, reactive, ref, watch } from 'vue'
-import { YdLabel, YdButton, YdCard, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdSelect, useYdModal } from '@yudream/components'
+import { YdLabel, YdButton, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdSelect, useYdModal, YdResponsiveEnhancedTable, YdListToolbar } from '@yudream/components'
 
 const props = defineProps<{ model: SkinPluginModel }>()
 const modal = useYdModal()
@@ -47,8 +47,7 @@ const columns: TableColumn<SkinClosetItem>[] = [
   { accessorKey: 'userId', header: '用户', width: 220 },
   { id: 'texture', header: '材质', width: 240 },
   { id: 'createdAt', header: '创建时间', width: 170 },
-  { id: 'operation', header: '操作', width: 170, align: 'center', fixed: 'right' },
-]
+  ]
 
 watch([() => search.keyword, () => search.userId], () => { pagination.page = 1 })
 watch(totalPages, pages => { if (pagination.page > pages) pagination.page = pages })
@@ -93,6 +92,13 @@ function confirmDelete(item: SkinClosetItem) {
     },
   })
 }
+
+/** 行操作统一收进操作菜单，删除保持确认流程 */
+const rowActions: ActionMenuItem<SkinClosetItem>[] = [
+  { label: '重命名', icon: 'morph:pencil', onClick: row => openEdit(row) },
+  { label: '删除', icon: 'morph:trash-2', danger: true, onClick: row => confirmDelete(row) },
+]
+
 </script>
 
 <template>
@@ -100,7 +106,25 @@ function confirmDelete(item: SkinClosetItem) {
     <YdButton @click="openCreate"><YdIcon name="i-ri:add-line" />新增衣柜项</YdButton>
   </YdPageHeader>
   <YdPageMain><div class="skin-admin-table-page">
-    <YdResponsiveTable
+    <YdListToolbar
+      v-model:keyword="search.keyword"
+      placeholder="衣柜名称 / 材质"
+      @search="pagination.page = 1"
+      @clear="pagination.page = 1"
+    >
+      <template #filters>
+            <YdInput v-model="search.userId" clearable placeholder="用户 ID" />
+            <div class="skin-admin-filter-grid__actions">
+              <YdButton variant="outline" @click="resetSearch">重置</YdButton>
+            </div>
+      </template>
+      <template #actions>
+        <YdButton variant="outline" @click="resetSearch">重置</YdButton>
+      </template>
+    </YdListToolbar>
+
+    <YdResponsiveEnhancedTable
+      :actions="rowActions"
       row-key="id"
       table-root-class="max-w-full overflow-x-auto rounded-lg"
       table-class="min-w-[920px]"
@@ -111,17 +135,6 @@ function confirmDelete(item: SkinClosetItem) {
       :data="pagedRows"
       empty-text="暂无衣柜数据"
     >
-      <template #toolbar>
-        <YdSearchBar class="w-full">
-          <div class="skin-admin-filter-grid">
-            <YdInput v-model="search.keyword" clearable placeholder="衣柜名称 / 材质" />
-            <YdInput v-model="search.userId" clearable placeholder="用户 ID" />
-            <div class="skin-admin-filter-grid__actions">
-              <YdButton variant="outline" @click="resetSearch">重置</YdButton>
-            </div>
-          </div>
-        </YdSearchBar>
-      </template>
       <template #cell-userId="{ row }">
         {{ model.userName(row.original.userId) }}
         <div class="skin-admin-code">{{ row.original.userId }}</div>
@@ -131,40 +144,8 @@ function confirmDelete(item: SkinClosetItem) {
         <div class="skin-admin-code">{{ row.original.textureHash }}</div>
       </template>
       <template #cell-createdAt="{ row }">{{ model.dateText(row.original.createdAt) }}</template>
-      <template #cell-operation="{ row }">
-        <div class="flex-center gap-2">
-          <YdButton size="sm" variant="outline" @click="openEdit(row.original)">重命名</YdButton>
-          <YdButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</YdButton>
-        </div>
-      </template>
-      <template #card="{ row }">
-        <YdCard class="w-full">
-          <div class="flex flex-col gap-3">
-            <div class="flex items-center justify-between gap-2">
-              <span class="min-w-0 break-words text-base font-semibold">{{ row.itemName || model.textureName(row.textureHash) }}</span>
-            </div>
-            <div class="flex flex-col gap-1 text-sm">
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">用户</span>
-                <span class="break-all">{{ model.userName(row.userId) }}</span>
-              </div>
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">材质</span>
-                <span class="break-all">{{ model.textureName(row.textureHash) }}</span>
-              </div>
-              <div v-if="row.createdAt !== undefined" class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">创建时间</span>
-                <span>{{ model.dateText(row.createdAt) }}</span>
-              </div>
-            </div>
-            <div class="flex flex-wrap gap-2 border-t pt-3">
-              <YdButton size="sm" variant="outline" @click="openEdit(row)">重命名</YdButton>
-              <YdButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</YdButton>
-            </div>
-          </div>
-        </YdCard>
-      </template>
-    </YdResponsiveTable>
+      
+</YdResponsiveEnhancedTable>
 
     <YdPagination
       v-model:page="pagination.page"

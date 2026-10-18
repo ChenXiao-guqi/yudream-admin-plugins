@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { FileItem, FileUploadRequestOptions, TableColumn } from '@yudream/components'
+import type { FileItem, FileUploadRequestOptions, TableColumn, ActionMenuItem } from '@yudream/components'
 import type { SkinTexture } from '../types'
 import type { SkinPluginModel } from '../composables/useSkinPlugin'
 import { computed, reactive, ref, watch } from 'vue'
-import { useYdModal, YdButton, YdCard, YdFileUpload, YdIcon, YdInput, YdLabel, YdModal, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdSelect, YdSwitch, YdTag } from '@yudream/components'
+import { useYdModal, YdButton, YdFileUpload, YdIcon, YdInput, YdLabel, YdModal, YdPageHeader, YdPageMain, YdPagination, YdSelect, YdSwitch, YdTag, YdResponsiveEnhancedTable, YdListToolbar } from '@yudream/components'
 import SkinTexturePreview from '../components/SkinTexturePreview.vue'
 
 const props = defineProps<{
@@ -88,8 +88,7 @@ const tableColumns = computed<TableColumn<SkinTexture>[]>(() => [
   { id: 'size', header: '大小', width: 96 },
   { id: 'uploadedAt', header: '上传时间', width: 152 },
   { id: 'hash', header: 'Hash', width: 190 },
-  { id: 'operation', header: '操作', width: 168, align: 'center', fixed: 'right' },
-])
+  ])
 
 watch([() => search.keyword, () => search.type, () => search.visibility], () => {
   pagination.page = 1
@@ -196,25 +195,25 @@ function formatSize(size?: number) {
   }
   return `${(size / 1024 / 1024).toFixed(1)} MB`
 }
+
+/** 行操作统一收进操作菜单，删除保持确认流程 */
+const rowActions: ActionMenuItem<SkinTexture>[] = [
+  { label: '编辑', icon: 'morph:pencil', onClick: row => openEdit(row) },
+  { label: '删除', icon: 'morph:trash-2', danger: true, onClick: row => confirmDelete(row) },
+]
+
 </script>
 
 <template>
 
   <YdPageHeader title="材质管理" class="mb-0" />  <YdPageMain><div class="skin-admin-table-page">
-    <YdResponsiveTable
-      row-key="hash"
-      table-root-class="skin-admin-texture-table-root rounded-lg overflow-hidden"
-      table-class="skin-admin-texture-table"
-      column-visibility
-      border
-      stripe
-      :columns="tableColumns"
-      :data="pagedRows"
+    <YdListToolbar
+      v-model:keyword="search.keyword"
+      placeholder="名称 / Hash / 上传人"
+      @search="pagination.page = 1"
+      @clear="pagination.page = 1"
     >
-      <template #toolbar>
-        <YdSearchBar class="w-full">
-          <div class="skin-admin-filter-grid">
-            <YdInput v-model="search.keyword" clearable placeholder="名称 / Hash / 上传人" class="skin-admin-filter-grid__keyword" @keydown.enter="pagination.page = 1" @clear="pagination.page = 1" />
+      <template #filters>
             <YdSelect v-model="search.type" :options="typeOptions" class="skin-admin-filter-grid__select" />
             <YdSelect v-model="search.visibility" :options="visibilityOptions" class="skin-admin-filter-grid__select" />
             <div class="skin-admin-filter-grid__actions">
@@ -230,9 +229,29 @@ function formatSize(size?: number) {
                 筛选
               </YdButton>
             </div>
-          </div>
-        </YdSearchBar>
       </template>
+      <template #actions>
+        <YdButton @click="openUpload">
+          <YdIcon name="i-ri:upload-cloud-2-line" />
+          上传材质
+        </YdButton>
+        <YdButton variant="outline" @click="resetSearch">
+          重置
+        </YdButton>
+      </template>
+    </YdListToolbar>
+
+    <YdResponsiveEnhancedTable
+      :actions="rowActions"
+      row-key="hash"
+      table-root-class="skin-admin-texture-table-root rounded-lg overflow-hidden"
+      table-class="skin-admin-texture-table"
+      column-visibility
+      border
+      stripe
+      :columns="tableColumns"
+      :data="pagedRows"
+    >
       <template #cell-preview="{ row }">
         <div class="skin-admin-texture-preview" aria-hidden="true">
           <SkinTexturePreview
@@ -265,49 +284,8 @@ function formatSize(size?: number) {
       <template #cell-hash="{ row }">
         <code class="skin-admin-code" :title="row.original.hash">{{ shortHash(row.original.hash) }}</code>
       </template>
-      <template #cell-operation="{ row }">
-        <div class="flex-center gap-2">
-          <YdButton variant="outline" size="sm" :loading="model.saving === `admin-texture:${row.original.hash}`" @click="openEdit(row.original)">编辑</YdButton>
-          <YdButton variant="destructive" size="sm" :loading="model.saving === `admin-texture:${row.original.hash}`" @click="confirmDelete(row.original)">删除</YdButton>
-        </div>
-      </template>
-      <template #card="{ row }">
-        <YdCard class="w-full">
-          <div class="flex flex-col gap-3">
-            <div class="flex items-center justify-between gap-2">
-              <span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span>
-              <div class="flex gap-1">
-                <YdTag :variant="row.publicAccess ? 'default' : 'secondary'">
-                  {{ row.publicAccess ? '公开' : '私有' }}
-                </YdTag>
-              </div>
-            </div>
-            <div class="flex flex-col gap-1 text-sm">
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">类型</span>
-                <span>{{ textureKind(row) }}</span>
-              </div>
-              <div v-if="row.uploaderId" class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">上传人</span>
-                <span class="min-w-0 break-all">{{ model.userName(row.uploaderId) }}</span>
-              </div>
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">大小</span>
-                <span>{{ formatSize(row.size) }}</span>
-              </div>
-              <div v-if="row.uploadedAt !== undefined" class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">上传时间</span>
-                <span class="min-w-0 break-words">{{ model.dateText(row.uploadedAt) }}</span>
-              </div>
-            </div>
-            <div class="flex flex-wrap gap-2 border-t pt-3">
-              <YdButton variant="outline" size="sm" :loading="model.saving === `admin-texture:${row.hash}`" @click="openEdit(row)">编辑</YdButton>
-              <YdButton variant="destructive" size="sm" :loading="model.saving === `admin-texture:${row.hash}`" @click="confirmDelete(row)">删除</YdButton>
-            </div>
-          </div>
-        </YdCard>
-      </template>
-    </YdResponsiveTable>
+      
+</YdResponsiveEnhancedTable>
 
     <YdPagination
       v-model:page="pagination.page"
