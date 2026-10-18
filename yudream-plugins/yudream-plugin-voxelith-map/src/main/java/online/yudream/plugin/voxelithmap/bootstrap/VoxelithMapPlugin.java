@@ -78,17 +78,17 @@ import java.util.Map;
                 //    因此每个页面的 name 必须全新且稳定——历史上用过 -admin-* 系列，这里统一为 -page-*。
                 // 两个查看入口、同一个组件、两种形态（组件按路径前缀区分，见 Viewer 的 topMenuLayout）：
                 // ① 站点页 /map：公开站导航入口（siteNav），套宿主页眉页脚，功能条保持纵向；
-                // ② 平台页 /platform/.../viewer：不套页眉页脚、占满视口（fullscreen），功能条横排顶部。
+                // ② 平台页 /platform/.../viewer：占满视口、功能条横排顶部。
                 // 分工的理由：站内浏览要一个"内容页"（有导航可回、有页脚），嵌入/投屏/专注看图要"纯地图"；
                 // 两者共用一份实现，不必维护两个查看器。
                 @PluginRoute(path = "/map", name = "voxelith-map-page-map",
                         title = "世界地图", component = "voxelith-map/Viewer",
                         publicAccess = true, siteNav = true, sort = 1),
-                // 平台页不再声明 siteNav：站点导航只留 /map 一个入口（fullscreen 与 siteNav 同时声明时
-                // 前者生效，留着标志只会让导航多出一条指向"无页眉页脚页"的项）。
+                // 平台页不声明 siteNav：站点导航只留 /map 一个入口。SPI 的 @PluginRoute 没有「平台页不套布局」
+                // 属性，平台页的占屏适配在 Viewer 自己（挂 voxelith-fullbleed 收起宿主页签条）。
                 @PluginRoute(path = "/platform/plugins/voxelith-map/viewer", name = "voxelith-map-page-viewer",
                         title = "体素世界地图", component = "voxelith-map/Viewer",
-                        publicAccess = true, fullscreen = true, sort = 1),
+                        publicAccess = true, sort = 1),
                 @PluginRoute(path = "/platform/plugins/voxelith-map/maps", name = "voxelith-map-page-maps",
                         title = "地图管理", component = "voxelith-map/MapList",
                         permission = VoxelithMapPlugin.MANAGE_PERMISSION, sort = 2),
