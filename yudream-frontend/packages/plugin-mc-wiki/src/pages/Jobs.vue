@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { YdLoadingOverlay } from '@yudream/components'
-import type { TableColumn } from '@yudream/components'
+import type { ActionMenuItem, StatusColumn, TableColumn } from '@yudream/components'
 import type { McWikiPluginModel } from '../composables/useMcWikiPlugin'
 import type { WikiJob } from '../types'
-import { YdButton, YdIcon, YdPageHeader, YdPageMain, YdPagination, YdProgress, YdResponsiveTable, YdTag, useYdModal } from '@yudream/components'
+import { YdButton, YdIcon, YdPageHeader, YdPageMain, YdPagination, YdProgress, YdResponsiveEnhancedTable, useYdModal } from '@yudream/components'
 import { computed, onMounted, ref } from 'vue'
 import JobLogModal from '../components/JobLogModal.vue'
 import { jobStatusLabel, jobVersionLabel } from '../types'
@@ -17,7 +17,26 @@ const columns: TableColumn<WikiJob>[] = [
   { id: 'progress', header: '进度', width: 180 },
   { id: 'status', header: '状态', width: 100 },
   { accessorKey: 'updatedAt', header: '更新时间', width: 170 },
-  { id: 'operation', header: '操作', width: 170 },
+]
+
+/** 任务状态：语义色胶囊 */
+const jobStatusColumn: StatusColumn<WikiJob> = {
+  statusKey: 'status',
+  header: '状态',
+  width: 110,
+  statusMap: {
+    DONE: { label: jobStatusLabel('DONE'), variant: 'default', tone: 'success' },
+    FAILED: { label: jobStatusLabel('FAILED'), variant: 'destructive', tone: 'danger' },
+    CANCELLED: { label: jobStatusLabel('CANCELLED'), variant: 'secondary', tone: 'neutral' },
+    RUNNING: { label: jobStatusLabel('RUNNING'), variant: 'default', tone: 'info' },
+    PENDING: { label: jobStatusLabel('PENDING'), variant: 'default', tone: 'warning' },
+  },
+}
+
+/** 行操作统一收进操作菜单，删除保持确认流程 */
+const rowActions: ActionMenuItem<WikiJob>[] = [
+  { label: '日志', icon: 'morph:file-text', onClick: row => openLog(row) },
+  { label: '删除', icon: 'morph:trash-2', danger: true, onClick: row => confirmDelete(row) },
 ]
 
 const selectedJob = ref<WikiJob | null>(null)
@@ -59,14 +78,15 @@ onMounted(() => props.model.loadJobs())
     <YdButton variant="outline" :loading="model.loading" @click="model.loadJobs"><YdIcon name="i-ri:refresh-line" />刷新</YdButton>
   </YdPageHeader>
   <YdPageMain>
-    <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable
-
+    <YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable
       :columns="columns"
       :data="model.jobs"
       row-key="jobId"
-      table-root-class="max-w-full overflow-x-auto rounded-lg"
-      table-class="min-w-[860px]"
+      table-root-class="rounded-lg overflow-hidden"
+      table-class="min-w-[760px]"
       border stripe column-visibility
+      :status-column="jobStatusColumn"
+      :actions="rowActions"
       empty-text="暂无导入任务"
     >
       <template #cell-version="{ row }"><strong>{{ jobVersionLabel(row.original.version) }}</strong></template>
@@ -77,32 +97,8 @@ onMounted(() => props.model.loadJobs())
           <span class="text-xs text-secondary-foreground/60">{{ row.original.done }} / {{ row.original.total }}</span>
         </div>
       </template>
-      <template #cell-status="{ row }"><YdTag :variant="statusVariant(row.original.status)">{{ jobStatusLabel(row.original.status) }}</YdTag></template>
       <template #cell-updatedAt="{ row }">{{ formatTime(row.original.updatedAt) }}</template>
-      <template #cell-operation="{ row }">
-        <div class="flex-center gap-2">
-          <YdButton size="sm" variant="outline" @click="openLog(row.original)">日志</YdButton>
-          <YdButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</YdButton>
-        </div>
-      </template>
-      <template #card="{ row }">
-        <div class="flex flex-col gap-3">
-          <div class="flex items-center justify-between gap-2">
-            <strong class="text-base">{{ jobVersionLabel(row.version) }}</strong>
-            <YdTag :variant="statusVariant(row.status)">{{ jobStatusLabel(row.status) }}</YdTag>
-          </div>
-          <div class="flex flex-col gap-1 text-sm">
-            <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">阶段</span><span>{{ row.phase }}</span></div>
-            <div class="flex items-center gap-2"><span class="shrink-0 text-secondary-foreground/60">进度</span><YdProgress class="w-28" :model-value="percent(row)" /><span class="text-xs">{{ row.done }} / {{ row.total }}</span></div>
-            <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">更新时间</span><span>{{ formatTime(row.updatedAt) }}</span></div>
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <YdButton size="sm" variant="outline" @click="openLog(row)">日志</YdButton>
-            <YdButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</YdButton>
-          </div>
-        </div>
-      </template>
-    </YdResponsiveTable></YdLoadingOverlay>
+    </YdResponsiveEnhancedTable></YdLoadingOverlay>
     <YdPagination v-model:page="model.jobPager.page" v-model:size="model.jobPager.size" :total="model.jobPager.total" class="mt-3" @page-change="model.loadJobs" @size-change="model.loadJobs" />
     <JobLogModal v-model="logOpen" :job="selectedJob" :api="model.api" />
   </YdPageMain>

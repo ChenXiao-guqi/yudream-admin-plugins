@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { YdLoadingOverlay } from '@yudream/components'
-import type { TableColumn } from '@yudream/components'
+import type { ActionMenuItem, StatusColumn, TableColumn } from '@yudream/components'
 import type { McWikiPluginModel } from '../composables/useMcWikiPlugin'
 import type { WikiJob, WikiVersionRow } from '../types'
-import { YdButton, YdCard, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdSelect, YdTag, useYdModal, useYdToast } from '@yudream/components'
+import { YdButton, YdCard, YdIcon, YdPageHeader, YdPageMain, YdListToolbar, YdPagination, YdResponsiveEnhancedTable, YdSelect, YdTag, useYdModal, useYdToast } from '@yudream/components'
 import { onMounted, ref, watch } from 'vue'
 import JobLogModal from '../components/JobLogModal.vue'
 
@@ -33,7 +33,36 @@ const columns: TableColumn<WikiVersionRow>[] = [
   { id: 'counts', header: '物品 / 配方', width: 120 },
   { id: 'published', header: '发布状态', width: 100 },
   { accessorKey: 'releaseTime', header: '发布时间', width: 170 },
-  { id: 'operation', header: '操作', width: 300 },
+]
+
+/** 导入状态：语义色胶囊 */
+const importStatusColumn: StatusColumn<WikiVersionRow> = {
+  statusKey: 'imported',
+  header: '导入状态',
+  width: 100,
+  statusMap: {
+    'true': { label: '已导入', variant: 'default', tone: 'success' },
+    'false': { label: '未导入', variant: 'secondary', tone: 'neutral' },
+  },
+}
+
+/** 发布状态列 */
+const publishStatusColumn: StatusColumn<WikiVersionRow> = {
+  statusKey: 'published',
+  header: '发布状态',
+  width: 100,
+  statusMap: {
+    'true': { label: '已发布', variant: 'default', tone: 'info' },
+    'false': { label: '-', variant: 'secondary', tone: 'neutral' },
+  },
+}
+
+/** 行操作统一收进操作菜单；发布/删除按导入状态禁用并保持确认流程 */
+const rowActions: ActionMenuItem<WikiVersionRow>[] = [
+  { label: row => (row.imported ? '重新导入' : '导入'), icon: 'morph:download', onClick: row => importVersion(row.id) },
+  { label: '发布', icon: 'morph:upload', visible: row => !row.published, disabled: row => !row.imported, onClick: row => props.model.publishVersion(row.id) },
+  { label: '取消发布', icon: 'morph:undo', visible: row => row.published, onClick: row => confirmUnpublish(row) },
+  { label: '删除数据', icon: 'morph:trash-2', danger: true, disabled: row => !row.imported, onClick: row => confirmDeleteData(row) },
 ]
 
 const selectedJob = ref<WikiJob | null>(null)
@@ -131,60 +160,38 @@ onMounted(() => {
         <YdButton variant="outline" @click="updateRenders"><YdIcon name="i-ri:download-cloud-2-line" />一键更新渲染资产</YdButton>
       </div>
     </YdCard>
-    <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable
+    <YdListToolbar
+      v-model:keyword="model.versionFilters.keyword"
+      placeholder="搜索版本号，如 1.12.2"
+      @search="model.applyVersionFilters"
+      @clear="model.applyVersionFilters"
+    >
+      <template #filters>
+        <YdSelect v-model="model.versionFilters.type" :options="typeOptions" @change="model.applyVersionFilters" />
+        <YdSelect v-model="model.versionFilters.status" :options="statusOptions" @change="model.applyVersionFilters" />
+      </template>
+      <template #actions>
+        <YdButton variant="outline" @click="model.applyVersionFilters">查询</YdButton>
+      </template>
+    </YdListToolbar>
 
+    <YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable
+      :actions="rowActions"
+      :status-column="importStatusColumn"
       :columns="columns"
       :data="model.versions"
       row-key="id"
-      table-root-class="max-w-full overflow-x-auto rounded-lg"
-      table-class="min-w-[1080px]"
+      table-root-class="rounded-lg overflow-hidden"
+      table-class="min-w-[1020px]"
       border stripe column-visibility
       empty-text="暂无版本数据，请先刷新官方版本清单"
     >
-      <template #toolbar>
-        <YdSearchBar class="w-full">
-          <div class="mc-wiki-filter-bar">
-            <YdInput v-model="model.versionFilters.keyword" placeholder="搜索版本号，如 1.12.2" clearable @keydown.enter="model.applyVersionFilters" @clear="model.applyVersionFilters" />
-            <YdSelect v-model="model.versionFilters.type" :options="typeOptions" @change="model.applyVersionFilters" />
-            <YdSelect v-model="model.versionFilters.status" :options="statusOptions" @change="model.applyVersionFilters" />
-            <YdButton variant="outline" @click="model.applyVersionFilters"><YdIcon name="i-ri:search-line" />查询</YdButton>
-          </div>
-        </YdSearchBar>
-      </template>
       <template #cell-id="{ row }"><strong>{{ row.original.id }}</strong><YdTag v-if="row.original.latest" class="ml-2" variant="secondary">最新</YdTag></template>
       <template #cell-type="{ row }">{{ typeLabel(row.original.type) }}</template>
-      <template #cell-imported="{ row }"><YdTag :variant="row.original.imported ? 'default' : 'outline'">{{ row.original.imported ? '已导入' : '未导入' }}</YdTag></template>
       <template #cell-counts="{ row }"><span v-if="row.original.imported">{{ row.original.items }} / {{ row.original.recipes }}</span><span v-else>-</span></template>
-      <template #cell-published="{ row }"><YdTag v-if="row.original.published" variant="default">已发布</YdTag><span v-else class="text-secondary-foreground/60">-</span></template>
+      <template #cell-published="{ row }"><span class="yd-status-tone" :data-tone="row.original.published ? 'info' : 'neutral'">{{ row.original.published ? '已发布' : '-' }}</span></template>
       <template #cell-releaseTime="{ row }">{{ formatTime(row.original.releaseTime) }}</template>
-      <template #cell-operation="{ row }">
-        <div class="flex-center gap-2">
-          <YdButton size="sm" @click="importVersion(row.original.id)">{{ row.original.imported ? '重新导入' : '导入' }}</YdButton>
-          <YdButton v-if="!row.original.published" size="sm" variant="outline" :disabled="!row.original.imported" @click="model.publishVersion(row.original.id)">发布</YdButton>
-          <YdButton v-else size="sm" variant="outline" @click="confirmUnpublish(row.original)">取消发布</YdButton>
-          <YdButton size="sm" variant="destructive" :disabled="!row.original.imported" @click="confirmDeleteData(row.original)">删除数据</YdButton>
-        </div>
-      </template>
-      <template #card="{ row }">
-        <div class="flex flex-col gap-3">
-          <div class="flex items-center justify-between gap-2">
-            <strong class="text-base">{{ row.id }}</strong>
-            <YdTag :variant="row.imported ? 'default' : 'outline'">{{ row.imported ? '已导入' : '未导入' }}</YdTag>
-          </div>
-          <div class="flex flex-col gap-1 text-sm">
-            <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">类型</span><span>{{ typeLabel(row.type) }}</span></div>
-            <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">物品 / 配方</span><span>{{ row.imported ? `${row.items} / ${row.recipes}` : '-' }}</span></div>
-            <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">发布时间</span><span>{{ formatTime(row.releaseTime) }}</span></div>
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <YdButton size="sm" @click="importVersion(row.id)">{{ row.imported ? '重新导入' : '导入' }}</YdButton>
-            <YdButton v-if="!row.published" size="sm" variant="outline" :disabled="!row.imported" @click="model.publishVersion(row.id)">发布</YdButton>
-            <YdButton v-else size="sm" variant="outline" @click="confirmUnpublish(row)">取消发布</YdButton>
-            <YdButton size="sm" variant="destructive" :disabled="!row.imported" @click="confirmDeleteData(row)">删除数据</YdButton>
-          </div>
-        </div>
-      </template>
-    </YdResponsiveTable></YdLoadingOverlay>
+    </YdResponsiveEnhancedTable></YdLoadingOverlay>
     <YdPagination v-model:page="model.versionPager.page" v-model:size="model.versionPager.size" :total="model.versionPager.total" class="mt-3" @page-change="model.loadVersions" @size-change="model.applyVersionFilters" />
     <JobLogModal v-model="logOpen" :job="selectedJob" :api="model.api" />
   </YdPageMain>
