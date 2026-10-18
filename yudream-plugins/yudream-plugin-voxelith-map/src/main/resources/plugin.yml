@@ -12,3 +12,6 @@ main: online.yudream.plugin.voxelithmap.bootstrap.VoxelithMapPlugin
 softdepend:
   - mcpanel
 version: 2.1.71
+menu:
+  # 一级共享分类，见宿主 docs/plugin-system/specification.md 第 10 节
+  category: mc
