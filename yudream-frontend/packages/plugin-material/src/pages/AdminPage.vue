@@ -268,7 +268,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <YdTablePageLayout title="物料管理" :show-search="false">
+  <YdTablePageLayout title="物料管理">
     <template #search>
           <YdListToolbar
             v-model:keyword="model.adminFilters.keyword"
