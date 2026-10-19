@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { YdLoadingOverlay } from '@yudream/components'
 import type { ShopOrder } from '../types'
-import type { TableColumn } from '@yudream/components'
+import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
-import { YdButton, YdCard, YdIcon, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdTag, useYdToast } from '@yudream/components'
+import { YdButton, YdIcon, YdPageHeader, YdPageMain, YdPagination, YdTag, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
 import { onMounted, reactive, ref } from 'vue'
 import { createShopApi } from '../api/shop-api'
 import OrderDetailModal from '../components/OrderDetailModal.vue'
@@ -88,6 +88,13 @@ async function onVoucherSubmitted(updated: ShopOrder) {
 }
 
 onMounted(() => { void load() })
+
+/** 销售行操作：发货凭证 / 详情 */
+const rowActions: ActionMenuItem<unknown>[] = [
+  { label: row => (hasDeliveryProof(row as never) ? '更新凭证' : '发货凭证'), icon: 'morph:package', visible: row => ['PAID', 'DELIVERING'].includes((row as { status: string }).status), onClick: row => openVoucher(row as never) },
+  { label: '详情', icon: 'morph:eye', onClick: row => openDetail(row as never) },
+]
+
 </script>
 
 <template>
@@ -99,8 +106,10 @@ onMounted(() => { void load() })
       </YdButton>
     </YdPageHeader>
     <YdPageMain>
-      <YdLoadingOverlay :loading="loading"><YdResponsiveTable
+      <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+        :actions="rowActions"
 
+        
         row-key="id"
         table-root-class="rounded-lg overflow-hidden"
         table-class="min-w-[860px]"
@@ -143,55 +152,7 @@ onMounted(() => { void load() })
         <template #cell-createdAt="{ row }">
           {{ formatTime(row.original.createdAt) }}
         </template>
-        <template #cell-operation="{ row }">
-          <div class="flex-center gap-2">
-            <YdButton
-              v-if="row.original.status === 'PAID' || row.original.status === 'DELIVERING'"
-              size="sm"
-              @click="openVoucher(row.original)"
-            >
-              {{ hasDeliveryProof(row.original) ? '更新凭证' : '发货凭证' }}
-            </YdButton>
-            <YdButton size="sm" variant="outline" @click="openDetail(row.original)">详情</YdButton>
-          </div>
-        </template>
-        <template #card="{ row }">
-          <YdCard class="w-full">
-            <div class="flex flex-col gap-3">
-              <div class="flex items-center justify-between gap-2">
-                <span class="min-w-0 break-words text-base font-semibold">{{ row.productTitle }}<template v-if="row.variantName">（{{ row.variantName }}）</template></span>
-                <YdTag :variant="orderStatusTag(row.status).variant">
-                  {{ row.statusText || orderStatusTag(row.status).text }}
-                </YdTag>
-              </div>
-              <div class="flex flex-col gap-1 text-sm">
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">金额</span>
-                  <span class="break-all">{{ formatAmount(row.totalAmount) }} {{ row.assetCode }} ×{{ row.quantity }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">买家</span>
-                  <span class="break-all">{{ displayUserName(row.buyer) }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">下单时间</span>
-                  <span class="break-all">{{ formatTime(row.createdAt) }}</span>
-                </div>
-              </div>
-              <div class="flex flex-wrap gap-2 border-t pt-3">
-                <YdButton
-                  v-if="row.status === 'PAID' || row.status === 'DELIVERING'"
-                  size="sm"
-                  @click="openVoucher(row)"
-                >
-                  {{ hasDeliveryProof(row) ? '更新凭证' : '发货凭证' }}
-                </YdButton>
-                <YdButton size="sm" variant="outline" @click="openDetail(row)">详情</YdButton>
-              </div>
-            </div>
-          </YdCard>
-        </template>
-      </YdResponsiveTable></YdLoadingOverlay>
+</YdResponsiveEnhancedTable></YdLoadingOverlay>
 
       <YdPagination
         v-model:page="pager.page"

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { YdLoadingOverlay } from '@yudream/components'
 import type { ShopProductDetail, ShopProductSummary } from '../types'
-import type { TableColumn } from '@yudream/components'
+import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
-import { YdButton, YdCard, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdSelect, YdTag, useYdModal, useYdToast } from '@yudream/components'
+import { YdButton, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdSearchBar, YdSelect, YdTag, useYdModal, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { createShopApi } from '../api/shop-api'
@@ -163,6 +163,18 @@ async function removeProduct(product: ShopProductSummary) {
 }
 
 onMounted(() => { void load() })
+
+/** 商品行操作统一收进操作菜单（管理端含置顶/上下移排序） */
+const rowActions: ActionMenuItem<unknown>[] = [
+  { label: '置顶', icon: 'morph:arrow-up-to-line', disabled: () => actingId.value !== '', onClick: row => moveProduct(row as never, 'TOP') },
+  { label: '上移', icon: 'morph:arrow-up', disabled: () => actingId.value !== '', onClick: row => moveProduct(row as never, 'UP') },
+  { label: '下移', icon: 'morph:arrow-down', disabled: () => actingId.value !== '', onClick: row => moveProduct(row as never, 'DOWN') },
+  { label: '详情', icon: 'morph:eye', onClick: row => openDetail(row as never) },
+  { label: '编辑', icon: 'morph:pencil', onClick: row => openEdit(row as never) },
+  { label: row => ((row as { status: string }).status === 'ON_SHELF' ? '强制下架' : '恢复上架'), icon: 'morph:power', disabled: () => actingId.value !== '', onClick: row => toggleShelf(row as never) },
+  { label: '删除', icon: 'morph:trash-2', danger: true, disabled: () => actingId.value !== '', onClick: row => confirmDelete(row as never) },
+]
+
 </script>
 
 <template>
@@ -180,8 +192,10 @@ onMounted(() => { void load() })
       </div>
     </YdPageHeader>
     <YdPageMain>
-      <YdLoadingOverlay :loading="loading"><YdResponsiveTable
+      <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+        :actions="rowActions"
 
+        
         row-key="id"
         table-root-class="rounded-lg overflow-hidden"
         table-class="min-w-[1100px]"
@@ -256,101 +270,7 @@ onMounted(() => { void load() })
         <template #cell-sortOrder="{ row }">
           <span class="text-xs text-muted-foreground">{{ Number(row.original.sortOrder) || 0 }}</span>
         </template>
-        <template #cell-operation="{ row }">
-          <div class="flex-center gap-2">
-            <YdButton size="sm" variant="outline" :loading="actingId === row.original.id" @click="moveProduct(row.original, 'TOP')">
-              置顶
-            </YdButton>
-            <YdButton size="sm" variant="outline" :loading="actingId === row.original.id" @click="moveProduct(row.original, 'UP')">
-              上移
-            </YdButton>
-            <YdButton size="sm" variant="outline" :loading="actingId === row.original.id" @click="moveProduct(row.original, 'DOWN')">
-              下移
-            </YdButton>
-            <YdButton size="sm" variant="outline" @click="openDetail(row.original)">详情</YdButton>
-            <YdButton size="sm" variant="outline" @click="openEdit(row.original)">编辑</YdButton>
-            <YdButton
-              size="sm"
-              variant="outline"
-              :loading="actingId === row.original.id"
-              @click="toggleShelf(row.original)"
-            >
-              {{ row.original.status === 'ON_SHELF' ? '强制下架' : '恢复上架' }}
-            </YdButton>
-            <YdButton
-              size="sm"
-              variant="destructive"
-              :loading="actingId === row.original.id"
-              @click="confirmDelete(row.original)"
-            >
-              删除
-            </YdButton>
-          </div>
-        </template>
-        <template #card="{ row }">
-          <YdCard class="w-full">
-            <div class="flex flex-col gap-3">
-              <div class="flex items-center justify-between gap-2">
-                <span class="min-w-0 break-words text-base font-semibold">{{ row.title }}</span>
-                <YdTag :variant="productStatusTag(row.status).variant">
-                  {{ row.statusText || productStatusTag(row.status).text }}
-                </YdTag>
-              </div>
-              <div class="flex flex-col gap-1 text-sm">
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">价格</span>
-                  <span class="break-all">{{ row.assetSymbol || '¥' }}{{ formatAmount(row.price) }} {{ row.assetCode }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">库存 / 已售</span>
-                  <span class="break-all">{{ row.stock < 0 ? '不限' : row.stock }} / {{ Number(row.soldCount) || 0 }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">卖家</span>
-                  <span class="break-all">{{ displayProductOwner(row) }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">类型 / 排序</span>
-                  <span class="break-all">{{ productTypeLabel(row.type, row.typeDisplayName) }} · 排序 {{ Number(row.sortOrder) || 0 }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">更新时间</span>
-                  <span class="break-all">{{ formatTime(row.updatedAt) }}</span>
-                </div>
-              </div>
-              <div class="flex flex-wrap gap-2 border-t pt-3">
-                <YdButton size="sm" variant="outline" :loading="actingId === row.id" @click="moveProduct(row, 'TOP')">
-                  置顶
-                </YdButton>
-                <YdButton size="sm" variant="outline" :loading="actingId === row.id" @click="moveProduct(row, 'UP')">
-                  上移
-                </YdButton>
-                <YdButton size="sm" variant="outline" :loading="actingId === row.id" @click="moveProduct(row, 'DOWN')">
-                  下移
-                </YdButton>
-                <YdButton size="sm" variant="outline" @click="openDetail(row)">详情</YdButton>
-                <YdButton size="sm" variant="outline" @click="openEdit(row)">编辑</YdButton>
-                <YdButton
-                  size="sm"
-                  variant="outline"
-                  :loading="actingId === row.id"
-                  @click="toggleShelf(row)"
-                >
-                  {{ row.status === 'ON_SHELF' ? '强制下架' : '恢复上架' }}
-                </YdButton>
-                <YdButton
-                  size="sm"
-                  variant="destructive"
-                  :loading="actingId === row.id"
-                  @click="confirmDelete(row)"
-                >
-                  删除
-                </YdButton>
-              </div>
-            </div>
-          </YdCard>
-        </template>
-      </YdResponsiveTable></YdLoadingOverlay>
+</YdResponsiveEnhancedTable></YdLoadingOverlay>
 
       <YdPagination
         v-model:page="pager.page"

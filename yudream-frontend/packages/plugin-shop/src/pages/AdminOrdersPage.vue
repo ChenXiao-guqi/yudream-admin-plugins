@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { YdLoadingOverlay } from '@yudream/components'
 import type { ShopOrder } from '../types'
-import type { TableColumn } from '@yudream/components'
+import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
-import { YdButton, YdCard, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdSelect, YdTag, useYdModal, useYdToast } from '@yudream/components'
+import { YdButton, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdSearchBar, YdSelect, YdTag, useYdModal, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { createShopApi } from '../api/shop-api'
 import OrderDetailModal from '../components/OrderDetailModal.vue'
@@ -199,6 +199,15 @@ function canRefund(order: ShopOrder) {
 }
 
 onMounted(() => { void load() })
+
+/** 订单行操作统一收进操作菜单；退款/重发保持确认流程 */
+const rowActions: ActionMenuItem<unknown>[] = [
+  { label: '详情', icon: 'morph:eye', onClick: row => openDetail(row as never) },
+  { label: row => (isOwnSale(row as never) ? '发货凭证' : '代发货'), icon: 'morph:package', visible: row => canSubmitVoucher(row as never), disabled: () => voucherLoadingId.value !== '', onClick: row => openVoucher(row as never) },
+  { label: '重发', icon: 'morph:refresh', visible: row => canRedeliver(row as never), disabled: () => actingId.value !== '', onClick: row => confirmRedeliver(row as never) },
+  { label: '退款', icon: 'morph:undo', danger: true, visible: row => canRefund(row as never), disabled: () => actingId.value !== '', onClick: row => confirmRefund(row as never) },
+]
+
 </script>
 
 <template>
@@ -210,8 +219,10 @@ onMounted(() => { void load() })
       </YdButton>
     </YdPageHeader>
     <YdPageMain>
-      <YdLoadingOverlay :loading="loading"><YdResponsiveTable
+      <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+        :actions="rowActions"
 
+        
         row-key="id"
         table-root-class="rounded-lg overflow-hidden"
         table-class="min-w-[1100px]"
@@ -295,101 +306,7 @@ onMounted(() => { void load() })
         <template #cell-createdAt="{ row }">
           {{ formatTime(row.original.createdAt) }}
         </template>
-        <template #cell-operation="{ row }">
-          <div class="flex-center gap-2">
-            <YdButton size="sm" variant="outline" @click="openDetail(row.original)">详情</YdButton>
-            <YdButton
-              v-if="canSubmitVoucher(row.original)"
-              size="sm"
-              :loading="voucherLoadingId === row.original.id"
-              @click="openVoucher(row.original)"
-            >
-              {{ isOwnSale(row.original) ? '发货凭证' : '代发货' }}
-            </YdButton>
-            <YdButton
-              v-if="canRedeliver(row.original)"
-              size="sm"
-              variant="outline"
-              :loading="actingId === row.original.id"
-              @click="confirmRedeliver(row.original)"
-            >
-              重新发货
-            </YdButton>
-            <YdButton
-              v-if="canRefund(row.original)"
-              size="sm"
-              variant="destructive"
-              :loading="actingId === row.original.id"
-              @click="confirmRefund(row.original)"
-            >
-              退款
-            </YdButton>
-          </div>
-        </template>
-        <template #card="{ row }">
-          <YdCard class="w-full">
-            <div class="flex flex-col gap-3">
-              <div class="flex items-center justify-between gap-2">
-                <span class="min-w-0 break-words text-base font-semibold">{{ row.productTitle }}<template v-if="row.variantName">（{{ row.variantName }}）</template></span>
-                <YdTag :variant="orderStatusTag(row.status).variant">
-                  {{ row.statusText || orderStatusTag(row.status).text }}
-                </YdTag>
-              </div>
-              <div class="flex flex-col gap-1 text-sm">
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">订单号</span>
-                  <span class="break-all font-mono text-xs">{{ row.id }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">金额</span>
-                  <span class="break-all">{{ formatAmount(row.totalAmount) }} {{ row.assetCode }} ×{{ row.quantity }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">买家</span>
-                  <span class="break-all">{{ displayUserName(row.buyer) }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">卖家</span>
-                  <span class="break-all">{{ displayOrderSeller(row) }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">下单时间</span>
-                  <span class="break-all">{{ formatTime(row.createdAt) }}</span>
-                </div>
-              </div>
-              <div class="flex flex-wrap gap-2 border-t pt-3">
-                <YdButton size="sm" variant="outline" @click="openDetail(row)">详情</YdButton>
-                <YdButton
-                  v-if="canSubmitVoucher(row)"
-                  size="sm"
-                  :loading="voucherLoadingId === row.id"
-                  @click="openVoucher(row)"
-                >
-                  {{ isOwnSale(row) ? '发货凭证' : '代发货' }}
-                </YdButton>
-                <YdButton
-                  v-if="canRedeliver(row)"
-                  size="sm"
-                  variant="outline"
-                  :loading="actingId === row.id"
-                  @click="confirmRedeliver(row)"
-                >
-                  重新发货
-                </YdButton>
-                <YdButton
-                  v-if="canRefund(row)"
-                  size="sm"
-                  variant="destructive"
-                  :loading="actingId === row.id"
-                  @click="confirmRefund(row)"
-                >
-                  退款
-                </YdButton>
-              </div>
-            </div>
-          </YdCard>
-        </template>
-      </YdResponsiveTable></YdLoadingOverlay>
+</YdResponsiveEnhancedTable></YdLoadingOverlay>
 
       <YdPagination
         v-model:page="pager.page"
