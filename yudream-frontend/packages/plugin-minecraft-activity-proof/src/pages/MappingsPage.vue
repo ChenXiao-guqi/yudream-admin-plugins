@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import type { TableColumn } from '@yudream/components'
+import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { ActivityProofMapping } from '../types'
-import { YdButton, YdCard, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSelect } from '@yudream/components'
+import { YdButton, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdSelect, YdResponsiveEnhancedTable } from '@yudream/components'
 import { computed, onMounted } from 'vue'
 import { useMappings } from '../composables/useMappings'
 import { formatTime } from '../composables/utils'
@@ -25,6 +25,12 @@ const mappingColumns: TableColumn<ActivityProofMapping>[] = [
 ]
 
 onMounted(model.load)
+
+/** 行操作：删除学号映射 */
+const rowActions: ActionMenuItem<unknown>[] = [
+  { label: '删除', icon: 'morph:trash-2', danger: true, disabled: () => saving.value, onClick: row => model.remove(row as never) },
+]
+
 </script>
 
 <template>
@@ -61,8 +67,10 @@ onMounted(model.load)
         </YdButton>
       </form>
       <div class="proof-min-w-0">
-      <YdLoadingOverlay :loading="loading"><YdResponsiveTable
-
+      <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+          :actions="rowActions"
+        
+        
         row-key="id"
         table-root-class="proof-table-scroll"
         table-class="proof-table-w860"
@@ -77,38 +85,7 @@ onMounted(model.load)
           <div>{{ row.original.playerId }}</div>
         </template>
         <template #cell-createdAt="{ row }">{{ formatTime(row.original.createdAt) }}</template>
-        <template #cell-operation="{ row }">
-          <div class="flex-center gap-2">
-            <YdButton size="sm" variant="destructive" :loading="saving" @click="model.remove(row.original)">删除</YdButton>
-          </div>
-        </template>
-        <template #card="{ row }">
-          <YdCard class="w-full">
-            <div class="flex flex-col gap-3">
-              <div class="flex items-center justify-between gap-2">
-                <span class="min-w-0 break-words text-base font-semibold">{{ row.playerName || '-' }}</span>
-              </div>
-              <div class="flex flex-col gap-1 text-sm">
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">学号</span>
-                  <span class="break-all">{{ row.studentNo }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">玩家 ID</span>
-                  <span class="break-all">{{ row.playerId }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">创建时间</span>
-                  <span>{{ formatTime(row.createdAt) }}</span>
-                </div>
-              </div>
-              <div class="flex flex-wrap gap-2 border-t pt-3">
-                <YdButton size="sm" variant="destructive" :loading="saving" @click="model.remove(row)">删除</YdButton>
-              </div>
-            </div>
-          </YdCard>
-        </template>
-      </YdResponsiveTable></YdLoadingOverlay>
+</YdResponsiveEnhancedTable></YdLoadingOverlay>
       </div>
       <YdPagination
         v-model:page="pager.page"

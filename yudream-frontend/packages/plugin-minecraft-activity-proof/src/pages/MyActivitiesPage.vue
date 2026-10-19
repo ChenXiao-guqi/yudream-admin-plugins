@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { YdLoadingOverlay } from '@yudream/components'
-import type { TableColumn } from '@yudream/components'
+import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { MyParticipation } from '../types'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
-import { YdButton, YdCard, YdIcon, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdTag } from '@yudream/components'
+import { YdButton, YdIcon, YdPageHeader, YdPageMain, YdPagination, YdTag, YdResponsiveEnhancedTable } from '@yudream/components'
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import CoverThumb from '../components/CoverThumb.vue'
@@ -56,6 +56,13 @@ function ended(row: MyParticipation) {
 function openDetail(row: MyParticipation) {
   router.push({ path: '/platform/plugins/yudream-student-info/activity-square/detail', query: { id: row.activityId } })
 }
+
+/** 行操作：查看活动 / 自助核验 / 退出报名 */
+const rowActions: ActionMenuItem<unknown>[] = [
+  { label: '查看活动', icon: 'morph:eye', onClick: row => openDetail(row as never) },
+  { label: '自助核验', icon: 'morph:check', visible: row => (row as { status: string }).status === 'JOINED' && (row as { verifyStatus: string }).verifyStatus !== 'PASSED', disabled: () => actingId.value !== '', onClick: row => model.verify(row as never) },
+]
+
 </script>
 
 <template>
@@ -66,8 +73,10 @@ function openDetail(row: MyParticipation) {
       </YdButton>
     </YdPageHeader>
     <YdPageMain>
-      <YdLoadingOverlay :loading="loading"><YdResponsiveTable
-
+      <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+          :actions="rowActions"
+        
+        
         row-key="activityId"
         table-root-class="proof-table-scroll"
         table-class="proof-table-w1240"
@@ -100,79 +109,7 @@ function openDetail(row: MyParticipation) {
         </template>
         <template #cell-verifyNote="{ row }">{{ row.original.verifyNote || '-' }}</template>
         <template #cell-joinedAt="{ row }">{{ formatTime(row.original.joinedAt) }}</template>
-        <template #cell-operation="{ row }">
-          <div class="flex-center flex-wrap gap-2">
-            <YdButton size="sm" variant="outline" @click="openDetail(row.original)">查看活动</YdButton>
-            <YdButton
-              v-if="row.original.status === 'JOINED' && row.original.verifyStatus !== 'PASSED'"
-              size="sm"
-              variant="outline"
-              :loading="actingId === row.original.activityId"
-              @click="model.verify(row.original)"
-            >
-              自助核验
-            </YdButton>
-            <YdButton
-              v-if="row.original.status === 'JOINED' && !ended(row.original)"
-              size="sm"
-              variant="destructive"
-              :loading="actingId === row.original.activityId"
-              @click="model.cancel(row.original)"
-            >
-              取消参与
-            </YdButton>
-          </div>
-        </template>
-        <template #card="{ row }">
-          <YdCard class="w-full">
-            <div class="flex flex-col gap-3">
-              <div class="flex items-center justify-between gap-2">
-                <span class="min-w-0 break-words text-base font-semibold">{{ row.title }}</span>
-                <YdTag :variant="verifyTag(row).variant">{{ verifyTag(row).text }}</YdTag>
-              </div>
-              <div class="flex flex-col gap-1 text-sm">
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">活动时间</span>
-                  <span>{{ formatTimeRange(row.activityStart, row.activityEnd) }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">参与状态</span>
-                  <span>{{ statusTag(row).text }}</span>
-                </div>
-                <div v-if="row.verifyNote" class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">核验说明</span>
-                  <span class="break-all">{{ row.verifyNote }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">参与时间</span>
-                  <span>{{ formatTime(row.joinedAt) }}</span>
-                </div>
-              </div>
-              <div class="flex flex-wrap gap-2 border-t pt-3">
-                <YdButton size="sm" variant="outline" @click="openDetail(row)">查看活动</YdButton>
-                <YdButton
-                  v-if="row.status === 'JOINED' && row.verifyStatus !== 'PASSED'"
-                  size="sm"
-                  variant="outline"
-                  :loading="actingId === row.activityId"
-                  @click="model.verify(row)"
-                >
-                  自助核验
-                </YdButton>
-                <YdButton
-                  v-if="row.status === 'JOINED' && !ended(row)"
-                  size="sm"
-                  variant="destructive"
-                  :loading="actingId === row.activityId"
-                  @click="model.cancel(row)"
-                >
-                  取消参与
-                </YdButton>
-              </div>
-            </div>
-          </YdCard>
-        </template>
-      </YdResponsiveTable></YdLoadingOverlay>
+</YdResponsiveEnhancedTable></YdLoadingOverlay>
       <YdPagination
         v-model:page="pager.page"
         v-model:size="pager.size"

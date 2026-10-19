@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import type { TableColumn } from '@yudream/components'
+import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
 import type { ActivityParticipantAdmin } from '../types'
-import { YdButton, YdCard, YdDescriptions, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSwitch, YdTag, YdTablePicker } from '@yudream/components'
+import { YdButton, YdDescriptions, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdSwitch, YdTag, YdTablePicker, YdResponsiveEnhancedTable } from '@yudream/components'
 import { computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAdminActivityDetail } from '../composables/useAdminActivityDetail'
@@ -87,6 +87,13 @@ function openEdit() {
   if (!activity.value) return
   router.push({ path: '/platform/plugins/yudream-student-info/activity-proof/activities/edit', query: { id: activity.value.id } })
 }
+
+/** 参与者行操作：核验 / 移除 */
+const rowActions: ActionMenuItem<unknown>[] = [
+  { label: '核验', icon: 'morph:check', visible: row => (row as { status: string }).status === 'JOINED' && (row as { verifyStatus: string }).verifyStatus !== 'PASSED', disabled: () => verifyingId.value !== '', onClick: row => model.verify(row as never) },
+  { label: '移除', icon: 'morph:trash-2', danger: true, onClick: row => model.removeParticipant(row as never) },
+]
+
 </script>
 
 <template>
@@ -140,8 +147,10 @@ function openEdit() {
               </div>
             </div>
             <div class="proof-min-w-0">
-            <YdLoadingOverlay :loading="loading"><YdResponsiveTable
-
+            <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+                :actions="rowActions"
+              
+              
               row-key="userId"
               table-root-class="proof-table-scroll"
               table-class="proof-table-w1550"
@@ -174,73 +183,7 @@ function openEdit() {
                 <YdTag :variant="verifyTag(row.original.verifyStatus).variant">{{ verifyTag(row.original.verifyStatus).text }}</YdTag>
               </template>
               <template #cell-verifyNote="{ row }">{{ row.original.verifyNote || '-' }}</template>
-              <template #cell-operation="{ row }">
-                <div class="flex-center gap-2">
-                  <YdButton
-                    v-if="row.original.status === 'JOINED' && row.original.verifyStatus !== 'PASSED'"
-                    size="sm"
-                    variant="outline"
-                    :loading="verifyingId === row.original.userId"
-                    @click="model.verify(row.original)"
-                  >
-                    核验
-                  </YdButton>
-                  <YdButton size="sm" variant="destructive" @click="model.removeParticipant(row.original)">
-                    移除
-                  </YdButton>
-                </div>
-              </template>
-              <template #card="{ row }">
-                <YdCard class="w-full">
-                  <div class="flex flex-col gap-3">
-                    <div class="flex items-center justify-between gap-2">
-                      <span class="min-w-0 break-words text-base font-semibold">{{ row.studentName || row.username || '-' }}</span>
-                      <YdTag :variant="verifyTag(row.verifyStatus).variant">{{ verifyTag(row.verifyStatus).text }}</YdTag>
-                    </div>
-                    <div class="flex flex-col gap-1 text-sm">
-                      <div class="flex gap-2">
-                        <span class="shrink-0 text-secondary-foreground/60">学号</span>
-                        <span class="break-all">{{ row.studentNo || '未绑定' }}</span>
-                      </div>
-                      <div class="flex gap-2">
-                        <span class="shrink-0 text-secondary-foreground/60">班级 / 学院</span>
-                        <span class="break-all">{{ row.className || '-' }} / {{ row.college || '-' }}</span>
-                      </div>
-                      <div class="flex gap-2">
-                        <span class="shrink-0 text-secondary-foreground/60">玩家</span>
-                        <span class="break-all">{{ row.playerName || '-' }}</span>
-                      </div>
-                      <div class="flex gap-2">
-                        <span class="shrink-0 text-secondary-foreground/60">来源</span>
-                        <span>{{ sourceTag(row.source).text }}</span>
-                      </div>
-                      <div class="flex gap-2">
-                        <span class="shrink-0 text-secondary-foreground/60">参与时间</span>
-                        <span>{{ formatTime(row.joinedAt) }}</span>
-                      </div>
-                      <div v-if="row.verifyNote" class="flex gap-2">
-                        <span class="shrink-0 text-secondary-foreground/60">核验说明</span>
-                        <span class="break-all">{{ row.verifyNote }}</span>
-                      </div>
-                    </div>
-                    <div class="flex flex-wrap gap-2 border-t pt-3">
-                      <YdButton
-                        v-if="row.status === 'JOINED' && row.verifyStatus !== 'PASSED'"
-                        size="sm"
-                        variant="outline"
-                        :loading="verifyingId === row.userId"
-                        @click="model.verify(row)"
-                      >
-                        核验
-                      </YdButton>
-                      <YdButton size="sm" variant="destructive" @click="model.removeParticipant(row)">
-                        移除
-                      </YdButton>
-                    </div>
-                  </div>
-                </YdCard>
-              </template>
-            </YdResponsiveTable></YdLoadingOverlay>
+            </YdResponsiveEnhancedTable></YdLoadingOverlay>
             </div>
             <YdPagination
               v-model:page="pager.page"

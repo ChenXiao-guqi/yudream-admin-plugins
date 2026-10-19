@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { YdLoadingOverlay } from '@yudream/components'
-import type { TableColumn } from '@yudream/components'
+import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { Activity } from '../types'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
-import { YdButton, YdCard, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdSelect, YdTag } from '@yudream/components'
+import { YdButton, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdSearchBar, YdSelect, YdTag, YdResponsiveEnhancedTable } from '@yudream/components'
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAdminActivities } from '../composables/useAdminActivities'
@@ -71,6 +71,16 @@ function openEdit(row?: Activity) {
 function openDetail(row: Activity) {
   router.push({ path: '/platform/plugins/yudream-student-info/activity-proof/activities/detail', query: { id: row.id } })
 }
+
+/** 行操作统一收进操作菜单，按活动状态出现 */
+const rowActions: ActionMenuItem<unknown>[] = [
+  { label: '详情核验', icon: 'morph:eye', onClick: row => openDetail(row as never) },
+  { label: '编辑', icon: 'morph:pencil', visible: row => (row as { status: string }).status !== 'CLOSED', onClick: row => openEdit(row as never) },
+  { label: '发布', icon: 'morph:send', visible: row => (row as { status: string }).status === 'DRAFT', disabled: () => actingId.value !== '', onClick: row => model.publish(row as never) },
+  { label: '结束', icon: 'morph:flag', visible: row => (row as { status: string }).status === 'PUBLISHED', disabled: () => actingId.value !== '', onClick: row => model.close(row as never) },
+  { label: '删除', icon: 'morph:trash-2', danger: true, disabled: () => actingId.value !== '', onClick: row => model.remove(row as never) },
+]
+
 </script>
 
 <template>
@@ -81,8 +91,10 @@ function openDetail(row: Activity) {
       </YdButton>
     </YdPageHeader>
     <YdPageMain>
-      <YdLoadingOverlay :loading="loading"><YdResponsiveTable
-
+      <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+          :actions="rowActions"
+        
+        
         row-key="id"
         table-root-class="proof-table-scroll"
         table-class="proof-table-w1740"
@@ -123,77 +135,7 @@ function openDetail(row: Activity) {
         <template #cell-activityTime="{ row }">{{ formatTimeRange(row.original.activityStart, row.original.activityEnd) }}</template>
         <template #cell-participants="{ row }">{{ row.original.participantCount }} / {{ row.original.verifiedCount }}</template>
         <template #cell-createdAt="{ row }">{{ formatTime(row.original.createdAt) }}</template>
-        <template #cell-operation="{ row }">
-          <div class="flex-center flex-wrap gap-2">
-            <YdButton size="sm" variant="outline" @click="openDetail(row.original)">详情核验</YdButton>
-            <YdButton v-if="row.original.status !== 'CLOSED'" size="sm" variant="outline" @click="openEdit(row.original)">编辑</YdButton>
-            <YdButton
-              v-if="row.original.status === 'DRAFT'"
-              size="sm"
-              :loading="actingId === row.original.id"
-              @click="model.publish(row.original)"
-            >
-              发布
-            </YdButton>
-            <YdButton
-              v-if="row.original.status === 'PUBLISHED'"
-              size="sm"
-              variant="outline"
-              :loading="actingId === row.original.id"
-              @click="model.close(row.original)"
-            >
-              结束
-            </YdButton>
-            <YdButton
-              size="sm"
-              variant="destructive"
-              :loading="actingId === row.original.id"
-              @click="model.remove(row.original)"
-            >
-              删除
-            </YdButton>
-          </div>
-        </template>
-        <template #card="{ row }">
-          <YdCard class="w-full">
-            <div class="flex flex-col gap-3">
-              <div class="flex items-center justify-between gap-2">
-                <span class="min-w-0 break-words text-base font-semibold">{{ row.title }}</span>
-                <YdTag :variant="statusTag(row).variant">{{ statusTag(row).text }}</YdTag>
-              </div>
-              <div class="flex flex-col gap-1 text-sm">
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">参与范围</span>
-                  <span>{{ deptText(row) }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">核验方式</span>
-                  <span class="break-all">{{ bindingText(row) }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">报名时间</span>
-                  <span>{{ formatTimeRange(row.signupStart, row.signupEnd) }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">活动时间</span>
-                  <span>{{ formatTimeRange(row.activityStart, row.activityEnd) }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">参与/通过</span>
-                  <span>{{ row.participantCount }} / {{ row.verifiedCount }}</span>
-                </div>
-              </div>
-              <div class="flex flex-wrap gap-2 border-t pt-3">
-                <YdButton size="sm" variant="outline" @click="openDetail(row)">详情核验</YdButton>
-                <YdButton v-if="row.status !== 'CLOSED'" size="sm" variant="outline" @click="openEdit(row)">编辑</YdButton>
-                <YdButton v-if="row.status === 'DRAFT'" size="sm" :loading="actingId === row.id" @click="model.publish(row)">发布</YdButton>
-                <YdButton v-if="row.status === 'PUBLISHED'" size="sm" variant="outline" :loading="actingId === row.id" @click="model.close(row)">结束</YdButton>
-                <YdButton size="sm" variant="destructive" :loading="actingId === row.id" @click="model.remove(row)">删除</YdButton>
-              </div>
-            </div>
-          </YdCard>
-        </template>
-      </YdResponsiveTable></YdLoadingOverlay>
+</YdResponsiveEnhancedTable></YdLoadingOverlay>
       <YdPagination
         v-model:page="pager.page"
         v-model:size="pager.size"

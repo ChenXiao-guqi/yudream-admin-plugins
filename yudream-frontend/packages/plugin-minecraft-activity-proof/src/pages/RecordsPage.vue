@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import type { TableColumn } from '@yudream/components'
+import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { ActivityProofExportRecord } from '../types'
-import { YdButton, YdCard, YdFileUpload, YdIcon, YdModal, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable } from '@yudream/components'
+import { YdButton, YdFileUpload, YdIcon, YdModal, YdPageHeader, YdPageMain, YdPagination, YdResponsiveEnhancedTable } from '@yudream/components'
 import { onMounted, ref } from 'vue'
 import { useProofRecords } from '../composables/useProofRecords'
 import { formatFileSize, formatTime } from '../composables/utils'
@@ -48,6 +48,15 @@ async function handleUpload(options: { file: File }) {
     uploading.value = false
   }
 }
+
+/** 记录行操作：下载与删除 */
+const rowActions: ActionMenuItem<unknown>[] = [
+  { label: '下载 Word', icon: 'morph:download', disabled: () => acting.value, onClick: row => model.download(row as never) },
+  { label: '下载 PDF', icon: 'morph:file-text', visible: row => Boolean((row as { stampedPdfReady?: boolean }).stampedPdfReady), disabled: () => acting.value, onClick: row => model.downloadStamped(row as never) },
+  { label: '上传 PDF', icon: 'morph:cloud-upload', onClick: row => openUpload(row as never) },
+  { label: '删除', icon: 'morph:trash-2', danger: true, onClick: row => model.remove(row as never) },
+]
+
 </script>
 
 <template>
@@ -58,8 +67,10 @@ async function handleUpload(options: { file: File }) {
       </YdButton>
     </YdPageHeader>
     <YdPageMain>
-      <YdLoadingOverlay :loading="loading"><YdResponsiveTable
-
+      <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+          :actions="rowActions"
+        
+        
         row-key="id"
         table-root-class="proof-table-scroll"
         table-class="proof-table-w1280"
@@ -81,48 +92,7 @@ async function handleUpload(options: { file: File }) {
           <div v-if="row.original.stampedPdfReady">{{ formatFileSize(row.original.stampedPdfSize) }}</div>
         </template>
         <template #cell-generatedAt="{ row }">{{ formatTime(row.original.generatedAt) }}</template>
-        <template #cell-operation="{ row }">
-          <div class="flex-center gap-2">
-            <YdButton size="sm" variant="outline" :loading="acting" @click="model.download(row.original)">下载 Word</YdButton>
-            <YdButton v-if="row.original.stampedPdfReady" size="sm" variant="outline" :loading="acting" @click="model.downloadStamped(row.original)">下载 PDF</YdButton>
-            <YdButton size="sm" variant="outline" @click="openUpload(row.original)">上传 PDF</YdButton>
-            <YdButton size="sm" variant="destructive" @click="model.remove(row.original)">删除</YdButton>
-          </div>
-        </template>
-        <template #card="{ row }">
-          <YdCard class="w-full">
-            <div class="flex flex-col gap-3">
-              <div class="flex items-center justify-between gap-2">
-                <span class="min-w-0 break-words text-base font-semibold">{{ row.outputFilename }}</span>
-              </div>
-              <div class="flex flex-col gap-1 text-sm">
-                <div v-if="row.activityName" class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">活动</span>
-                  <span class="break-all">{{ row.activityName }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">参与人数</span>
-                  <span>{{ row.participantCount }} 人<span v-if="row.unmatchedCount"> / {{ row.unmatchedCount }} 未匹配</span></span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">盖章 PDF</span>
-                  <span>{{ row.stampedPdfReady ? row.stampedPdfFilename : '未上传' }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">生成时间</span>
-                  <span>{{ formatTime(row.generatedAt) }}</span>
-                </div>
-              </div>
-              <div class="flex flex-wrap gap-2 border-t pt-3">
-                <YdButton size="sm" variant="outline" :loading="acting" @click="model.download(row)">下载 Word</YdButton>
-                <YdButton v-if="row.stampedPdfReady" size="sm" variant="outline" :loading="acting" @click="model.downloadStamped(row)">下载 PDF</YdButton>
-                <YdButton size="sm" variant="outline" @click="openUpload(row)">上传 PDF</YdButton>
-                <YdButton size="sm" variant="destructive" @click="model.remove(row)">删除</YdButton>
-              </div>
-            </div>
-          </YdCard>
-        </template>
-      </YdResponsiveTable></YdLoadingOverlay>
+</YdResponsiveEnhancedTable></YdLoadingOverlay>
       <YdPagination
         v-model:page="pager.page"
         v-model:size="pager.size"

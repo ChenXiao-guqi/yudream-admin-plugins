@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { YdLoadingOverlay } from '@yudream/components'
-import type { TableColumn } from '@yudream/components'
+import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { ActivityProofExportRecord } from '../types'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
-import { YdButton, YdCard, YdIcon, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable } from '@yudream/components'
+import { YdButton, YdIcon, YdPageHeader, YdPageMain, YdPagination, YdResponsiveEnhancedTable } from '@yudream/components'
 import { onMounted } from 'vue'
 import { useMyProofs } from '../composables/useMyProofs'
 import { formatTime } from '../composables/utils'
@@ -25,6 +25,12 @@ const columns: TableColumn<ActivityProofExportRecord>[] = [
   { id: 'uploadedAt', header: '盖章时间', width: 180 },
   { id: 'operation', header: '操作', width: 140, align: 'center', fixed: 'right' },
 ]
+
+/** 行操作：下载盖章证明 PDF */
+const rowActions: ActionMenuItem<unknown>[] = [
+  { label: '下载 PDF', icon: 'morph:download', disabled: () => downloading.value, onClick: row => model.downloadStamped(row as never) },
+]
+
 </script>
 
 <template>
@@ -35,8 +41,10 @@ const columns: TableColumn<ActivityProofExportRecord>[] = [
       </YdButton>
     </YdPageHeader>
     <YdPageMain>
-      <YdLoadingOverlay :loading="loading"><YdResponsiveTable
-
+      <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+          :actions="rowActions"
+        
+        
         row-key="id"
         table-root-class="proof-table-scroll"
         table-class="proof-table-w760"
@@ -47,32 +55,7 @@ const columns: TableColumn<ActivityProofExportRecord>[] = [
         :data="records"
       >
         <template #cell-uploadedAt="{ row }">{{ formatTime(row.original.stampedPdfUploadedAt) }}</template>
-        <template #cell-operation="{ row }">
-          <YdButton size="sm" variant="outline" :loading="downloading" @click="model.downloadStamped(row.original)">下载 PDF</YdButton>
-        </template>
-        <template #card="{ row }">
-          <YdCard class="w-full">
-            <div class="flex flex-col gap-3">
-              <div class="flex items-center justify-between gap-2">
-                <span class="min-w-0 break-words text-base font-semibold">{{ row.activityName }}</span>
-              </div>
-              <div class="flex flex-col gap-1 text-sm">
-                <div v-if="row.serverName" class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">服务器</span>
-                  <span class="break-all">{{ row.serverName }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">盖章时间</span>
-                  <span>{{ formatTime(row.stampedPdfUploadedAt) }}</span>
-                </div>
-              </div>
-              <div class="flex flex-wrap gap-2 border-t pt-3">
-                <YdButton size="sm" variant="outline" :loading="downloading" @click="model.downloadStamped(row)">下载 PDF</YdButton>
-              </div>
-            </div>
-          </YdCard>
-        </template>
-      </YdResponsiveTable></YdLoadingOverlay>
+</YdResponsiveEnhancedTable></YdLoadingOverlay>
       <YdPagination
         v-model:page="pager.page"
         v-model:size="pager.size"
