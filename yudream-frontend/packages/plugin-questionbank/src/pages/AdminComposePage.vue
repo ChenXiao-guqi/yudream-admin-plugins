@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { YdLoadingOverlay } from '@yudream/components'
-import type { TableColumn } from '@yudream/components'
+import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { QuestionBankPluginModel } from '../composables/useQuestionBankPlugin'
 import type { ComposeRecordView, QuestionView } from '../types'
-import { YdButton, YdCard, YdDrawer, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdSelect, YdSwitch, YdTabs, YdTag, YdTextarea, useYdModal, useYdToast } from '@yudream/components'
+import { YdButton, YdDrawer, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdSearchBar, YdSelect, YdSwitch, YdTabs, YdTag, YdTextarea, useYdModal, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
 import { computed, onMounted, ref } from 'vue'
 import CategorySelect from '../components/CategorySelect.vue'
 import MarkdownPreview from '../components/MarkdownPreview.vue'
@@ -160,6 +160,19 @@ onMounted(async () => {
   await model.loadComposeQuestions()
   await model.loadComposeRecords()
 })
+/** 抽题列表行操作：加入本次组卷 */
+const pickActions: ActionMenuItem<unknown>[] = [
+  { label: '加入', icon: 'morph:plus', visible: row => !isSelected(row as never), onClick: row => model.addComposeQuestion(row as never) },
+]
+
+/** 组卷记录行操作：查看 / 大屏 / 导出 / 分享 / 删除 */
+const recordActions: ActionMenuItem<unknown>[] = [
+  { label: '查看', icon: 'morph:eye', onClick: row => viewRecord(row as never) },
+  { label: '大屏', icon: 'morph:presentation', onClick: row => presentRecord(row as never) },
+  { label: 'Word', icon: 'morph:file-text', onClick: row => model.exportComposeRecordWord(row as never) },
+  { label: row => ((row as { shared: boolean }).shared ? '取消分享' : '分享'), icon: 'morph:share', onClick: row => toggleShare(row as never) },
+  { label: '删除', icon: 'morph:trash-2', danger: true, onClick: row => confirmDeleteRecord(row as never) },
+]
 </script>
 
 <template>
@@ -182,8 +195,8 @@ onMounted(async () => {
     <!-- 组卷工作台：宽屏左右两栏（右栏吸附），窄屏单栏堆叠 -->
     <div v-if="tab === 'workbench'" class="qb-compose-layout">
       <YdCard title="题目拾取" description="仅显示启用中的题目，点击「加入」进入右侧组卷列表">
-        <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable
-
+        <YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable
+          :actions="pickActions"
           :columns="columns"
           :data="model.composeQuestions"
           row-key="id"
@@ -215,34 +228,7 @@ onMounted(async () => {
             </div>
           </template>
           <template #cell-difficulty="{ row }"><span style="color: var(--color-warning-6, #ff7d00)">{{ difficultyLabel(row.original.difficulty) }}</span></template>
-          <template #cell-operation="{ row }">
-            <YdButton v-if="!isSelected(row.original)" size="sm" variant="outline" @click="model.addComposeQuestion(row.original)">
-              <YdIcon name="i-ri:add-line" />加入
-            </YdButton>
-            <YdTag v-else variant="default">已加入</YdTag>
-          </template>
-          <template #card="{ row }">
-            <YdCard>
-              <div class="qb-mobile-card">
-                <div class="qb-mobile-card-title">{{ plainContent(row) || '（空题干）' }}</div>
-                <div class="qb-mobile-card-meta">
-                  <YdTag variant="secondary">{{ row.typeLabel }}</YdTag>
-                  <span>{{ row.categoryName || '未分类' }}</span>
-                  <span style="color: var(--color-warning-6, #ff7d00)">{{ difficultyLabel(row.difficulty) }}</span>
-                </div>
-                <div v-if="row.tags.length" class="flex flex-wrap gap-1">
-                  <YdTag v-for="tag in row.tags" :key="tag" variant="outline">{{ tag }}</YdTag>
-                </div>
-                <div class="qb-mobile-card-actions">
-                  <YdButton v-if="!isSelected(row)" size="sm" variant="outline" @click="model.addComposeQuestion(row)">
-                    <YdIcon name="i-ri:add-line" />加入
-                  </YdButton>
-                  <YdTag v-else variant="default">已加入</YdTag>
-                </div>
-              </div>
-            </YdCard>
-          </template>
-        </YdResponsiveTable></YdLoadingOverlay>
+</YdResponsiveEnhancedTable></YdLoadingOverlay>
         <YdPagination
           v-model:page="model.composePager.page"
           v-model:size="model.composePager.size"
@@ -323,8 +309,9 @@ onMounted(async () => {
 
     <!-- 组卷记录 -->
     <YdCard v-else title="组卷记录" description="记录只保存题目引用，打开时实时解析；已删除或停用的题目会自动跳过">
-      <YdLoadingOverlay :loading="model.composeRecordsLoading"><YdResponsiveTable
-
+      <YdLoadingOverlay :loading="model.composeRecordsLoading"><YdResponsiveEnhancedTable
+        :actions="recordActions"
+        
         :columns="recordColumns"
         :data="model.composeRecords"
         row-key="id"
@@ -350,41 +337,7 @@ onMounted(async () => {
           <YdTag :variant="row.original.shared ? 'default' : 'secondary'">{{ row.original.shared ? '分享中' : '未分享' }}</YdTag>
         </template>
         <template #cell-createdAt="{ row }">{{ formatTime(row.original.createdAt) }}</template>
-        <template #cell-operation="{ row }">
-          <div class="flex flex-wrap gap-1">
-            <YdButton size="sm" variant="outline" @click="viewRecord(row.original)"><YdIcon name="i-ri:eye-line" />查看</YdButton>
-            <YdButton size="sm" variant="outline" @click="presentRecord(row.original)"><YdIcon name="i-ri:slideshow-2-line" />大屏</YdButton>
-            <YdButton size="sm" variant="outline" @click="model.exportComposeRecordWord(row.original)"><YdIcon name="i-ri:file-word-2-line" />Word</YdButton>
-            <YdButton size="sm" :variant="row.original.shared ? 'ghost' : 'outline'" @click="toggleShare(row.original)">
-              <YdIcon :name="row.original.shared ? 'i-ri:link-unlink' : 'i-ri:share-line'" />{{ row.original.shared ? '取消分享' : '分享' }}
-            </YdButton>
-            <YdButton size="sm" variant="destructive" @click="confirmDeleteRecord(row.original)"><YdIcon name="i-ri:delete-bin-line" />删除</YdButton>
-          </div>
-        </template>
-        <template #card="{ row }">
-          <YdCard>
-            <div class="qb-mobile-card">
-              <div class="qb-mobile-card-title">{{ row.title }}</div>
-              <div class="qb-mobile-card-meta">
-                <span v-if="model.questionbankManager">{{ row.ownerName }}</span>
-                <span>{{ row.questionCount }} 题</span>
-                <YdTag :variant="row.withAnswers ? 'default' : 'outline'">{{ row.withAnswers ? '附答案' : '纯试卷' }}</YdTag>
-                <YdTag :variant="row.shared ? 'default' : 'secondary'">{{ row.shared ? '分享中' : '未分享' }}</YdTag>
-                <span>{{ formatTime(row.createdAt) }}</span>
-              </div>
-              <div class="qb-mobile-card-actions">
-                <YdButton size="sm" variant="outline" @click="viewRecord(row)">查看</YdButton>
-                <YdButton size="sm" variant="outline" @click="presentRecord(row)">大屏</YdButton>
-                <YdButton size="sm" variant="outline" @click="model.exportComposeRecordWord(row)">Word</YdButton>
-                <YdButton size="sm" :variant="row.shared ? 'ghost' : 'outline'" @click="toggleShare(row)">
-                  {{ row.shared ? '取消分享' : '分享' }}
-                </YdButton>
-                <YdButton size="sm" variant="destructive" @click="confirmDeleteRecord(row)">删除</YdButton>
-              </div>
-            </div>
-          </YdCard>
-        </template>
-      </YdResponsiveTable></YdLoadingOverlay>
+</YdResponsiveEnhancedTable></YdLoadingOverlay>
       <YdPagination
         v-model:page="model.composeRecordsPager.page"
         v-model:size="model.composeRecordsPager.size"

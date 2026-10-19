@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { YdLoadingOverlay } from '@yudream/components'
-import type { TableColumn } from '@yudream/components'
+import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { QuestionBankPluginModel } from '../composables/useQuestionBankPlugin'
 import type { CategoryView } from '../types'
-import { YdButton, YdCard, YdCheckbox, YdIcon, YdInput, YdModal, YdNumberField, YdPageHeader, YdPageMain, YdResponsiveTable, useYdModal, YdAction } from '@yudream/components'
+import { YdButton, YdCheckbox, YdIcon, YdInput, YdModal, YdNumberField, YdPageHeader, YdPageMain, useYdModal, YdAction, YdResponsiveEnhancedTable } from '@yudream/components'
 import { computed, onMounted, ref } from 'vue'
 import { formatTime } from '../composables/utils'
 
@@ -102,6 +102,13 @@ async function submitMerge() {
 }
 
 onMounted(() => model.loadAdminCategories())
+
+/** 分类行操作统一收进操作菜单 */
+const rowActions: ActionMenuItem<unknown>[] = [
+  { label: '编辑', icon: 'morph:pencil', onClick: row => openEdit(row as never) },
+  { label: '删除', icon: 'morph:trash-2', danger: true, onClick: row => confirmDelete(row as never) },
+]
+
 </script>
 
 <template>
@@ -112,10 +119,12 @@ onMounted(() => model.loadAdminCategories())
     <YdButton @click="openCreate"><YdIcon name="i-ri:add-line" />新建分类</YdButton>
   </YdPageHeader>
   <YdPageMain>
-
-
-      <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable v-model:row-selection="rowSelection"
-
+    
+    
+      <YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable
+        :actions="rowActions"
+ v-model:row-selection="rowSelection"
+        
         :columns="columns"
         :data="model.adminCategories"
         row-key="id"
@@ -128,18 +137,12 @@ onMounted(() => model.loadAdminCategories())
         @selection-change="onSelectionChange"
       >
         <template #cell-createdAt="{ row }">{{ formatTime(row.original.createdAt) }}</template>
-        <template #cell-operation="{ row }">
-          <div class="flex-center gap-2">
-            <YdButton size="sm" variant="outline" @click="openEdit(row.original)">编辑</YdButton>
-            <YdButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</YdButton>
-          </div>
-        </template>
       <template #card="{ row, selected, selectDisabled, toggleSelected }">
             <YdCard class="w-full"><div class="qb-mobile-card"><div class="qb-mobile-card-head"><YdCheckbox :model-value="selected" :disabled="selectDisabled" @change="value => toggleSelected(value === true)" /><div class="qb-mobile-card-title">{{ row.name }}</div></div><div class="qb-mobile-card-meta"><span>排序 {{ row.sort }}</span><span>{{ row.questionCount }} 道题</span><span>{{ formatTime(row.createdAt) }}</span></div><div class="qb-mobile-card-actions"><YdButton size="sm" variant="outline" @click="openEdit(row)">编辑</YdButton><YdButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</YdButton></div></div></YdCard>
           </template>
-          </YdResponsiveTable></YdLoadingOverlay>
-
-
+          </YdResponsiveEnhancedTable></YdLoadingOverlay>
+    
+    
     <YdModal v-model="editOpen" :title="editTarget ? '编辑分类' : '新建分类'" :confirm-button-loading="saving" @confirm="submit">
       <div class="flex flex-col gap-3">
         <label class="flex flex-col gap-1 text-sm">

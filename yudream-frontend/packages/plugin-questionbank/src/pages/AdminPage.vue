@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { YdLoadingOverlay } from '@yudream/components'
-import type { TableColumn, YdFilePickerInstance } from '@yudream/components'
+import type { TableColumn, YdFilePickerInstance, ActionMenuItem } from '@yudream/components'
 import type { QuestionBankPluginModel } from '../composables/useQuestionBankPlugin'
 import type { ImportResult, QuestionPayload, QuestionView } from '../types'
-import { YdButton, YdCard, YdCheckbox, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdSearchBar, YdSelect, YdResponsiveTable, YdTag, YdTextarea, YdFilePicker, useYdModal, useYdToast } from '@yudream/components'
+import { YdButton, YdCheckbox, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdSearchBar, YdSelect, YdTag, YdTextarea, YdFilePicker, useYdModal, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
 import { onMounted, ref, shallowRef } from 'vue'
 import { useRouter } from 'vue-router'
 import { saveBlob } from '../api/questionbank-api'
@@ -296,6 +296,13 @@ onMounted(async () => {
   tagOptions.value = [{ label: '全部标签', value: '' }, ...model.adminTags.map(tag => ({ label: `${tag.name}（${tag.count}）`, value: tag.name }))]
   await model.loadAdminQuestions()
 })
+
+/** 行操作统一收进操作菜单，删除保持确认流程 */
+const rowActions: ActionMenuItem<unknown>[] = [
+  { label: '编辑', icon: 'morph:pencil', onClick: row => openEdit(row as never) },
+  { label: '删除', icon: 'morph:trash-2', danger: true, onClick: row => confirmDelete(row as never) },
+]
+
 </script>
 
 <template>
@@ -321,10 +328,12 @@ onMounted(async () => {
         </YdButton>
       </div>
     </YdSearchBar>
-
-
-      <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable v-model:row-selection="rowSelection"
-
+    
+    
+      <YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable
+        :actions="rowActions"
+ v-model:row-selection="rowSelection"
+        
         :columns="columns"
         :data="model.adminQuestions"
         row-key="id"
@@ -352,12 +361,6 @@ onMounted(async () => {
           <YdTag :variant="row.original.status === 'DISABLED' ? 'outline' : 'default'">{{ row.original.status === 'DISABLED' ? '停用' : '启用' }}</YdTag>
         </template>
         <template #cell-updatedAt="{ row }">{{ formatTime(row.original.updatedAt) }}</template>
-        <template #cell-operation="{ row }">
-          <div class="flex-center gap-2">
-            <YdButton size="sm" variant="outline" @click="openEdit(row.original)">编辑</YdButton>
-            <YdButton size="sm" variant="destructive" @click="confirmDelete(row.original)">删除</YdButton>
-          </div>
-        </template>
       <template #card="{ row, selected, selectDisabled, toggleSelected }">
             <YdCard class="w-full">
               <div class="qb-mobile-card">
@@ -368,9 +371,9 @@ onMounted(async () => {
               </div>
             </YdCard>
           </template>
-          </YdResponsiveTable></YdLoadingOverlay>
-
-
+          </YdResponsiveEnhancedTable></YdLoadingOverlay>
+    
+    
     <YdPagination
       v-model:page="model.adminPager.page"
       v-model:size="model.adminPager.size"

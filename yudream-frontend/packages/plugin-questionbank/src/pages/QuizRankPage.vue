@@ -32,7 +32,7 @@ onMounted(() => model.loadQuizLeaderboard())
   </YdPageHeader>
   <YdPageMain>
     <YdLoadingOverlay :loading="model.quizLeaderboardLoading"><YdResponsiveTable
-
+      
       :columns="columns"
       :data="model.quizLeaderboard"
       row-key="rank"

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { YdLoadingOverlay } from '@yudream/components'
-import type { TableColumn } from '@yudream/components'
+import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { QuestionBankPluginModel } from '../composables/useQuestionBankPlugin'
 import type { SessionQuestionView, SessionSummary } from '../types'
-import { YdButton, YdDrawer, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdTag } from '@yudream/components'
+import { YdButton, YdDrawer, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdSearchBar, YdTag, YdResponsiveEnhancedTable } from '@yudream/components'
 import { onMounted, ref } from 'vue'
 import MarkdownPreview from '../components/MarkdownPreview.vue'
 import { formatTime, optionKey } from '../composables/utils'
@@ -57,13 +57,21 @@ function closeDrawer() {
 }
 
 onMounted(() => model.loadReviewQueue())
+
+/** 行操作：进入人工审核 */
+const rowActions: ActionMenuItem<unknown>[] = [
+  { label: '审核', icon: 'morph:clipboard-check', onClick: row => openReview(row as never) },
+]
+
 </script>
 
 <template>
   <YdPageHeader title="简答审核" description="人工审核题单的简答题作答，判定对错后计入成绩" />
   <YdPageMain>
-    <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable
+    <YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable
+        :actions="rowActions"
 
+      
       :columns="columns"
       :data="model.reviewList"
       row-key="id"
@@ -87,23 +95,7 @@ onMounted(() => model.loadReviewQueue())
         <YdTag variant="secondary">{{ row.original.pendingReview ? '待审核' : '已完成' }}</YdTag>
       </template>
       <template #cell-submittedAt="{ row }">{{ formatTime(row.original.submittedAt) }}</template>
-      <template #cell-operation="{ row }">
-        <YdButton size="sm" variant="outline" @click="openReview(row.original)">审核</YdButton>
-      </template>
-      <template #card="{ row }">
-        <div class="flex flex-col gap-2 text-sm">
-          <div class="flex items-center justify-between">
-            <strong>{{ row.userName || row.userId }}</strong>
-            <YdTag variant="secondary">{{ row.pendingReview ? '待审核' : '已完成' }}</YdTag>
-          </div>
-          <div class="text-secondary-foreground/60">{{ row.paperName || '-' }} · 当前得分 {{ scoreText(row) }}</div>
-          <div class="text-secondary-foreground/60">{{ formatTime(row.submittedAt) }}</div>
-          <div class="flex gap-2">
-            <YdButton size="sm" variant="outline" @click="openReview(row)">审核</YdButton>
-          </div>
-        </div>
-      </template>
-    </YdResponsiveTable></YdLoadingOverlay>
+</YdResponsiveEnhancedTable></YdLoadingOverlay>
     <YdPagination
       v-model:page="model.reviewPager.page"
       v-model:size="model.reviewPager.size"
