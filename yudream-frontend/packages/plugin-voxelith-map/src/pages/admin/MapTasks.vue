@@ -188,7 +188,16 @@ const rowActions: ActionMenuItem<unknown>[] = [
       </p>
     </YdCard>
 
-    <YdTablePageLayout title="任务中心" :show-search="false">
+    <YdTablePageLayout title="任务中心">
+      <template #search>
+        <div class="grid grid-cols-1 gap-3 md:grid-cols-[200px_200px_1fr]">
+          <YdSelect v-model="kindFilter" :options="kindFilterOptions" class="w-full" />
+          <YdSelect v-model="stateFilter" :options="stateFilterOptions" class="w-full" />
+          <div class="flex items-center justify-end text-xs text-muted-foreground">
+            共 {{ filteredTasks.length }} 个任务
+          </div>
+        </div>
+      </template>
     <template #actions>
       <YdButton size="sm" variant="outline" :loading="model.loading.value" @click="model.loadMaps()">
       <YdIcon name="i-mdi:refresh" />
@@ -207,15 +216,6 @@ const rowActions: ActionMenuItem<unknown>[] = [
       :columns="columns"
       :data="pagedTasks"
     >
-      <template #toolbar>
-        <div class="grid grid-cols-1 gap-3 md:grid-cols-[200px_200px_1fr]">
-          <YdSelect v-model="kindFilter" :options="kindFilterOptions" class="w-full" />
-          <YdSelect v-model="stateFilter" :options="stateFilterOptions" class="w-full" />
-          <div class="flex items-center justify-end text-xs text-muted-foreground">
-            共 {{ filteredTasks.length }} 个任务
-          </div>
-        </div>
-      </template>
 
       <template #cell-kind="{ row }">
         <YdTag variant="secondary">

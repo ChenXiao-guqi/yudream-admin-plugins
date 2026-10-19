@@ -685,7 +685,26 @@ const rowActions: ActionMenuItem<unknown>[] = [
 <template>
 
   <YdPageMain>
-    <YdTablePageLayout title="Voxelith 地图管理" :show-search="false">
+    <YdTablePageLayout title="Voxelith 地图管理">
+      <template #search>
+        <div class="grid grid-cols-1 gap-3 md:grid-cols-[minmax(220px,1fr)_170px_170px_auto]">
+            <div class="min-w-0">
+              <YdInput v-model="search" placeholder="搜索地图名称 / 存档名" clearable class="w-full" />
+            </div>
+            <div class="min-w-0">
+              <YdSelect v-model="stateFilter" :options="stateFilterOptions" class="w-full" />
+            </div>
+            <div class="min-w-0">
+              <YdSelect v-model="dimensionFilter" :options="dimensionFilterOptions" class="w-full" />
+            </div>
+            <div class="flex items-center justify-start gap-2 md:justify-end">
+              <YdButton size="sm" variant="outline" :disabled="!filtersActive" @click="resetFilters">
+                <YdIcon name="i-mdi:filter-off-outline" />
+                重置筛选
+              </YdButton>
+            </div>
+          </div>
+      </template>
     <template #actions>
       <div class="flex gap-2">
       <YdButton size="sm" variant="outline" @click="openJarLibrary">
@@ -724,28 +743,6 @@ const rowActions: ActionMenuItem<unknown>[] = [
       :columns="columns"
       :data="rows"
     >
-      <template #toolbar>
-        <!-- YdSelect 内置 w-[200px]，窄轨道里会溢出压到相邻控件：包 min-w-0 容器并传 w-full 收缩 -->
-        <YdSearchBar class="w-full" :show-toggle="false">
-          <div class="grid grid-cols-1 gap-3 md:grid-cols-[minmax(220px,1fr)_170px_170px_auto]">
-            <div class="min-w-0">
-              <YdInput v-model="search" placeholder="搜索地图名称 / 存档名" clearable class="w-full" />
-            </div>
-            <div class="min-w-0">
-              <YdSelect v-model="stateFilter" :options="stateFilterOptions" class="w-full" />
-            </div>
-            <div class="min-w-0">
-              <YdSelect v-model="dimensionFilter" :options="dimensionFilterOptions" class="w-full" />
-            </div>
-            <div class="flex items-center justify-start gap-2 md:justify-end">
-              <YdButton size="sm" variant="outline" :disabled="!filtersActive" @click="resetFilters">
-                <YdIcon name="i-mdi:filter-off-outline" />
-                重置筛选
-              </YdButton>
-            </div>
-          </div>
-        </YdSearchBar>
-      </template>
       <template #cell-name="{ row }">
         <YdButton variant="link" class="h-auto px-0" @click="openDetail(row.original)">
           {{ row.original.name }}

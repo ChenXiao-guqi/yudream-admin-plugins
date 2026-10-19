@@ -4,7 +4,7 @@ import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { Activity } from '../types'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
-import { YdButton, YdIcon, YdInput, YdPageMain, YdPagination, YdSearchBar, YdSelect, YdTag, YdResponsiveEnhancedTable } from '@yudream/components'
+import { YdButton, YdIcon, YdInput, YdPageMain, YdPagination, YdSelect, YdTag, YdResponsiveEnhancedTable } from '@yudream/components'
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAdminActivities } from '../composables/useAdminActivities'
@@ -86,7 +86,19 @@ const rowActions: ActionMenuItem<unknown>[] = [
 <template>
   <section class="proof-page">
     <YdPageMain>
-      <YdTablePageLayout title="活动管理" :show-search="false">
+      <YdTablePageLayout title="活动管理">
+      <template #search>
+        <div class="activity-filter">
+              <YdInput v-model="filters.keyword" placeholder="搜索活动标题" clearable @keyup.enter="model.search" />
+              <YdSelect v-model="filters.status" :options="statusOptions" placeholder="状态" />
+              <div class="flex justify-end gap-2">
+                <YdButton variant="outline" @click="model.resetFilters">重置</YdButton>
+                <YdButton :loading="loading" @click="model.search">
+                  <YdIcon name="i-ri:search-line" />查询
+                </YdButton>
+              </div>
+            </div>
+      </template>
     <template #actions>
       <YdButton @click="openEdit()">
         <YdIcon name="i-ri:add-line" />发布活动
@@ -106,20 +118,6 @@ const rowActions: ActionMenuItem<unknown>[] = [
         :columns="columns"
         :data="activities"
       >
-        <template #toolbar>
-          <YdSearchBar class="w-full">
-            <div class="activity-filter">
-              <YdInput v-model="filters.keyword" placeholder="搜索活动标题" clearable @keyup.enter="model.search" />
-              <YdSelect v-model="filters.status" :options="statusOptions" placeholder="状态" />
-              <div class="flex justify-end gap-2">
-                <YdButton variant="outline" @click="model.resetFilters">重置</YdButton>
-                <YdButton :loading="loading" @click="model.search">
-                  <YdIcon name="i-ri:search-line" />查询
-                </YdButton>
-              </div>
-            </div>
-          </YdSearchBar>
-        </template>
         <template #cell-title="{ row }">
           <div class="grid gap-1">
             <strong>{{ row.original.title }}</strong>

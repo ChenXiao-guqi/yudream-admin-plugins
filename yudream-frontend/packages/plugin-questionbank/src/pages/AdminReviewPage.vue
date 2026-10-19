@@ -67,7 +67,13 @@ const rowActions: ActionMenuItem<unknown>[] = [
 
 <template>
   <YdPageMain>
-    <YdTablePageLayout title="简答审核" :show-search="false">
+    <YdTablePageLayout title="简答审核">
+      <template #search>
+        <div class="qb-toolbar">
+            <YdInput v-model="model.reviewKeyword" placeholder="搜索用户昵称、ID 或题单名称" clearable @keydown.enter="model.applyReviewFilters" @clear="model.applyReviewFilters" />
+            <YdButton variant="outline" @click="model.applyReviewFilters"><YdIcon name="i-ri:search-line" />查询</YdButton>
+          </div>
+      </template>
     <template #table>
 <YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable
         :actions="rowActions"
@@ -81,14 +87,6 @@ const rowActions: ActionMenuItem<unknown>[] = [
       border stripe
       empty-text="暂无待审核的作答"
     >
-      <template #toolbar>
-        <YdSearchBar class="w-full">
-          <div class="qb-toolbar">
-            <YdInput v-model="model.reviewKeyword" placeholder="搜索用户昵称、ID 或题单名称" clearable @keydown.enter="model.applyReviewFilters" @clear="model.applyReviewFilters" />
-            <YdButton variant="outline" @click="model.applyReviewFilters"><YdIcon name="i-ri:search-line" />查询</YdButton>
-          </div>
-        </YdSearchBar>
-      </template>
       <template #cell-user="{ row }">{{ row.original.userName || row.original.userId }}</template>
       <template #cell-paperName="{ row }">{{ row.original.paperName || '-' }}</template>
       <template #cell-score="{ row }">{{ scoreText(row.original) }}</template>

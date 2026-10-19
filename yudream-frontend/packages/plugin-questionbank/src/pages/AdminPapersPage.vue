@@ -105,7 +105,14 @@ const rowActions: ActionMenuItem<unknown>[] = [
 
 <template>
   <YdPageMain>
-    <YdTablePageLayout title="题单管理" :show-search="false">
+    <YdTablePageLayout title="题单管理">
+      <template #search>
+        <div class="qb-toolbar">
+            <YdInput v-model="model.adminPapersFilters.keyword" placeholder="搜索题单名称" clearable @keydown.enter="model.applyAdminPapersFilters" @clear="model.applyAdminPapersFilters" />
+            <YdSelect v-model="model.adminPapersFilters.status" :options="statusOptions" @change="model.applyAdminPapersFilters" />
+            <YdButton variant="outline" @click="model.applyAdminPapersFilters"><YdIcon name="i-ri:search-line" />查询</YdButton>
+          </div>
+      </template>
     <template #actions>
       <YdButton @click="openCreate"><YdIcon name="i-ri:add-line" />新建题单</YdButton>
     </template>
@@ -122,15 +129,6 @@ const rowActions: ActionMenuItem<unknown>[] = [
       border stripe
       empty-text="暂无题单，点击右上角新建"
     >
-      <template #toolbar>
-        <YdSearchBar class="w-full">
-          <div class="qb-toolbar">
-            <YdInput v-model="model.adminPapersFilters.keyword" placeholder="搜索题单名称" clearable @keydown.enter="model.applyAdminPapersFilters" @clear="model.applyAdminPapersFilters" />
-            <YdSelect v-model="model.adminPapersFilters.status" :options="statusOptions" @change="model.applyAdminPapersFilters" />
-            <YdButton variant="outline" @click="model.applyAdminPapersFilters"><YdIcon name="i-ri:search-line" />查询</YdButton>
-          </div>
-        </YdSearchBar>
-      </template>
       <template #cell-mode="{ row }">
         <YdTag :variant="row.original.mode === 'RULE' ? 'default' : 'secondary'">
           {{ row.original.mode === 'RULE' ? '随机抽题' : '固定题目' }}

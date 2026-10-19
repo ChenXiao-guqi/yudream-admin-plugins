@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, YdListToolbar } from '@yudream/components'
 import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { QuestionBankPluginModel } from '../composables/useQuestionBankPlugin'
 import type { ComposeRecordView, QuestionView } from '../types'
@@ -195,6 +195,22 @@ const recordActions: ActionMenuItem<unknown>[] = [
     <!-- 组卷工作台：宽屏左右两栏（右栏吸附），窄屏单栏堆叠 -->
     <div v-if="tab === 'workbench'" class="qb-compose-layout">
       <YdCard title="题目拾取" description="仅显示启用中的题目，点击「加入」进入右侧组卷列表">
+        <YdListToolbar
+          v-model:keyword="model.composeFilters.keyword"
+          placeholder="搜索题干或标签"
+          class="mb-3"
+          @search="model.applyComposeFilters"
+          @clear="model.applyComposeFilters"
+        >
+          <template #filters>
+            <CategorySelect v-model="model.composeFilters.categoryId" :categories="model.composeOptions.categories" empty-label="全部分类" @update:model-value="model.applyComposeFilters" />
+            <YdSelect v-model="model.composeFilters.tag" :options="tagOptions" @change="model.applyComposeFilters" />
+            <YdSelect v-model="model.composeFilters.type" :options="typeOptions" @change="model.applyComposeFilters" />
+          </template>
+          <template #actions>
+            <YdButton variant="outline" @click="model.applyComposeFilters">查询</YdButton>
+          </template>
+        </YdListToolbar>
         <YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable
           :actions="pickActions"
           :columns="columns"
@@ -205,17 +221,6 @@ const recordActions: ActionMenuItem<unknown>[] = [
           border stripe
           empty-text="暂无符合条件的启用题目"
         >
-          <template #toolbar>
-            <YdSearchBar class="w-full">
-              <div class="qb-toolbar">
-                <YdInput v-model="model.composeFilters.keyword" placeholder="搜索题干或标签" clearable @keydown.enter="model.applyComposeFilters" @clear="model.applyComposeFilters" />
-                <CategorySelect v-model="model.composeFilters.categoryId" :categories="model.composeOptions.categories" empty-label="全部分类" @update:model-value="model.applyComposeFilters" />
-                <YdSelect v-model="model.composeFilters.tag" :options="tagOptions" @change="model.applyComposeFilters" />
-                <YdSelect v-model="model.composeFilters.type" :options="typeOptions" @change="model.applyComposeFilters" />
-                <YdButton variant="outline" @click="model.applyComposeFilters"><YdIcon name="i-ri:search-line" />查询</YdButton>
-              </div>
-            </YdSearchBar>
-          </template>
           <template #cell-content="{ row }">
             <span class="qb-question-content-cell" :title="plainContent(row.original)">{{ plainContent(row.original) || '（空题干）' }}</span>
           </template>
@@ -309,9 +314,24 @@ const recordActions: ActionMenuItem<unknown>[] = [
 
     <!-- 组卷记录 -->
     <YdCard v-else title="组卷记录" description="记录只保存题目引用，打开时实时解析；已删除或停用的题目会自动跳过">
+      <YdListToolbar
+        v-model:keyword="model.composeRecordsFilters.keyword"
+        placeholder="搜索标题或说明"
+        class="mb-3"
+        @search="model.applyComposeRecordsFilters"
+        @clear="model.applyComposeRecordsFilters"
+      >
+        <template #filters>
+          <YdSelect v-if="model.questionbankManager" v-model="recordScope" :options="scopeOptions" @change="model.applyComposeRecordsFilters" />
+        </template>
+        <template #actions>
+          <YdButton variant="outline" @click="model.applyComposeRecordsFilters">查询</YdButton>
+          <YdButton variant="outline" @click="model.loadComposeRecords">刷新</YdButton>
+        </template>
+      </YdListToolbar>
       <YdLoadingOverlay :loading="model.composeRecordsLoading"><YdResponsiveEnhancedTable
         :actions="recordActions"
-        
+
         :columns="recordColumns"
         :data="model.composeRecords"
         row-key="id"
@@ -320,16 +340,6 @@ const recordActions: ActionMenuItem<unknown>[] = [
         border stripe
         empty-text="还没有组卷记录，去工作台保存一份吧"
       >
-        <template #toolbar>
-          <YdSearchBar class="w-full">
-            <div class="qb-toolbar">
-              <YdInput v-model="model.composeRecordsFilters.keyword" placeholder="搜索标题或说明" clearable @keydown.enter="model.applyComposeRecordsFilters" @clear="model.applyComposeRecordsFilters" />
-              <YdSelect v-if="model.questionbankManager" v-model="recordScope" :options="scopeOptions" @change="model.applyComposeRecordsFilters" />
-              <YdButton variant="outline" @click="model.applyComposeRecordsFilters"><YdIcon name="i-ri:search-line" />查询</YdButton>
-              <YdButton variant="outline" @click="model.loadComposeRecords"><YdIcon name="i-ri:refresh-line" />刷新</YdButton>
-            </div>
-          </YdSearchBar>
-        </template>
         <template #cell-withAnswers="{ row }">
           <YdTag :variant="row.original.withAnswers ? 'default' : 'outline'">{{ row.original.withAnswers ? '附答案' : '纯试卷' }}</YdTag>
         </template>

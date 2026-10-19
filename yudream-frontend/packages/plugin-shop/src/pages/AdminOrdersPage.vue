@@ -213,31 +213,9 @@ const rowActions: ActionMenuItem<unknown>[] = [
 <template>
   <section class="shop-page">
     <YdPageMain>
-      <YdTablePageLayout title="订单管理" :show-search="false">
-    <template #actions>
-      <YdButton variant="outline" :loading="loading" @click="load">
-        <YdIcon name="i-ri:refresh-line" />
-        刷新
-      </YdButton>
-    </template>
-    <template #table>
-<YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
-        :actions="rowActions"
-
-        
-        row-key="id"
-        table-root-class="rounded-lg overflow-hidden"
-        table-class="min-w-[1100px]"
-        border
-        stripe
-        column-visibility
-        :columns="columns"
-        :data="rows"
-        empty-text="暂无订单"
-      >
-        <template #toolbar>
-          <YdSearchBar class="w-full">
-            <div class="shop-filter-grid shop-order-filters">
+      <YdTablePageLayout title="订单管理">
+      <template #search>
+        <div class="shop-filter-grid shop-order-filters">
               <YdInput
                 v-model="filters.keyword"
                 placeholder="搜索商品标题或订单号前缀，回车查询"
@@ -265,8 +243,28 @@ const rowActions: ActionMenuItem<unknown>[] = [
                 <YdButton :loading="loading" @click="applyFilters">查询</YdButton>
               </div>
             </div>
-          </YdSearchBar>
-        </template>
+      </template>
+    <template #actions>
+      <YdButton variant="outline" :loading="loading" @click="load">
+        <YdIcon name="i-ri:refresh-line" />
+        刷新
+      </YdButton>
+    </template>
+    <template #table>
+<YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+        :actions="rowActions"
+
+        
+        row-key="id"
+        table-root-class="rounded-lg overflow-hidden"
+        table-class="min-w-[1100px]"
+        border
+        stripe
+        column-visibility
+        :columns="columns"
+        :data="rows"
+        empty-text="暂无订单"
+      >
         <template #cell-id="{ row }">
           <span class="font-mono text-xs">{{ row.original.id.slice(0, 8) }}</span>
         </template>

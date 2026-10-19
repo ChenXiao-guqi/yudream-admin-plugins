@@ -3,7 +3,7 @@ import { YdLoadingOverlay } from '@yudream/components'
 import type { ActionMenuItem, TableColumn } from '@yudream/components'
 import type { MaterialPluginModel } from '../composables/useMaterialPlugin'
 import type { MaterialItemView, MaterialSummary, PreviewInfo } from '../types'
-import { YdButton, YdDrawer, YdIcon, YdInput, YdListToolbar, YdModal, YdPageHeader, YdPageMain, YdPagination, YdSelect, YdResponsiveEnhancedTable, YdCheckbox, YdTag, useYdModal } from '@yudream/components'
+import { YdTablePageLayout, YdButton, YdDrawer, YdIcon, YdInput, YdListToolbar, YdModal, YdPagination, YdSelect, YdResponsiveEnhancedTable, YdCheckbox, YdTag, useYdModal } from '@yudream/components'
 import { onMounted, ref, watch } from 'vue'
 import CategoryPicker from '../components/CategoryPicker.vue'
 import EditMaterialModal from '../components/EditMaterialModal.vue'
@@ -268,9 +268,34 @@ onMounted(() => {
 </script>
 
 <template>
-  <YdPageHeader title="物料管理" description="跨用户查看全部物料，支持编辑、代传新版本、分享、归档/恢复、删除与批量操作" />
-  <YdPageMain>
-    <!-- YdResponsiveTable 的事件会落到包装 div 上无法透传（selectionChange 收不到），需要勾选事件的表格直接用 FaTable -->
+  <YdTablePageLayout title="物料管理" :show-search="false">
+    <template #search>
+          <YdListToolbar
+            v-model:keyword="model.adminFilters.keyword"
+            placeholder="搜索名称或标签"
+            @search="model.applyAdminFilters"
+            @clear="model.applyAdminFilters"
+          >
+            <template #filters>
+              <YdInput v-model="model.adminFilters.owner" placeholder="归属用户（昵称或 ID）" clearable @keydown.enter="model.applyAdminFilters" @clear="model.applyAdminFilters" />
+              <YdSelect v-model="model.adminFilters.type" :options="MATERIAL_TYPES" @change="model.applyAdminFilters" />
+              <CategoryPicker v-model="model.adminFilters.categoryId" :categories="model.categories" placeholder="全部分类" @update:model-value="model.applyAdminFilters" />
+              <YdSelect v-model="model.adminFilters.status" :options="statusOptions" @change="model.applyAdminFilters" />
+            </template>
+            <template #actions>
+              <YdButton variant="outline" @click="model.applyAdminFilters">查询</YdButton>
+            </template>
+          </YdListToolbar>
+    </template>
+    <template #table>
+        <div v-if="selectedRows.length" class="mt-2 flex flex-wrap items-center gap-2">
+          <span class="text-sm text-secondary-foreground/70">已选 {{ selectedRows.length }} 项</span>
+          <YdButton size="sm" variant="outline" @click="openBatchCategory"><YdIcon name="i-ri:folder-transfer-line" />移动分组</YdButton>
+          <YdButton size="sm" variant="outline" @click="openBatchTags"><YdIcon name="i-ri:price-tag-3-line" />打标签</YdButton>
+          <YdButton size="sm" variant="outline" @click="batchSetStatus('ARCHIVED')">批量归档</YdButton>
+          <YdButton size="sm" variant="outline" @click="batchSetStatus('ACTIVE')">批量恢复</YdButton>
+          <YdButton size="sm" variant="destructive" @click="confirmBatchDelete">批量删除</YdButton>
+        </div>
     <YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable v-model:row-selection="rowSelection"
       :columns="columns"
       :data="model.adminList"
@@ -284,32 +309,6 @@ onMounted(() => {
       empty-text="暂无物料"
       @selection-change="onSelectionChange"
     >
-      <template #toolbar>
-        <YdListToolbar
-          v-model:keyword="model.adminFilters.keyword"
-          placeholder="搜索名称或标签"
-          @search="model.applyAdminFilters"
-          @clear="model.applyAdminFilters"
-        >
-          <template #filters>
-            <YdInput v-model="model.adminFilters.owner" placeholder="归属用户（昵称或 ID）" clearable @keydown.enter="model.applyAdminFilters" @clear="model.applyAdminFilters" />
-            <YdSelect v-model="model.adminFilters.type" :options="MATERIAL_TYPES" @change="model.applyAdminFilters" />
-            <CategoryPicker v-model="model.adminFilters.categoryId" :categories="model.categories" placeholder="全部分类" @update:model-value="model.applyAdminFilters" />
-            <YdSelect v-model="model.adminFilters.status" :options="statusOptions" @change="model.applyAdminFilters" />
-          </template>
-          <template #actions>
-            <YdButton variant="outline" @click="model.applyAdminFilters">查询</YdButton>
-          </template>
-        </YdListToolbar>
-        <div v-if="selectedRows.length" class="mt-2 flex flex-wrap items-center gap-2">
-          <span class="text-sm text-secondary-foreground/70">已选 {{ selectedRows.length }} 项</span>
-          <YdButton size="sm" variant="outline" @click="openBatchCategory"><YdIcon name="i-ri:folder-transfer-line" />移动分组</YdButton>
-          <YdButton size="sm" variant="outline" @click="openBatchTags"><YdIcon name="i-ri:price-tag-3-line" />打标签</YdButton>
-          <YdButton size="sm" variant="outline" @click="batchSetStatus('ARCHIVED')">批量归档</YdButton>
-          <YdButton size="sm" variant="outline" @click="batchSetStatus('ACTIVE')">批量恢复</YdButton>
-          <YdButton size="sm" variant="destructive" @click="confirmBatchDelete">批量删除</YdButton>
-        </div>
-      </template>
       <template #cell-name="{ row }">
         <div class="flex items-center gap-2">
           <strong>{{ row.original.name }}</strong>
@@ -332,99 +331,17 @@ onMounted(() => {
       </template>
       <template #cell-updatedAt="{ row }">{{ formatTime(row.original.updatedAt) }}</template>
     </YdResponsiveEnhancedTable></YdLoadingOverlay>
-    <YdPagination
-      v-model:page="model.adminPager.page"
-      v-model:size="model.adminPager.size"
-      :total="model.adminPager.total"
-      class="mt-3"
-      @page-change="model.loadAdmin"
-      @size-change="model.applyAdminFilters"
-    />
-    <YdModal v-model="previewOpen" :title="previewTarget ? `预览：${previewTarget.name}` : '预览'" maximize :show-confirm-button="false" cancel-button-text="关闭">
-      <PreviewFrame
-        :sdk="model.sdk"
-        :info="previewInfo"
-        :loading="previewing"
-        :material-type="previewTarget?.type"
-        :ext="previewTarget?.ext"
-      />
-    </YdModal>
-    <EditMaterialModal
-      v-model="editOpen"
-      v-model:target="editTarget"
-      :categories="model.categories"
-      :tags="model.tags"
-      :dept-options="model.adminDeptOptions"
-      :create-category="model.quickCreateCategory"
-      :saving="saving"
-      @submit="submitEdit"
-    />
-    <NewVersionModal v-model="newVersionOpen" :sdk="model.sdk" :saving="saving" @submit="submitNewVersion" />
-    <ShareModal v-model="shareOpen" :material="shareTarget" :model="model" admin />
-    <YdDrawer
-      v-model="itemsOpen"
-      :title="itemsTarget ? `子物料：${itemsTarget.name}` : '子物料'"
-      description="代任意用户维护子物料，并分别管理每个子物料的独立版本链"
-      side="right"
-      :show-confirm-button="false"
-      show-cancel-button
-      cancel-button-text="关闭"
-      content-class="material-items-drawer"
-      @closed="itemsTarget = null"
-    >
-      <template v-if="itemsTarget">
-        <MaterialItemManager
-          v-model:active-id="itemsActiveId"
-          :model="model"
-          :material-id="itemsTarget.id"
-          :preview-item-id="itemsTarget.previewItemId || ''"
-          admin
-          @preview="previewItem"
-        />
-      </template>
-    </YdDrawer>
-    <YdModal
-      v-model="itemPreviewOpen"
-      :title="`预览：${itemPreviewLabel}`"
-      :z-index="2400"
-      maximize
-      :show-confirm-button="false"
-      show-cancel-button
-      cancel-button-text="关闭"
-    >
-      <PreviewFrame
-        :sdk="model.sdk"
-        :info="model.preview"
-        :loading="model.previewLoading"
-      />
-    </YdModal>
-    <YdModal
-      v-model="batchCategoryOpen"
-      title="批量移动分组"
-      :description="`将勾选的 ${selectedRows.length} 个物料移动到所选分类；不选分类则移出分组`"
-      :confirm-button-loading="batchSaving"
-      @confirm="submitBatchCategory"
-    >
-      <CategoryPicker v-model="batchCategoryId" :categories="model.categories" placeholder="选择目标分类（不选为移出分组）" />
-    </YdModal>
-    <YdModal
-      v-model="batchTagsOpen"
-      title="批量打标签"
-      :description="`对勾选的 ${selectedRows.length} 个物料批量设置标签`"
-      :confirm-button-loading="batchSaving"
-      :confirm-button-disabled="!batchTags.length"
-      @confirm="submitBatchTags"
-    >
-      <div class="flex flex-col gap-3">
-        <label class="flex flex-col gap-1 text-sm">
-          <span class="text-secondary-foreground/80">方式</span>
-          <YdSelect v-model="batchTagMode" :options="batchTagModeOptions" />
-        </label>
-        <label class="flex flex-col gap-1 text-sm">
-          <span class="text-secondary-foreground/80">标签（最多 8 个）</span>
-          <TagPicker v-model="batchTags" :tags="model.tags" />
-        </label>
-      </div>
-    </YdModal>
-  </YdPageMain>
+    </template>
+    <template #footer>
+  <YdPagination
+  v-model:page="model.adminPager.page"
+  v-model:size="model.adminPager.size"
+  :total="model.adminPager.total"
+  class="mt-3"
+  @page-change="model.loadAdmin"
+  @size-change="model.applyAdminFilters"
+  />
+    </template>
+  </YdTablePageLayout>
 </template>
+

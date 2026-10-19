@@ -144,7 +144,21 @@ const rowActions: ActionMenuItem<unknown>[] = [
           {{ qualification?.reason || '管理员已关闭用户上架功能、积分门槛不足，或当前账号是管理员（只能投放官方积分商品）。' }}
         </template>
       </YdAlert>
-      <YdTablePageLayout title="我的商品" :show-search="false">
+      <YdTablePageLayout title="我的商品">
+      <template #search>
+        <div class="grid grid-cols-1 gap-3 md:grid-cols-[minmax(220px,1fr)_auto]">
+              <YdInput
+                v-model="filters.keyword"
+                placeholder="搜索商品标题或简介，回车查询"
+                clearable
+                @keyup.enter="applyFilters"
+                @clear="applyFilters"
+              />
+              <div class="flex justify-end gap-2">
+                <YdButton variant="outline" :loading="loading" @click="applyFilters">查询</YdButton>
+              </div>
+            </div>
+      </template>
     <template #actions>
       <YdButton :disabled="publishBlocked" @click="openCreate">
         <YdIcon name="i-ri:add-line" />
@@ -166,22 +180,6 @@ const rowActions: ActionMenuItem<unknown>[] = [
         :data="rows"
         :empty-text="publishBlocked ? '还没有商品' : '还没有上架过商品，点击右上角上架第一件商品'"
       >
-        <template #toolbar>
-          <YdSearchBar class="w-full">
-            <div class="grid grid-cols-1 gap-3 md:grid-cols-[minmax(220px,1fr)_auto]">
-              <YdInput
-                v-model="filters.keyword"
-                placeholder="搜索商品标题或简介，回车查询"
-                clearable
-                @keyup.enter="applyFilters"
-                @clear="applyFilters"
-              />
-              <div class="flex justify-end gap-2">
-                <YdButton variant="outline" :loading="loading" @click="applyFilters">查询</YdButton>
-              </div>
-            </div>
-          </YdSearchBar>
-        </template>
         <template #cell-title="{ row }">
           <div class="flex items-center gap-2">
             <img

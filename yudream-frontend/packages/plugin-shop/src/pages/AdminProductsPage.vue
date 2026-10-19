@@ -180,7 +180,30 @@ const rowActions: ActionMenuItem<unknown>[] = [
 <template>
   <section class="shop-page">
     <YdPageMain>
-      <YdTablePageLayout title="商品管理" :show-search="false">
+      <YdTablePageLayout title="商品管理">
+      <template #search>
+        <div class="shop-filter-grid shop-product-filters">
+              <YdInput
+                v-model="filters.keyword"
+                placeholder="搜索商品标题或简介，回车查询"
+                clearable
+                @keyup.enter="applyFilters"
+                @clear="applyFilters"
+              />
+              <YdInput
+                v-model="filters.ownerId"
+                placeholder="卖家用户 ID"
+                clearable
+                @keyup.enter="applyFilters"
+                @clear="applyFilters"
+              />
+              <YdSelect v-model="filters.status" class="shop-select" :options="statusOptions" placeholder="全部状态" />
+              <div class="flex justify-end gap-2">
+                <YdButton variant="outline" @click="resetFilters">重置</YdButton>
+                <YdButton :loading="loading" @click="applyFilters">查询</YdButton>
+              </div>
+            </div>
+      </template>
     <template #actions>
       <div class="flex flex-wrap justify-end gap-2">
         <YdButton @click="openCreate">
@@ -208,31 +231,6 @@ const rowActions: ActionMenuItem<unknown>[] = [
         :data="rows"
         empty-text="暂无商品"
       >
-        <template #toolbar>
-          <YdSearchBar class="w-full">
-            <div class="shop-filter-grid shop-product-filters">
-              <YdInput
-                v-model="filters.keyword"
-                placeholder="搜索商品标题或简介，回车查询"
-                clearable
-                @keyup.enter="applyFilters"
-                @clear="applyFilters"
-              />
-              <YdInput
-                v-model="filters.ownerId"
-                placeholder="卖家用户 ID"
-                clearable
-                @keyup.enter="applyFilters"
-                @clear="applyFilters"
-              />
-              <YdSelect v-model="filters.status" class="shop-select" :options="statusOptions" placeholder="全部状态" />
-              <div class="flex justify-end gap-2">
-                <YdButton variant="outline" @click="resetFilters">重置</YdButton>
-                <YdButton :loading="loading" @click="applyFilters">查询</YdButton>
-              </div>
-            </div>
-          </YdSearchBar>
-        </template>
         <template #cell-title="{ row }">
           <div class="flex items-center gap-2">
             <img
