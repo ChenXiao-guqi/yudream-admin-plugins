@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, type ActionMenuItem } from '@yudream/components'
 import {computed, onMounted, ref } from 'vue'
-import { YdAction, YdAlert, YdButton, YdCard, YdIcon, YdInput, YdLabel, YdModal, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSelect, YdSwitch, YdTextarea, useYdModal, useYdToast, type TableColumn } from '@yudream/components'
+import { YdAction, YdAlert, YdButton, YdIcon, YdInput, YdLabel, YdModal, YdPageHeader, YdPageMain, YdPagination, YdSelect, YdSwitch, YdTextarea, useYdModal, useYdToast, type TableColumn, YdResponsiveEnhancedTable } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import { createWebCardApi } from '../api/web-card-api'
 import type { CardTemplate, ParseRules, Site, SiteRouteRule } from '../types'
@@ -107,6 +107,13 @@ function remove(row: Site) { confirm.confirm({ title: '删除站点', content: `
 async function toggle(row: Site) { toggling.value = row.id; try { await api.saveSite({ ...row, enabled: !row.enabled }); toast.success(row.enabled ? '站点规则已停用' : '站点规则已启用'); await load() } catch (cause) { toast.error(errorText(cause, '更新站点状态失败')) } finally { toggling.value = '' } }
 async function loadPatterns() { const values = await Promise.all(rows.value.map(async row => { const routes = await api.routeRules(row.id); if (routes.length) return [row.id, routes.map(value => value.rules.detailUrlPattern).join('、')] as const; const legacy = await api.rules(row.id); return [row.id, legacy?.detailUrlPattern || '未配置'] as const })); patterns.value = Object.fromEntries(values) }
 onMounted(load)
+
+/** 行操作统一收进操作菜单 */
+const rowActions: ActionMenuItem<unknown>[] = [
+  { label: '管理规则', icon: 'morph:sliders', onClick: row => edit(row as never) },
+  { label: '删除', icon: 'morph:trash-2', danger: true, onClick: row => remove(row as never) },
+]
+
 </script>
 
 <template>
@@ -114,31 +121,13 @@ onMounted(load)
     <YdPageHeader title="站点与子链接规则" description="一个域名可维护多套子链接匹配、字段解析和卡片模板。"><YdButton @click="create"><YdIcon name="i-ri:add-line"/>新增站点</YdButton></YdPageHeader>
     <YdPageMain class="space-y-4">
       <YdAlert v-if="error" variant="destructive" title="加载失败" :description="error"/>
-      <YdLoadingOverlay :loading="loading"><YdResponsiveTable  row-key="id" table-root-class="rounded-lg overflow-hidden" table-class="min-w-[1040px]" border stripe :columns="columns" :data="rows">
+      <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+        :actions="rowActions"
+  row-key="id" table-root-class="rounded-lg overflow-hidden" table-class="min-w-[1040px]" border stripe :columns="columns" :data="rows">
         <template #cell-hosts="{row}">{{ row.original.hosts.join(', ') }}</template>
         <template #cell-pattern="{row}"><span class="pattern-cell">{{ patterns[row.original.id] || '加载中' }}</span></template>
         <template #cell-enabled="{row}"><div class="status-toggle"><YdSwitch :model-value="row.original.enabled" :disabled="toggling===row.original.id" @update:model-value="toggle(row.original)"/><small>{{ row.original.enabled ? '已启用' : '已停用' }}</small></div></template>
-        <template #cell-operation="{row}"><div class="row-actions"><YdButton size="sm" variant="outline" @click="edit(row.original)">管理规则</YdButton><YdButton size="sm" variant="destructive" @click="remove(row.original)">删除</YdButton></div></template>
-        <template #card="{ row }">
-          <YdCard class="w-full">
-            <div class="flex flex-col gap-3">
-              <div class="flex items-center justify-between gap-2">
-                <span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span>
-              </div>
-              <div class="flex flex-col gap-1 text-sm">
-                <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">允许域名</span><span class="break-all">{{ row.hosts.join(', ') }}</span></div>
-                <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">子链接规则</span><span class="break-all">{{ patterns[row.id] || '加载中' }}</span></div>
-                <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">类型</span><span>{{ row.responseType }}</span></div>
-                <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">状态</span><span>{{ row.enabled ? '已启用' : '已停用' }}</span></div>
-              </div>
-              <div class="flex flex-wrap gap-2 border-t pt-3">
-                <YdButton size="sm" variant="outline" @click="edit(row)">管理规则</YdButton>
-                <YdButton size="sm" variant="destructive" @click="remove(row)">删除</YdButton>
-              </div>
-            </div>
-          </YdCard>
-        </template>
-      </YdResponsiveTable></YdLoadingOverlay>
+                </YdResponsiveEnhancedTable></YdLoadingOverlay>
       <YdPagination v-model:page="page" v-model:size="size" :total="total" class="mt-3" @page-change="load" @size-change="load"/>
     </YdPageMain>
 

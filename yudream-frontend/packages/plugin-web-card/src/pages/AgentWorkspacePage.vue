@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { YdAlert, YdButton, YdCard, YdIcon, YdPageHeader, YdPageMain, YdResponsiveTable, YdSelect, YdTextarea, useYdToast, type TableColumn } from '@yudream/components'
+import { YdAlert, YdButton, YdIcon, YdPageHeader, YdPageMain, YdSelect, YdTextarea, useYdToast, type TableColumn, YdResponsiveEnhancedTable, type ActionMenuItem } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import { createWebCardApi } from '../api/web-card-api'
 import type { AgentProposal, AgentSession, CardTemplate, Option, Site } from '../types'
@@ -14,8 +14,15 @@ async function send(){if(!sessionId.value||!message.value.trim())return;busy.val
 async function apply(id:string){try{await api.applyProposal(id);toast.success('提案已应用为新草稿版本');await load()}catch(e){toast.error(errorText(e,'应用提案失败'))}}
 async function reject(id:string){await api.rejectProposal(id);toast.success('提案已拒绝');await load()}
 onMounted(load)
+/** 提案行操作：待审状态才可应用/拒绝 */
+const rowActions: ActionMenuItem<unknown>[] = [
+  { label: '应用', icon: 'morph:check', visible: row => (row as { status: string }).status === 'PENDING', onClick: row => apply((row as { id: string }).id) },
+  { label: '拒绝', icon: 'morph:ban', visible: row => (row as { status: string }).status === 'PENDING', onClick: row => reject((row as { id: string }).id) },
+]
 </script>
-<template><section><YdPageHeader title="Agent 工作台" description="通过持续对话调整解析规则与模板；每次变更都需要人工确认。"><YdButton variant="outline" @click="create"><YdIcon name="i-ri:add-line"/>创建会话</YdButton></YdPageHeader><YdPageMain class="space-y-4"><YdAlert v-if="error" variant="destructive" title="加载失败" :description="error"/><div class="grid grid-cols-1 gap-3 md:grid-cols-4"><YdSelect v-model="siteId" :options="sites.map(v=>({label:v.name,value:v.id}))" placeholder="站点"/><YdSelect v-model="templateId" :options="templates.filter(v=>!siteId||v.siteId===siteId).map(v=>({label:v.name,value:v.id}))" placeholder="模板"/><YdSelect v-model="agentCode" :options="agents.map(v=>({label:v.name,value:v.id}))" placeholder="Agent"/><YdSelect v-model="sessionId" :options="sessions.map(v=>({label:`${v.siteId} / ${v.agentCode}`,value:String(v.id)}))" placeholder="已有会话"/></div><div class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_360px]"><div class="space-y-3"><div class="conversation"><div v-if="!active?.messages.length" class="empty">尚无对话</div><div v-for="(item,i) in active?.messages" :key="i" class="message" :class="item.role"><strong>{{item.role==='user'?'管理员':'Agent'}}</strong><p>{{item.content}}</p></div></div><YdTextarea v-model="message" placeholder="例如：标题改用 article h1，并把作者和发布时间放到摘要下方。"/><YdButton :disabled="busy||!sessionId||!message.trim()" @click="send"><YdIcon name="i-ri:send-plane-line"/>生成变更提案</YdButton></div><YdAlert title="变更边界" description="Agent 只能修改解析规则、结构化布局、HTML 和 CSS；无法修改域名、访问凭据、群绑定或发布状态。"/></div><YdResponsiveTable row-key="id" table-root-class="rounded-lg overflow-hidden" table-class="min-w-[900px]" border stripe :columns="columns" :data="proposals"><template #cell-operations="{row}"><code>{{row.original.operations.map((v: { target: string; operation: string; value: unknown })=>`${v.operation} ${v.target}`).join('；')}}</code></template><template #cell-createdAt="{row}">{{dateTime(row.original.createdAt)}}</template><template #cell-operation="{row}"><div v-if="row.original.status==='PENDING'" class="flex gap-2"><YdButton size="sm" @click="apply(row.original.id)">应用</YdButton><YdButton size="sm" variant="outline" @click="reject(row.original.id)">拒绝</YdButton></div></template>
+<template><section><YdPageHeader title="Agent 工作台" description="通过持续对话调整解析规则与模板；每次变更都需要人工确认。"><YdButton variant="outline" @click="create"><YdIcon name="i-ri:add-line"/>创建会话</YdButton></YdPageHeader><YdPageMain class="space-y-4"><YdAlert v-if="error" variant="destructive" title="加载失败" :description="error"/><div class="grid grid-cols-1 gap-3 md:grid-cols-4"><YdSelect v-model="siteId" :options="sites.map(v=>({label:v.name,value:v.id}))" placeholder="站点"/><YdSelect v-model="templateId" :options="templates.filter(v=>!siteId||v.siteId===siteId).map(v=>({label:v.name,value:v.id}))" placeholder="模板"/><YdSelect v-model="agentCode" :options="agents.map(v=>({label:v.name,value:v.id}))" placeholder="Agent"/><YdSelect v-model="sessionId" :options="sessions.map(v=>({label:`${v.siteId} / ${v.agentCode}`,value:String(v.id)}))" placeholder="已有会话"/></div><div class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_360px]"><div class="space-y-3"><div class="conversation"><div v-if="!active?.messages.length" class="empty">尚无对话</div><div v-for="(item,i) in active?.messages" :key="i" class="message" :class="item.role"><strong>{{item.role==='user'?'管理员':'Agent'}}</strong><p>{{item.content}}</p></div></div><YdTextarea v-model="message" placeholder="例如：标题改用 article h1，并把作者和发布时间放到摘要下方。"/><YdButton :disabled="busy||!sessionId||!message.trim()" @click="send"><YdIcon name="i-ri:send-plane-line"/>生成变更提案</YdButton></div><YdAlert title="变更边界" description="Agent 只能修改解析规则、结构化布局、HTML 和 CSS；无法修改域名、访问凭据、群绑定或发布状态。"/></div><YdResponsiveEnhancedTable
+        :actions="rowActions"
+ row-key="id" table-root-class="rounded-lg overflow-hidden" table-class="min-w-[900px]" border stripe :columns="columns" :data="proposals"><template #cell-operations="{row}"><code>{{row.original.operations.map((v: { target: string; operation: string; value: unknown })=>`${v.operation} ${v.target}`).join('；')}}</code></template><template #cell-createdAt="{row}">{{dateTime(row.original.createdAt)}}</template>
 <template #card="{ row }">
   <YdCard class="w-full">
     <div class="flex flex-col gap-3">
@@ -33,5 +40,5 @@ onMounted(load)
       </div>
     </div>
   </YdCard>
-</template></YdResponsiveTable></YdPageMain></section></template>
+</template></YdResponsiveEnhancedTable></YdPageMain></section></template>
 <style scoped>.conversation{min-height:280px;max-height:440px;overflow:auto;border:1px solid var(--color-border-2);padding:16px}.empty{display:grid;min-height:240px;place-items:center;color:var(--color-text-3)}.message{margin-bottom:14px;padding:12px;border-left:3px solid var(--color-text-1);background:var(--color-fill-1)}.message.assistant{border-left-color:rgb(var(--success-6))}.message p{margin:6px 0 0;white-space:pre-wrap}</style>

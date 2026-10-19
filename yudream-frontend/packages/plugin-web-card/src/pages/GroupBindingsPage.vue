@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, type ActionMenuItem } from '@yudream/components'
 import { computed, onMounted, ref } from 'vue'
-import { YdAlert, YdButton, YdCard, YdIcon, YdInput, YdLabel, YdModal, YdNumberField, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSelect, YdSwitch, useYdModal, useYdToast, type TableColumn } from '@yudream/components'
+import { YdAlert, YdButton, YdIcon, YdInput, YdLabel, YdModal, YdNumberField, YdPageHeader, YdPageMain, YdPagination, YdSelect, YdSwitch, useYdModal, useYdToast, type TableColumn, YdResponsiveEnhancedTable } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import { createWebCardApi } from '../api/web-card-api'
 import type { GroupBinding, Option, Site } from '../types'
@@ -57,6 +57,13 @@ async function save() { saving.value = true; try { const connection = connection
 async function toggle(value: GroupBinding) { toggling.value = value.id; try { await api.saveBinding({ ...value, enabled: !value.enabled }); toast.success(value.enabled ? '定时推送已停用' : '定时推送已启用'); await load() } catch (cause) { toast.error(errorText(cause, '更新定时推送状态失败')) } finally { toggling.value = '' } }
 function remove(value: GroupBinding) { modal.confirm({ title: '删除定时推送目标', content: '删除后定时采集任务不再主动推送到此群。即时链接回复不受影响。', onConfirm: async () => { await api.deleteBinding(value.id); toast.success('定时推送目标已删除'); await load() } }) }
 onMounted(load)
+
+/** 行操作统一收进操作菜单 */
+const rowActions: ActionMenuItem<unknown>[] = [
+  { label: '编辑', icon: 'morph:pencil', onClick: row => edit(row as never) },
+  { label: '删除', icon: 'morph:trash-2', danger: true, onClick: row => remove(row as never) },
+]
+
 </script>
 
 <template>
@@ -64,32 +71,14 @@ onMounted(load)
     <YdPageHeader title="定时推送目标" description="仅供定时采集任务主动推送使用。即时链接始终回复到用户发送链接的原群。"><YdButton @click="create"><YdIcon name="i-ri:add-line"/>新增目标</YdButton></YdPageHeader>
     <YdPageMain class="space-y-4">
       <YdAlert v-if="error" variant="destructive" title="加载失败" :description="error"/>
-      <YdLoadingOverlay :loading="loading"><YdResponsiveTable  row-key="id" table-root-class="rounded-lg overflow-hidden" table-class="min-w-[900px]" border stripe :columns="columns" :data="rows">
+      <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+        :actions="rowActions"
+  row-key="id" table-root-class="rounded-lg overflow-hidden" table-class="min-w-[900px]" border stripe :columns="columns" :data="rows">
         <template #cell-siteId="{row}">{{ sites.find(value => value.id === row.original.siteId)?.name || row.original.siteId }}</template>
         <template #cell-connectionId="{row}">{{ connections.find(value => value.id === row.original.connectionId)?.name || row.original.connectionId }}</template>
         <template #cell-channelId="{row}">{{ row.original.channelId }}</template>
         <template #cell-enabled="{row}"><div class="status-toggle"><YdSwitch :model-value="row.original.enabled" :disabled="toggling===row.original.id" @update:model-value="toggle(row.original)"/><small>{{ row.original.enabled ? '已启用' : '已停用' }}</small></div></template>
-        <template #cell-operation="{row}"><div class="row-actions"><YdButton size="sm" variant="outline" @click="edit(row.original)">编辑</YdButton><YdButton size="sm" variant="destructive" @click="remove(row.original)">删除</YdButton></div></template>
-        <template #card="{ row }">
-          <YdCard class="w-full">
-            <div class="flex flex-col gap-3">
-              <div class="flex items-center justify-between gap-2">
-                <span class="min-w-0 break-words text-base font-semibold">{{ sites.find(value => value.id === row.siteId)?.name || row.siteId }}</span>
-              </div>
-              <div class="flex flex-col gap-1 text-sm">
-                <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">连接</span><span class="break-all">{{ connections.find(value => value.id === row.connectionId)?.name || row.connectionId }}</span></div>
-                <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">目标群</span><span class="break-all">{{ row.channelId }}</span></div>
-                <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">状态</span><span>{{ row.enabled ? '已启用' : '已停用' }}</span></div>
-                <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">冷却/秒</span><span>{{ row.cooldownSeconds }}</span></div>
-              </div>
-              <div class="flex flex-wrap gap-2 border-t pt-3">
-                <YdButton size="sm" variant="outline" @click="edit(row)">编辑</YdButton>
-                <YdButton size="sm" variant="destructive" @click="remove(row)">删除</YdButton>
-              </div>
-            </div>
-          </YdCard>
-        </template>
-      </YdResponsiveTable></YdLoadingOverlay>
+                </YdResponsiveEnhancedTable></YdLoadingOverlay>
       <YdPagination v-model:page="page" v-model:size="size" :total="total" class="mt-3" @page-change="load" @size-change="load"/>
     </YdPageMain>
     <YdModal v-model="open" title="定时推送目标" class="binding-modal" :show-cancel-button="true" :confirm-button-loading="saving" @confirm="save">

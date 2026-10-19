@@ -1,25 +1,7 @@
 <script setup lang="ts">
 import { YdLoadingOverlay } from '@yudream/components'
 import {computed, onMounted, ref, watch } from 'vue'
-import { YdAction,
-  YdAlert,
-  YdButton,
-  YdButtonGroup,
-  YdCard,
-  YdIcon,
-  YdInput,
-  YdLabel,
-  YdModal,
-  YdPageHeader,
-  YdPageMain,
-  YdPagination,
-  YdResponsiveTable,
-  YdSelect,
-  YdTag,
-  useYdModal,
-  useYdToast,
-  type TableColumn,
-} from '@yudream/components'
+import { YdAction, YdAlert, YdButton, YdButtonGroup, YdIcon, YdInput, YdLabel, YdModal, YdPageHeader, YdPageMain, YdPagination, YdSelect, YdTag, useYdModal, useYdToast, type TableColumn, YdResponsiveEnhancedTable, type ActionMenuItem } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import { createWebCardApi } from '../api/web-card-api'
 import TemplateCodeEditor from '../components/TemplateCodeEditor.vue'
@@ -416,6 +398,15 @@ async function changeSite(value: unknown) {
 watch(selected, () => void loadVersions())
 watch(mode, value => { editorTab.value = value === 'ADVANCED' ? 'html' : 'layout' })
 onMounted(load)
+/** 模板与版本行操作 */
+const templateActions: ActionMenuItem<unknown>[] = [
+  { label: '编辑', icon: 'morph:pencil', onClick: row => editTemplate(row as never) },
+  { label: '删除', icon: 'morph:trash-2', danger: true, onClick: row => removeTemplate(row as never) },
+]
+
+const versionActions: ActionMenuItem<unknown>[] = [
+  { label: '回滚到此版本', icon: 'morph:undo', onClick: row => rollback(row as never) },
+]
 </script>
 
 <template>
@@ -448,46 +439,20 @@ onMounted(load)
           </div>
           <YdTag>{{ templateTotal }} 个模板</YdTag>
         </div>
-        <YdLoadingOverlay :loading="loading"><YdResponsiveTable
-
+        <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+          
           row-key="id"
           table-root-class="rounded-lg overflow-hidden"
           table-class="min-w-[760px]"
           border
           stripe
+          :actions="templateActions"
           :columns="templateColumns"
           :data="templates"
         >
           <template #cell-siteId="{ row }">{{ sites.find(site => site.id === row.original.siteId)?.name || row.original.siteId }}</template>
           <template #cell-updatedAt="{ row }">{{ dateTime(row.original.updatedAt) }}</template>
-          <template #cell-operation="{ row }">
-            <div class="row-actions">
-              <YdButton size="sm" variant="outline" @click="editTemplate(row.original)">编辑</YdButton>
-              <YdButton size="sm" variant="destructive" title="删除模板" @click="removeTemplate(row.original)">
-                <YdIcon name="i-ri:delete-bin-line" />
-              </YdButton>
-            </div>
-          </template>
-          <template #card="{ row }">
-            <YdCard class="w-full">
-              <div class="flex flex-col gap-3">
-                <div class="flex items-center justify-between gap-2">
-                  <span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span>
-                </div>
-                <div class="flex flex-col gap-1 text-sm">
-                  <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">站点</span><span class="break-all">{{ sites.find(site => site.id === row.siteId)?.name || row.siteId }}</span></div>
-                  <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">更新时间</span><span>{{ dateTime(row.updatedAt) }}</span></div>
-                </div>
-                <div class="flex flex-wrap gap-2 border-t pt-3">
-                  <YdButton size="sm" variant="outline" @click="editTemplate(row)">编辑</YdButton>
-                  <YdButton size="sm" variant="destructive" title="删除模板" @click="removeTemplate(row)">
-                    <YdIcon name="i-ri:delete-bin-line" />
-                  </YdButton>
-                </div>
-              </div>
-            </YdCard>
-          </template>
-        </YdResponsiveTable></YdLoadingOverlay>
+          </YdResponsiveEnhancedTable></YdLoadingOverlay>
         <YdPagination
           v-model:page="templatePage"
           v-model:size="templateSize"
@@ -608,14 +573,15 @@ onMounted(load)
       class="version-modal"
       :footer="false"
     >
-      <YdLoadingOverlay :loading="loading"><YdResponsiveTable
-
+      <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+        
         row-key="id"
         table-root-class="rounded-lg overflow-hidden"
         table-class="min-w-[860px]"
         border
         stripe
-        :columns="versionColumns"
+        :actions="versionActions"
+          :columns="versionColumns"
         :data="versions"
       >
         <template #cell-status="{ row }">
@@ -624,38 +590,7 @@ onMounted(load)
           <span v-else>历史版本</span>
         </template>
         <template #cell-createdAt="{ row }">{{ dateTime(row.original.createdAt) }}</template>
-        <template #cell-operation="{ row }">
-          <YdButton size="sm" variant="outline" @click="rollback(row.original)">
-            <YdIcon name="i-ri:arrow-go-back-line" />
-            回滚
-          </YdButton>
-        </template>
-        <template #card="{ row }">
-          <YdCard class="w-full">
-            <div class="flex flex-col gap-3">
-              <div class="flex items-center justify-between gap-2">
-                <span class="min-w-0 break-words text-base font-semibold">版本 {{ row.version }}</span>
-                <div class="flex gap-1">
-                  <YdTag v-if="row.id === current?.publishedVersionId">已发布</YdTag>
-                  <YdTag v-else-if="row.id === current?.draftVersionId">当前草稿</YdTag>
-                  <span v-else>历史版本</span>
-                </div>
-              </div>
-              <div class="flex flex-col gap-1 text-sm">
-                <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">来源</span><span class="break-all">{{ row.origin }}</span></div>
-                <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">变更说明</span><span class="break-all">{{ row.summary }}</span></div>
-                <div class="flex gap-2"><span class="shrink-0 text-secondary-foreground/60">创建时间</span><span>{{ dateTime(row.createdAt) }}</span></div>
-              </div>
-              <div class="flex flex-wrap gap-2 border-t pt-3">
-                <YdButton size="sm" variant="outline" @click="rollback(row)">
-                  <YdIcon name="i-ri:arrow-go-back-line" />
-                  回滚
-                </YdButton>
-              </div>
-            </div>
-          </YdCard>
-        </template>
-      </YdResponsiveTable></YdLoadingOverlay>
+        </YdResponsiveEnhancedTable></YdLoadingOverlay>
       <YdPagination
         v-model:page="versionPage"
         v-model:size="versionSize"
