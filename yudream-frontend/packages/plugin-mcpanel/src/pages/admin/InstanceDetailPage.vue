@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, YdTablePageLayout } from '@yudream/components'
 import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { McpNodeStats } from '../../types.ts'
-import { YdAction, YdAlert, YdButton, YdCard, YdDescriptions, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdSelect, YdTag, useYdModal, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
+import { YdAction, YdAlert, YdButton, YdCard, YdDescriptions, YdIcon, YdInput, YdModal, YdPageMain, YdSelect, YdTag, useYdModal, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createMcPanelExtra } from '../../api/api-extra.ts'
@@ -1177,26 +1177,7 @@ const rowActions: ActionMenuItem<unknown>[] = [
 </script>
 
 <template>
-  <YdPageHeader :title="`控制台 · ${instance?.name ?? instanceId}`" class="mb-0">
-    <YdButton variant="outline" @click="router.push(listPath)">
-      返回列表
-    </YdButton>
-    <YdButton v-if="canUse" variant="outline" :disabled="acting || running" @click="act('start')">
-      启动
-    </YdButton>
-    <YdButton v-if="canUse" variant="outline" :disabled="acting || !running" @click="act('stop')">
-      停止
-    </YdButton>
-    <YdButton v-if="canUse" variant="outline" :disabled="acting" @click="act('restart')">
-      重启
-    </YdButton>
-    <YdButton v-if="canUse" variant="destructive" :disabled="acting" @click="act('kill')">
-      终止
-    </YdButton>
-    <YdButton variant="outline" @click="router.push(filesPath)">
-      文件管理
-    </YdButton>
-  </YdPageHeader>
+  
 
   <YdAlert v-if="loadError" variant="destructive" title="无法加载实例" class="mt-4">
   <template #description>
@@ -1580,7 +1561,29 @@ const rowActions: ActionMenuItem<unknown>[] = [
         <p v-if="backupCreating" class="mb-2 text-sm text-muted-foreground">
           正在打包备份，完成后自动出现在列表（大世界可能需要数分钟）…
         </p>
-        <YdLoadingOverlay :loading="backupLoading"><YdResponsiveEnhancedTable
+                  <YdTablePageLayout title="`控制台 · ${instance?.name ?? instanceId}`" :show-search="false">
+              <template #actions>
+      <YdButton variant="outline" @click="router.push(listPath)">
+      返回列表
+    </YdButton>
+    <YdButton v-if="canUse" variant="outline" :disabled="acting || running" @click="act('start')">
+      启动
+    </YdButton>
+    <YdButton v-if="canUse" variant="outline" :disabled="acting || !running" @click="act('stop')">
+      停止
+    </YdButton>
+    <YdButton v-if="canUse" variant="outline" :disabled="acting" @click="act('restart')">
+      重启
+    </YdButton>
+    <YdButton v-if="canUse" variant="destructive" :disabled="acting" @click="act('kill')">
+      终止
+    </YdButton>
+    <YdButton variant="outline" @click="router.push(filesPath)">
+      文件管理
+    </YdButton>
+              </template>
+              <template #table>
+<YdLoadingOverlay :loading="backupLoading"><YdResponsiveEnhancedTable
           :actions="rowActions"
 
           
@@ -1616,6 +1619,9 @@ const rowActions: ActionMenuItem<unknown>[] = [
             {{ formatDateTime(row.original.at as number) }}
           </template>
 </YdResponsiveEnhancedTable></YdLoadingOverlay>
+              </template>
+            </YdTablePageLayout>
+
       </YdCard>
     </div>
     <FileEditorModal

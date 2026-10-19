@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, YdTablePageLayout } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { TableColumn, ActionMenuItem } from '@yudream/components'
-import { YdAlert, YdButton, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdProgress, YdTag, useYdModal, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
+import { YdAlert, YdButton, YdIcon, YdInput, YdModal, YdPageMain, YdPagination, YdProgress, YdTag, useYdModal, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
 import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createNodeOpsApi } from '../../api/node-ops-api.ts'
@@ -205,11 +205,7 @@ const rowActions: ActionMenuItem<unknown>[] = [
 </script>
 
 <template>
-  <YdPageHeader :title="`${name || '节点'} · 文件管理`" description="白名单内的节点文件 · 在线编辑与安全传输" class="mb-0">
-    <YdButton variant="outline" @click="router.push(`/platform/plugins/mcpanel/admin/nodes/${nodeId}`)"><YdIcon name="i-ri:arrow-left-line" />节点详情</YdButton>
-    <YdButton v-if="canManage" variant="outline" :loading="ftpBusy" @click="enableFtp"><YdIcon name="i-ri:key-2-line" />SFTP 连接</YdButton>
-    <YdButton v-if="canManage" @click="openForm()"><YdIcon name="i-ri:folder-add-line" />新建目录</YdButton>
-  </YdPageHeader>
+  
   <YdPageMain class="mcp-file-page">
     <div class="mcp-file-location">
       <YdButton size="sm" variant="outline" :aria-expanded="sideOpen" @click="sideOpen = !sideOpen"><YdIcon name="i-ri:side-bar-line" />目录</YdButton>
@@ -224,7 +220,14 @@ const rowActions: ActionMenuItem<unknown>[] = [
         <div class="mcp-file-search"><YdInput v-model="keyword" clearable placeholder="搜索当前目录" @keydown.enter="search" @clear="search" /><YdButton variant="outline" :loading="loading" @click="search"><YdIcon name="i-ri:refresh-line" />刷新</YdButton></div>
         <YdAlert v-if="error" variant="destructive" title="目录加载失败" class="mb-4">{{ error }}</YdAlert>
         <div v-if="download.active.value" class="mcp-download-status"><YdIcon name="i-ri:download-line" /><span>{{ download.fileName.value }}</span><YdProgress :model-value="download.progress.value" /><span>{{ download.progress.value }}%</span><YdButton size="sm" variant="outline" @click="download.cancel">取消</YdButton></div>
-        <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+                <YdTablePageLayout title="`${name || '节点'} · 文件管理`" :show-search="false">
+            <template #actions>
+      <YdButton variant="outline" @click="router.push(`/platform/plugins/mcpanel/admin/nodes/${nodeId}`)"><YdIcon name="i-ri:arrow-left-line" />节点详情</YdButton>
+    <YdButton v-if="canManage" variant="outline" :loading="ftpBusy" @click="enableFtp"><YdIcon name="i-ri:key-2-line" />SFTP 连接</YdButton>
+    <YdButton v-if="canManage" @click="openForm()"><YdIcon name="i-ri:folder-add-line" />新建目录</YdButton>
+            </template>
+            <template #table>
+<YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
             :actions="rowActions"
   :data="rows" :columns="columns" row-key="name" table-root-class="rounded-lg overflow-hidden" table-class="min-w-[800px]" border stripe column-visibility :empty-text="error ? '未能读取目录' : keyword ? '没有匹配的文件' : '此目录为空'">
           <template #cell-name="{ row }"><YdButton variant="ghost" class="mcp-file-name" @click="enter(row.original)"><YdIcon :name="row.original.isDir ? 'i-ri:folder-3-line' : 'i-ri:file-text-line'" />{{ row.original.name }}</YdButton></template>
@@ -238,7 +241,12 @@ const rowActions: ActionMenuItem<unknown>[] = [
             <YdButton v-if="canManage" size="icon-sm" variant="ghost" title="删除" class="text-destructive" :disabled="busy" @click="remove(row.original)"><YdIcon name="i-ri:delete-bin-line" /></YdButton>
           </div></template>
         </YdResponsiveEnhancedTable></YdLoadingOverlay>
-        <YdPagination v-model:page="pager.page" v-model:size="pager.size" :sizes="[10, 20, 50, 100]" :total="pager.total" class="mt-3" @page-change="() => load()" @size-change="search" />
+            </template>
+            <template #footer>
+      <YdPagination v-model:page="pager.page" v-model:size="pager.size" :sizes="[10, 20, 50, 100]" :total="pager.total" @page-change="() => load()" @size-change="search" />
+            </template>
+          </YdTablePageLayout>
+
       </div>
     </div>
     <YdModal v-model="formOpen" :title="formKind === 'mkdir' ? '新建目录' : '重命名 / 移动'" :confirm-button-loading="busy" :before-close="(action, done) => action === 'confirm' ? submit(done) : busy ? undefined : done()">

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, YdTablePageLayout } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { TableColumn, ActionMenuItem } from '@yudream/components'
-import { YdButton, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdSearchBar, YdSelect, YdTag, useYdModal, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
+import { YdButton, YdIcon, YdInput, YdPageMain, YdPagination, YdSelect, YdTag, useYdModal, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { createMcPanelExtra } from '../../api/api-extra'
 import { MCPANEL_PERMISSION, accountHasPermission } from '../../composables/permissions'
@@ -101,14 +101,34 @@ const rowActions: ActionMenuItem<unknown>[] = [
 </script>
 
 <template>
-  <YdPageHeader title="服务端模板" description="镜像与服务端模板：安装源、启动命令形态、配置重写与注入开关">
-    <YdButton v-if="canManage" @click="editing = null; formOpen = true">
+  
+  <YdPageMain>
+            <YdTablePageLayout title="服务端模板">
+            <template #actions>
+      <YdButton v-if="canManage" @click="editing = null; formOpen = true">
       <YdIcon name="i-ri:add-line" />
       新建模板
     </YdButton>
-  </YdPageHeader>
-  <YdPageMain>
-    <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+            </template>
+            <template #search>
+              <div class="flex flex-wrap items-center gap-2">
+                <div class="mcp-filter-grid">
+            <YdInput v-model="filters.keyword" clearable placeholder="Key / 名称" class="w-full" @keydown.enter="search" @clear="search" />
+            <YdSelect v-model="filters.kind" :options="KIND_OPTIONS" class="w-full" @change="search" />
+            <div class="flex flex-wrap items-center justify-end gap-2">
+              <YdButton variant="outline" @click="() => { filters.keyword = ''; filters.kind = 'all'; search() }">
+                重置
+              </YdButton>
+              <YdButton @click="search">
+                <YdIcon name="i-ri:search-line" />
+                查询
+              </YdButton>
+            </div>
+          </div>
+              </div>
+            </template>
+            <template #table>
+<YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
         :actions="rowActions"
 
       
@@ -122,23 +142,7 @@ const rowActions: ActionMenuItem<unknown>[] = [
       column-visibility
       empty-text="暂无模板，点击右上角「新建模板」创建"
     >
-      <template #toolbar>
-        <YdSearchBar class="w-full">
-          <div class="mcp-filter-grid">
-            <YdInput v-model="filters.keyword" clearable placeholder="Key / 名称" class="w-full" @keydown.enter="search" @clear="search" />
-            <YdSelect v-model="filters.kind" :options="KIND_OPTIONS" class="w-full" @change="search" />
-            <div class="flex flex-wrap items-center justify-end gap-2">
-              <YdButton variant="outline" @click="() => { filters.keyword = ''; filters.kind = 'all'; search() }">
-                重置
-              </YdButton>
-              <YdButton @click="search">
-                <YdIcon name="i-ri:search-line" />
-                查询
-              </YdButton>
-            </div>
-          </div>
-        </YdSearchBar>
-      </template>
+      
       <template #cell-kind="{ row }">
         <YdTag :variant="row.original.kind === 'image' ? 'secondary' : 'default'">
           {{ row.original.kind === 'image' ? '镜像' : '服务端' }}
@@ -148,14 +152,18 @@ const rowActions: ActionMenuItem<unknown>[] = [
         {{ formatDateTime(row.original.updatedAt as number | undefined) }}
       </template>
 </YdResponsiveEnhancedTable></YdLoadingOverlay>
-    <YdPagination
+            </template>
+            <template #footer>
+      <YdPagination
       v-model:page="pager.page"
       v-model:size="pager.size"
       :total="pager.total"
-      class="mt-3"
       @page-change="() => load()"
       @size-change="() => { pager.page = 1; load() }"
     />
+            </template>
+          </YdTablePageLayout>
+
     <TemplateFormModal v-model:open="formOpen" :sdk="sdk" :template="editing" @saved="() => { toast.success('模板已保存'); load() }" />
   </YdPageMain>
 </template>

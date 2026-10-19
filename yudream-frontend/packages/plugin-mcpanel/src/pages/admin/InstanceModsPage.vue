@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, YdTablePageLayout } from '@yudream/components'
 import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { YdAlert, YdButton, YdCard, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdSelect, useYdModal, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
+import { YdAlert, YdButton, YdCard, YdIcon, YdInput, YdPageMain, YdPagination, YdSelect, useYdModal, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createMcPanelExtra } from '../../api/api-extra.ts'
@@ -158,14 +158,7 @@ const rowActions: ActionMenuItem<unknown>[] = [
 </script>
 
 <template>
-  <YdPageHeader :title="`模组/插件 · ${instanceName || instanceId}`" description="Modrinth 检索并安装到实例 plugins/ 或 mods/">
-    <YdButton variant="outline" @click="router.push(`/platform/plugins/mcpanel/admin/instances/${instanceId}`)">
-      返回终端
-    </YdButton>
-    <YdButton variant="outline" @click="router.push(`/platform/plugins/mcpanel/admin/instances/${instanceId}/files`)">
-      文件管理
-    </YdButton>
-  </YdPageHeader>
+  
   <YdPageMain>
     <YdAlert v-if="error" variant="destructive" title="提示" class="mb-4">
   <template #description>
@@ -191,7 +184,17 @@ const rowActions: ActionMenuItem<unknown>[] = [
         </div>
       </div>
 
-      <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+              <YdTablePageLayout title="`模组/插件 · ${instanceName || instanceId}`" :show-search="false">
+            <template #actions>
+      <YdButton variant="outline" @click="router.push(`/platform/plugins/mcpanel/admin/instances/${instanceId}`)">
+      返回终端
+    </YdButton>
+    <YdButton variant="outline" @click="router.push(`/platform/plugins/mcpanel/admin/instances/${instanceId}/files`)">
+      文件管理
+    </YdButton>
+            </template>
+            <template #table>
+<YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
           :actions="rowActions"
 
         
@@ -214,14 +217,18 @@ const rowActions: ActionMenuItem<unknown>[] = [
           {{ Number(row.original.downloads ?? 0).toLocaleString() }}
         </template>
       </YdResponsiveEnhancedTable></YdLoadingOverlay>
+            </template>
+            <template #footer>
       <YdPagination
         v-model:page="pager.page"
         v-model:size="pager.size"
         :total="pager.total"
-        class="mt-3"
         @page-change="() => search()"
         @size-change="() => { pager.page = 1; search() }"
       />
+            </template>
+          </YdTablePageLayout>
+
     </YdCard>
 
     <YdCard :title="projectType === 'plugin' ? '本地插件目录 plugins/' : '本地模组目录 mods/'" class="mcp-page-gap">

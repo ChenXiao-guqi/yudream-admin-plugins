@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, YdTablePageLayout } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { TableColumn, ActionMenuItem } from '@yudream/components'
-import { YdButton, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdSearchBar, YdTag, useYdModal, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
+import { YdButton, YdIcon, YdInput, YdModal, YdPageMain, YdPagination, YdSearchBar, YdTag, useYdModal, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { createMcPanelExtra } from '../../api/api-extra'
 import { createNodeOpsApi } from '../../api/node-ops-api'
@@ -239,12 +239,7 @@ const rowActions: ActionMenuItem<unknown>[] = [
 </script>
 
 <template>
-  <YdPageHeader title="回收站" description="已删除实例的数据目录：保留期内可找回或下载，超过节点保留期后自动清除">
-    <YdButton variant="outline" @click="() => load()">
-      <YdIcon name="i-ri:refresh-line" />
-      刷新
-    </YdButton>
-  </YdPageHeader>
+  
 
   <YdPageMain>
     <YdSearchBar class="mcp-page-gap">
@@ -260,7 +255,15 @@ const rowActions: ActionMenuItem<unknown>[] = [
       </div>
     </YdSearchBar>
 
-    <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+            <YdTablePageLayout title="回收站" :show-search="false">
+            <template #actions>
+      <YdButton variant="outline" @click="() => load()">
+      <YdIcon name="i-ri:refresh-line" />
+      刷新
+    </YdButton>
+            </template>
+            <template #table>
+<YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
         :actions="rowActions"
 
       class="mcp-page-gap"
@@ -311,15 +314,19 @@ const rowActions: ActionMenuItem<unknown>[] = [
         <span v-else class="text-muted-foreground">按节点配置</span>
       </template>
 </YdResponsiveEnhancedTable></YdLoadingOverlay>
-
-    <YdPagination
+            </template>
+            <template #footer>
+      <YdPagination
       v-model:page="pager.page"
       v-model:size="pager.size"
       :total="pager.total"
-      class="mt-3"
       @page-change="() => load()"
       @size-change="() => { pager.page = 1; load() }"
     />
+            </template>
+          </YdTablePageLayout>
+
+
 
     <YdModal
       v-model="restoreOpen"

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, YdTablePageLayout } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { FileItem, FileUploadRequestOptions, TableColumn, ActionMenuItem } from '@yudream/components'
-import { YdAlert, YdButton, YdCard, YdCheckboxGroup, YdFileUpload, YdInput, YdModal, YdPageHeader, YdPageMain, YdRadioGroup, YdSelect, YdSwitch, YdTag, useYdModal, useYdToast } from '@yudream/components'
+import { YdAlert, YdButton, YdCard, YdCheckboxGroup, YdFileUpload, YdInput, YdModal, YdPageMain, YdRadioGroup, YdSelect, YdSwitch, YdTag, useYdModal, useYdToast } from '@yudream/components'
 import { computed, onMounted, reactive, ref } from 'vue'
 import type { McpInjectArtifact } from '../../types'
 import { createMcPanelExtra } from '../../api/api-extra'
@@ -800,7 +800,6 @@ const rowActions: ActionMenuItem<{ index: number }>[] = [
 </script>
 
 <template>
-  <YdPageHeader title="面板设置" description="注入下载源、下载与导入、DNS、租户、节点贡献与 P2P 全局配置" />
   <YdLoadingOverlay :loading="loading"><YdPageMain >
     <YdAlert v-if="loadError" variant="destructive" title="无法加载设置" class="mb-4">
   <template #description>
@@ -887,7 +886,9 @@ const rowActions: ActionMenuItem<{ index: number }>[] = [
                   添加制品
                 </YdButton>
               </div>
-              <YdResponsiveEnhancedTable
+                      <YdTablePageLayout title="面板设置" :show-search="false">
+            <template #table>
+<YdResponsiveEnhancedTable
                 :actions="rowActions"
 
                 :columns="artifactColumns"
@@ -920,6 +921,9 @@ const rowActions: ActionMenuItem<{ index: number }>[] = [
                   <span v-else class="mcp-mono block truncate text-xs" :title="row.original.url">{{ row.original.url }}</span>
                 </template>
               </YdResponsiveEnhancedTable>
+            </template>
+          </YdTablePageLayout>
+
               <span class="mcp-form-hint">插件形态按 MC 版本区分（如 Paper 多版本）；模组形态按加载器（Fabric/Forge/NeoForge/Quilt）与 MC 版本细分。注入链路上线后按实例环境自动挑选匹配制品。</span>
             </div>
           </template>

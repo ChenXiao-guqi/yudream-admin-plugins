@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
-import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { TableColumn } from '@yudream/components'
-import { YdAction, YdAlert, YdButton, YdCard, YdIcon, YdPageHeader, YdPageMain, YdProgress, YdTag, YdResponsiveEnhancedTable } from '@yudream/components'
+import { YdLoadingOverlay, YdTablePageLayout } from '@yudream/components'
+import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
+import { YdAction, YdAlert, YdButton, YdCard, YdIcon, YdPageMain, YdProgress, YdTag, YdResponsiveEnhancedTable } from '@yudream/components'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { createMcPanelExtra } from '../../api/api-extra'
@@ -137,12 +137,7 @@ onMounted(() => void load())
 </script>
 
 <template>
-  <YdPageHeader title="数据监控" description="节点在线、实例运行状态与资源总览">
-    <YdButton variant="outline" @click="load">
-      <YdIcon name="i-ri:refresh-line" />
-      刷新
-    </YdButton>
-  </YdPageHeader>
+  
   <YdLoadingOverlay :loading="loading"><YdPageMain >
     <div class="space-y-6">
       <YdAlert v-if="error" variant="destructive" title="无法加载">
@@ -267,7 +262,15 @@ onMounted(() => void load())
             <YdIcon name="i-ri:arrow-right-s-line" />
           </YdButton>
         </div>
-        <YdResponsiveEnhancedTable
+                <YdTablePageLayout title="数据监控" :show-search="false">
+            <template #actions>
+      <YdButton variant="outline" @click="load">
+      <YdIcon name="i-ri:refresh-line" />
+      刷新
+    </YdButton>
+            </template>
+            <template #table>
+<YdResponsiveEnhancedTable
           :columns="instanceColumns"
           :data="recentInstances"
           row-key="id"
@@ -297,6 +300,9 @@ onMounted(() => void load())
             {{ formatDateTime(row.original.updatedAt as number) }}
           </template>
         </YdResponsiveEnhancedTable>
+            </template>
+          </YdTablePageLayout>
+
       </section>
     </div>
   </YdPageMain></YdLoadingOverlay>

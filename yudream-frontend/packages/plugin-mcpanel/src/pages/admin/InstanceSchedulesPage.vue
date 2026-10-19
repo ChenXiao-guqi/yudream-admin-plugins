@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, YdTablePageLayout } from '@yudream/components'
 import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { YdAlert, YdButton, YdCard, YdInput, YdModal, YdPageHeader, YdPageMain, YdSelect, YdSwitch, YdTag, useYdModal, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
+import { YdAlert, YdButton, YdCard, YdInput, YdModal, YdPageMain, YdSelect, YdSwitch, YdTag, useYdModal, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createMcPanelExtra } from '../../api/api-extra'
@@ -214,14 +214,7 @@ const rowActions: ActionMenuItem<unknown>[] = [
 </script>
 
 <template>
-  <YdPageHeader :title="`计划任务 · ${instanceId}`" description="间隔 / 每日定时向控制台发送命令">
-    <YdButton variant="outline" @click="router.push(`/platform/plugins/mcpanel/admin/instances/${instanceId}`)">
-      返回终端
-    </YdButton>
-    <YdButton v-if="canManage" @click="openCreate">
-      新建任务
-    </YdButton>
-  </YdPageHeader>
+  
   <YdPageMain>
     <YdAlert class="mb-4" title="说明">
   <template #description>
@@ -229,7 +222,17 @@ const rowActions: ActionMenuItem<unknown>[] = [
   </template>
     </YdAlert>
     <YdCard>
-      <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+              <YdTablePageLayout title="`计划任务 · ${instanceId}`" :show-search="false">
+            <template #actions>
+      <YdButton variant="outline" @click="router.push(`/platform/plugins/mcpanel/admin/instances/${instanceId}`)">
+      返回终端
+    </YdButton>
+    <YdButton v-if="canManage" @click="openCreate">
+      新建任务
+    </YdButton>
+            </template>
+            <template #table>
+<YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
         :actions="rowActions"
 
         
@@ -264,6 +267,9 @@ const rowActions: ActionMenuItem<unknown>[] = [
           {{ formatDateTime(row.original.nextRunAt as number) }}
         </template>
 </YdResponsiveEnhancedTable></YdLoadingOverlay>
+            </template>
+          </YdTablePageLayout>
+
     </YdCard>
 
     <YdModal

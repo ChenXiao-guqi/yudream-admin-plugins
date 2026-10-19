@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, YdTablePageLayout } from '@yudream/components'
 import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { YdAlert, YdButton, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdSearchBar, YdSelect, YdTag, useYdModal, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
+import { YdAlert, YdButton, YdIcon, YdInput, YdPageMain, YdPagination, YdSelect, YdTag, useYdModal, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { createMcPanelExtra } from '../../api/api-extra'
 import { MCPANEL_PERMISSION, accountHasPermission } from '../../composables/permissions'
@@ -238,8 +238,12 @@ const rowActions: ActionMenuItem<unknown>[] = [
 </script>
 
 <template>
-  <YdPageHeader title="操作审计" description="启停、命令、文件变更、备份、SFTP 等敏感操作；纯浏览不入审计。支持筛选、CSV 导出与单条删除">
-    <YdButton variant="outline" @click="load">
+  
+  <YdPageMain>
+    <YdAlert v-if="error" variant="destructive" title="无法加载审计日志" :description="error" class="mb-4" />
+            <YdTablePageLayout title="操作审计">
+            <template #actions>
+      <YdButton variant="outline" @click="load">
       刷新
     </YdButton>
     <YdButton :loading="exporting" @click="exportCsv">
@@ -249,25 +253,10 @@ const rowActions: ActionMenuItem<unknown>[] = [
       <YdIcon name="i-ri:delete-bin-2-line" />
       一键清理
     </YdButton>
-  </YdPageHeader>
-  <YdPageMain>
-    <YdAlert v-if="error" variant="destructive" title="无法加载审计日志" :description="error" class="mb-4" />
-    <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
-        :actions="rowActions"
-
-      :columns="columns"
-      :data="rows"
-      row-key="logId"
-      table-root-class="rounded-lg overflow-hidden"
-      table-class="min-w-[860px]"
-      border
-      stripe
-      column-visibility
-      empty-text="暂无审计记录"
-    >
-      <template #toolbar>
-        <YdSearchBar :show-toggle="false" class="w-full">
-          <div class="flex w-full flex-wrap items-center gap-2">
+            </template>
+            <template #search>
+              <div class="flex flex-wrap items-center gap-2">
+                <div class="flex w-full flex-wrap items-center gap-2">
             <YdInput v-model="filters.action" clearable placeholder="动作，如 instance.start" class="w-56" @keydown.enter="() => { pager.page = 1; load() }" />
             <YdInput v-model="filters.actor" clearable placeholder="操作者" class="w-44" @keydown.enter="() => { pager.page = 1; load() }" />
             <YdSelect v-model="filters.targetType" :options="TARGET_TYPES" class="w-36" @change="() => { pager.page = 1; load() }" />
@@ -282,8 +271,23 @@ const rowActions: ActionMenuItem<unknown>[] = [
               </YdButton>
             </div>
           </div>
-        </YdSearchBar>
-      </template>
+              </div>
+            </template>
+            <template #table>
+<YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+        :actions="rowActions"
+
+      :columns="columns"
+      :data="rows"
+      row-key="logId"
+      table-root-class="rounded-lg overflow-hidden"
+      table-class="min-w-[860px]"
+      border
+      stripe
+      column-visibility
+      empty-text="暂无审计记录"
+    >
+      
       <template #cell-at="{ row }">
         <span class="mcp-status-meta">{{ formatDateTime(row.original.at as number) }}</span>
       </template>
@@ -306,14 +310,18 @@ const rowActions: ActionMenuItem<unknown>[] = [
         </div>
       </template>
 </YdResponsiveEnhancedTable></YdLoadingOverlay>
-    <YdPagination
+            </template>
+            <template #footer>
+      <YdPagination
       v-model:page="pager.page"
       v-model:size="pager.size"
       :total="pager.total"
-      class="mt-3"
       @page-change="() => load()"
       @size-change="() => { pager.page = 1; load() }"
     />
+            </template>
+          </YdTablePageLayout>
+
   </YdPageMain>
 </template>
 

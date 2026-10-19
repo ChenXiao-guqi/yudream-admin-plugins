@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, YdTablePageLayout } from '@yudream/components'
 import type { TableColumn, YdTablePickerQuery, YdTablePickerResult, ActionMenuItem } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { McpNode } from '../../types'
-import { YdAlert, YdButton, YdCard, YdDescriptions, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdSelect, YdSwitch, YdTag, YdTextarea, YdTablePicker, useYdModal, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
+import { YdAlert, YdButton, YdCard, YdDescriptions, YdIcon, YdInput, YdModal, YdPageMain, YdPagination, YdSelect, YdSwitch, YdTag, YdTextarea, YdTablePicker, useYdModal, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { createMcPanelApi } from '../../api/mcpanel-api'
@@ -467,16 +467,7 @@ const rowActions: ActionMenuItem<unknown>[] = [
 </script>
 
 <template>
-  <YdPageHeader title="镜像管理" description="管理面板 / 节点 / 镜像管理">
-    <YdButton variant="outline" @click="refreshAll">
-      <YdIcon name="i-ri:refresh-line" />
-      刷新
-    </YdButton>
-    <YdButton v-if="canManage" :disabled="!nodeId" @click="openPull()">
-      <YdIcon name="i-ri:add-line" />
-      新增镜像
-    </YdButton>
-  </YdPageHeader>
+  
 
   <YdPageMain class="mcp-col">
     <YdCard title="远程主机镜像列表" description="镜像构建与容器运行依赖于 Docker 软件，物理主机上所有远程节点将共享所有镜像。">
@@ -495,7 +486,19 @@ const rowActions: ActionMenuItem<unknown>[] = [
         />
       </div>
 
-      <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+              <YdTablePageLayout title="镜像管理" :show-search="false">
+            <template #actions>
+      <YdButton variant="outline" @click="refreshAll">
+      <YdIcon name="i-ri:refresh-line" />
+      刷新
+    </YdButton>
+    <YdButton v-if="canManage" :disabled="!nodeId" @click="openPull()">
+      <YdIcon name="i-ri:add-line" />
+      新增镜像
+    </YdButton>
+            </template>
+            <template #table>
+<YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
           :actions="rowActions"
 
         
@@ -520,14 +523,18 @@ const rowActions: ActionMenuItem<unknown>[] = [
           <span class="mcp-mono">{{ row.original.nameText }}</span>
         </template>
       </YdResponsiveEnhancedTable></YdLoadingOverlay>
-
+            </template>
+            <template #footer>
       <YdPagination
         v-model:page="imagePager.page"
         v-model:size="imagePager.size"
         :total="imagePager.total"
-        class="mt-3"
         @size-change="onImageSizeChange"
       />
+            </template>
+          </YdTablePageLayout>
+
+
 
       <p v-if="pullStatus" class="mcp-status-meta mt-3">
         拉取状态：{{ pullStatus }}

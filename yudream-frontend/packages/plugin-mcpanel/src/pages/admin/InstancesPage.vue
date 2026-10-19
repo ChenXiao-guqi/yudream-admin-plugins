@@ -3,7 +3,7 @@ import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type {TableColumn, ActionMenuItem } from '@yudream/components'
 import type { McpNode, McpNodeContainerStat } from '../../types'
-import { YdAction, YdButton, YdButtonGroup, YdCheckbox, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdSearchBar, YdSelect, YdTag, YdTooltip, useYdModal, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
+import { YdTablePageLayout, YdAction, YdButton, YdButtonGroup, YdCheckbox, YdIcon, YdInput, YdModal, YdPagination, YdSelect, YdTag, YdTooltip, useYdModal, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { createMcPanelApi } from '../../api/mcpanel-api'
@@ -438,33 +438,68 @@ const rowActions: ActionMenuItem<unknown>[] = [
 </script>
 
 <template>
-  <YdPageHeader title="应用实例" description="Minecraft 服务器实例的生命周期与批量管理">
-    <YdButtonGroup class="mr-1">
-      <YdTooltip text="表格视图">
-        <YdButton size="sm" :variant="viewMode === 'table' ? 'default' : 'outline'" @click="viewMode = 'table'">
-          <YdIcon name="i-ri:table-line" />
-        </YdButton>
-      </YdTooltip>
-      <YdTooltip text="卡片视图（实时监控）">
-        <YdButton size="sm" :variant="viewMode === 'card' ? 'default' : 'outline'" @click="viewMode = 'card'">
-          <YdIcon name="i-ri:layout-grid-line" />
-        </YdButton>
-      </YdTooltip>
-    </YdButtonGroup>
-    <YdButton v-if="canManage" @click="openCreate">
-      <YdIcon name="i-ri:magic-line" />
-      创建服务器
-    </YdButton>
-    <YdButton variant="outline" @click="router.push('/platform/plugins/mcpanel/admin/market')">
-      应用市场
-    </YdButton>
-    <YdButton variant="outline" @click="router.push('/platform/plugins/mcpanel/admin/quickstart')">
-      快速开始
-    </YdButton>
-  </YdPageHeader>
-
-  <YdPageMain>
-    <!-- 卡片视图：实时资源 + 迷你趋势 + 图标操作 -->
+  <YdTablePageLayout title="应用实例">
+    <template #actions>
+  <YdButtonGroup class="mr-1">
+  <YdTooltip text="表格视图">
+  <YdButton size="sm" :variant="viewMode === 'table' ? 'default' : 'outline'" @click="viewMode = 'table'">
+  <YdIcon name="i-ri:table-line" />
+  </YdButton>
+  </YdTooltip>
+  <YdTooltip text="卡片视图（实时监控）">
+  <YdButton size="sm" :variant="viewMode === 'card' ? 'default' : 'outline'" @click="viewMode = 'card'">
+  <YdIcon name="i-ri:layout-grid-line" />
+  </YdButton>
+  </YdTooltip>
+  </YdButtonGroup>
+  <YdButton v-if="canManage" @click="openCreate">
+  <YdIcon name="i-ri:magic-line" />
+  创建服务器
+  </YdButton>
+  <YdButton variant="outline" @click="router.push('/platform/plugins/mcpanel/admin/market')">
+  应用市场
+  </YdButton>
+  <YdButton variant="outline" @click="router.push('/platform/plugins/mcpanel/admin/quickstart')">
+  快速开始
+  </YdButton>
+    </template>
+    <template #search>
+      <div class="flex flex-wrap items-center gap-2">
+              <div class="grid w-full gap-2 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_160px_200px_auto]">
+                <YdInput v-model="filters.keyword" clearable placeholder="实例名 / 备注" class="w-full" @keydown.enter="search" @clear="search" />
+                <YdSelect v-model="filters.status" :options="STATUS_OPTIONS" class="w-full" @change="search" />
+                <YdSelect v-model="filters.nodeId" :options="nodeOptions" class="w-full" @change="search" />
+                <div class="flex items-center justify-end gap-2">
+                  <YdButton variant="outline" @click="resetFilters">
+  重置
+                  </YdButton>
+                  <YdButton @click="search">
+  <YdIcon name="i-ri:search-line" />
+  查询
+                  </YdButton>
+                </div>
+              </div>
+      </div>
+    </template>
+    <template #table>
+            <div v-if="selectedIds.length" class="flex flex-wrap items-center gap-2 rounded-md border border-dashed px-3 py-2">
+              <span class="text-sm text-muted-foreground">已选 {{ selectedIds.length }} 个实例</span>
+              <YdButton v-if="canUse" size="sm" variant="outline" :disabled="batchLoading" @click="batchAction('start')">
+                批量启动
+              </YdButton>
+              <YdButton v-if="canUse" size="sm" variant="outline" :disabled="batchLoading" @click="batchAction('stop')">
+                批量停止
+              </YdButton>
+              <YdButton v-if="canUse" size="sm" variant="outline" :disabled="batchLoading" @click="batchAction('restart')">
+                批量重启
+              </YdButton>
+              <YdButton v-if="canUse" size="sm" variant="destructive" :disabled="batchLoading" @click="batchAction('kill')">
+                批量强杀
+              </YdButton>
+              <YdButton size="sm" variant="ghost" @click="clearSelection">
+                取消选择
+              </YdButton>
+            </div>
     <YdLoadingOverlay :loading="loading" v-if="viewMode === 'card'"><div  >
       <div v-if="!rows.length" class="mcp-empty-hint">
         暂无实例，可通过「创建服务器」「应用市场」或「快速开始」安装
@@ -557,9 +592,7 @@ const rowActions: ActionMenuItem<unknown>[] = [
         @size-change="() => { pager.page = 1; load() }"
       />
     </div></YdLoadingOverlay>
-
-    <!-- 表格视图：标准 YdTable 管理页 -->
-    <template v-else>
+      <template v-else>
       <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
         :actions="rowActions"
 
@@ -578,44 +611,6 @@ const rowActions: ActionMenuItem<unknown>[] = [
         empty-text="暂无实例，可通过「创建服务器」「应用市场」或「快速开始」安装"
         @selection-change="onSelectionChange"
       >
-        <template #toolbar>
-          <div class="flex w-full flex-col gap-2">
-            <YdSearchBar :show-toggle="false" class="w-full">
-              <div class="grid w-full gap-2 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_160px_200px_auto]">
-                <YdInput v-model="filters.keyword" clearable placeholder="实例名 / 备注" class="w-full" @keydown.enter="search" @clear="search" />
-                <YdSelect v-model="filters.status" :options="STATUS_OPTIONS" class="w-full" @change="search" />
-                <YdSelect v-model="filters.nodeId" :options="nodeOptions" class="w-full" @change="search" />
-                <div class="flex items-center justify-end gap-2">
-                  <YdButton variant="outline" @click="resetFilters">
-                    重置
-                  </YdButton>
-                  <YdButton @click="search">
-                    <YdIcon name="i-ri:search-line" />
-                    查询
-                  </YdButton>
-                </div>
-              </div>
-            </YdSearchBar>
-            <div v-if="selectedIds.length" class="flex flex-wrap items-center gap-2 rounded-md border border-dashed px-3 py-2">
-              <span class="text-sm text-muted-foreground">已选 {{ selectedIds.length }} 个实例</span>
-              <YdButton v-if="canUse" size="sm" variant="outline" :disabled="batchLoading" @click="batchAction('start')">
-                批量启动
-              </YdButton>
-              <YdButton v-if="canUse" size="sm" variant="outline" :disabled="batchLoading" @click="batchAction('stop')">
-                批量停止
-              </YdButton>
-              <YdButton v-if="canUse" size="sm" variant="outline" :disabled="batchLoading" @click="batchAction('restart')">
-                批量重启
-              </YdButton>
-              <YdButton v-if="canUse" size="sm" variant="destructive" :disabled="batchLoading" @click="batchAction('kill')">
-                批量强杀
-              </YdButton>
-              <YdButton size="sm" variant="ghost" @click="clearSelection">
-                取消选择
-              </YdButton>
-            </div>
-          </div>
-        </template>
 
         <template #cell-name="{ row }">
           <div class="flex min-w-0 flex-col">
@@ -666,17 +661,17 @@ const rowActions: ActionMenuItem<unknown>[] = [
           {{ memoryText(row.original) }}
         </template>
 </YdResponsiveEnhancedTable></YdLoadingOverlay>
-
-      <YdPagination
-        v-model:page="pager.page"
-        v-model:size="pager.size"
-        :total="pager.total"
-        class="mt-3"
-        @page-change="() => load()"
-        @size-change="() => { pager.page = 1; load() }"
-      />
+        <YdPagination
+          v-model:page="pager.page"
+          v-model:size="pager.size"
+          :total="pager.total"
+          class="mt-3"
+          @page-change="() => load()"
+          @size-change="() => { pager.page = 1; load() }"
+        />
+      </template>
     </template>
-
+  </YdTablePageLayout>
     <InstanceFormModal
       v-model:open="formOpen"
       :sdk="sdk"
@@ -684,7 +679,6 @@ const rowActions: ActionMenuItem<unknown>[] = [
       :nodes="nodes"
       @saved="() => { toast.success('实例已保存'); load() }"
     />
-
     <YdModal
       v-model="deleteOpen"
       title="删除实例"
@@ -707,5 +701,4 @@ const rowActions: ActionMenuItem<unknown>[] = [
         <p v-if="deleteError" class="text-destructive text-xs">{{ deleteError }}</p>
       </div>
     </YdModal>
-  </YdPageMain>
 </template>
