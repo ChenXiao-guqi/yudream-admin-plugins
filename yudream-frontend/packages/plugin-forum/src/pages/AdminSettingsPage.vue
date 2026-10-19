@@ -39,7 +39,7 @@ const sectionList: { icon?: string, label: string, value: string }[] = [
 </script>
 <template>
   <div class="forum-page"><YdPageHeader title="论坛设置" class="mb-0"><YdButton :loading="saving" @click="save"><YdIcon name="i-ri:save-3-line" />保存设置</YdButton></YdPageHeader><div class="forum-settings-shell">
-<YdPageHeader title="论坛设置" class="mb-0"><YdButton :loading="saving" @click="save"><YdIcon name="i-ri:save-3-line" />保存设置</YdButton></YdPageHeader>
+
   <YdSettingsLayout
     v-model="activeSection"
     :list="sectionList"

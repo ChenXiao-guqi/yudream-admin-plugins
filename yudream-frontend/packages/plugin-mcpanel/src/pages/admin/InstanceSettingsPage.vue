@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { YdLoadingOverlay, YdSettingsLayout } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { YdAlert, YdButton, YdCard, YdInput, YdModal, YdPageHeader, YdSelect, YdSwitch, YdTag, YdTextarea, useYdToast } from '@yudream/components'
+import { YdAlert, YdButton, YdInput, YdModal, YdPageHeader, YdSelect, YdSwitch, YdTag, YdTextarea, useYdToast } from '@yudream/components'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createMcPanelExtra } from '../../api/api-extra'
@@ -332,7 +332,12 @@ onMounted(() => {
 
 const activeSection = ref('main')
 const sectionList: { icon?: string, label: string, value: string }[] = [
-  { label: '实例设置', value: 'main' },
+  { label: "基础与启动", value: "sec1" },
+  { label: "事件触发型任务", value: "sec2" },
+  { label: "Java 运行时（换版本 / 镜像源）", value: "sec3" },
+  { label: "端口管理（附加端口开放/回收）", value: "sec4" },
+  { label: "P2P 直连（启动器无感接入）", value: "sec5" },
+  { label: "RCON / Ping / 终端", value: "sec6" },
 ]
 </script>
 
@@ -354,15 +359,9 @@ const sectionList: { icon?: string, label: string, value: string }[] = [
     scroll
     width-class="max-w-[960px]"
   >
-    <template #main>
-    <YdAlert v-if="error" variant="destructive" class="mb-4">
-  <template #description>
-      {{ error }}
-  </template>
-    </YdAlert>
-    <div class="mcp-grid-2">
-      <YdCard title="基础与启动">
-        <div class="mcp-form">
+    <template #sec1>
+      <YdSettingsSection title="基础与启动">
+<div class="mcp-form">
           <label class="mcp-form-item"><span class="mcp-form-label">名称</span><YdInput v-model="form.name" class="mcp-w-full" /></label>
           <label class="mcp-form-item"><span class="mcp-form-label">启动命令</span><YdTextarea v-model="form.command" :rows="2" class="mcp-w-full mcp-mono" /></label>
           <div class="mcp-grid-3">
@@ -373,9 +372,11 @@ const sectionList: { icon?: string, label: string, value: string }[] = [
           <label class="mcp-form-item"><span class="mcp-form-label">环境变量（每行 KEY=VALUE）</span><YdTextarea v-model="form.envText" :rows="4" class="mcp-w-full mcp-mono" /></label>
           <label class="mcp-form-item"><span class="mcp-form-label">备注</span><YdInput v-model="form.remark" class="mcp-w-full" /></label>
         </div>
-      </YdCard>
-      <YdCard title="事件触发型任务">
-        <div class="mcp-form">
+      </YdSettingsSection>
+    </template>
+    <template #sec2>
+      <YdSettingsSection title="事件触发型任务">
+<div class="mcp-form">
           <label class="flex items-start gap-3 text-sm">
             <YdSwitch v-model="eventTask.autoRestart" />
             <span>
@@ -405,9 +406,11 @@ const sectionList: { icon?: string, label: string, value: string }[] = [
             </YdButton>
           </div>
         </div>
-      </YdCard>
-      <YdCard title="Java 运行时（换版本 / 镜像源）">
-        <div class="mcp-form">
+      </YdSettingsSection>
+    </template>
+    <template #sec3>
+      <YdSettingsSection title="Java 运行时（换版本 / 镜像源）">
+<div class="mcp-form">
           <label class="mcp-form-item">
             <span class="mcp-form-label">运行时目录</span>
             <YdSelect v-model="imageDirectoryId" :options="imageDirectoryOptions" class="mcp-w-full" placeholder="选择 Java 版本对应的运行时" />
@@ -430,9 +433,11 @@ const sectionList: { icon?: string, label: string, value: string }[] = [
             </p>
           </div>
         </div>
-      </YdCard>
-      <YdCard title="端口管理（附加端口开放/回收）">
-        <div class="mcp-form">
+      </YdSettingsSection>
+    </template>
+    <template #sec4>
+      <YdSettingsSection title="端口管理（附加端口开放/回收）">
+<div class="mcp-form">
           <YdAlert v-if="running" icon="i-lucide:info" title="实例运行中">
             <template #description>
               开放或回收端口会重建容器，需先停止实例再操作。
@@ -484,10 +489,11 @@ const sectionList: { icon?: string, label: string, value: string }[] = [
             访问地址按「节点直连地址:端口」计算，域名与单端口入口模式仅服务游戏主端口。
           </span>
         </div>
-      </YdCard>
-
-      <YdCard title="P2P 直连（启动器无感接入）">
-        <div class="mcp-form">
+      </YdSettingsSection>
+    </template>
+    <template #sec5>
+      <YdSettingsSection title="P2P 直连（启动器无感接入）">
+<div class="mcp-form">
           <label class="flex items-start gap-3 text-sm">
             <YdSwitch v-model="form.p2pEnabled" />
             <span>
@@ -504,10 +510,11 @@ const sectionList: { icon?: string, label: string, value: string }[] = [
             当前传输为直连（节点公网可达或已做端口映射），打洞落地后 NAT 场景自动可用。
           </span>
         </div>
-      </YdCard>
-
-      <YdCard title="RCON / Ping / 终端">
-        <div class="mcp-form">
+      </YdSettingsSection>
+    </template>
+    <template #sec6>
+      <YdSettingsSection title="RCON / Ping / 终端">
+<div class="mcp-form">
           <label class="mcp-form-item"><span class="mcp-form-label">RCON 主机</span><YdInput v-model="form.rconHost" class="mcp-w-full" placeholder="127.0.0.1" /></label>
           <div class="mcp-grid-2">
             <label class="mcp-form-item"><span class="mcp-form-label">RCON 端口</span><YdInput v-model="form.rconPort" type="number" class="mcp-w-full" /></label>
@@ -525,9 +532,8 @@ const sectionList: { icon?: string, label: string, value: string }[] = [
             RCON/Ping 为实例级配置存储；面板侧 RCON 协议发送可在节点能力具备后接入。当前控制台命令仍走容器 stdin。
           </p>
         </div>
-      </YdCard>
-    </div>
-      </template>
+      </YdSettingsSection>
+    </template>
   </YdSettingsLayout>
   </YdLoadingOverlay>
   </div>

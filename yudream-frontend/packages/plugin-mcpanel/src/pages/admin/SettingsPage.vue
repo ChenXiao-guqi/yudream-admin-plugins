@@ -2,7 +2,7 @@
 import { YdLoadingOverlay, YdTablePageLayout, YdSettingsLayout } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { FileItem, FileUploadRequestOptions, TableColumn, ActionMenuItem } from '@yudream/components'
-import { YdAlert, YdButton, YdCard, YdCheckboxGroup, YdFileUpload, YdInput, YdModal, YdRadioGroup, YdSelect, YdSwitch, YdTag, useYdModal, useYdToast } from '@yudream/components'
+import { YdAlert, YdButton, YdCheckboxGroup, YdFileUpload, YdInput, YdModal, YdRadioGroup, YdSelect, YdSwitch, YdTag, useYdModal, useYdToast } from '@yudream/components'
 import { computed, onMounted, reactive, ref } from 'vue'
 import type { McpInjectArtifact } from '../../types'
 import { createMcPanelExtra } from '../../api/api-extra'
@@ -801,13 +801,24 @@ const rowActions: ActionMenuItem<{ index: number }>[] = [
 /** 设置页分区：单分区保持统一骨架 */
 const activeSection = ref('main')
 const sectionList: { icon?: string, label: string, value: string }[] = [
-  { label: '设置', value: 'main' },
+  { label: "注入下载源（authlib-injector / 时长统计）", value: "sec1" },
+  { label: "下载与导入", value: "sec2" },
+  { label: "实例域名（DNS 自动解析）", value: "sec3" },
+  { label: "单端口入口（mc-router）", value: "sec4" },
+  { label: "多租户与配额", value: "sec5" },
+  { label: "节点贡献（玩家侧）", value: "sec6" },
+  { label: "启动器 P2P 直连", value: "sec7" },
+  { label: "SFTP 网关", value: "sec8" },
 ]
 </script>
 
 <template>
   <div class="mcp-settings-shell">
-  <YdPageHeader title="面板设置" class="mb-0" />
+  <YdPageHeader title="面板设置" class="mb-0">
+    <YdButton :loading="saving" @click="save">
+      保存设置
+    </YdButton>
+  </YdPageHeader>
   <YdLoadingOverlay :loading="loading">
   <YdSettingsLayout
     v-model="activeSection"
@@ -816,16 +827,9 @@ const sectionList: { icon?: string, label: string, value: string }[] = [
     scroll
     width-class="max-w-[960px]"
   >
-    <template #main>
-    <YdAlert v-if="loadError" variant="destructive" title="无法加载设置" class="mb-4">
-  <template #description>
-      {{ loadError }}
-  </template>
-    </YdAlert>
-
-    <div class="flex flex-col gap-4 xl:max-w-[960px]">
-      <YdCard title="注入下载源（authlib-injector / 时长统计）" class="w-full">
-        <div class="mcp-form">
+    <template #sec1>
+      <YdSettingsSection title="注入下载源（authlib-injector / 时长统计）">
+<div class="mcp-form">
           <label class="flex items-center gap-3 text-sm">
             <YdSwitch v-model="form.authlibEnabled" />
             启用 authlib-injector 注入（Java 系核心以 -javaagent 注入）
@@ -944,10 +948,11 @@ const sectionList: { icon?: string, label: string, value: string }[] = [
             </div>
           </template>
         </div>
-      </YdCard>
-
-      <YdCard title="下载与导入">
-        <div class="mcp-form">
+      </YdSettingsSection>
+    </template>
+    <template #sec2>
+      <YdSettingsSection title="下载与导入">
+<div class="mcp-form">
           <label class="mcp-form-item">
             <span class="mcp-form-label">FastMirror 基址</span>
             <YdInput v-model="form.fastMirrorBase" clearable placeholder="https://download.fastmirror.net" class="mcp-w-full mcp-mono" />
@@ -1000,10 +1005,11 @@ const sectionList: { icon?: string, label: string, value: string }[] = [
             <YdInput v-model="form.cfApiKey" type="password" :disabled="!form.modpackAllowCurseforge" clearable class="mcp-w-full mcp-mono" />
           </label>
         </div>
-      </YdCard>
-
-      <YdCard title="实例域名（DNS 自动解析）">
-        <div class="mcp-form">
+      </YdSettingsSection>
+    </template>
+    <template #sec3>
+      <YdSettingsSection title="实例域名（DNS 自动解析）">
+<div class="mcp-form">
           <label class="mcp-form-item">
             <span class="mcp-form-label">驱动</span>
             <YdSelect v-model="form.dnsMode" :options="DNS_MODES" class="mcp-w-full" />
@@ -1063,10 +1069,11 @@ const sectionList: { icon?: string, label: string, value: string }[] = [
             </div>
           </template>
         </div>
-      </YdCard>
-
-      <YdCard title="单端口入口（mc-router）">
-        <div class="mcp-form">
+      </YdSettingsSection>
+    </template>
+    <template #sec4>
+      <YdSettingsSection title="单端口入口（mc-router）">
+<div class="mcp-form">
           <label class="mcp-form-item">
             <span class="mcp-form-label">入口 API 地址</span>
             <YdInput v-model="form.entryApiBase" clearable placeholder="http://127.0.0.1:8080" class="mcp-w-full mcp-mono" />
@@ -1121,10 +1128,11 @@ const sectionList: { icon?: string, label: string, value: string }[] = [
             </div>
           </template>
         </div>
-      </YdCard>
-
-      <YdCard title="多租户与配额">
-        <div class="mcp-form">
+      </YdSettingsSection>
+    </template>
+    <template #sec5>
+      <YdSettingsSection title="多租户与配额">
+<div class="mcp-form">
           <label class="flex items-center gap-3 text-sm">
             <YdSwitch v-model="form.tenancyEnabled" />
             启用租户数据范围（按部门/角色绑定；关闭 = 全局管理员直管）
@@ -1138,10 +1146,11 @@ const sectionList: { icon?: string, label: string, value: string }[] = [
             配额计费（钱包软联动；钱包插件未安装时仅记账）
           </label>
         </div>
-      </YdCard>
-
-      <YdCard title="节点贡献（玩家侧）">
-        <div class="mcp-form">
+      </YdSettingsSection>
+    </template>
+    <template #sec6>
+      <YdSettingsSection title="节点贡献（玩家侧）">
+<div class="mcp-form">
           <label class="flex items-center gap-3 text-sm">
             <YdSwitch v-model="form.contributionEnabled" />
             开放玩家贡献节点申请（/me/contributions）
@@ -1170,10 +1179,11 @@ const sectionList: { icon?: string, label: string, value: string }[] = [
           </div>
           <span class="mcp-form-hint">贡献节点为半可信：正式实例默认不调度其上，平台级秘密从不下发。</span>
         </div>
-      </YdCard>
-
-      <YdCard title="启动器 P2P 直连">
-        <div class="mcp-form">
+      </YdSettingsSection>
+    </template>
+    <template #sec7>
+      <YdSettingsSection title="启动器 P2P 直连">
+<div class="mcp-form">
           <label class="flex items-center gap-3 text-sm">
             <YdSwitch v-model="form.p2pEnabled" />
             开启 P2P 信令端点（启动器域插件据此为玩家开「无感直连」会话；玩家流量不经面板）
@@ -1194,10 +1204,11 @@ const sectionList: { icon?: string, label: string, value: string }[] = [
             节点程序需支持 p2p.* 能力（面板会如实显示能力缺口）。当前传输为 TCP 直连，节点需公网可达或已做端口映射。
           </span>
         </div>
-      </YdCard>
-
-      <YdCard title="SFTP 网关">
-        <div class="mcp-form">
+      </YdSettingsSection>
+    </template>
+    <template #sec8>
+      <YdSettingsSection title="SFTP 网关">
+<div class="mcp-form">
           <label class="flex items-center gap-3 text-sm">
             <YdSwitch v-model="form.sftpGatewayEnabled" />
             开启后桌面 SFTP 客户端（WinSCP 等）经面板单端口中转，节点端口不再对使用方暴露
@@ -1216,15 +1227,10 @@ const sectionList: { icon?: string, label: string, value: string }[] = [
             需在防火墙/容器映射中放行该端口；凭据为面板签发的 mc-短别名 + 随机密码，TTL 与节点侧一致（≤2 小时）。
           </p>
         </div>
-      </YdCard>
-    </div>
-
-    <div class="mt-4 flex justify-end">
-      <YdButton :loading="saving" @click="save">
-        保存设置
-      </YdButton>
-    </div>
-
+      </YdSettingsSection>
+    </template>
+  </YdSettingsLayout>
+  </YdLoadingOverlay>
     <YdModal
       v-model="artifactOpen"
       :title="artifactEditingIndex === null ? '添加制品' : '编辑制品'"
@@ -1293,8 +1299,6 @@ const sectionList: { icon?: string, label: string, value: string }[] = [
         </YdAlert>
       </div>
     </YdModal>
-      </template>
-  </YdSettingsLayout>
-  </YdLoadingOverlay>
+
   </div>
 </template>

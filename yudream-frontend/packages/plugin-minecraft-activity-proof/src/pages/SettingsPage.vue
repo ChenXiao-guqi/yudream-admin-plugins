@@ -68,11 +68,7 @@ const sectionList: { icon?: string, label: string, value: string }[] = [
     </YdButton>
   </YdPageHeader>
   <div class="map-activity-settings-shell">
-<YdPageHeader title="活动设置" class="mb-0">
-    <YdButton variant="outline" :disabled="!wordTemplateReady" @click="model.reloadTemplates">
-      <YdIcon name="i-ri:refresh-line" />刷新模板
-    </YdButton>
-  </YdPageHeader>
+
   <YdSettingsLayout
     v-model="activeSection"
     :list="sectionList"
@@ -82,7 +78,7 @@ const sectionList: { icon?: string, label: string, value: string }[] = [
   >
     <template #main>
       <YdSettingsSection
-        title="活动设置"
+        title="基础设置"
         description="活动报名与核验的基础配置。"
       >
 

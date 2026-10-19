@@ -172,14 +172,18 @@ function save() {
 /** 设置页分区：单分区页保持统一骨架 */
 const activeSection = ref('main')
 const sectionList: { icon?: string, label: string, value: string }[] = [
-  { label: "题库设置", value: 'main' },
+  { label: "自由刷题", value: "sec1" },
+  { label: "AI 能力", value: "sec2" },
+  { label: "QQ 群抽题", value: "sec3" },
+  { label: "群指令开放时间", value: "sec4" },
+  { label: "", value: "sec5" },
 ]
 </script>
 
 <template>
   <YdPageHeader title="题库设置" class="mb-0"></YdPageHeader>
   <div class="questionbank-settings-shell">
-<YdPageHeader title="题库设置" class="mb-0"></YdPageHeader>
+
   <YdSettingsLayout
     v-model="activeSection"
     :list="sectionList"
@@ -187,15 +191,9 @@ const sectionList: { icon?: string, label: string, value: string }[] = [
     scroll
     width-class="max-w-[880px]"
   >
-    <template #main>
-      <YdSettingsSection
-        title="题库设置"
-        description="答题与题库管理的基础配置。"
-      >
-
-    <div class="qb-form">
-      <YdCard title="自由刷题" description="关闭后，用户端「抽题练习」入口不可用；已发布题单的作答不受影响">
-        <div class="qb-form">
+    <template #sec1>
+      <YdSettingsSection title="自由刷题" description="关闭后，用户端「抽题练习」入口不可用；已发布题单的作答不受影响">
+<div class="qb-form">
           <div class="qb-form-row">
             <span class="qb-form-label">自由刷题开关</span>
             <div class="flex items-center gap-3">
@@ -207,9 +205,11 @@ const sectionList: { icon?: string, label: string, value: string }[] = [
             题库的推荐用法是发布题单给指定人群作答（招新笔试、活动答题等）；自由刷题适合作为公开练习入口，可按需关闭。
           </p>
         </div>
-      </YdCard>
-      <YdCard title="AI 能力" description="题单简答题评分方式选择「AI 判分」与题目管理「AI 导入」时生效；默认使用平台默认 AI 供应商与模型，判分失败自动转人工审核">
-        <div class="qb-form">
+      </YdSettingsSection>
+    </template>
+    <template #sec2>
+      <YdSettingsSection title="AI 能力" description="题单简答题评分方式选择「AI 判分」与题目管理「AI 导入」时生效；默认使用平台默认 AI 供应商与模型，判分失败自动转人工审核">
+<div class="qb-form">
           <div class="qb-form-row">
             <span class="qb-form-label">AI 供应商</span>
             <YdSelect v-model="aiProviderCode" :options="providerOptions" @change="onProviderChange" />
@@ -225,8 +225,11 @@ const sectionList: { icon?: string, label: string, value: string }[] = [
             仅在需要为判分/导入指定专用模型时选择；留空使用平台默认供应商与模型。
           </p>
         </div>
-      </YdCard>
-      <YdCard title="QQ 群抽题" description="群内发送 /抽题 或 /抽题 <分组名> 发起限时抢答；客观题自动判分，简答题可用上方配置的 AI 模型判分">
+      </YdSettingsSection>
+    </template>
+    <template #sec3>
+      <YdSettingsSection title="QQ 群抽题">
+发起限时抢答；客观题自动判分，简答题可用上方配置的 AI 模型判分">
         <div class="qb-form">
           <div class="qb-form-row">
             <span class="qb-form-label">默认分组</span>
@@ -284,9 +287,11 @@ const sectionList: { icon?: string, label: string, value: string }[] = [
             </div>
           </div>
         </div>
-      </YdCard>
-      <YdCard title="群指令开放时间" description="限制群内 /抽题、/抢答榜 的可用时段；不在时段内发送指令时，群内会收到「现在不在开放时间，开放时间为 …」">
-        <div class="qb-form">
+      </YdSettingsSection>
+    </template>
+    <template #sec4>
+      <YdSettingsSection title="群指令开放时间" description="限制群内 /抽题、/抢答榜 的可用时段；不在时段内发送指令时，群内会收到「现在不在开放时间，开放时间为 …」">
+<div class="qb-form">
           <div class="qb-form-row">
             <span class="qb-form-label">限制调用时间</span>
             <div class="flex items-center gap-3">
@@ -314,15 +319,15 @@ const sectionList: { icon?: string, label: string, value: string }[] = [
             </div>
           </div>
         </div>
-      </YdCard>
-      <YdCard>
-        <div class="flex justify-end gap-2">
+      </YdSettingsSection>
+    </template>
+    <template #sec5>
+      <YdSettingsSection title="">
+<div class="flex justify-end gap-2">
           <YdButton :disabled="!dirty" :loading="model.settingsSaving" @click="save">
             <YdIcon name="i-ri:save-line" />保存设置
           </YdButton>
         </div>
-      </YdCard>
-    </div>
       </YdSettingsSection>
     </template>
   </YdSettingsLayout>

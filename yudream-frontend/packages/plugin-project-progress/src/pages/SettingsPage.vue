@@ -19,7 +19,7 @@ const sectionList: { icon?: string, label: string, value: string }[] = [
 
   <YdPageHeader title="插件设置" class="mb-0"></YdPageHeader>
   <div class="pp-settings-shell">
-<YdPageHeader title="插件设置" class="mb-0"></YdPageHeader>
+
   <YdSettingsLayout
     v-model="activeSection"
     :list="sectionList"

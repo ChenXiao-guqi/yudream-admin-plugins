@@ -3,7 +3,7 @@ import type { TableColumn } from '@yudream/components'
 import type { WalletPluginModel } from '../composables/useWalletPlugin'
 import type { RechargeRuleForm } from '../types'
 import { ref } from 'vue'
-import { YdButton, YdCard, YdIcon, YdInput, YdPageHeader, YdSwitch, YdResponsiveTable, YdSettingsLayout, YdSettingsSection } from '@yudream/components'
+import { YdButton, YdIcon, YdInput, YdPageHeader, YdSwitch, YdResponsiveTable, YdSettingsLayout, YdSettingsSection } from '@yudream/components'
 
 defineProps<{ model: WalletPluginModel }>()
 
@@ -17,7 +17,7 @@ const columns: TableColumn<RechargeRuleForm>[] = [
 /** 设置页分区：单分区页保持统一骨架 */
 const activeSection = ref('main')
 const sectionList: { icon?: string, label: string, value: string }[] = [
-  { label: "充值配置", value: 'main' },
+  { label: "充值规则", value: 'main' },
 ]
 </script>
 
@@ -28,11 +28,6 @@ const sectionList: { icon?: string, label: string, value: string }[] = [
     </YdButton>
   </YdPageHeader>
   <div class="wallet-recharge-settings-shell">
-<YdPageHeader title="充值配置" class="mb-0">
-    <YdButton :loading="model.saving" @click="model.saveRechargeSettings">
-      <YdIcon name="morph:save" />保存充值配置
-    </YdButton>
-  </YdPageHeader>
   <YdSettingsLayout
     v-model="activeSection"
     :list="sectionList"
@@ -42,7 +37,7 @@ const sectionList: { icon?: string, label: string, value: string }[] = [
   >
     <template #main>
       <YdSettingsSection
-        title="充值配置"
+        title="充值规则"
         description="充值开关与各币种汇率规则。"
       >
 
@@ -70,7 +65,7 @@ const sectionList: { icon?: string, label: string, value: string }[] = [
         <template #cell-minPayAmount="{ row }"><YdInput v-model="row.original.minPayAmount" inputmode="decimal" /></template>
         <template #cell-maxPayAmount="{ row }"><YdInput v-model="row.original.maxPayAmount" inputmode="decimal" placeholder="不限制" /></template>
         <template #card="{ row }">
-          <YdCard class="w-full">
+          
             <div class="flex flex-col gap-3">
               <div class="flex items-center justify-between gap-2">
                 <span class="min-w-0 break-words text-base font-semibold">{{ model.assetName(row.assetCode) }} ({{ row.assetCode }})</span>
@@ -91,7 +86,7 @@ const sectionList: { icon?: string, label: string, value: string }[] = [
                 </div>
               </div>
             </div>
-          </YdCard>
+          
         </template>
       </YdResponsiveTable>
     </div>

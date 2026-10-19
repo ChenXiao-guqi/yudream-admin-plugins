@@ -198,12 +198,7 @@ const sectionList: { icon?: string, label: string, value: string }[] = [
       </YdButton>
     </YdPageHeader>
     <div class="shop-settings-shell">
-<YdPageHeader title="商店设置" class="mb-0">
-      <YdButton :loading="saving" @click="save">
-        <YdIcon name="i-ri:save-3-line" />
-        保存设置
-      </YdButton>
-    </YdPageHeader>
+
   <YdSettingsLayout
     v-model="activeSection"
     :list="sectionList"
@@ -213,7 +208,7 @@ const sectionList: { icon?: string, label: string, value: string }[] = [
   >
     <template #main>
       <YdSettingsSection
-        title="商店设置"
+        title="交易规则"
         description="交易与商品发布的基础配置。"
       >
 

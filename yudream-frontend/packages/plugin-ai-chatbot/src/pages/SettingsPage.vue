@@ -67,9 +67,7 @@ const sectionList: { icon?: string, label: string, value: string }[] = [
     <YdButton variant="outline" :loading="loading" @click="loadPolicies">刷新</YdButton>
   </YdPageHeader>
   <div class="ai-chatbot-settings-shell">
-<YdPageHeader title="AI 群聊机器人配置" class="mb-0">
-    <YdButton variant="outline" :loading="loading" @click="loadPolicies">刷新</YdButton>
-  </YdPageHeader>
+
   <YdSettingsLayout
     v-model="activeSection"
     :list="sectionList"
