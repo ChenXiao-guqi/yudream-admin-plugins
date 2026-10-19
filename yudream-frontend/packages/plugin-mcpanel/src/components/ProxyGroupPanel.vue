@@ -3,7 +3,7 @@ import { YdLoadingOverlay } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { McpProxyDetectResult, McpProxyGroup, McpProxyServerRow } from '../types'
-import { YdAlert, YdButton, YdCard, YdIcon, YdResponsiveTable, YdSelect, YdTag, useYdModal, useYdToast } from '@yudream/components'
+import { YdAlert, YdButton, YdCard, YdIcon, YdSelect, YdTag, useYdModal, useYdToast, YdResponsiveEnhancedTable, type ActionMenuItem } from '@yudream/components'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { createMcPanelExtra } from '../api/api-extra'
 import { errorMessage } from '../composables/utils'
@@ -237,6 +237,11 @@ onMounted(() => {
   void loadGroup()
   void loadInstanceOptions()
 })
+
+/** 代理成员行操作：解绑 */
+const rowActions: ActionMenuItem<unknown>[] = [
+  { label: '解绑', icon: 'morph:unlink', visible: row => props.canSave && Boolean((row as { boundInstanceId?: string }).boundInstanceId), disabled: () => saving.value, onClick: row => unbindRow(row as never) },
+]
 </script>
 
 <template>
@@ -273,9 +278,11 @@ onMounted(() => {
     </div>
 
     <!-- 已纳管视图 -->
-    <YdLoadingOverlay :loading="loading" v-if="group && !draftRows.length"><YdResponsiveTable
+    <YdLoadingOverlay :loading="loading" v-if="group && !draftRows.length"><YdResponsiveEnhancedTable
+      :actions="rowActions"
 
-
+      
+      
       :columns="columns"
       :data="group.servers as unknown as Record<string, unknown>[]"
       row-key="name"
@@ -305,58 +312,7 @@ onMounted(() => {
           {{ row.original.boundInstanceId ? '已绑定' : '外部' }}
         </YdTag>
       </template>
-      <template #cell-operation="{ row }">
-        <YdButton
-          v-if="canSave && row.original.boundInstanceId"
-          size="sm"
-          variant="outline"
-          :disabled="saving"
-          @click="unbindRow(row.original)"
-        >
-          解绑
-        </YdButton>
-      </template>
-      <template #card="{ row }">
-        <YdCard class="w-full">
-          <div class="flex flex-col gap-3">
-            <div class="flex items-center justify-between gap-2">
-              <span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span>
-              <YdTag :variant="row.boundInstanceId ? 'default' : 'outline'">
-                {{ row.boundInstanceId ? '已绑定' : '外部' }}
-              </YdTag>
-            </div>
-            <div class="flex flex-col gap-1 text-sm">
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">地址</span>
-                <span class="break-all">{{ row.address || '-' }}</span>
-              </div>
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">绑定实例</span>
-                <span class="min-w-0 flex-1 break-all">
-                  <template v-if="row.boundInstanceId">
-                    <router-link
-                      :to="`/platform/plugins/mcpanel/admin/instances/${encodeURIComponent(String(row.boundInstanceId))}`"
-                      class="font-medium text-primary hover:underline"
-                    >
-                      {{ row.boundName || row.boundInstanceId }}
-                    </router-link>
-                    <YdTag v-if="row.boundState" :variant="row.boundState === 'running' ? 'default' : 'secondary'" class="ml-2">
-                      {{ row.boundState === 'running' ? '运行中' : String(row.boundState) }}
-                    </YdTag>
-                  </template>
-                  <span v-else class="text-muted-foreground">外部子服</span>
-                </span>
-              </div>
-            </div>
-            <div v-if="canSave && row.boundInstanceId" class="flex flex-wrap gap-2 border-t pt-3">
-              <YdButton size="sm" variant="outline" :disabled="saving" @click="unbindRow(row)">
-                解绑
-              </YdButton>
-            </div>
-          </div>
-        </YdCard>
-      </template>
-    </YdResponsiveTable></YdLoadingOverlay>
+</YdResponsiveEnhancedTable></YdLoadingOverlay>
 
     <!-- 识别/编辑草稿视图 -->
     <template v-else-if="draftRows.length">
@@ -365,7 +321,7 @@ onMounted(() => {
           地址匹配与同名建议为自动结果，可逐行调整；「外部子服」仅保留记录。保存不会修改代理配置文件。
         </template>
       </YdAlert>
-      <YdResponsiveTable
+      <YdResponsiveEnhancedTable
         :columns="columns"
         :data="draftRows as unknown as Record<string, unknown>[]"
         row-key="name"
@@ -389,39 +345,7 @@ onMounted(() => {
             {{ MATCH_LABEL[String(row.original.matchType ?? 'none')]?.text ?? '外部' }}
           </YdTag>
         </template>
-        <template #cell-operation>
-          <span class="text-xs text-muted-foreground">-</span>
-        </template>
-        <template #card="{ row }">
-          <YdCard class="w-full">
-            <div class="flex flex-col gap-3">
-              <div class="flex items-center justify-between gap-2">
-                <span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span>
-                <YdTag :variant="MATCH_LABEL[String(row.matchType ?? 'none')]?.variant ?? 'outline'">
-                  {{ MATCH_LABEL[String(row.matchType ?? 'none')]?.text ?? '外部' }}
-                </YdTag>
-              </div>
-              <div class="flex flex-col gap-1 text-sm">
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">地址</span>
-                  <span class="break-all">{{ row.address || '-' }}</span>
-                </div>
-                <div class="flex flex-col gap-1">
-                  <span class="text-secondary-foreground/60">绑定面板实例</span>
-                  <YdSelect
-                    :model-value="bindValue(asRow(row))"
-                    :options="bindOptions"
-                    :disabled="!canSave"
-                    size="sm"
-                    class="w-full"
-                    @update:model-value="(value: unknown) => onBind(asRow(row), value)"
-                  />
-                </div>
-              </div>
-            </div>
-          </YdCard>
-        </template>
-      </YdResponsiveTable>
+  </YdResponsiveEnhancedTable>
       <div v-if="canSave" class="mt-3 flex items-center justify-end gap-2">
         <YdButton size="sm" variant="outline" :disabled="saving" @click="cancelDraft">
           取消

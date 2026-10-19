@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { YdLoadingOverlay } from '@yudream/components'
-import type { FileItem, TableColumn } from '@yudream/components'
+import type { FileItem, TableColumn, ActionMenuItem } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { YdAction, YdAlert, YdButton, YdCard, YdContextMenu, YdFileUpload, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdProgress, YdResponsiveTable, YdSelect, YdTag, YdTooltip, useYdModal, useYdToast } from '@yudream/components'
+import { YdAction, YdAlert, YdButton, YdCard, YdContextMenu, YdFileUpload, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdProgress, YdSelect, YdTag, useYdModal, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
 import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { withTimeout } from '../../utils/fileContent.ts'
 import { relativeFilePath } from '../../utils/textFileAccess.ts'
@@ -679,6 +679,16 @@ watch(instanceId, () => {
   void load(relativeFilePath(route.query.dir))
 }, { immediate: true })
 onBeforeUnmount(() => { listRequest++; download.cancel() })
+
+/** 文件行操作：编辑 / 下载 / 重命名 / 解压 / 压缩 / 删除 */
+const rowActions: ActionMenuItem<unknown>[] = [
+  { label: '编辑', icon: 'morph:pencil', visible: row => canManage.value && !(row as { isDir?: boolean }).isDir, onClick: row => openFileFromBrowser(String((row as { path?: string }).path ?? (row as { name: string }).name)) },
+  { label: '下载', icon: 'morph:download', visible: row => !(row as { isDir?: boolean }).isDir, disabled: () => Boolean(download.active.value), onClick: row => downloadRow(row as never) },
+  { label: '重命名 / 移动', icon: 'morph:swap', visible: () => canManage.value, onClick: row => promptRename(row as never) },
+  { label: '解压', icon: 'morph:package-open', visible: row => canManage.value && String((row as { name: string }).name).toLowerCase().endsWith('.zip'), onClick: row => doUnzip(row as never) },
+  { label: '压缩为 zip', icon: 'morph:package', visible: () => canManage.value, onClick: row => doZip(row as never) },
+  { label: '删除', icon: 'morph:trash-2', danger: true, visible: () => canManage.value, onClick: row => confirmDelete(row as never) },
+]
 </script>
 
 <template>
@@ -790,9 +800,11 @@ onBeforeUnmount(() => { listRequest++; download.cancel() })
             </div>
           </div>
 
-          <YdLoadingOverlay :loading="loading"><YdResponsiveTable
-            ref="tableRef"
+          <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+            :actions="rowActions"
 
+            ref="tableRef"
+            
             :columns="columns"
             :data="rows"
             row-key="path"
@@ -822,84 +834,7 @@ onBeforeUnmount(() => { listRequest++; download.cancel() })
             <template #cell-modTime="{ row }">
               {{ row.original.modTime ? formatDateTime(Number(row.original.modTime)) : '-' }}
             </template>
-            <template #cell-operation="{ row }">
-              <div class="mcp-op-cell">
-                <YdTooltip v-if="canManage && !row.original.isDir" text="编辑">
-                  <YdButton size="icon-sm" variant="outline" @click="openFileFromBrowser(String(row.original.path ?? row.original.name))">
-                    <YdIcon name="i-ri:file-edit-line" />
-                  </YdButton>
-                </YdTooltip>
-                <YdTooltip v-if="!row.original.isDir" text="下载">
-                  <YdButton size="icon-sm" variant="outline" :disabled="download.active.value" @click="downloadRow(row.original)"><YdIcon name="i-ri:download-2-line" /></YdButton>
-                </YdTooltip>
-                <YdTooltip v-if="canManage" text="重命名 / 移动">
-                  <YdButton size="icon-sm" variant="outline" @click="promptRename(row.original)">
-                    <YdIcon name="i-ri:edit-2-line" />
-                  </YdButton>
-                </YdTooltip>
-                <YdTooltip v-if="canManage && String(row.original.name).toLowerCase().endsWith('.zip')" text="解压">
-                  <YdButton size="icon-sm" variant="outline" @click="doUnzip(row.original)">
-                    <YdIcon name="i-ri:file-reduce-line" />
-                  </YdButton>
-                </YdTooltip>
-                <YdTooltip v-if="canManage" :text="row.original.isDir ? '压缩目录为 zip' : '压缩为 zip'">
-                  <YdButton size="icon-sm" variant="outline" @click="doZip(row.original)">
-                    <YdIcon name="i-ri:file-zip-line" />
-                  </YdButton>
-                </YdTooltip>
-                <YdTooltip v-if="canManage" text="删除">
-                  <YdButton size="icon-sm" variant="destructive" @click="confirmDelete(row.original)">
-                    <YdIcon name="i-ri:delete-bin-line" />
-                  </YdButton>
-                </YdTooltip>
-              </div>
-            </template>
-            <template #card="{ row }">
-              <YdCard class="w-full">
-                <div class="flex flex-col gap-3">
-                  <div class="flex items-center justify-between gap-2">
-                    <YdAction type="button" class="mcp-link flex min-w-0 items-center gap-1" @click.prevent="enter(row)">
-                      <YdIcon :name="row.isDir ? 'i-ri:folder-line' : 'i-ri:file-line'" class="shrink-0" />
-                      <span class="min-w-0 break-all text-left text-base font-semibold">{{ row.name }}</span>
-                    </YdAction>
-                    <YdTag :variant="row.isDir ? 'secondary' : 'outline'">
-                      {{ row.isDir ? '目录' : (row.mode === 'symlink' ? '链接' : '文件') }}
-                    </YdTag>
-                  </div>
-                  <div class="flex flex-col gap-1 text-sm">
-                    <div class="flex gap-2">
-                      <span class="shrink-0 text-secondary-foreground/60">大小</span>
-                      <span class="break-all">{{ row.isDir ? '-' : formatSize(row.size) }}</span>
-                    </div>
-                    <div class="flex gap-2">
-                      <span class="shrink-0 text-secondary-foreground/60">修改时间</span>
-                      <span class="break-all">{{ row.modTime ? formatDateTime(Number(row.modTime)) : '-' }}</span>
-                    </div>
-                  </div>
-                  <div class="flex flex-wrap gap-2 border-t pt-3">
-                    <YdButton v-if="canManage && !row.isDir" size="sm" variant="outline" @click="openFileFromBrowser(String(row.path ?? row.name))">
-                      编辑
-                    </YdButton>
-                    <YdButton v-if="!row.isDir" size="sm" variant="outline" :disabled="download.active.value" @click="downloadRow(row)">
-                      下载
-                    </YdButton>
-                    <YdButton v-if="canManage" size="sm" variant="outline" @click="promptRename(row)">
-                      重命名
-                    </YdButton>
-                    <YdButton v-if="canManage && String(row.name).toLowerCase().endsWith('.zip')" size="sm" variant="outline" @click="doUnzip(row)">
-                      解压
-                    </YdButton>
-                    <YdButton v-if="canManage" size="sm" variant="outline" @click="doZip(row)">
-                      压缩
-                    </YdButton>
-                    <YdButton v-if="canManage" size="sm" variant="destructive" @click="confirmDelete(row)">
-                      删除
-                    </YdButton>
-                  </div>
-                </div>
-              </YdCard>
-            </template>
-          </YdResponsiveTable></YdLoadingOverlay>
+</YdResponsiveEnhancedTable></YdLoadingOverlay>
           <YdPagination
             v-model:page="pager.page"
             v-model:size="pager.size"

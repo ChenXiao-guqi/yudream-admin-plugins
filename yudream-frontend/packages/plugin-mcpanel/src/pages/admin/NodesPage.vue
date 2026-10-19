@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import type { TableColumn } from '@yudream/components'
+import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { McpNode, McpNodeHistorySample } from '../../types'
-import { YdAction, YdButton, YdButtonGroup, YdCard, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdProgress, YdResponsiveTable, YdSearchBar, YdSelect, YdTag, YdTooltip, useYdModal, useYdToast } from '@yudream/components'
+import { YdAction, YdButton, YdButtonGroup, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdProgress, YdSearchBar, YdSelect, YdTag, YdTooltip, useYdModal, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createMcPanelApi } from '../../api/mcpanel-api'
@@ -314,6 +314,14 @@ onBeforeUnmount(() => {
     pollTimer = null
   }
 })
+
+/** 节点行操作统一收进操作菜单 */
+const rowActions: ActionMenuItem<unknown>[] = [
+  { label: '详情', icon: 'morph:eye', onClick: row => openDetail(row as never) },
+  { label: '编辑', icon: 'morph:pencil', visible: () => Boolean(canManage.value ?? canManage), onClick: row => openEdit(row as never) },
+  { label: '重连', icon: 'morph:refresh', visible: () => Boolean(canManage.value ?? canManage), disabled: row => Boolean(reconnectBusy[(row as { id: string }).id]), onClick: row => reconnect(row as never) },
+]
+
 </script>
 
 <template>
@@ -457,9 +465,11 @@ onBeforeUnmount(() => {
 
     <!-- 表格视图：标准 YdTable 管理页 -->
     <template v-else>
-      <YdLoadingOverlay :loading="loading"><YdResponsiveTable
-        class="mcp-page-gap"
+      <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+        :actions="rowActions"
 
+        class="mcp-page-gap"
+        
         :columns="columns"
         :data="rows"
         row-key="id"
@@ -521,82 +531,7 @@ onBeforeUnmount(() => {
         <template #cell-lastSeen="{ row }">
           <span :title="formatDateTime(row.original.lastSeenAt)">{{ relativeSeenText(row.original.lastSeenAt) }}</span>
         </template>
-        <template #cell-operation="{ row }">
-          <div class="mcp-op-cell">
-            <YdTooltip text="详情">
-              <YdButton size="icon-sm" variant="outline" @click="openDetail(row.original)">
-                <YdIcon name="i-ri:eye-line" />
-              </YdButton>
-            </YdTooltip>
-            <YdTooltip v-if="canManage" text="编辑">
-              <YdButton size="icon-sm" variant="outline" @click="openEdit(row.original)">
-                <YdIcon name="i-ri:edit-line" />
-              </YdButton>
-            </YdTooltip>
-            <YdTooltip v-if="canManage" text="重连">
-              <YdButton size="icon-sm" variant="outline" :disabled="reconnectBusy[row.original.id]" @click="reconnect(row.original)">
-                <YdIcon name="i-ri:refresh-line" />
-              </YdButton>
-            </YdTooltip>
-            <YdTooltip v-if="canDelete" text="删除">
-              <YdButton size="icon-sm" variant="destructive" @click="confirmDelete(row.original)">
-                <YdIcon name="i-ri:delete-bin-line" />
-              </YdButton>
-            </YdTooltip>
-          </div>
-        </template>
-        <template #card="{ row }">
-          <YdCard class="w-full">
-            <div class="flex flex-col gap-3">
-              <div class="flex items-center justify-between gap-2">
-                <span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span>
-                <div class="flex gap-1">
-                  <NodeStatusTag :status="row.status" />
-                  <YdTag v-if="row.enabled === false" variant="secondary">
-                    已停用
-                  </YdTag>
-                </div>
-              </div>
-              <div class="flex flex-col gap-1 text-sm">
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">地址</span>
-                  <span class="break-all">{{ row.endpoint || '未配置控制信道' }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">CPU / 内存</span>
-                  <span class="break-all">{{ row.stats && freshnessOf(row) !== 'offline' ? `${metricTextOf(row, cpuPercentOf(row))} · ${metricTextOf(row, memPercentOf(row))}` : '-' }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">容器</span>
-                  <span class="break-all">{{ row.stats?.containers?.length ?? '-' }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">版本</span>
-                  <span class="break-all">Agent {{ row.agentVersion || '-' }} · Docker {{ row.stats?.dockerVersion || row.dockerVersion || '-' }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">心跳</span>
-                  <span class="break-all">{{ relativeSeenText(row.lastSeenAt) }}</span>
-                </div>
-              </div>
-              <div class="flex flex-wrap gap-2 border-t pt-3">
-                <YdButton size="sm" variant="outline" @click="openDetail(row)">
-                  详情
-                </YdButton>
-                <YdButton v-if="canManage" size="sm" variant="outline" @click="openEdit(row)">
-                  编辑
-                </YdButton>
-                <YdButton v-if="canManage" size="sm" variant="outline" :disabled="reconnectBusy[row.id]" @click="reconnect(row)">
-                  重连
-                </YdButton>
-                <YdButton v-if="canDelete" size="sm" variant="destructive" @click="confirmDelete(row)">
-                  删除
-                </YdButton>
-              </div>
-            </div>
-          </YdCard>
-        </template>
-      </YdResponsiveTable></YdLoadingOverlay>
+</YdResponsiveEnhancedTable></YdLoadingOverlay>
 
       <YdPagination
         v-model:page="pager.page"

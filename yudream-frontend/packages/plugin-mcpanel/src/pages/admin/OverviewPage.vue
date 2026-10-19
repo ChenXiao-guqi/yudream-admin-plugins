@@ -2,7 +2,7 @@
 import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { TableColumn } from '@yudream/components'
-import { YdAction, YdAlert, YdButton, YdCard, YdIcon, YdPageHeader, YdPageMain, YdProgress, YdResponsiveTable, YdTag } from '@yudream/components'
+import { YdAction, YdAlert, YdButton, YdCard, YdIcon, YdPageHeader, YdPageMain, YdProgress, YdTag, YdResponsiveEnhancedTable } from '@yudream/components'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { createMcPanelExtra } from '../../api/api-extra'
@@ -267,7 +267,7 @@ onMounted(() => void load())
             <YdIcon name="i-ri:arrow-right-s-line" />
           </YdButton>
         </div>
-        <YdResponsiveTable
+        <YdResponsiveEnhancedTable
           :columns="instanceColumns"
           :data="recentInstances"
           row-key="id"
@@ -296,39 +296,7 @@ onMounted(() => void load())
           <template #cell-updatedAt="{ row }">
             {{ formatDateTime(row.original.updatedAt as number) }}
           </template>
-          <template #card="{ row }">
-            <YdCard class="w-full">
-              <div class="flex flex-col gap-3">
-                <div class="flex items-center justify-between gap-2">
-                  <YdAction type="button" class="min-w-0 break-words text-left text-base font-semibold text-primary hover:underline" @click="openInstance(row)">
-                    {{ row.name }}
-                  </YdAction>
-                  <YdTag :variant="stateTagVariant(String(row.state ?? ''))">
-                    {{ STATE_LABEL[String(row.state)] || row.state || '-' }}
-                  </YdTag>
-                </div>
-                <div class="flex flex-col gap-1 text-sm">
-                  <div class="flex gap-2">
-                    <span class="shrink-0 text-secondary-foreground/60">类型</span>
-                    <span class="break-all">{{ row.kind || '-' }}{{ row.mcVersion ? ` · v${row.mcVersion}` : '' }}</span>
-                  </div>
-                  <div class="flex gap-2">
-                    <span class="shrink-0 text-secondary-foreground/60">CPU</span>
-                    <span class="break-all">{{ row.cpuPercent == null ? '-' : `${cpuPercent(row)}%` }}</span>
-                  </div>
-                  <div class="flex gap-2">
-                    <span class="shrink-0 text-secondary-foreground/60">内存</span>
-                    <span class="break-all">{{ row.memUsedMb == null ? '-' : `${Math.round(Number(row.memUsedMb))} MB` }}</span>
-                  </div>
-                  <div class="flex gap-2">
-                    <span class="shrink-0 text-secondary-foreground/60">更新时间</span>
-                    <span class="break-all">{{ formatDateTime(row.updatedAt as number) }}</span>
-                  </div>
-                </div>
-              </div>
-            </YdCard>
-          </template>
-        </YdResponsiveTable>
+        </YdResponsiveEnhancedTable>
       </section>
     </div>
   </YdPageMain></YdLoadingOverlay>

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { YdLoadingOverlay } from '@yudream/components'
-import type { TableColumn } from '@yudream/components'
+import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { YdAlert, YdButton, YdCard, YdInput, YdModal, YdPageHeader, YdPageMain, YdResponsiveTable, YdSelect, YdSwitch, YdTag, useYdModal, useYdToast } from '@yudream/components'
+import { YdAlert, YdButton, YdCard, YdInput, YdModal, YdPageHeader, YdPageMain, YdSelect, YdSwitch, YdTag, useYdModal, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createMcPanelExtra } from '../../api/api-extra'
@@ -203,6 +203,14 @@ const targetOptions = computed(() => backupTargets.targets.value.map(target => (
   label: `${target.name}（${target.code}）`,
   value: target.code,
 })))
+
+/** 计划任务行操作统一收进操作菜单 */
+const rowActions: ActionMenuItem<unknown>[] = [
+  { label: '立即执行', icon: 'morph:play', visible: () => Boolean(canManage.value), onClick: row => runNow(row as never) },
+  { label: '编辑', icon: 'morph:pencil', visible: () => Boolean(canManage.value), onClick: row => openEdit(row as never) },
+  { label: '删除', icon: 'morph:trash-2', danger: true, visible: () => Boolean(canDelete.value), onClick: row => confirmDelete(row as never) },
+]
+
 </script>
 
 <template>
@@ -221,8 +229,10 @@ const targetOptions = computed(() => backupTargets.targets.value.map(target => (
   </template>
     </YdAlert>
     <YdCard>
-      <YdLoadingOverlay :loading="loading"><YdResponsiveTable
+      <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+        :actions="rowActions"
 
+        
         :columns="columns"
         :data="rows"
         row-key="id"
@@ -253,70 +263,7 @@ const targetOptions = computed(() => backupTargets.targets.value.map(target => (
         <template #cell-next="{ row }">
           {{ formatDateTime(row.original.nextRunAt as number) }}
         </template>
-        <template #cell-operation="{ row }">
-          <div class="mcp-op-cell">
-            <YdButton v-if="canManage" size="sm" variant="outline" @click="runNow(row.original)">
-              立即执行
-            </YdButton>
-            <YdButton v-if="canManage" size="sm" variant="outline" @click="openEdit(row.original)">
-              编辑
-            </YdButton>
-            <YdButton v-if="canDelete" size="sm" variant="destructive" @click="confirmDelete(row.original)">
-              删除
-            </YdButton>
-          </div>
-        </template>
-        <template #card="{ row }">
-          <YdCard class="w-full">
-            <div class="flex flex-col gap-3">
-              <div class="flex items-center justify-between gap-2">
-                <span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span>
-                <YdTag :variant="row.enabled === false ? 'secondary' : 'default'">
-                  {{ row.enabled === false ? '停用' : '启用' }}
-                </YdTag>
-              </div>
-              <div class="flex flex-col gap-1 text-sm">
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">触发</span>
-                  <span class="break-all">{{ timeText(row) }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">命令 / 目标</span>
-                  <span class="min-w-0 flex-1 break-all">
-                    <template v-if="String(row.action) === 'offsite-backup'">
-                      <YdTag variant="secondary">异地备份</YdTag>
-                      <span class="mcp-mono">{{ row.payload }}</span>
-                    </template>
-                    <template v-else-if="String(row.action) === 'local-backup'">
-                      <YdTag variant="secondary">本地备份</YdTag>
-                    </template>
-                    <span v-else class="mcp-mono">{{ row.payload }}</span>
-                  </span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">次数</span>
-                  <span class="break-all">{{ row.count ?? '-' }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">下次执行</span>
-                  <span class="break-all">{{ formatDateTime(row.nextRunAt as number) }}</span>
-                </div>
-              </div>
-              <div class="flex flex-wrap gap-2 border-t pt-3">
-                <YdButton v-if="canManage" size="sm" variant="outline" @click="runNow(row)">
-                  立即执行
-                </YdButton>
-                <YdButton v-if="canManage" size="sm" variant="outline" @click="openEdit(row)">
-                  编辑
-                </YdButton>
-                <YdButton v-if="canDelete" size="sm" variant="destructive" @click="confirmDelete(row)">
-                  删除
-                </YdButton>
-              </div>
-            </div>
-          </YdCard>
-        </template>
-      </YdResponsiveTable></YdLoadingOverlay>
+</YdResponsiveEnhancedTable></YdLoadingOverlay>
     </YdCard>
 
     <YdModal

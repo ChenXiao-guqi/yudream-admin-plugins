@@ -1,25 +1,8 @@
 <script setup lang="ts">
 import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import type { FileItem, FileUploadRequestOptions, TableColumn } from '@yudream/components'
-import {
-  YdAlert,
-  YdButton,
-  YdCard,
-  YdCheckboxGroup,
-  YdFileUpload,
-  YdInput,
-  YdModal,
-  YdPageHeader,
-  YdPageMain,
-  YdRadioGroup,
-  YdResponsiveTable,
-  YdSelect,
-  YdSwitch,
-  YdTag,
-  useYdModal,
-  useYdToast,
-} from '@yudream/components'
+import type { FileItem, FileUploadRequestOptions, TableColumn, ActionMenuItem } from '@yudream/components'
+import { YdAlert, YdButton, YdCard, YdCheckboxGroup, YdFileUpload, YdInput, YdModal, YdPageHeader, YdPageMain, YdRadioGroup, YdSelect, YdSwitch, YdTag, useYdModal, useYdToast } from '@yudream/components'
 import { computed, onMounted, reactive, ref } from 'vue'
 import type { McpInjectArtifact } from '../../types'
 import { createMcPanelExtra } from '../../api/api-extra'
@@ -808,6 +791,12 @@ async function save() {
 }
 
 onMounted(() => void load())
+
+/** 注入物行操作：编辑 / 删除（行索引定位） */
+const rowActions: ActionMenuItem<{ index: number }>[] = [
+  { label: '编辑', icon: 'morph:pencil', onClick: row => openArtifactEdit(row.index) },
+  { label: '删除', icon: 'morph:trash-2', danger: true, onClick: row => removeArtifact(row.index) },
+]
 </script>
 
 <template>
@@ -898,7 +887,9 @@ onMounted(() => void load())
                   添加制品
                 </YdButton>
               </div>
-              <YdResponsiveTable
+              <YdResponsiveEnhancedTable
+                :actions="rowActions"
+
                 :columns="artifactColumns"
                 :data="artifacts"
                 row-key="name"
@@ -928,54 +919,7 @@ onMounted(() => void load())
                   </div>
                   <span v-else class="mcp-mono block truncate text-xs" :title="row.original.url">{{ row.original.url }}</span>
                 </template>
-                <template #cell-operation="{ row }">
-                  <div class="mcp-op-cell">
-                    <YdButton size="sm" variant="outline" @click="openArtifactEdit(row.index)">
-                      编辑
-                    </YdButton>
-                    <YdButton size="sm" variant="destructive" @click="removeArtifact(row.index)">
-                      删除
-                    </YdButton>
-                  </div>
-                </template>
-                <template #card="{ row, index }">
-                  <YdCard class="w-full">
-                    <div class="flex flex-col gap-3">
-                      <div class="flex items-center justify-between gap-2">
-                        <span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span>
-                        <YdTag :variant="row.kind === 'mod' ? 'secondary' : 'default'">
-                          {{ row.kind === 'mod' ? '模组' : '插件' }}
-                        </YdTag>
-                      </div>
-                      <div class="flex flex-col gap-1 text-sm">
-                        <div class="flex gap-2">
-                          <span class="shrink-0 text-secondary-foreground/60">加载器</span>
-                          <span class="break-all">{{ row.kind === 'mod' ? ((row.loaders ?? []).join(' / ') || '—') : '—' }}</span>
-                        </div>
-                        <div class="flex gap-2">
-                          <span class="shrink-0 text-secondary-foreground/60">MC 版本</span>
-                          <span class="break-all">{{ mcRangeOf(row) }}</span>
-                        </div>
-                        <div class="flex gap-2">
-                          <span class="shrink-0 text-secondary-foreground/60">来源</span>
-                          <span class="min-w-0 flex-1 break-all">
-                            <template v-if="row.fileId">{{ artifactNameFromFileId(row.fileId) }}</template>
-                            <span v-else class="mcp-mono">{{ row.url || '-' }}</span>
-                          </span>
-                        </div>
-                      </div>
-                      <div class="flex flex-wrap gap-2 border-t pt-3">
-                        <YdButton size="sm" variant="outline" @click="openArtifactEdit(index)">
-                          编辑
-                        </YdButton>
-                        <YdButton size="sm" variant="destructive" @click="removeArtifact(index)">
-                          删除
-                        </YdButton>
-                      </div>
-                    </div>
-                  </YdCard>
-                </template>
-              </YdResponsiveTable>
+              </YdResponsiveEnhancedTable>
               <span class="mcp-form-hint">插件形态按 MC 版本区分（如 Paper 多版本）；模组形态按加载器（Fabric/Forge/NeoForge/Quilt）与 MC 版本细分。注入链路上线后按实例环境自动挑选匹配制品。</span>
             </div>
           </template>

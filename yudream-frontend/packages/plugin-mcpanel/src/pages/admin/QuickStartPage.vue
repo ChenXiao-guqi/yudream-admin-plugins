@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { YdLoadingOverlay } from '@yudream/components'
-import type { TableColumn, YdTablePickerQuery, YdTablePickerResult } from '@yudream/components'
+import type { TableColumn, YdTablePickerQuery, YdTablePickerResult, ActionMenuItem } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { McpNode } from '../../types'
-import { YdAction, YdAlert, YdButton, YdCard, YdInput, YdModal, YdPageHeader, YdPageMain, YdResponsiveTable, YdSelect, YdTablePicker, useYdModal, useYdToast } from '@yudream/components'
+import { YdAction, YdAlert, YdButton, YdCard, YdInput, YdModal, YdPageHeader, YdPageMain, YdSelect, YdTablePicker, useYdModal, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { createMcPanelApi } from '../../api/mcpanel-api'
@@ -272,6 +272,12 @@ onMounted(() => {
   void loadPackages()
   void loadNodes()
 })
+
+/** 目录行操作：删除 */
+const rowActions: ActionMenuItem<unknown>[] = [
+  { label: '删除', icon: 'morph:trash-2', danger: true, visible: () => Boolean(canDelete.value), onClick: row => confirmCatalogDelete(row as never) },
+]
+
 </script>
 
 <template>
@@ -369,8 +375,10 @@ onMounted(() => {
           刷新目录
         </YdButton>
       </div>
-      <YdLoadingOverlay :loading="catalogLoading"><YdResponsiveTable
+      <YdLoadingOverlay :loading="catalogLoading"><YdResponsiveEnhancedTable
+        :actions="rowActions"
 
+        
         :columns="catalogColumns"
         :data="catalogRows"
         row-key="id"
@@ -380,44 +388,7 @@ onMounted(() => {
         stripe
         empty-text="暂无包，点击新增"
       >
-        <template #cell-operation="{ row }">
-          <YdButton v-if="canDelete" size="sm" variant="destructive" @click="confirmCatalogDelete(row.original)">
-            删除
-          </YdButton>
-        </template>
-        <template #card="{ row }">
-          <YdCard class="w-full">
-            <div class="flex flex-col gap-3">
-              <div class="flex items-center justify-between gap-2">
-                <span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span>
-              </div>
-              <div class="flex flex-col gap-1 text-sm">
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">核心</span>
-                  <span class="break-all">{{ row.kind || '-' }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">版本</span>
-                  <span class="break-all">{{ row.mcVersion || '-' }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">Java</span>
-                  <span class="break-all">{{ row.javaImageId || '-' }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">内存</span>
-                  <span class="break-all">{{ row.memoryMb ? `${row.memoryMb} MB` : '-' }}</span>
-                </div>
-              </div>
-              <div v-if="canDelete" class="flex flex-wrap gap-2 border-t pt-3">
-                <YdButton size="sm" variant="destructive" @click="confirmCatalogDelete(row)">
-                  删除
-                </YdButton>
-              </div>
-            </div>
-          </YdCard>
-        </template>
-      </YdResponsiveTable></YdLoadingOverlay>
+</YdResponsiveEnhancedTable></YdLoadingOverlay>
     </YdCard>
 
     <YdModal

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { YdLoadingOverlay } from '@yudream/components'
-import type { TableColumn } from '@yudream/components'
+import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { YdAlert, YdButton, YdCard, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdSelect, YdTag, useYdModal, useYdToast } from '@yudream/components'
+import { YdAlert, YdButton, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdSearchBar, YdSelect, YdTag, useYdModal, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { createMcPanelExtra } from '../../api/api-extra'
 import { MCPANEL_PERMISSION, accountHasPermission } from '../../composables/permissions'
@@ -229,6 +229,12 @@ function reset() {
 }
 
 onMounted(() => void load())
+
+/** 审计行操作：删除记录 */
+const rowActions: ActionMenuItem<unknown>[] = [
+  { label: '删除记录', icon: 'morph:trash-2', danger: true, visible: () => Boolean(canDelete.value), disabled: row => deleting.value === (row as { logId: string }).logId, onClick: row => confirmDelete(row as never) },
+]
+
 </script>
 
 <template>
@@ -246,7 +252,9 @@ onMounted(() => void load())
   </YdPageHeader>
   <YdPageMain>
     <YdAlert v-if="error" variant="destructive" title="无法加载审计日志" :description="error" class="mb-4" />
-    <YdLoadingOverlay :loading="loading"><YdResponsiveTable
+    <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+        :actions="rowActions"
+
       :columns="columns"
       :data="rows"
       row-key="logId"
@@ -297,62 +305,7 @@ onMounted(() => void load())
           <span class="mcp-inline-code" :title="String(row.original.targetId ?? '')">{{ row.original.targetId }}</span>
         </div>
       </template>
-      <template #cell-operation="{ row }">
-        <YdButton
-          v-if="canDelete"
-          size="sm"
-          variant="ghost"
-          title="删除该记录"
-          :loading="deleting === row.original.logId"
-          @click="confirmDelete(row.original)"
-        >
-          <YdIcon name="i-ri:delete-bin-line" class="mcp-audit-del" />
-        </YdButton>
-      </template>
-      <template #card="{ row }">
-        <YdCard class="w-full">
-          <div class="flex flex-col gap-3">
-            <div class="flex items-start justify-between gap-2">
-              <span class="min-w-0 break-words text-base font-semibold">{{ actionLabel(row.action) || row.action }}</span>
-              <YdTag variant="secondary">
-                {{ targetTypeLabel(row.targetType) }}
-              </YdTag>
-            </div>
-            <div class="flex flex-col gap-1 text-sm">
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">时间</span>
-                <span class="break-all">{{ formatDateTime(row.at as number) }}</span>
-              </div>
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">操作者</span>
-                <span class="break-all">{{ row.actor }}</span>
-              </div>
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">对象</span>
-                <span class="min-w-0 flex-1 break-all">
-                  <span v-if="row.targetName">{{ row.targetName }} </span>
-                  <span class="mcp-mono">{{ row.targetId }}</span>
-                </span>
-              </div>
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">详情</span>
-                <span class="break-all">{{ row.detail || '-' }}</span>
-              </div>
-            </div>
-            <div v-if="canDelete" class="flex flex-wrap gap-2 border-t pt-3">
-              <YdButton
-                size="sm"
-                variant="ghost"
-                :loading="deleting === row.logId"
-                @click="confirmDelete(row)"
-              >
-                删除
-              </YdButton>
-            </div>
-          </div>
-        </YdCard>
-      </template>
-    </YdResponsiveTable></YdLoadingOverlay>
+</YdResponsiveEnhancedTable></YdLoadingOverlay>
     <YdPagination
       v-model:page="pager.page"
       v-model:size="pager.size"

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { YdLoadingOverlay } from '@yudream/components'
-import type { TableColumn } from '@yudream/components'
+import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { YdAlert, YdButton, YdCard, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSelect, useYdModal, useYdToast } from '@yudream/components'
+import { YdAlert, YdButton, YdCard, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdSelect, useYdModal, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createMcPanelExtra } from '../../api/api-extra.ts'
@@ -149,6 +149,12 @@ onMounted(() => {
   void search()
   void loadLocal()
 })
+
+/** Mod 行操作：安装 */
+const rowActions: ActionMenuItem<unknown>[] = [
+  { label: '安装', icon: 'morph:download', disabled: row => !canManage || !instanceId || installing.value === String((row as { id: unknown }).id), onClick: row => install(row as never) },
+]
+
 </script>
 
 <template>
@@ -185,8 +191,10 @@ onMounted(() => {
         </div>
       </div>
 
-      <YdLoadingOverlay :loading="loading"><YdResponsiveTable
+      <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+          :actions="rowActions"
 
+        
         :columns="columns"
         :data="rows"
         row-key="id"
@@ -205,56 +213,7 @@ onMounted(() => {
         <template #cell-downloads="{ row }">
           {{ Number(row.original.downloads ?? 0).toLocaleString() }}
         </template>
-        <template #cell-operation="{ row }">
-          <YdButton
-            size="sm"
-            variant="outline"
-            :disabled="!canManage || !instanceId"
-            :loading="installing === String(row.original.id)"
-            @click="install(row.original)"
-          >
-            安装
-          </YdButton>
-        </template>
-        <template #card="{ row }">
-          <YdCard class="w-full">
-            <div class="flex flex-col gap-3">
-              <div class="flex items-start justify-between gap-2">
-                <span class="min-w-0 break-words text-base font-semibold">{{ row.title }}</span>
-              </div>
-              <div class="flex flex-col gap-1 text-sm">
-                <div v-if="row.slug" class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">Slug</span>
-                  <span class="break-all">{{ row.slug }}</span>
-                </div>
-                <div v-if="row.description" class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">简介</span>
-                  <span class="break-all">{{ row.description }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">作者</span>
-                  <span class="break-all">{{ row.author || '-' }}</span>
-                </div>
-                <div class="flex gap-2">
-                  <span class="shrink-0 text-secondary-foreground/60">下载</span>
-                  <span class="break-all">{{ Number(row.downloads ?? 0).toLocaleString() }}</span>
-                </div>
-              </div>
-              <div class="flex flex-wrap gap-2 border-t pt-3">
-                <YdButton
-                  size="sm"
-                  variant="outline"
-                  :disabled="!canManage || !instanceId"
-                  :loading="installing === String(row.id)"
-                  @click="install(row)"
-                >
-                  安装
-                </YdButton>
-              </div>
-            </div>
-          </YdCard>
-        </template>
-      </YdResponsiveTable></YdLoadingOverlay>
+      </YdResponsiveEnhancedTable></YdLoadingOverlay>
       <YdPagination
         v-model:page="pager.page"
         v-model:size="pager.size"
@@ -266,7 +225,7 @@ onMounted(() => {
     </YdCard>
 
     <YdCard :title="projectType === 'plugin' ? '本地插件目录 plugins/' : '本地模组目录 mods/'" class="mcp-page-gap">
-      <YdResponsiveTable
+      <YdResponsiveEnhancedTable
         :columns="localColumns"
         :data="localRows"
         row-key="name"
@@ -320,7 +279,7 @@ onMounted(() => {
             </div>
           </YdCard>
         </template>
-      </YdResponsiveTable>
+      </YdResponsiveEnhancedTable>
     </YdCard>
   </YdPageMain>
 </template>

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { YdLoadingOverlay } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import type { TableColumn } from '@yudream/components'
-import { YdButton, YdCard, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdResponsiveTable, YdSearchBar, YdTag, YdTooltip, useYdModal, useYdToast } from '@yudream/components'
+import type { TableColumn, ActionMenuItem } from '@yudream/components'
+import { YdButton, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdSearchBar, YdTag, useYdModal, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { createMcPanelExtra } from '../../api/api-extra'
 import { createNodeOpsApi } from '../../api/node-ops-api'
@@ -228,6 +228,14 @@ function statusTagVariant(row: TrashRow): 'default' | 'secondary' | 'destructive
 onMounted(() => {
   void load()
 })
+
+/** 回收站行操作：找回 / 打包下载 / 永久删除 */
+const rowActions: ActionMenuItem<unknown>[] = [
+  { label: '找回', icon: 'morph:undo', visible: () => canManage.value, disabled: row => !nodeReady(row as never) || (row as { dirPresent?: boolean }).dirPresent === false || Boolean(restoring.value ?? restoring), onClick: row => openRestore(row as never) },
+  { label: '打包下载', icon: 'morph:download', visible: () => canManage.value, disabled: row => !nodeReady(row as never) || (row as { dirPresent?: boolean }).dirPresent === false || Boolean(download.active.value), onClick: row => downloadRow(row as never) },
+  { label: '永久删除', icon: 'morph:trash-2', danger: true, visible: () => canDelete.value, disabled: row => !nodeReady(row as never), onClick: row => confirmRemove(row as never) },
+]
+
 </script>
 
 <template>
@@ -252,9 +260,11 @@ onMounted(() => {
       </div>
     </YdSearchBar>
 
-    <YdLoadingOverlay :loading="loading"><YdResponsiveTable
-      class="mcp-page-gap"
+    <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+        :actions="rowActions"
 
+      class="mcp-page-gap"
+      
       :columns="columns"
       :data="rows"
       row-key="trashId"
@@ -300,107 +310,7 @@ onMounted(() => {
         </span>
         <span v-else class="text-muted-foreground">按节点配置</span>
       </template>
-      <template #cell-operation="{ row }">
-        <div class="mcp-op-cell">
-          <YdTooltip text="以原规格重建实例（名称可改）">
-            <YdButton
-              v-if="canManage"
-              size="sm"
-              variant="outline"
-              :disabled="!nodeReady(row.original) || row.original.dirPresent === false || restoring"
-              @click="openRestore(row.original)"
-            >
-              找回
-            </YdButton>
-          </YdTooltip>
-          <YdTooltip text="打包为 zip 下载（大目录打包可能较慢）">
-            <YdButton
-              v-if="canManage"
-              size="icon-sm"
-              variant="outline"
-              :disabled="!nodeReady(row.original) || row.original.dirPresent === false || download.active.value"
-              @click="downloadRow(row.original)"
-            >
-              <YdIcon name="i-ri:download-2-line" />
-            </YdButton>
-          </YdTooltip>
-          <YdTooltip text="立即永久删除（不可恢复）">
-            <YdButton
-              v-if="canDelete"
-              size="icon-sm"
-              variant="destructive"
-              :disabled="!nodeReady(row.original)"
-              @click="confirmRemove(row.original)"
-            >
-              <YdIcon name="i-ri:delete-bin-line" />
-            </YdButton>
-          </YdTooltip>
-        </div>
-      </template>
-      <template #card="{ row }">
-        <YdCard class="w-full">
-          <div class="flex flex-col gap-3">
-            <div class="flex items-center justify-between gap-2">
-              <span class="min-w-0 break-words text-base font-semibold">{{ row.instanceName }}</span>
-              <YdTag :variant="statusTagVariant(row)">
-                {{ dirStatusText(row) }}
-              </YdTag>
-            </div>
-            <div class="flex flex-col gap-1 text-sm">
-              <div v-if="row.remark" class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">备注</span>
-                <span class="break-all">{{ row.remark }}</span>
-              </div>
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">类型</span>
-                <span class="break-all">{{ (KIND_LABEL[row.kind as string] ?? row.kind) || '-' }}{{ row.mcVersion ? ` · ${row.mcVersion}` : '' }}</span>
-              </div>
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">节点</span>
-                <span class="break-all">{{ row.nodeName || row.nodeId }}<template v-if="row.nodeMissing">（节点已删除）</template><template v-else-if="!row.nodeOnline">（离线）</template></span>
-              </div>
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">删除时间</span>
-                <span class="break-all">{{ formatDateTime(row.deletedAtMs) }}<template v-if="row.deletedBy"> · 操作人 {{ row.deletedBy }}</template></span>
-              </div>
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">自动清除</span>
-                <span class="break-all"><template v-if="typeof row.retentionDays === 'number'">{{ row.retentionDays > 0 ? `${row.retentionDays} 天` : '永久保留' }}</template><template v-else>按节点配置</template></span>
-              </div>
-            </div>
-            <div class="flex flex-wrap gap-2 border-t pt-3">
-              <YdButton
-                v-if="canManage"
-                size="sm"
-                variant="outline"
-                :disabled="!nodeReady(row) || row.dirPresent === false || restoring"
-                @click="openRestore(row)"
-              >
-                找回
-              </YdButton>
-              <YdButton
-                v-if="canManage"
-                size="sm"
-                variant="outline"
-                :disabled="!nodeReady(row) || row.dirPresent === false || download.active.value"
-                @click="downloadRow(row)"
-              >
-                下载
-              </YdButton>
-              <YdButton
-                v-if="canDelete"
-                size="sm"
-                variant="destructive"
-                :disabled="!nodeReady(row)"
-                @click="confirmRemove(row)"
-              >
-                删除
-              </YdButton>
-            </div>
-          </div>
-        </YdCard>
-      </template>
-    </YdResponsiveTable></YdLoadingOverlay>
+</YdResponsiveEnhancedTable></YdLoadingOverlay>
 
     <YdPagination
       v-model:page="pager.page"

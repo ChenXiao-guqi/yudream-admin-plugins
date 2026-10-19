@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { YdLoadingOverlay } from '@yudream/components'
-import type { TableColumn } from '@yudream/components'
+import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { McpNodeStats } from '../../types.ts'
-import { YdAction, YdAlert, YdButton, YdCard, YdDescriptions, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdResponsiveTable, YdSelect, YdTag, useYdModal, useYdToast } from '@yudream/components'
+import { YdAction, YdAlert, YdButton, YdCard, YdDescriptions, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdSelect, YdTag, useYdModal, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createMcPanelExtra } from '../../api/api-extra.ts'
@@ -1168,6 +1168,12 @@ onBeforeUnmount(() => {
     stateTimer = null
   }
 })
+
+/** 备份行操作：恢复 / 删除（仅本机备份） */
+const rowActions: ActionMenuItem<unknown>[] = [
+  { label: '恢复', icon: 'morph:undo', visible: row => (row as { type: string }).type === 'local' && canManage.value, disabled: row => restoringFile.value === String((row as { file: string }).file), onClick: row => confirmRestoreBackup(row as never) },
+  { label: '删除', icon: 'morph:trash-2', danger: true, visible: row => (row as { type: string }).type === 'local' && canManage.value, disabled: row => deletingFile.value === String((row as { file: string }).file), onClick: row => confirmDeleteBackup(row as never) },
+]
 </script>
 
 <template>
@@ -1574,8 +1580,10 @@ onBeforeUnmount(() => {
         <p v-if="backupCreating" class="mb-2 text-sm text-muted-foreground">
           正在打包备份，完成后自动出现在列表（大世界可能需要数分钟）…
         </p>
-        <YdLoadingOverlay :loading="backupLoading"><YdResponsiveTable
+        <YdLoadingOverlay :loading="backupLoading"><YdResponsiveEnhancedTable
+          :actions="rowActions"
 
+          
           :columns="backupColumns"
           :data="backupRows"
           row-key="key"
@@ -1607,72 +1615,7 @@ onBeforeUnmount(() => {
           <template #cell-at="{ row }">
             {{ formatDateTime(row.original.at as number) }}
           </template>
-          <template #cell-operation="{ row }">
-            <div v-if="row.original.type === 'local' && canManage" class="mcp-op-cell">
-              <YdButton
-                size="sm"
-                variant="outline"
-                :loading="restoringFile === String(row.original.file)"
-                @click="confirmRestoreBackup(row.original)"
-              >
-                恢复
-              </YdButton>
-              <YdButton
-                size="sm"
-                variant="destructive"
-                :loading="deletingFile === String(row.original.file)"
-                @click="confirmDeleteBackup(row.original)"
-              >
-                删除
-              </YdButton>
-            </div>
-            <span v-else>-</span>
-          </template>
-          <template #card="{ row }">
-            <YdCard class="w-full">
-              <div class="flex flex-col gap-3">
-                <div class="flex items-center justify-between gap-2">
-                  <span class="mcp-mono min-w-0 break-all text-sm font-semibold">{{ row.type === 'local' ? row.file : (row.archiveName || `备份任务 #${row.jobId ?? '-'}`) }}</span>
-                  <YdTag :variant="row.type === 'local' ? 'default' : 'secondary'">
-                    {{ backupKindLabel(row) }}
-                  </YdTag>
-                </div>
-                <div class="flex flex-col gap-1 text-sm">
-                  <div class="flex gap-2">
-                    <span class="shrink-0 text-secondary-foreground/60">大小</span>
-                    <span class="break-all">{{ row.type === 'local' && row.size !== undefined ? formatBytes(row.size) : '-' }}</span>
-                  </div>
-                  <div class="flex gap-2">
-                    <span class="shrink-0 text-secondary-foreground/60">状态</span>
-                    <span class="break-all" :class="String(row.status) === 'FAILED' ? 'text-destructive' : ''">{{ row.type !== 'local' ? (backupStatusLabel(row) || '-') : '-' }}</span>
-                  </div>
-                  <div class="flex gap-2">
-                    <span class="shrink-0 text-secondary-foreground/60">时间</span>
-                    <span class="break-all">{{ formatDateTime(row.at as number) }}</span>
-                  </div>
-                </div>
-                <div v-if="row.type === 'local' && canManage" class="flex flex-wrap gap-2 border-t pt-3">
-                  <YdButton
-                    size="sm"
-                    variant="outline"
-                    :loading="restoringFile === String(row.file)"
-                    @click="confirmRestoreBackup(row)"
-                  >
-                    恢复
-                  </YdButton>
-                  <YdButton
-                    size="sm"
-                    variant="destructive"
-                    :loading="deletingFile === String(row.file)"
-                    @click="confirmDeleteBackup(row)"
-                  >
-                    删除
-                  </YdButton>
-                </div>
-              </div>
-            </YdCard>
-          </template>
-        </YdResponsiveTable></YdLoadingOverlay>
+</YdResponsiveEnhancedTable></YdLoadingOverlay>
       </YdCard>
     </div>
     <FileEditorModal
