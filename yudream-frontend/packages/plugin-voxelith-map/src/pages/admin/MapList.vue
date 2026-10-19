@@ -1,28 +1,9 @@
 <script setup lang="ts">
-import type { FileItem, FileUploadRequestOptions, TableColumn } from '@yudream/components'
+import type { FileItem, FileUploadRequestOptions, TableColumn, ActionMenuItem } from '@yudream/components'
 import type { ClientJarEntry } from '../../types'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
-import {
-  YdButton,
-  YdCard,
-  YdFileUpload,
-  YdIcon,
-  YdInput,
-  YdModal,
-  YdNumberField,
-  YdPageHeader,
-  YdPageMain,
-  YdPagination,
-  YdProgress,
-  YdResponsiveTable,
-  YdSearchBar,
-  YdSelect,
-  YdSwitch,
-  YdTag,
-  useYdModal,
-  useYdToast,
-} from '@yudream/components'
+import { YdButton, YdFileUpload, YdIcon, YdInput, YdModal, YdNumberField, YdPageHeader, YdPageMain, YdPagination, YdProgress, YdSearchBar, YdSelect, YdSwitch, YdTag, useYdModal, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import {
@@ -446,7 +427,7 @@ watch(() => model.createOpen.value, async (open) => {
   }
 })
 
-const columns: TableColumn<MapAdmin>[] = [
+const columns: TableColumn<ArchiveRow>[] = [
   { id: 'name', header: '存档名称', width: 200, fixed: 'left' },
   { id: 'dimension', header: '维度', width: 120 },
   { id: 'state', header: '状态', width: 120 },
@@ -654,11 +635,7 @@ type ArchiveRow = MapAdmin & {
   archiveDimensions: MapAdmin[]
 }
 
-function asArchiveRow(row: MapAdmin): ArchiveRow {
-  return row as ArchiveRow
-}
-
-const rows = computed(() => pagedGroups.value.map((group) => {
+const rows = computed<ArchiveRow[]>(() => pagedGroups.value.map((group) => {
   const current = currentDimensionOf(group)
   return {
     ...current,
@@ -694,6 +671,15 @@ function resetFilters(): void {
 function activeTaskOf(map: MapAdmin) {
   return model.activeTasksByMapId.value.get(map.id) ?? null
 }
+
+/** 地图行操作统一收进操作菜单，归档保持确认流程 */
+const rowActions: ActionMenuItem<unknown>[] = [
+  { label: '查看', icon: 'morph:eye', disabled: row => !isReady(row as never), onClick: row => openViewer(row as never) },
+  { label: '渲染', icon: 'morph:brush', onClick: row => openDetail(row as never) },
+  { label: '标注', icon: 'morph:map-pin', disabled: row => !isReady(row as never), onClick: row => openMarkers(row as never) },
+  { label: '归档', icon: 'morph:archive', danger: true, disabled: row => isBusy(row as never), onClick: row => confirmArchive(row as never) },
+]
+
 </script>
 
 <template>
@@ -725,7 +711,9 @@ function activeTaskOf(map: MapAdmin) {
   </YdPageHeader>
 
   <YdPageMain>
-    <YdResponsiveTable
+    <YdResponsiveEnhancedTable
+      :actions="rowActions"
+
       row-key="id"
       table-root-class="max-w-full overflow-x-auto rounded-lg"
       table-class="min-w-[960px]"
@@ -797,64 +785,10 @@ function activeTaskOf(map: MapAdmin) {
       <template #cell-updatedAt="{ row }">
         {{ formatTime(row.original.updatedAt) }}
       </template>
-      <template #cell-operation="{ row }">
-        <div class="flex flex-wrap items-center gap-2">
-          <YdButton size="sm" variant="outline" :disabled="!isReady(row.original)" @click="openViewer(row.original)">
-            查看
-          </YdButton>
-          <YdButton size="sm" variant="outline" @click="openDetail(row.original)">
-            渲染
-          </YdButton>
-          <YdButton size="sm" variant="outline" :disabled="!isReady(row.original)" @click="openMarkers(row.original)">
-            标注
-          </YdButton>
-          <YdButton
-            size="sm"
-            variant="destructive"
-            :disabled="isBusy(row.original)"
-            @click="confirmArchive(row.original)"
-          >
-            归档
-          </YdButton>
-        </div>
-      </template>
       <template #empty>
         <span class="text-muted-foreground">{{ emptyText }}</span>
       </template>
-      <template #card="{ row }">
-        <YdCard class="w-full">
-          <div class="flex flex-col gap-3">
-            <div class="flex items-center justify-between gap-2">
-              <span class="min-w-0 break-words text-base font-semibold">{{ row.name }}</span>
-              <YdTag :variant="mapStateTag(row.state).variant">{{ mapStateTag(row.state).label }}</YdTag>
-            </div>
-            <div class="flex flex-col gap-1 text-sm">
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">存档名</span>
-                <span class="break-all">{{ row.worldName || asArchiveRow(row).archiveName || '—' }}</span>
-              </div>
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">维度</span>
-                <span class="break-all">{{ dimensionLabel(row.dimension) }}</span>
-              </div>
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">规模</span>
-                <span class="break-all">{{ row.scaleDescription || '—' }}</span>
-              </div>
-              <div class="flex gap-2">
-                <span class="shrink-0 text-secondary-foreground/60">更新时间</span>
-                <span>{{ formatTime(row.updatedAt) }}</span>
-              </div>
-            </div>
-            <div class="flex flex-wrap gap-2 border-t pt-3">
-              <YdButton size="sm" variant="outline" :disabled="!isReady(row)" @click="openViewer(row)">查看</YdButton>
-              <YdButton size="sm" variant="outline" @click="openDetail(row)">渲染</YdButton>
-              <YdButton size="sm" variant="destructive" :disabled="isBusy(row)" @click="confirmArchive(row)">归档</YdButton>
-            </div>
-          </div>
-        </YdCard>
-      </template>
-    </YdResponsiveTable>
+</YdResponsiveEnhancedTable>
 
     <YdPagination
       v-model:page="page"

@@ -1,17 +1,7 @@
 <script setup lang="ts">
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
-import {
-  YdButton,
-  YdCard,
-  YdIcon,
-  YdPageHeader,
-  YdPageMain,
-  YdResponsiveTable,
-  YdTag,
-  useYdModal,
-  useYdToast,
-} from '@yudream/components'
+import { YdButton, YdIcon, YdPageHeader, YdPageMain, YdTag, useYdModal, useYdToast, YdResponsiveEnhancedTable, type ActionMenuItem } from '@yudream/components'
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { createVoxelithMapAdminApi } from '../../api/voxelith-map-admin-api'
@@ -89,6 +79,13 @@ function removeForever(map: MapAdmin): void {
 onMounted(() => {
   void load()
 })
+
+/** 归档行操作：恢复 / 彻底删除 */
+const rowActions: ActionMenuItem<unknown>[] = [
+  { label: '恢复', icon: 'morph:undo', disabled: () => operating.value !== '', onClick: row => restore(row as never) },
+  { label: '彻底删除', icon: 'morph:trash-2', danger: true, disabled: () => operating.value !== '', onClick: row => removeForever(row as never) },
+]
+
 </script>
 
 <template>
@@ -105,7 +102,9 @@ onMounted(() => {
         <h3 class="text-base font-semibold">已归档地图</h3>
         <span class="text-xs text-muted-foreground">共 {{ total }} 张；归档只是隐藏，可恢复或彻底删除</span>
       </div>
-      <YdResponsiveTable
+      <YdResponsiveEnhancedTable
+      :actions="rowActions"
+
         row-key="id"
         border
         stripe
@@ -126,51 +125,7 @@ onMounted(() => {
         <template #cell-updatedAt="{ row }">
           {{ formatTime(row.original.updatedAt) }}
         </template>
-        <template #cell-operation="{ row }">
-          <div class="flex flex-wrap gap-2">
-            <YdButton
-              size="sm"
-              variant="outline"
-              :disabled="operating === row.original.id"
-              @click="restore(row.original)"
-            >
-              恢复
-            </YdButton>
-            <YdButton
-              size="sm"
-              variant="destructive"
-              :disabled="operating === row.original.id"
-              @click="removeForever(row.original)"
-            >
-              彻底删除
-            </YdButton>
-          </div>
-        </template>
-        <template #card="{ row }">
-          <div class="flex flex-col gap-2">
-            <div class="flex items-center justify-between gap-2">
-              <strong class="min-w-0 truncate">{{ row.name }}</strong>
-              <YdTag :variant="MAP_STATE_META[row.state as MapAdminState].variant">
-                {{ MAP_STATE_META[row.state as MapAdminState].label }}
-              </YdTag>
-            </div>
-            <div class="text-xs text-muted-foreground">
-              {{ dimensionLabel(row.dimension) }} · {{ formatTime(row.updatedAt) }}
-            </div>
-            <div class="flex flex-wrap gap-2">
-              <YdButton size="sm" variant="outline" :disabled="operating === row.id" @click="restore(row)">
-                恢复
-              </YdButton>
-              <YdButton size="sm" variant="destructive" :disabled="operating === row.id" @click="removeForever(row)">
-                彻底删除
-              </YdButton>
-            </div>
-          </div>
-        </template>
-        <template #empty>
-          <span class="text-muted-foreground">暂无归档地图</span>
-        </template>
-      </YdResponsiveTable>
+    </YdResponsiveEnhancedTable>
     </YdCard>
   </YdPageMain>
 </template>

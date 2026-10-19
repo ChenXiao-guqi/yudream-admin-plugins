@@ -1,20 +1,7 @@
 <script setup lang="ts">
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
-import {
-  YdButton,
-  YdCard,
-  YdDrawer,
-  YdIcon,
-  YdPageHeader,
-  YdPageMain,
-  YdPagination,
-  YdProgress,
-  YdResponsiveTable,
-  YdSelect,
-  YdTag,
-  useYdToast,
-} from '@yudream/components'
+import { YdButton, YdDrawer, YdIcon, YdPageHeader, YdPageMain, YdPagination, YdProgress, YdSelect, YdTag, useYdToast, YdResponsiveEnhancedTable, type ActionMenuItem } from '@yudream/components'
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import {
@@ -182,6 +169,13 @@ function openMap(task: RenderTask): void {
   if (!task.mapId) return
   void router.push({ path: '/platform/plugins/voxelith-map/map-detail', query: { id: task.mapId } })
 }
+
+/** 任务行操作：日志 / 取消 */
+const rowActions: ActionMenuItem<unknown>[] = [
+  { label: '查看日志', icon: 'morph:file-text', onClick: row => openLog(row as never) },
+  { label: '取消任务', icon: 'morph:close', visible: row => Boolean((row as { canCancel?: boolean }).canCancel), disabled: () => cancelling.value !== '', onClick: row => cancelTask(row as never) },
+]
+
 </script>
 
 <template>
@@ -200,7 +194,9 @@ function openMap(task: RenderTask): void {
       </p>
     </YdCard>
 
-    <YdResponsiveTable
+    <YdResponsiveEnhancedTable
+      :actions="rowActions"
+
       row-key="id"
       table-root-class="max-w-full overflow-x-auto rounded-lg"
       table-class="min-w-[1000px]"
@@ -263,54 +259,8 @@ function openMap(task: RenderTask): void {
         {{ formatTime(row.original.createdAt) }}
       </template>
 
-      <template #cell-operation="{ row }">
-        <div class="flex items-center gap-1">
-          <YdButton size="sm" variant="ghost" title="查看日志" @click="openLog(row.original)">
-            <YdIcon name="i-mdi:text-box-outline" />
-          </YdButton>
-          <YdButton
-            v-if="row.original.canCancel"
-            size="sm"
-            variant="ghost"
-            title="取消任务"
-            :loading="cancelling === row.original.id"
-            @click="cancelTask(row.original)"
-          >
-            <YdIcon name="i-mdi:close-circle-outline" />
-          </YdButton>
-        </div>
-      </template>
 
-      <template #card="{ row }">
-        <div class="flex flex-col gap-2">
-          <div class="flex flex-wrap items-center justify-between gap-2">
-            <YdTag variant="secondary">
-              <YdIcon :name="kindMeta(row).icon" class="mr-1" />
-              {{ kindMeta(row).label }}
-            </YdTag>
-            <YdTag :variant="stateMeta(row.state).variant">{{ stateMeta(row.state).label }}</YdTag>
-          </div>
-          <div class="min-w-0 truncate text-sm">{{ row.subject || row.mapName || row.mapId || '—' }}</div>
-          <YdProgress :model-value="renderTaskProgress(row)" />
-          <div class="text-xs text-muted-foreground">
-            {{ renderTaskProgress(row) }}% · {{ formatTime(row.createdAt) }}
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <YdButton size="sm" variant="outline" @click="openLog(row)">日志</YdButton>
-            <YdButton
-              v-if="row.canCancel"
-              size="sm"
-              variant="destructive"
-              :loading="cancelling === row.id"
-              @click="cancelTask(row)"
-            >
-              取消
-            </YdButton>
-            <YdButton v-if="row.mapId" size="sm" variant="ghost" @click="openMap(row)">打开地图</YdButton>
-          </div>
-        </div>
-      </template>
-    </YdResponsiveTable>
+</YdResponsiveEnhancedTable>
 
     <YdPagination
       v-if="filteredTasks.length > pageSize"

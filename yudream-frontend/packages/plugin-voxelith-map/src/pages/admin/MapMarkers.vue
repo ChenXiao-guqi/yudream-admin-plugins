@@ -1,22 +1,7 @@
 <script setup lang="ts">
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
-import {
-  YdButton,
-  YdCard,
-  YdCheckbox,
-  YdIcon,
-  YdInput,
-  YdModal,
-  YdNumberField,
-  YdPageHeader,
-  YdPageMain,
-  YdResponsiveTable,
-  YdSelect,
-  YdTag,
-  useYdModal,
-  useYdToast,
-} from '@yudream/components'
+import { YdButton, YdCheckbox, YdIcon, YdInput, YdModal, YdNumberField, YdPageHeader, YdPageMain, YdSelect, YdTag, useYdModal, useYdToast, YdResponsiveEnhancedTable, type ActionMenuItem } from '@yudream/components'
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { createVoxelithMapAdminApi } from '../../api/voxelith-map-admin-api'
@@ -440,6 +425,13 @@ function removeMarker(row: Row): void {
 onMounted(() => {
   void load()
 })
+
+/** 标注行操作：编辑 / 删除 */
+const rowActions: ActionMenuItem<unknown>[] = [
+  { label: '编辑', icon: 'morph:pencil', onClick: row => openEditDialog(row as never) },
+  { label: '删除', icon: 'morph:trash-2', danger: true, onClick: row => removeMarker(row as never) },
+]
+
 </script>
 
 <template>
@@ -525,7 +517,9 @@ onMounted(() => {
             </YdButton>
           </div>
         </div>
-        <YdResponsiveTable
+        <YdResponsiveEnhancedTable
+      :actions="rowActions"
+
           row-key="key"
           border
           stripe
@@ -554,38 +548,7 @@ onMounted(() => {
               {{ markerCoordsText(row.original.marker) }}
             </span>
           </template>
-          <template #cell-operation="{ row }">
-            <div class="flex gap-1">
-              <YdButton size="sm" variant="ghost" title="编辑" @click="openEditDialog(row.original)">
-                <YdIcon name="i-mdi:pencil" />
-              </YdButton>
-              <YdButton size="sm" variant="ghost" title="删除" @click="removeMarker(row.original)">
-                <YdIcon name="i-mdi:delete-outline" />
-              </YdButton>
-            </div>
-          </template>
-          <template #card="{ row }">
-            <div class="flex flex-col gap-2">
-              <div class="flex items-center justify-between gap-2">
-                <strong class="min-w-0 truncate">{{ row.marker.label || row.marker.id }}</strong>
-                <YdTag :variant="MARKER_TYPE_META[row.marker.type]?.variant ?? 'secondary'">
-                  {{ MARKER_TYPE_META[row.marker.type]?.label ?? row.marker.type }}
-                </YdTag>
-              </div>
-              <div class="text-xs text-muted-foreground">
-                {{ row.setLabel }} · {{ markerCoordsText(row.marker) }}
-              </div>
-              <div class="flex flex-wrap gap-2">
-                <YdButton size="sm" variant="outline" @click="openEditDialog(row)">编辑</YdButton>
-                <YdButton size="sm" variant="destructive" @click="removeMarker(row)">删除</YdButton>
-              </div>
-            </div>
-          </template>
-          <template #empty>
-            <span v-if="filtersActive" class="text-muted-foreground">没有符合筛选条件的标注，可调整或重置筛选</span>
-            <span v-else class="text-muted-foreground">暂无标注，点右上角「新增点位 / 新增范围」添加，或到查看页添加点位 / 范围标注</span>
-          </template>
-        </YdResponsiveTable>
+        </YdResponsiveEnhancedTable>
       </YdCard>
 
       <!-- 新增 / 编辑弹窗 -->
