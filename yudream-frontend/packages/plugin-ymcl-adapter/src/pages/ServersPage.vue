@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, YdTablePageLayout } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { ServerView } from '../types'
-import { YdButton, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdSelect, YdTag, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
+import { YdButton, YdIcon, YdInput, YdModal, YdPageMain, YdSelect, YdTag, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
 import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useYmclAdapter } from '../composables/useYmclAdapter'
@@ -146,11 +146,12 @@ const rowActions: ActionMenuItem<ServerView>[] = [
 
 <template>
   <div class="ymcl-page">
-    <YdPageHeader title="服务器绑定" description="MIP 附录 B 聚合视图：为启动器成员的服务器指定整合包与更新策略。" />
 
     <YdPageMain>
       <YdCard content-class="ymcl-card-content">
-        <YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable
+        <YdTablePageLayout title="服务器绑定" :show-search="false">
+    <template #table>
+<YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable
               :actions="rowActions"
 
           table-root-class="max-w-full overflow-x-auto rounded-lg overflow-hidden"
@@ -190,6 +191,9 @@ const rowActions: ActionMenuItem<ServerView>[] = [
             </YdButton>
           </template>
 </YdResponsiveEnhancedTable></YdLoadingOverlay>
+    </template>
+  </YdTablePageLayout>
+
       </YdCard>
     </YdPageMain>
 

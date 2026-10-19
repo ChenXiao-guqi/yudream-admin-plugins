@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { YdLoadingOverlay, type ActionMenuItem } from '@yudream/components'
+import { YdLoadingOverlay, type ActionMenuItem, YdTablePageLayout } from '@yudream/components'
 import { computed, onMounted, ref } from 'vue'
-import { YdAlert, YdButton, YdIcon, YdInput, YdLabel, YdModal, YdNumberField, YdPageHeader, YdPageMain, YdPagination, YdSelect, YdSwitch, useYdModal, useYdToast, type TableColumn, YdResponsiveEnhancedTable } from '@yudream/components'
+import { YdAlert, YdButton, YdIcon, YdInput, YdLabel, YdModal, YdNumberField, YdPageMain, YdPagination, YdSelect, YdSwitch, useYdModal, useYdToast, type TableColumn, YdResponsiveEnhancedTable } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import { createWebCardApi } from '../api/web-card-api'
 import type { GroupBinding, Option, Site } from '../types'
@@ -68,10 +68,15 @@ const rowActions: ActionMenuItem<unknown>[] = [
 
 <template>
   <section>
-    <YdPageHeader title="定时推送目标" description="仅供定时采集任务主动推送使用。即时链接始终回复到用户发送链接的原群。"><YdButton @click="create"><YdIcon name="i-ri:add-line"/>新增目标</YdButton></YdPageHeader>
+    
     <YdPageMain class="space-y-4">
       <YdAlert v-if="error" variant="destructive" title="加载失败" :description="error"/>
-      <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+              <YdTablePageLayout title="定时推送目标" :show-search="false">
+            <template #actions>
+      <YdButton @click="create"><YdIcon name="i-ri:add-line"/>新增目标</YdButton>
+            </template>
+            <template #table>
+<YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
         :actions="rowActions"
   row-key="id" table-root-class="rounded-lg overflow-hidden" table-class="min-w-[900px]" border stripe :columns="columns" :data="rows">
         <template #cell-siteId="{row}">{{ sites.find(value => value.id === row.original.siteId)?.name || row.original.siteId }}</template>
@@ -79,7 +84,12 @@ const rowActions: ActionMenuItem<unknown>[] = [
         <template #cell-channelId="{row}">{{ row.original.channelId }}</template>
         <template #cell-enabled="{row}"><div class="status-toggle"><YdSwitch :model-value="row.original.enabled" :disabled="toggling===row.original.id" @update:model-value="toggle(row.original)"/><small>{{ row.original.enabled ? '已启用' : '已停用' }}</small></div></template>
                 </YdResponsiveEnhancedTable></YdLoadingOverlay>
-      <YdPagination v-model:page="page" v-model:size="size" :total="total" class="mt-3" @page-change="load" @size-change="load"/>
+            </template>
+            <template #footer>
+      <YdPagination v-model:page="page" v-model:size="size" :total="total" @page-change="load" @size-change="load"/>
+            </template>
+          </YdTablePageLayout>
+
     </YdPageMain>
     <YdModal v-model="open" title="定时推送目标" class="binding-modal" :show-cancel-button="true" :confirm-button-loading="saving" @confirm="save">
       <div class="binding-form">

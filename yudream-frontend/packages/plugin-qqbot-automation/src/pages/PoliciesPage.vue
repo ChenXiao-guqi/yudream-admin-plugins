@@ -1,26 +1,7 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, YdTablePageLayout } from '@yudream/components'
 import { computed, onMounted, ref, watch } from 'vue'
-import {
-  YdAlert,
-  YdButton,
-  YdDrawer,
-  YdIcon,
-  YdInput,
-  YdPageHeader,
-  YdPageMain,
-  YdPagination,
-  YdResponsiveEnhancedTable,
-  YdSelect,
-  YdTag,
-  useYdModal,
-  useYdToast,
-  type ActionMenuItem,
-  type StatusColumn,
-  type TableColumn,
-  type YdTablePickerQuery,
-  type YdTablePickerResult,
-} from '@yudream/components'
+import { YdAlert, YdButton, YdDrawer, YdIcon, YdInput, YdPageMain, YdPagination, YdResponsiveEnhancedTable, YdSelect, YdTag, useYdModal, useYdToast, type ActionMenuItem, type StatusColumn, type TableColumn, type YdTablePickerQuery, type YdTablePickerResult } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import { createQqbotAutomationApi } from '../api/qqbot-automation-api'
 import PolicyFieldsForm from '../components/PolicyFieldsForm.vue'
@@ -398,7 +379,6 @@ onMounted(async () => {
 
 <template>
   <section>
-    <YdPageHeader title="群自动化策略" description="配置连接默认策略，并按需为单独群聊覆盖指定字段。" />
 
     <YdPageMain>
       <div class="qqbot-automation-page">
@@ -521,7 +501,9 @@ onMounted(async () => {
         </div>
 
         <div class="qa-card-body">
-          <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+          <YdTablePageLayout title="群自动化策略" :show-search="false">
+    <template #table>
+<YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
             row-key="channelId"
             table-root-class="rounded-lg overflow-hidden"
             table-class="min-w-[720px]"
@@ -543,14 +525,19 @@ onMounted(async () => {
             </template>
             <template #cell-overrides="{ row }">{{ countOverrides(row.original) }} 项</template>
           </YdResponsiveEnhancedTable></YdLoadingOverlay>
-
-          <YdPagination
+    </template>
+    <template #footer>
+      <YdPagination
             v-if="connectionId"
             v-model:page="page"
             v-model:size="size"
             :total="total"
-            class="mt-3"
           />
+    </template>
+  </YdTablePageLayout>
+
+
+
         </div>
       </section>
       </div>

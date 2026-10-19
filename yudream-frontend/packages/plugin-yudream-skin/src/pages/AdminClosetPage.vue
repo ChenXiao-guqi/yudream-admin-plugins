@@ -3,7 +3,7 @@ import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { SkinPluginModel } from '../composables/useSkinPlugin'
 import type { SkinClosetItem } from '../types'
 import { computed, reactive, ref, watch } from 'vue'
-import { YdLabel, YdButton, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdSelect, useYdModal, YdResponsiveEnhancedTable, YdListToolbar } from '@yudream/components'
+import { YdLabel, YdButton, YdIcon, YdInput, YdModal, YdPageMain, YdPagination, YdSelect, useYdModal, YdResponsiveEnhancedTable, YdListToolbar, YdTablePageLayout } from '@yudream/components'
 
 const props = defineProps<{ model: SkinPluginModel }>()
 const modal = useYdModal()
@@ -102,9 +102,6 @@ const rowActions: ActionMenuItem<SkinClosetItem>[] = [
 </script>
 
 <template>
-  <YdPageHeader title="衣柜管理" class="mb-0">
-    <YdButton @click="openCreate"><YdIcon name="i-ri:add-line" />新增衣柜项</YdButton>
-  </YdPageHeader>
   <YdPageMain><div class="skin-admin-table-page">
     <YdListToolbar
       v-model:keyword="search.keyword"
@@ -123,7 +120,12 @@ const rowActions: ActionMenuItem<SkinClosetItem>[] = [
       </template>
     </YdListToolbar>
 
-    <YdResponsiveEnhancedTable
+    <YdTablePageLayout title="衣柜管理" :show-search="false">
+    <template #actions>
+      <YdButton @click="openCreate"><YdIcon name="i-ri:add-line" />新增衣柜项</YdButton>
+    </template>
+    <template #table>
+<YdResponsiveEnhancedTable
       :actions="rowActions"
       row-key="id"
       table-root-class="max-w-full overflow-x-auto rounded-lg"
@@ -146,14 +148,19 @@ const rowActions: ActionMenuItem<SkinClosetItem>[] = [
       <template #cell-createdAt="{ row }">{{ model.dateText(row.original.createdAt) }}</template>
       
 </YdResponsiveEnhancedTable>
-
-    <YdPagination
+    </template>
+    <template #footer>
+      <YdPagination
       v-model:page="pagination.page"
       v-model:size="pagination.size"
       :total="filteredRows.length"
-      class="mt-3"
       @size-change="pagination.page = 1"
     />
+    </template>
+  </YdTablePageLayout>
+
+
+
 
     <YdModal v-model="formVisible" :title="editing ? '重命名衣柜项' : '新增衣柜项'" show-cancel-button @confirm="submit">
       <div class="skin-admin-form">

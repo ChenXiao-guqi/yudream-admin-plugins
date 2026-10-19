@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { YdLoadingOverlay, type ActionMenuItem } from '@yudream/components'
+import { YdLoadingOverlay, type ActionMenuItem, YdTablePageLayout } from '@yudream/components'
 import { onMounted, ref } from 'vue'
-import { YdAlert, YdButton, YdIcon, YdPageHeader, YdPageMain, YdPagination, YdTag, useYdToast, type TableColumn, YdResponsiveEnhancedTable } from '@yudream/components'
+import { YdAlert, YdButton, YdIcon, YdPageMain, YdPagination, YdTag, useYdToast, type TableColumn, YdResponsiveEnhancedTable } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import { createWebCardApi } from '../api/web-card-api'
 import type { DeliveryRecord } from '../types'
@@ -29,6 +29,17 @@ const rowActions: ActionMenuItem<unknown>[] = [
 
 </script>
 
-<template><section><YdPageHeader title="运行记录" description="查看即时链接回复和定时推送的渲染、发送结果与失败原因。"><YdButton variant="outline" @click="load"><YdIcon name="i-ri:refresh-line"/>刷新</YdButton></YdPageHeader><YdPageMain class="space-y-4"><YdAlert v-if="error" variant="destructive" title="加载失败" :description="error"/><YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+<template><section><YdPageMain class="space-y-4"><YdAlert v-if="error" variant="destructive" title="加载失败" :description="error"/>        <YdTablePageLayout title="运行记录" :show-search="false">
+            <template #actions>
+      <YdButton variant="outline" @click="load"><YdIcon name="i-ri:refresh-line"/>刷新</YdButton>
+            </template>
+            <template #table>
+<YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
         :actions="rowActions"
-  row-key="id" table-root-class="rounded-lg overflow-hidden" table-class="min-w-[1080px]" border stripe :columns="columns" :data="rows"><template #cell-stage="{row}"><YdTag :variant="variant(row.original.stage)">{{ row.original.stage }}</YdTag></template><template #cell-mode="{row}">{{ row.original.bindingId ? '定时推送' : '即时回复' }}</template><template #cell-updatedAt="{row}">{{ dateTime(row.original.updatedAt) }}</template></YdResponsiveEnhancedTable></YdLoadingOverlay><YdPagination v-model:page="page" v-model:size="size" :total="total" class="mt-3" @page-change="load" @size-change="load"/></YdPageMain></section></template>
+  row-key="id" table-root-class="rounded-lg overflow-hidden" table-class="min-w-[1080px]" border stripe :columns="columns" :data="rows"><template #cell-stage="{row}"><YdTag :variant="variant(row.original.stage)">{{ row.original.stage }}</YdTag></template><template #cell-mode="{row}">{{ row.original.bindingId ? '定时推送' : '即时回复' }}</template><template #cell-updatedAt="{row}">{{ dateTime(row.original.updatedAt) }}</template></YdResponsiveEnhancedTable></YdLoadingOverlay>
+            </template>
+            <template #footer>
+      <YdPagination v-model:page="page" v-model:size="size" :total="total" @page-change="load" @size-change="load"/>
+            </template>
+          </YdTablePageLayout>
+</YdPageMain></section></template>

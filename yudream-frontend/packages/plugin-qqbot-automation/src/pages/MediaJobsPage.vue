@@ -1,22 +1,7 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, YdTablePageLayout } from '@yudream/components'
 import { computed, onMounted, ref, watch } from 'vue'
-import {
-  YdAlert,
-  YdButton,
-  YdIcon,
-  YdInput,
-  YdModal,
-  YdPageHeader,
-  YdPageMain,
-  YdPagination,
-  YdSelect,
-  YdResponsiveEnhancedTable,
-  useYdModal,
-  useYdToast,
-  type StatusColumn,
-  type TableColumn,
-} from '@yudream/components'
+import { YdAlert, YdButton, YdIcon, YdInput, YdModal, YdPageMain, YdPagination, YdSelect, YdResponsiveEnhancedTable, useYdModal, useYdToast, type StatusColumn, type TableColumn } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import { createQqbotAutomationApi } from '../api/qqbot-automation-api'
 import { formatGroupLabel, type MediaJob, type Option } from '../types'
@@ -264,7 +249,12 @@ onMounted(load)
 
 <template>
   <section>
-    <YdPageHeader title="媒体任务" description="查看群消息触发和手动测试的媒体解析任务。">
+
+    <YdPageMain class="space-y-4">
+      <YdAlert v-if="error" variant="destructive" title="操作未完成" :description="error" />
+
+      <YdTablePageLayout title="媒体任务" :show-search="false">
+    <template #actions>
       <div class="flex flex-wrap gap-2">
         <YdButton variant="outline" :disabled="loading" @click="load">
           <YdIcon name="i-lucide:refresh-cw" />
@@ -279,12 +269,9 @@ onMounted(load)
           发起测试
         </YdButton>
       </div>
-    </YdPageHeader>
-
-    <YdPageMain class="space-y-4">
-      <YdAlert v-if="error" variant="destructive" title="操作未完成" :description="error" />
-
-      <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+    </template>
+    <template #table>
+<YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
         
         row-key="id"
         table-root-class="overflow-hidden rounded-lg"
@@ -311,8 +298,14 @@ onMounted(load)
         </template>
         <template #cell-createdAt="{ row }">{{ formatTime(row.original.createdAt) }}</template>
 </YdResponsiveEnhancedTable></YdLoadingOverlay>
+    </template>
+    <template #footer>
+      <YdPagination v-model:page="page" v-model:size="size" :total="total" />
+    </template>
+  </YdTablePageLayout>
 
-      <YdPagination v-model:page="page" v-model:size="size" :total="total" class="mt-3" />
+
+
     </YdPageMain>
 
     <YdModal

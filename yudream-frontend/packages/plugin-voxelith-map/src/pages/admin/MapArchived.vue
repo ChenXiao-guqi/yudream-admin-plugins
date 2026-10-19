@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
-import { YdButton, YdIcon, YdPageHeader, YdPageMain, YdTag, useYdModal, useYdToast, YdResponsiveEnhancedTable, type ActionMenuItem } from '@yudream/components'
+import { YdButton, YdIcon, YdPageMain, YdTag, useYdModal, useYdToast, YdResponsiveEnhancedTable, type ActionMenuItem, YdTablePageLayout } from '@yudream/components'
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { createVoxelithMapAdminApi } from '../../api/voxelith-map-admin-api'
@@ -89,12 +89,6 @@ const rowActions: ActionMenuItem<unknown>[] = [
 </script>
 
 <template>
-  <YdPageHeader title="归档" class="mb-0">
-    <YdButton size="sm" variant="outline" @click="goBack">
-      <YdIcon name="i-mdi:arrow-left" />
-      返回
-    </YdButton>
-  </YdPageHeader>
 
   <YdPageMain>
     <YdCard class="p-4">
@@ -102,7 +96,15 @@ const rowActions: ActionMenuItem<unknown>[] = [
         <h3 class="text-base font-semibold">已归档地图</h3>
         <span class="text-xs text-muted-foreground">共 {{ total }} 张；归档只是隐藏，可恢复或彻底删除</span>
       </div>
-      <YdResponsiveEnhancedTable
+      <YdTablePageLayout title="归档" :show-search="false">
+    <template #actions>
+      <YdButton size="sm" variant="outline" @click="goBack">
+      <YdIcon name="i-mdi:arrow-left" />
+      返回
+    </YdButton>
+    </template>
+    <template #table>
+<YdResponsiveEnhancedTable
       :actions="rowActions"
 
         row-key="id"
@@ -126,6 +128,9 @@ const rowActions: ActionMenuItem<unknown>[] = [
           {{ formatTime(row.original.updatedAt) }}
         </template>
     </YdResponsiveEnhancedTable>
+    </template>
+  </YdTablePageLayout>
+
     </YdCard>
   </YdPageMain>
 </template>

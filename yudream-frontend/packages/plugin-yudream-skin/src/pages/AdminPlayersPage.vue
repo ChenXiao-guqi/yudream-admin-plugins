@@ -3,7 +3,7 @@ import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { SkinPlayer } from '../types'
 import type { SkinPluginModel } from '../composables/useSkinPlugin'
 import { computed, reactive, ref, watch } from 'vue'
-import { YdLabel, YdButton, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdPagination, YdSelect, YdTag, useYdModal, YdResponsiveEnhancedTable, YdListToolbar } from '@yudream/components'
+import { YdLabel, YdButton, YdIcon, YdInput, YdModal, YdPageMain, YdPagination, YdSelect, YdTag, useYdModal, YdResponsiveEnhancedTable, YdListToolbar, YdTablePageLayout } from '@yudream/components'
 
 const props = defineProps<{
   model: SkinPluginModel
@@ -205,9 +205,6 @@ const rowActions: ActionMenuItem<SkinPlayer>[] = [
 </script>
 
 <template>
-  <YdPageHeader title="角色管理" class="mb-0">
-    <YdButton @click="openCreate"><YdIcon name="i-ri:add-line" />新增角色</YdButton>
-  </YdPageHeader>
   <YdPageMain><div class="skin-admin-table-page">
     <YdListToolbar
       v-model:keyword="search.keyword"
@@ -239,7 +236,12 @@ const rowActions: ActionMenuItem<SkinPlayer>[] = [
       </template>
     </YdListToolbar>
 
-    <YdResponsiveEnhancedTable
+    <YdTablePageLayout title="角色管理" :show-search="false">
+    <template #actions>
+      <YdButton @click="openCreate"><YdIcon name="i-ri:add-line" />新增角色</YdButton>
+    </template>
+    <template #table>
+<YdResponsiveEnhancedTable
       :actions="rowActions"
       row-key="uuid"
       table-root-class="skin-admin-player-table-root rounded-lg overflow-hidden"
@@ -278,15 +280,20 @@ const rowActions: ActionMenuItem<SkinPlayer>[] = [
       </template>
       
 </YdResponsiveEnhancedTable>
-
-    <YdPagination
+    </template>
+    <template #footer>
+      <YdPagination
       v-model:page="pagination.page"
       v-model:size="pagination.size"
       :total="filteredRows.length"
-      class="mt-3"
       @page-change="onPageChange"
       @size-change="onSizeChange"
     />
+    </template>
+  </YdTablePageLayout>
+
+
+
 
     <YdModal v-model="formVisible" :title="editing ? '编辑角色' : '新增角色'" show-cancel-button class="sm:max-w-2xl" @confirm="saveForm">
       <div class="skin-admin-form">

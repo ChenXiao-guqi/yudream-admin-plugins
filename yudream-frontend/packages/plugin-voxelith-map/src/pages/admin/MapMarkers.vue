@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
-import { YdButton, YdCheckbox, YdIcon, YdInput, YdModal, YdNumberField, YdPageHeader, YdPageMain, YdSelect, YdTag, useYdModal, useYdToast, YdResponsiveEnhancedTable, type ActionMenuItem } from '@yudream/components'
+import { YdButton, YdCheckbox, YdIcon, YdInput, YdModal, YdNumberField, YdPageMain, YdSelect, YdTag, useYdModal, useYdToast, YdResponsiveEnhancedTable, type ActionMenuItem, YdTablePageLayout } from '@yudream/components'
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { createVoxelithMapAdminApi } from '../../api/voxelith-map-admin-api'
@@ -435,23 +435,6 @@ const rowActions: ActionMenuItem<unknown>[] = [
 </script>
 
 <template>
-  <YdPageHeader :title="mapName ? `标注管理：${mapName}` : '标注管理'" class="mb-0">
-    <div class="flex gap-2">
-      <YdButton size="sm" variant="outline" @click="goBack">
-        <YdIcon name="i-mdi:arrow-left" />
-        返回
-      </YdButton>
-      <YdButton size="sm" variant="outline" @click="openCreateDialog">
-        <YdIcon name="i-mdi:map-marker-plus" />
-        新增点位
-      </YdButton>
-      <YdButton size="sm" variant="outline" @click="openCreateShapeDialog">
-        <YdIcon name="i-mdi:vector-square" />
-        新增范围
-      </YdButton>
-
-    </div>
-  </YdPageHeader>
 
   <YdPageMain>
     <div v-if="error" class="py-12 text-center text-muted-foreground">{{ error }}</div>
@@ -517,7 +500,26 @@ const rowActions: ActionMenuItem<unknown>[] = [
             </YdButton>
           </div>
         </div>
-        <YdResponsiveEnhancedTable
+        <YdTablePageLayout title="mapName ? `标注管理：${mapName}` : '标注管理'" :show-search="false">
+    <template #actions>
+      <div class="flex gap-2">
+      <YdButton size="sm" variant="outline" @click="goBack">
+        <YdIcon name="i-mdi:arrow-left" />
+        返回
+      </YdButton>
+      <YdButton size="sm" variant="outline" @click="openCreateDialog">
+        <YdIcon name="i-mdi:map-marker-plus" />
+        新增点位
+      </YdButton>
+      <YdButton size="sm" variant="outline" @click="openCreateShapeDialog">
+        <YdIcon name="i-mdi:vector-square" />
+        新增范围
+      </YdButton>
+
+    </div>
+    </template>
+    <template #table>
+<YdResponsiveEnhancedTable
       :actions="rowActions"
 
           row-key="key"
@@ -549,6 +551,9 @@ const rowActions: ActionMenuItem<unknown>[] = [
             </span>
           </template>
         </YdResponsiveEnhancedTable>
+    </template>
+  </YdTablePageLayout>
+
       </YdCard>
 
       <!-- 新增 / 编辑弹窗 -->

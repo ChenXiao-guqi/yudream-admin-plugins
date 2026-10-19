@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, YdTablePageLayout } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { LaunchEventView, StatsScopeEntry } from '../types'
-import { YdButton, YdCard, YdIcon, YdPageHeader, YdPageMain, YdTag, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
+import { YdButton, YdCard, YdIcon, YdPageMain, YdTag, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
 import type { TableColumn } from '@yudream/components'
 import { computed, onMounted, ref } from 'vue'
 import { createYmclApi } from '../api/ymcl-api'
@@ -106,14 +106,6 @@ onMounted(() => {
 
 <template>
   <div class="ymcl-page">
-    <YdPageHeader title="启动统计" description="域整合包实例的启动上报聚合：启动次数、用户活跃与最近动态。数据由启动器在启动成功后上报。">
-      <template #actions>
-        <YdButton variant="outline" :loading="loading" @click="load">
-          <YdIcon name="i-ri:refresh-line" />
-          刷新
-        </YdButton>
-      </template>
-    </YdPageHeader>
 
     <YdPageMain>
       <div class="ymcl-stats-stack">
@@ -130,7 +122,17 @@ onMounted(() => {
         </div>
 
         <YdCard title="近 14 天趋势" content-class="ymcl-card-content">
-          <YdLoadingOverlay :loading="loading" v-if="summary?.days?.length"><div  class="ymcl-stats-chart" >
+          <YdTablePageLayout title="启动统计" :show-search="false">
+    <template #actions>
+      <template #actions>
+        <YdButton variant="outline" :loading="loading" @click="load">
+          <YdIcon name="i-ri:refresh-line" />
+          刷新
+        </YdButton>
+      </template>
+    </template>
+    <template #table>
+<YdLoadingOverlay :loading="loading" v-if="summary?.days?.length"><div  class="ymcl-stats-chart" >
             <div
               v-for="point in summary.days"
               :key="point.day"
@@ -145,6 +147,9 @@ onMounted(() => {
               <span class="ymcl-stats-chart__bar-day">{{ point.day.slice(5) }}</span>
             </div>
           </div></YdLoadingOverlay>
+    </template>
+  </YdTablePageLayout>
+
           <p v-else class="ymcl-muted">
             暂无数据。启动器在域整合包实例启动成功后会自动上报。
           </p>

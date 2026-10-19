@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, YdTablePageLayout } from '@yudream/components'
 import type { ActionMenuItem, StatusColumn, TableColumn } from '@yudream/components'
 import type { McWikiPluginModel } from '../composables/useMcWikiPlugin'
 import type { WikiJob, WikiVersionRow } from '../types'
@@ -142,9 +142,6 @@ onMounted(() => {
 </script>
 
 <template>
-  <YdPageHeader title="百科版本" description="刷新官方版本清单、导入资源并将版本发布到公开百科">
-    <YdButton variant="outline" :loading="model.loading" @click="model.refreshVersions"><YdIcon name="i-ri:refresh-line" />刷新清单</YdButton>
-  </YdPageHeader>
   <YdPageMain>
     <YdCard style="margin-bottom: 12px">
       <div class="flex flex-wrap items-center gap-3">
@@ -175,7 +172,12 @@ onMounted(() => {
       </template>
     </YdListToolbar>
 
-    <YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable
+    <YdTablePageLayout title="百科版本" :show-search="false">
+    <template #actions>
+      <YdButton variant="outline" :loading="model.loading" @click="model.refreshVersions"><YdIcon name="i-ri:refresh-line" />刷新清单</YdButton>
+    </template>
+    <template #table>
+<YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable
       :actions="rowActions"
       :status-column="importStatusColumn"
       :columns="columns"
@@ -192,7 +194,13 @@ onMounted(() => {
       <template #cell-published="{ row }"><span class="yd-status-tone" :data-tone="row.original.published ? 'info' : 'neutral'">{{ row.original.published ? '已发布' : '-' }}</span></template>
       <template #cell-releaseTime="{ row }">{{ formatTime(row.original.releaseTime) }}</template>
     </YdResponsiveEnhancedTable></YdLoadingOverlay>
-    <YdPagination v-model:page="model.versionPager.page" v-model:size="model.versionPager.size" :total="model.versionPager.total" class="mt-3" @page-change="model.loadVersions" @size-change="model.applyVersionFilters" />
+    </template>
+    <template #footer>
+      <YdPagination v-model:page="model.versionPager.page" v-model:size="model.versionPager.size" :total="model.versionPager.total" @page-change="model.loadVersions" @size-change="model.applyVersionFilters" />
+    </template>
+  </YdTablePageLayout>
+
+
     <JobLogModal v-model="logOpen" :job="selectedJob" :api="model.api" />
   </YdPageMain>
 </template>

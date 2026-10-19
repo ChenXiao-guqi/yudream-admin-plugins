@@ -224,7 +224,7 @@ onMounted(() => {
 		</YdButton>
 	</YdPageHeader>
 	<YdPageMain>
-		<YdLoadingOverlay :loading="loading"><YdResponsiveTable
+		<YdLoadingOverlay :loading="loading"><YdResponsiveTable 
 			:columns="columns"
 			:data="records"
 			row-key="id"
@@ -287,7 +287,7 @@ onMounted(() => {
 					</YdButton>
 				</div>
 			</template>
-
+		
 		<template #card="{ row }">
 			<YdCard class="w-full">
 				<div class="flex flex-col gap-3">

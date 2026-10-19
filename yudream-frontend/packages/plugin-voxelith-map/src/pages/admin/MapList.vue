@@ -3,7 +3,7 @@ import type { FileItem, FileUploadRequestOptions, TableColumn, ActionMenuItem } 
 import type { ClientJarEntry } from '../../types'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
-import { YdButton, YdFileUpload, YdIcon, YdInput, YdModal, YdNumberField, YdPageHeader, YdPageMain, YdPagination, YdProgress, YdSearchBar, YdSelect, YdSwitch, YdTag, useYdModal, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
+import { YdButton, YdFileUpload, YdIcon, YdInput, YdModal, YdNumberField, YdPageMain, YdPagination, YdProgress, YdSearchBar, YdSelect, YdSwitch, YdTag, useYdModal, useYdToast, YdResponsiveEnhancedTable, YdTablePageLayout } from '@yudream/components'
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import {
@@ -683,8 +683,11 @@ const rowActions: ActionMenuItem<unknown>[] = [
 </script>
 
 <template>
-  <YdPageHeader title="Voxelith 地图管理" class="mb-0">
-    <div class="flex gap-2">
+
+  <YdPageMain>
+    <YdTablePageLayout title="Voxelith 地图管理" :show-search="false">
+    <template #actions>
+      <div class="flex gap-2">
       <YdButton size="sm" variant="outline" @click="openJarLibrary">
         <YdIcon name="i-mdi:upload" />
         客户端 jar
@@ -708,10 +711,9 @@ const rowActions: ActionMenuItem<unknown>[] = [
         新建地图
       </YdButton>
     </div>
-  </YdPageHeader>
-
-  <YdPageMain>
-    <YdResponsiveEnhancedTable
+    </template>
+    <template #table>
+<YdResponsiveEnhancedTable
       :actions="rowActions"
 
       row-key="id"
@@ -789,13 +791,18 @@ const rowActions: ActionMenuItem<unknown>[] = [
         <span class="text-muted-foreground">{{ emptyText }}</span>
       </template>
 </YdResponsiveEnhancedTable>
-
-    <YdPagination
+    </template>
+    <template #footer>
+      <YdPagination
       v-model:page="page"
       v-model:size="pageSize"
       :total="filteredGroups.length"
-      class="mt-3"
     />
+    </template>
+  </YdTablePageLayout>
+
+
+
 
     <YdModal v-model="model.createOpen.value" title="新建地图">
       <div class="grid gap-4">

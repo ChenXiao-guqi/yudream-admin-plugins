@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, YdTablePageLayout } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { BundleDoc } from '../types'
-import { YdAction, YdButton, YdIcon, YdFilePicker, YdInput, YdPageHeader, YdPageMain, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
+import { YdAction, YdButton, YdIcon, YdFilePicker, YdInput, YdPageMain, useYdToast, YdResponsiveEnhancedTable } from '@yudream/components'
 import type { TableColumn, YdFilePickerInstance, ActionMenuItem } from '@yudream/components'
 import { onMounted, reactive, ref } from 'vue'
 import { useYmclAdapter } from '../composables/useYmclAdapter'
@@ -71,7 +71,6 @@ const rowActions: ActionMenuItem<BundleDoc>[] = [
 
 <template>
   <div class="ymcl-page">
-    <YdPageHeader title="扩展页面包" description="给 YMCL 启动器下发的自定义页面 zip（ESM 入口 + ymcl-bundle.json）。版本不可变，重复上传同版本会返回冲突。" />
 
     <YdPageMain>
       <div class="ymcl-bundle-grid">
@@ -114,7 +113,9 @@ const rowActions: ActionMenuItem<BundleDoc>[] = [
         </YdCard>
 
         <YdCard title="已注册包" description="启动器按 manifest 中的 sha256 校验后加载" content-class="ymcl-card-content ymcl-card-content--wide">
-          <YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable
+          <YdTablePageLayout title="扩展页面包" :show-search="false">
+    <template #table>
+<YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable
               :actions="rowActions"
 
             table-root-class="max-w-full overflow-x-auto rounded-lg overflow-hidden"
@@ -138,6 +139,9 @@ const rowActions: ActionMenuItem<BundleDoc>[] = [
               {{ formatTime(row.original.uploadedAt) }}
             </template>
 </YdResponsiveEnhancedTable></YdLoadingOverlay>
+    </template>
+  </YdTablePageLayout>
+
         </YdCard>
       </div>
     </YdPageMain>

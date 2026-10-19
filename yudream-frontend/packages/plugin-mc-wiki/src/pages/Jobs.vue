@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, YdTablePageLayout } from '@yudream/components'
 import type { ActionMenuItem, StatusColumn, TableColumn } from '@yudream/components'
 import type { McWikiPluginModel } from '../composables/useMcWikiPlugin'
 import type { WikiJob } from '../types'
@@ -74,11 +74,13 @@ onMounted(() => props.model.loadJobs())
 </script>
 
 <template>
-  <YdPageHeader title="导入任务" description="查看版本导入进度、诊断日志与历史任务">
-    <YdButton variant="outline" :loading="model.loading" @click="model.loadJobs"><YdIcon name="i-ri:refresh-line" />刷新</YdButton>
-  </YdPageHeader>
   <YdPageMain>
-    <YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable
+    <YdTablePageLayout title="导入任务" :show-search="false">
+    <template #actions>
+      <YdButton variant="outline" :loading="model.loading" @click="model.loadJobs"><YdIcon name="i-ri:refresh-line" />刷新</YdButton>
+    </template>
+    <template #table>
+<YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable
       :columns="columns"
       :data="model.jobs"
       row-key="jobId"
@@ -99,7 +101,13 @@ onMounted(() => props.model.loadJobs())
       </template>
       <template #cell-updatedAt="{ row }">{{ formatTime(row.original.updatedAt) }}</template>
     </YdResponsiveEnhancedTable></YdLoadingOverlay>
-    <YdPagination v-model:page="model.jobPager.page" v-model:size="model.jobPager.size" :total="model.jobPager.total" class="mt-3" @page-change="model.loadJobs" @size-change="model.loadJobs" />
+    </template>
+    <template #footer>
+      <YdPagination v-model:page="model.jobPager.page" v-model:size="model.jobPager.size" :total="model.jobPager.total" @page-change="model.loadJobs" @size-change="model.loadJobs" />
+    </template>
+  </YdTablePageLayout>
+
+
     <JobLogModal v-model="logOpen" :job="selectedJob" :api="model.api" />
   </YdPageMain>
 </template>

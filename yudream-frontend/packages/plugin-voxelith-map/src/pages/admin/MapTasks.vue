@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
-import { YdButton, YdDrawer, YdIcon, YdPageHeader, YdPageMain, YdPagination, YdProgress, YdSelect, YdTag, useYdToast, YdResponsiveEnhancedTable, type ActionMenuItem } from '@yudream/components'
+import { YdButton, YdDrawer, YdIcon, YdPageMain, YdPagination, YdProgress, YdSelect, YdTag, useYdToast, YdResponsiveEnhancedTable, type ActionMenuItem, YdTablePageLayout } from '@yudream/components'
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import {
@@ -179,12 +179,6 @@ const rowActions: ActionMenuItem<unknown>[] = [
 </script>
 
 <template>
-  <YdPageHeader title="任务中心" class="mb-0">
-    <YdButton size="sm" variant="outline" :loading="model.loading.value" @click="model.loadMaps()">
-      <YdIcon name="i-mdi:refresh" />
-      刷新
-    </YdButton>
-  </YdPageHeader>
 
   <YdPageMain>
     <YdCard class="mb-3 p-3">
@@ -194,7 +188,15 @@ const rowActions: ActionMenuItem<unknown>[] = [
       </p>
     </YdCard>
 
-    <YdResponsiveEnhancedTable
+    <YdTablePageLayout title="任务中心" :show-search="false">
+    <template #actions>
+      <YdButton size="sm" variant="outline" :loading="model.loading.value" @click="model.loadMaps()">
+      <YdIcon name="i-mdi:refresh" />
+      刷新
+    </YdButton>
+    </template>
+    <template #table>
+<YdResponsiveEnhancedTable
       :actions="rowActions"
 
       row-key="id"
@@ -261,14 +263,19 @@ const rowActions: ActionMenuItem<unknown>[] = [
 
 
 </YdResponsiveEnhancedTable>
-
-    <YdPagination
+    </template>
+    <template #footer>
+      <YdPagination
       v-if="filteredTasks.length > pageSize"
       v-model:page="page"
       v-model:size="pageSize"
       :total="filteredTasks.length"
-      class="mt-3"
     />
+    </template>
+  </YdTablePageLayout>
+
+
+
 
     <!-- 日志抽屉 -->
     <YdDrawer

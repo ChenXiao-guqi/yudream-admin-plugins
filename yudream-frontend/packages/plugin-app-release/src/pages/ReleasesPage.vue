@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, YdTablePageLayout } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { TableColumn, ActionMenuItem, StatusColumn } from '@yudream/components'
 import type { AppReleaseSettingsView, AppReleaseView } from '../types'
@@ -217,16 +217,6 @@ onMounted(load)
 
 <template>
   <YdPageMain>
-    <YdPageHeader title="更新发布" description="YDAM 更新包发布、更新日志与强制更新管理">
-      <div class="app-release-toolbar">
-        <span class="text-sm text-secondary-foreground/60">
-          最新 versionCode {{ latestVersionCode }} · 强制更新线 {{ settings?.minVersionCode ?? 0 }}
-        </span>
-        <YdButton @click="openUpload">
-          <YdIcon name="i-ri:upload-2-line" />发布新版本
-        </YdButton>
-      </div>
-    </YdPageHeader>
 
     <YdCard class="mb-4">
       <div class="app-release-toolbar">
@@ -241,7 +231,19 @@ onMounted(load)
       </div>
     </YdCard>
 
-    <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+    <YdTablePageLayout title="更新发布" :show-search="false">
+    <template #actions>
+      <div class="app-release-toolbar">
+        <span class="text-sm text-secondary-foreground/60">
+          最新 versionCode {{ latestVersionCode }} · 强制更新线 {{ settings?.minVersionCode ?? 0 }}
+        </span>
+        <YdButton @click="openUpload">
+          <YdIcon name="i-ri:upload-2-line" />发布新版本
+        </YdButton>
+      </div>
+    </template>
+    <template #table>
+<YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
       :columns="columns"
       :data="rows"
       row-key="id"
@@ -270,6 +272,9 @@ onMounted(load)
         <span v-else class="app-release-subtitle">未填写</span>
       </template>
     </YdResponsiveEnhancedTable></YdLoadingOverlay>
+    </template>
+  </YdTablePageLayout>
+
 
     <YdModal v-model="uploadOpen" title="发布新版本" class="sm:max-w-[560px]" :close-on-click-overlay="false">
       <div class="flex flex-col gap-4">

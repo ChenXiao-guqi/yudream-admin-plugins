@@ -94,7 +94,7 @@ onMounted(() => {
     </YdSearchBar>
 
     <YdLoadingOverlay :loading="model.loading"><YdResponsiveTable
-
+      
       :columns="columns"
       :data="model.packs"
       row-key="id"
@@ -196,8 +196,8 @@ onMounted(() => {
 
     <YdModal v-model="detailOpen" title="版本历史" class="sm:max-w-4xl" :show-confirm-button="false" show-cancel-button>
       <YdLoadingOverlay :loading="model.loading" v-if="model.packDetail"><YdResponsiveTable
-
-
+        
+        
         :columns="versionColumns"
         :data="model.packDetail.versions"
         row-key="versionId"

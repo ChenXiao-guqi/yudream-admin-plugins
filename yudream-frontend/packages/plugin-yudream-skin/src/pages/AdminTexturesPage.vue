@@ -3,7 +3,7 @@ import type { FileItem, FileUploadRequestOptions, TableColumn, ActionMenuItem } 
 import type { SkinTexture } from '../types'
 import type { SkinPluginModel } from '../composables/useSkinPlugin'
 import { computed, reactive, ref, watch } from 'vue'
-import { useYdModal, YdButton, YdFileUpload, YdIcon, YdInput, YdLabel, YdModal, YdPageHeader, YdPageMain, YdPagination, YdSelect, YdSwitch, YdTag, YdResponsiveEnhancedTable, YdListToolbar } from '@yudream/components'
+import { useYdModal, YdButton, YdFileUpload, YdIcon, YdInput, YdLabel, YdModal, YdPageMain, YdPagination, YdSelect, YdSwitch, YdTag, YdResponsiveEnhancedTable, YdListToolbar, YdTablePageLayout } from '@yudream/components'
 import SkinTexturePreview from '../components/SkinTexturePreview.vue'
 
 const props = defineProps<{
@@ -206,7 +206,7 @@ const rowActions: ActionMenuItem<SkinTexture>[] = [
 
 <template>
 
-  <YdPageHeader title="材质管理" class="mb-0" />  <YdPageMain><div class="skin-admin-table-page">
+  <YdPageMain><div class="skin-admin-table-page">
     <YdListToolbar
       v-model:keyword="search.keyword"
       placeholder="名称 / Hash / 上传人"
@@ -241,7 +241,9 @@ const rowActions: ActionMenuItem<SkinTexture>[] = [
       </template>
     </YdListToolbar>
 
-    <YdResponsiveEnhancedTable
+            <YdTablePageLayout title="材质管理" :show-search="false">
+            <template #table>
+<YdResponsiveEnhancedTable
       :actions="rowActions"
       row-key="hash"
       table-root-class="skin-admin-texture-table-root rounded-lg overflow-hidden"
@@ -286,15 +288,19 @@ const rowActions: ActionMenuItem<SkinTexture>[] = [
       </template>
       
 </YdResponsiveEnhancedTable>
-
-    <YdPagination
+            </template>
+            <template #footer>
+      <YdPagination
       v-model:page="pagination.page"
       v-model:size="pagination.size"
       :total="filteredRows.length"
-      class="mt-3"
       @page-change="onPageChange"
       @size-change="onSizeChange"
     />
+            </template>
+          </YdTablePageLayout>
+
+
 
     <YdModal
       v-model="editVisible"
