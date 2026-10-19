@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, YdTablePageLayout } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { ActivityProofMapping } from '../types'
-import { YdButton, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdSelect, YdResponsiveEnhancedTable } from '@yudream/components'
+import { YdButton, YdIcon, YdInput, YdPageMain, YdPagination, YdSelect, YdResponsiveEnhancedTable } from '@yudream/components'
 import { computed, onMounted } from 'vue'
 import { useMappings } from '../composables/useMappings'
 import { formatTime } from '../composables/utils'
@@ -34,11 +34,6 @@ const rowActions: ActionMenuItem<unknown>[] = [
 </script>
 
 <template>
-  <YdPageHeader title="玩家学号映射" class="mb-0">
-    <YdButton variant="outline" :loading="loading" @click="model.load">
-      <YdIcon name="i-ri:refresh-line" />刷新
-    </YdButton>
-  </YdPageHeader>
   <YdPageMain>
     <div v-if="!loading && !minecraftReady" class="grid gap-2 rounded-lg border border-dashed p-8 text-center text-muted-foreground">
       <YdIcon name="i-ri:server-line" class="mx-auto text-3xl" />
@@ -67,7 +62,14 @@ const rowActions: ActionMenuItem<unknown>[] = [
         </YdButton>
       </form>
       <div class="proof-min-w-0">
-      <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+      <YdTablePageLayout title="玩家学号映射" :show-search="false">
+    <template #actions>
+      <YdButton variant="outline" :loading="loading" @click="model.load">
+      <YdIcon name="i-ri:refresh-line" />刷新
+    </YdButton>
+    </template>
+    <template #table>
+<YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
           :actions="rowActions"
         
         
@@ -86,15 +88,20 @@ const rowActions: ActionMenuItem<unknown>[] = [
         </template>
         <template #cell-createdAt="{ row }">{{ formatTime(row.original.createdAt) }}</template>
 </YdResponsiveEnhancedTable></YdLoadingOverlay>
-      </div>
+    </template>
+    <template #footer>
       <YdPagination
         v-model:page="pager.page"
         v-model:size="pager.size"
         :total="pager.total"
-        class="mt-3"
         @page-change="model.loadMappings"
         @size-change="model.loadMappings"
       />
+    </template>
+  </YdTablePageLayout>
+
+      </div>
+
     </div></YdLoadingOverlay>
   </YdPageMain>
 </template>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, YdTablePageLayout } from '@yudream/components'
 import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { QuestionBankPluginModel } from '../composables/useQuestionBankPlugin'
 import type { SessionQuestionView, SessionSummary } from '../types'
@@ -66,9 +66,10 @@ const rowActions: ActionMenuItem<unknown>[] = [
 </script>
 
 <template>
-  <YdPageHeader title="简答审核" description="人工审核题单的简答题作答，判定对错后计入成绩" />
   <YdPageMain>
-    <YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable
+    <YdTablePageLayout title="简答审核" :show-search="false">
+    <template #table>
+<YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable
         :actions="rowActions"
 
       
@@ -96,14 +97,19 @@ const rowActions: ActionMenuItem<unknown>[] = [
       </template>
       <template #cell-submittedAt="{ row }">{{ formatTime(row.original.submittedAt) }}</template>
 </YdResponsiveEnhancedTable></YdLoadingOverlay>
-    <YdPagination
+    </template>
+    <template #footer>
+      <YdPagination
       v-model:page="model.reviewPager.page"
       v-model:size="model.reviewPager.size"
       :total="model.reviewPager.total"
-      class="mt-3"
       @page-change="model.loadReviewQueue"
       @size-change="model.applyReviewFilters"
     />
+    </template>
+  </YdTablePageLayout>
+
+
     <YdDrawer v-model="drawerOpen" title="简答审核" size="720px" @close="closeDrawer">
       <YdLoadingOverlay :loading="model.reviewSessionLoading"><div  class="flex flex-col gap-4">
         <template v-if="model.reviewSession">

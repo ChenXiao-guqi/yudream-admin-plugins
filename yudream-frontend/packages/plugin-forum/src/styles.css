@@ -80,3 +80,23 @@
 .forum-markdown { min-width: 0; }
 @media (max-width: 1100px) { .forum-layout { grid-template-columns: 170px minmax(0, 1fr); } .forum-sidebar--right { grid-column: 1 / -1; grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 760px) { .forum-layout { grid-template-columns: 1fr; } .forum-sidebar--left { display: flex; overflow-x: auto; gap: .5rem; } .forum-sidebar--left .forum-sidebar-section { display: flex; align-items: center; gap: .35rem; padding: .45rem; white-space: nowrap; } .forum-sidebar--left .forum-sidebar-heading { margin: 0 .25rem 0 0; } .forum-sidebar--left .forum-nav-item { width: auto; } .forum-sidebar--right { grid-template-columns: 1fr; } .forum-post-card { grid-template-columns: 34px minmax(0, 1fr); } .forum-post-card__stats { grid-column: 2; justify-content: flex-start; } .forum-feed-header { align-items: flex-start; flex-direction: column; } .forum-searchbar { flex-wrap: wrap; } }
+
+/*
+ * 设置类页面外壳（对齐宿主 .settings-page-shell）：固定为「可视高度 - 布局占位」，
+ * 白底铺满，页头与分区导航固定在壳内，只有内容区滚动（YdSettingsLayout scroll 模式）。
+ */
+.forum-settings-shell {
+  display: flex;
+  flex-direction: column;
+  height: calc(
+    100dvh
+    - var(--g-slots-layout-top-height, 0px)
+    - var(--g-header-actual-height, 0px)
+    - var(--g-topbar-actual-height, 0px)
+    - var(--g-slots-layout-bottom-height, 0px)
+    - var(--g-main-container-padding-top, 0px)
+    - var(--g-main-container-padding-bottom, 0px)
+  );
+  overflow: hidden;
+  background-color: oklch(var(--card));
+}

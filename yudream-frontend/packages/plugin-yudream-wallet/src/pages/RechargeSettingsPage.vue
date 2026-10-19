@@ -2,7 +2,8 @@
 import type { TableColumn } from '@yudream/components'
 import type { WalletPluginModel } from '../composables/useWalletPlugin'
 import type { RechargeRuleForm } from '../types'
-import { YdButton, YdCard, YdIcon, YdInput, YdPageHeader, YdPageMain, YdSwitch, YdResponsiveTable } from '@yudream/components'
+import { ref } from 'vue'
+import { YdButton, YdCard, YdIcon, YdInput, YdPageHeader, YdSwitch, YdResponsiveTable, YdSettingsLayout, YdSettingsSection } from '@yudream/components'
 
 defineProps<{ model: WalletPluginModel }>()
 
@@ -13,6 +14,11 @@ const columns: TableColumn<RechargeRuleForm>[] = [
   { id: 'minPayAmount', header: '最低支付', width: 150 },
   { id: 'maxPayAmount', header: '最高支付', width: 150 },
 ]
+/** 设置页分区：单分区页保持统一骨架 */
+const activeSection = ref('main')
+const sectionList: { icon?: string, label: string, value: string }[] = [
+  { label: "充值配置", value: 'main' },
+]
 </script>
 
 <template>
@@ -21,7 +27,25 @@ const columns: TableColumn<RechargeRuleForm>[] = [
       <YdIcon name="morph:save" />保存充值配置
     </YdButton>
   </YdPageHeader>
-  <YdPageMain>
+  <div class="wallet-recharge-settings-shell">
+<YdPageHeader title="充值配置" class="mb-0">
+    <YdButton :loading="model.saving" @click="model.saveRechargeSettings">
+      <YdIcon name="morph:save" />保存充值配置
+    </YdButton>
+  </YdPageHeader>
+  <YdSettingsLayout
+    v-model="activeSection"
+    :list="sectionList"
+    surface
+    scroll
+    width-class="max-w-[880px]"
+  >
+    <template #main>
+      <YdSettingsSection
+        title="充值配置"
+        description="充值开关与各币种汇率规则。"
+      >
+
     <div class="flex flex-col gap-4">
       <div class="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-4">
         <div class="grid gap-1">
@@ -71,5 +95,9 @@ const columns: TableColumn<RechargeRuleForm>[] = [
         </template>
       </YdResponsiveTable>
     </div>
-  </YdPageMain>
+      </YdSettingsSection>
+    </template>
+  </YdSettingsLayout>
+</div>
+
 </template>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, YdTablePageLayout } from '@yudream/components'
 import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { QuestionBankPluginModel } from '../composables/useQuestionBankPlugin'
 import type { SessionSummary } from '../types'
@@ -123,9 +123,10 @@ const rowActions: ActionMenuItem<unknown>[] = [
 </script>
 
 <template>
-  <YdPageHeader title="练习记录" description="跨用户查看全部抽题练习与作答结果" />
   <YdPageMain>
-    <YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable
+    <YdTablePageLayout title="练习记录" :show-search="false">
+    <template #table>
+<YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable
         :actions="rowActions"
 
       
@@ -158,14 +159,19 @@ const rowActions: ActionMenuItem<unknown>[] = [
       <template #cell-createdAt="{ row }">{{ formatTime(row.original.createdAt) }}</template>
       <template #cell-submittedAt="{ row }">{{ formatTime(row.original.submittedAt) }}</template>
 </YdResponsiveEnhancedTable></YdLoadingOverlay>
-    <YdPagination
+    </template>
+    <template #footer>
+      <YdPagination
       v-model:page="model.adminRecordsPager.page"
       v-model:size="model.adminRecordsPager.size"
       :total="model.adminRecordsPager.total"
-      class="mt-3"
       @page-change="model.loadAdminRecords"
       @size-change="model.applyAdminRecordsFilters"
     />
+    </template>
+  </YdTablePageLayout>
+
+
     <YdDrawer v-model="detailOpen" title="练习详情" size="720px">
       <YdLoadingOverlay :loading="detailLoading"><div  class="flex flex-col gap-4">
         <template v-if="detail">

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, YdSettingsLayout } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { YdAlert, YdButton, YdCard, YdInput, YdModal, YdPageHeader, YdPageMain, YdSelect, YdSwitch, YdTag, YdTextarea, useYdToast } from '@yudream/components'
+import { YdAlert, YdButton, YdCard, YdInput, YdModal, YdPageHeader, YdSelect, YdSwitch, YdTag, YdTextarea, useYdToast } from '@yudream/components'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createMcPanelExtra } from '../../api/api-extra'
@@ -329,9 +329,15 @@ onMounted(() => {
     void loadPorts()
   })
 })
+
+const activeSection = ref('main')
+const sectionList: { icon?: string, label: string, value: string }[] = [
+  { label: '实例设置', value: 'main' },
+]
 </script>
 
 <template>
+  <div class="mcp-settings-shell">
   <YdPageHeader :title="`实例设置 · ${instance?.name || instanceId}`" description="启动命令、环境变量、RCON / Ping、终端展示（对标 MCSM 实例设置）">
     <YdButton variant="outline" @click="router.push(`/platform/plugins/mcpanel/admin/instances/${instanceId}`)">
       返回终端
@@ -340,7 +346,15 @@ onMounted(() => {
       保存设置
     </YdButton>
   </YdPageHeader>
-  <YdLoadingOverlay :loading="loading"><YdPageMain >
+  <YdLoadingOverlay :loading="loading">
+  <YdSettingsLayout
+    v-model="activeSection"
+    :list="sectionList"
+    surface
+    scroll
+    width-class="max-w-[960px]"
+  >
+    <template #main>
     <YdAlert v-if="error" variant="destructive" class="mb-4">
   <template #description>
       {{ error }}
@@ -513,7 +527,10 @@ onMounted(() => {
         </div>
       </YdCard>
     </div>
-  </YdPageMain></YdLoadingOverlay>
+      </template>
+  </YdSettingsLayout>
+  </YdLoadingOverlay>
+  </div>
   <YdModal
     v-model="removeOpen"
     title="回收端口"

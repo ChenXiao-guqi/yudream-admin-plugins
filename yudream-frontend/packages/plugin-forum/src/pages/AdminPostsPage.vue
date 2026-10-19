@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, YdTablePageLayout } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import { YdButton, YdPageHeader, YdPageMain, YdPagination, YdResponsiveEnhancedTable, YdSelect, useYdToast, type ActionMenuItem, type StatusColumn } from '@yudream/components'
 import { onMounted, ref } from 'vue'
@@ -33,4 +33,17 @@ async function moderate(id:string,state:'published'|'rejected'|'archived'){try{a
 async function flag(id:string,key:'pinned'|'featured'){try{const post=rows.value.find(item=>item.id===id);await api.flags(id,{[key]:!post?.[key]});await load()}catch(e){toast.error(e instanceof Error?e.message:'操作失败')}}
 onMounted(load)
 </script>
-<template><div class="forum-page"><YdPageHeader title="帖子审核" description="审核帖子并维护置顶、精华状态"/><YdPageMain><YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable row-key="id" :columns="columns" :data="rows" border stripe column-visibility :status-column="postStatusColumn" :actions="rowActions" table-root-class="rounded-lg overflow-hidden" table-class="min-w-[760px]" empty-text="暂无帖子"><template #toolbar><div class="forum-toolbar"><YdSelect v-model="status" class="forum-select" :options="[{label:'待审核',value:'pending'},{label:'已发布',value:'published'},{label:'已拒绝',value:'rejected'},{label:'全部',value:''}]" @update:model-value="page=1;load()"/></div></template></YdResponsiveEnhancedTable></YdLoadingOverlay><YdPagination v-model:page="page" v-model:size="size" :total="total" class="mt-3" @page-change="load" @size-change="page = 1; load()"/></YdPageMain></div></template>
+<template><div class="forum-page"><YdPageMain>        <YdTablePageLayout title="帖子审核">
+            <template #search>
+              <div class="flex flex-wrap items-center gap-2">
+                <div class="forum-toolbar"><YdSelect v-model="status" class="forum-select" :options="[{label:'待审核',value:'pending'},{label:'已发布',value:'published'},{label:'已拒绝',value:'rejected'},{label:'全部',value:''}]" @update:model-value="page=1;load()"/></div>
+              </div>
+            </template>
+            <template #table>
+<YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable row-key="id" :columns="columns" :data="rows" border stripe column-visibility :status-column="postStatusColumn" :actions="rowActions" table-root-class="rounded-lg overflow-hidden" table-class="min-w-[760px]" empty-text="暂无帖子"></YdResponsiveEnhancedTable></YdLoadingOverlay>
+            </template>
+            <template #footer>
+      <YdPagination v-model:page="page" v-model:size="size" :total="total" @page-change="load" @size-change="page = 1; load()"/>
+            </template>
+          </YdTablePageLayout>
+</YdPageMain></div></template>

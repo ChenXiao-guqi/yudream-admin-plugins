@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, YdSettingsLayout, YdSettingsSection } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { YdButton, YdIcon, YdInput, YdPageHeader, YdPageMain, YdSelect, YdSwitch, YdTextarea, YdTablePicker, YdMultiSelect } from '@yudream/components'
+import { YdButton, YdIcon, YdInput, YdPageHeader, YdSelect, YdSwitch, YdTextarea, YdTablePicker, YdMultiSelect } from '@yudream/components'
 import { computed, onMounted, ref } from 'vue'
 import { useProofSettings } from '../composables/useProofSettings'
 import { userPickerColumns } from '../composables/user-picker'
@@ -54,15 +54,38 @@ function addExtraGroup() {
 }
 
 onMounted(model.load)
+/** 设置页分区：单分区页保持统一骨架 */
+const activeSection = ref('main')
+const sectionList: { icon?: string, label: string, value: string }[] = [
+  { label: "活动设置", value: 'main' },
+]
 </script>
 
 <template>
-  <YdPageHeader title="活动证明配置" class="mb-0">
+  <YdPageHeader title="活动设置" class="mb-0">
     <YdButton variant="outline" :disabled="!wordTemplateReady" @click="model.reloadTemplates">
       <YdIcon name="i-ri:refresh-line" />刷新模板
     </YdButton>
   </YdPageHeader>
-  <YdPageMain>
+  <div class="map-activity-settings-shell">
+<YdPageHeader title="活动设置" class="mb-0">
+    <YdButton variant="outline" :disabled="!wordTemplateReady" @click="model.reloadTemplates">
+      <YdIcon name="i-ri:refresh-line" />刷新模板
+    </YdButton>
+  </YdPageHeader>
+  <YdSettingsLayout
+    v-model="activeSection"
+    :list="sectionList"
+    surface
+    scroll
+    width-class="max-w-[880px]"
+  >
+    <template #main>
+      <YdSettingsSection
+        title="活动设置"
+        description="活动报名与核验的基础配置。"
+      >
+
     <YdLoadingOverlay :loading="loading"><div >
       <div v-if="!loading && !wordTemplateReady" class="mb-4 grid gap-2 rounded-lg border border-dashed p-6 text-center text-muted-foreground">
         <YdIcon name="i-ri:file-word-2-line" class="mx-auto text-3xl" />
@@ -151,5 +174,9 @@ onMounted(model.load)
         </div>
       </form>
     </div></YdLoadingOverlay>
-  </YdPageMain>
+      </YdSettingsSection>
+    </template>
+  </YdSettingsLayout>
+</div>
+
 </template>

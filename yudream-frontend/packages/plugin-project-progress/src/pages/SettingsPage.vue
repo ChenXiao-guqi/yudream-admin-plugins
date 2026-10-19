@@ -1,18 +1,38 @@
 <script setup lang="ts">
 // yudream-self-chrome 页面自管页头与卡片
 import type { ProjectProgressModel } from '../composables/useProjectProgress'
-import { YdButton, YdPageHeader, YdPageMain } from '@yudream/components'
+import { ref } from 'vue'
+import { YdButton, YdPageHeader, YdSettingsLayout, YdSettingsSection } from '@yudream/components'
 import ProgressPanel from '../components/ProgressPanel.vue'
 
 defineProps<{
   model: ProjectProgressModel
 }>()
+/** 设置页分区：单分区页保持统一骨架 */
+const activeSection = ref('main')
+const sectionList: { icon?: string, label: string, value: string }[] = [
+  { label: "联动状态", value: 'main' },
+]
 </script>
 
 <template>
 
-  <YdPageHeader title="插件设置" class="mb-0" />
-  <YdPageMain>  <section class="pp-page">
+  <YdPageHeader title="插件设置" class="mb-0"></YdPageHeader>
+  <div class="pp-settings-shell">
+<YdPageHeader title="插件设置" class="mb-0"></YdPageHeader>
+  <YdSettingsLayout
+    v-model="activeSection"
+    :list="sectionList"
+    surface
+    scroll
+    width-class="max-w-[880px]"
+  >
+    <template #main>
+      <YdSettingsSection
+        title="联动状态"
+        description="插件依赖能力的可用性状态。"
+      >
+  <section class="pp-page">
     <section class="pp-toolbar">
       <div>
         <span>联动状态</span>
@@ -34,5 +54,9 @@ defineProps<{
       </div>
     </ProgressPanel>
   </section>
-</YdPageMain>
+      </YdSettingsSection>
+    </template>
+  </YdSettingsLayout>
+</div>
+
 </template>

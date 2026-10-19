@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, YdTablePageLayout } from '@yudream/components'
 import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { QuestionBankPluginModel } from '../composables/useQuestionBankPlugin'
 import type { PaperView } from '../types'
@@ -104,11 +104,13 @@ const rowActions: ActionMenuItem<unknown>[] = [
 </script>
 
 <template>
-  <YdPageHeader title="题单管理" description="按规则随机抽题或手动固定选题，发布给用户作答，并可打印纸质试卷">
-    <YdButton @click="openCreate"><YdIcon name="i-ri:add-line" />新建题单</YdButton>
-  </YdPageHeader>
   <YdPageMain>
-    <YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable
+    <YdTablePageLayout title="题单管理" :show-search="false">
+    <template #actions>
+      <YdButton @click="openCreate"><YdIcon name="i-ri:add-line" />新建题单</YdButton>
+    </template>
+    <template #table>
+<YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable
         :actions="rowActions"
 
       
@@ -141,13 +143,18 @@ const rowActions: ActionMenuItem<unknown>[] = [
       </template>
       <template #cell-updatedAt="{ row }">{{ formatTime(row.original.updatedAt) }}</template>
 </YdResponsiveEnhancedTable></YdLoadingOverlay>
-    <YdPagination
+    </template>
+    <template #footer>
+      <YdPagination
       v-model:page="model.adminPapersPager.page"
       v-model:size="model.adminPapersPager.size"
       :total="model.adminPapersPager.total"
-      class="mt-3"
       @page-change="model.loadAdminPapers"
       @size-change="model.applyAdminPapersFilters"
     />
+    </template>
+  </YdTablePageLayout>
+
+
   </YdPageMain>
 </template>

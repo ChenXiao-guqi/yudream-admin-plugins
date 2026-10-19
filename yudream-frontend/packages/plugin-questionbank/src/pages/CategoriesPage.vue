@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, YdTablePageLayout } from '@yudream/components'
 import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { QuestionBankPluginModel } from '../composables/useQuestionBankPlugin'
 import type { CategoryView } from '../types'
@@ -112,16 +112,18 @@ const rowActions: ActionMenuItem<unknown>[] = [
 </script>
 
 <template>
-  <YdPageHeader title="题目分类" description="分类对所有题目共享；勾选多个分类可合并为一个，删除前需移出其中题目">
-    <YdButton variant="outline" :disabled="selectedRows.length < 2" @click="openMerge">
-      <YdIcon name="i-ri:merge-cells-horizontal" />合并所选<template v-if="selectedRows.length >= 2">（{{ selectedRows.length }}）</template>
-    </YdButton>
-    <YdButton @click="openCreate"><YdIcon name="i-ri:add-line" />新建分类</YdButton>
-  </YdPageHeader>
   <YdPageMain>
     
     
-      <YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable
+      <YdTablePageLayout title="题目分类" :show-search="false">
+    <template #actions>
+      <YdButton variant="outline" :disabled="selectedRows.length < 2" @click="openMerge">
+      <YdIcon name="i-ri:merge-cells-horizontal" />合并所选<template v-if="selectedRows.length >= 2">（{{ selectedRows.length }}）</template>
+    </YdButton>
+    <YdButton @click="openCreate"><YdIcon name="i-ri:add-line" />新建分类</YdButton>
+    </template>
+    <template #table>
+<YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable
         :actions="rowActions"
  v-model:row-selection="rowSelection"
         
@@ -141,6 +143,9 @@ const rowActions: ActionMenuItem<unknown>[] = [
             <YdCard class="w-full"><div class="qb-mobile-card"><div class="qb-mobile-card-head"><YdCheckbox :model-value="selected" :disabled="selectDisabled" @change="value => toggleSelected(value === true)" /><div class="qb-mobile-card-title">{{ row.name }}</div></div><div class="qb-mobile-card-meta"><span>排序 {{ row.sort }}</span><span>{{ row.questionCount }} 道题</span><span>{{ formatTime(row.createdAt) }}</span></div><div class="qb-mobile-card-actions"><YdButton size="sm" variant="outline" @click="openEdit(row)">编辑</YdButton><YdButton size="sm" variant="destructive" @click="confirmDelete(row)">删除</YdButton></div></div></YdCard>
           </template>
           </YdResponsiveEnhancedTable></YdLoadingOverlay>
+    </template>
+  </YdTablePageLayout>
+
     
     
     <YdModal v-model="editOpen" :title="editTarget ? '编辑分类' : '新建分类'" :confirm-button-loading="saving" @confirm="submit">

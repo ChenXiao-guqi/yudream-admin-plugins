@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, YdTablePageLayout } from '@yudream/components'
 import type { TableColumn, YdFilePickerInstance, ActionMenuItem } from '@yudream/components'
 import type { QuestionBankPluginModel } from '../composables/useQuestionBankPlugin'
 import type { ImportResult, QuestionPayload, QuestionView } from '../types'
@@ -306,13 +306,6 @@ const rowActions: ActionMenuItem<unknown>[] = [
 </script>
 
 <template>
-  <YdPageHeader title="题目管理" description="维护题库题目：单选/多选/判断/填空/简答，支持标签、分类、导入导出">
-    <YdButton variant="outline" :disabled="importing" @click="openImport"><YdIcon name="i-ri:upload-2-line" />导入</YdButton>
-    <YdButton variant="outline" @click="openAiImport"><YdIcon name="i-ri:sparkling-line" />AI 导入</YdButton>
-    <YdButton variant="outline" :loading="exporting" @click="doExport('json')"><YdIcon name="i-ri:download-2-line" />导出 JSON{{ selectedRows.length ? `（${selectedRows.length}）` : '（全部）' }}</YdButton>
-    <YdButton variant="outline" :loading="exporting" @click="doExport('markdown')"><YdIcon name="i-ri:markdown-line" />导出 Markdown{{ selectedRows.length ? `（${selectedRows.length}）` : '（全部）' }}</YdButton>
-    <YdButton @click="openCreate"><YdIcon name="i-ri:add-line" />新建题目</YdButton>
-  </YdPageHeader>
   <YdPageMain>
     <!-- 工具栏提到表格外面：移动端卡片列表也要共用同一套筛选与批量删除 -->
     <YdSearchBar class="w-full">
@@ -330,7 +323,16 @@ const rowActions: ActionMenuItem<unknown>[] = [
     </YdSearchBar>
     
     
-      <YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable
+      <YdTablePageLayout title="题目管理" :show-search="false">
+    <template #actions>
+      <YdButton variant="outline" :disabled="importing" @click="openImport"><YdIcon name="i-ri:upload-2-line" />导入</YdButton>
+    <YdButton variant="outline" @click="openAiImport"><YdIcon name="i-ri:sparkling-line" />AI 导入</YdButton>
+    <YdButton variant="outline" :loading="exporting" @click="doExport('json')"><YdIcon name="i-ri:download-2-line" />导出 JSON{{ selectedRows.length ? `（${selectedRows.length}）` : '（全部）' }}</YdButton>
+    <YdButton variant="outline" :loading="exporting" @click="doExport('markdown')"><YdIcon name="i-ri:markdown-line" />导出 Markdown{{ selectedRows.length ? `（${selectedRows.length}）` : '（全部）' }}</YdButton>
+    <YdButton @click="openCreate"><YdIcon name="i-ri:add-line" />新建题目</YdButton>
+    </template>
+    <template #table>
+<YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable
         :actions="rowActions"
  v-model:row-selection="rowSelection"
         
@@ -372,16 +374,21 @@ const rowActions: ActionMenuItem<unknown>[] = [
             </YdCard>
           </template>
           </YdResponsiveEnhancedTable></YdLoadingOverlay>
-    
-    
-    <YdPagination
+    </template>
+    <template #footer>
+      <YdPagination
       v-model:page="model.adminPager.page"
       v-model:size="model.adminPager.size"
       :total="model.adminPager.total"
-      class="mt-3"
       @page-change="model.loadAdminQuestions"
       @size-change="model.applyAdminFilters"
     />
+    </template>
+  </YdTablePageLayout>
+
+    
+    
+
     <YdModal v-model="importOpen" title="导入题目" :show-confirm-button="false" cancel-button-text="关闭">
       <div class="flex flex-col gap-3 text-sm">
         <p class="qb-muted">

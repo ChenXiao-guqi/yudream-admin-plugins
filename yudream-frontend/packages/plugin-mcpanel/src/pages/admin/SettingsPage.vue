@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { YdLoadingOverlay, YdTablePageLayout } from '@yudream/components'
+import { YdLoadingOverlay, YdTablePageLayout, YdSettingsLayout } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { FileItem, FileUploadRequestOptions, TableColumn, ActionMenuItem } from '@yudream/components'
-import { YdAlert, YdButton, YdCard, YdCheckboxGroup, YdFileUpload, YdInput, YdModal, YdPageMain, YdRadioGroup, YdSelect, YdSwitch, YdTag, useYdModal, useYdToast } from '@yudream/components'
+import { YdAlert, YdButton, YdCard, YdCheckboxGroup, YdFileUpload, YdInput, YdModal, YdRadioGroup, YdSelect, YdSwitch, YdTag, useYdModal, useYdToast } from '@yudream/components'
 import { computed, onMounted, reactive, ref } from 'vue'
 import type { McpInjectArtifact } from '../../types'
 import { createMcPanelExtra } from '../../api/api-extra'
@@ -797,10 +797,26 @@ const rowActions: ActionMenuItem<{ index: number }>[] = [
   { label: '编辑', icon: 'morph:pencil', onClick: row => openArtifactEdit(row.index) },
   { label: '删除', icon: 'morph:trash-2', danger: true, onClick: row => removeArtifact(row.index) },
 ]
+
+/** 设置页分区：单分区保持统一骨架 */
+const activeSection = ref('main')
+const sectionList: { icon?: string, label: string, value: string }[] = [
+  { label: '设置', value: 'main' },
+]
 </script>
 
 <template>
-  <YdLoadingOverlay :loading="loading"><YdPageMain >
+  <div class="mcp-settings-shell">
+  <YdPageHeader title="面板设置" class="mb-0" />
+  <YdLoadingOverlay :loading="loading">
+  <YdSettingsLayout
+    v-model="activeSection"
+    :list="sectionList"
+    surface
+    scroll
+    width-class="max-w-[960px]"
+  >
+    <template #main>
     <YdAlert v-if="loadError" variant="destructive" title="无法加载设置" class="mb-4">
   <template #description>
       {{ loadError }}
@@ -1277,5 +1293,8 @@ const rowActions: ActionMenuItem<{ index: number }>[] = [
         </YdAlert>
       </div>
     </YdModal>
-  </YdPageMain></YdLoadingOverlay>
+      </template>
+  </YdSettingsLayout>
+  </YdLoadingOverlay>
+  </div>
 </template>

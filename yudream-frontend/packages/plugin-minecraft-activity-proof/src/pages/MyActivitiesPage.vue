@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, YdTablePageLayout } from '@yudream/components'
 import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { MyParticipation } from '../types'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
-import { YdButton, YdIcon, YdPageHeader, YdPageMain, YdPagination, YdTag, YdResponsiveEnhancedTable } from '@yudream/components'
+import { YdButton, YdIcon, YdPageMain, YdPagination, YdTag, YdResponsiveEnhancedTable } from '@yudream/components'
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import CoverThumb from '../components/CoverThumb.vue'
@@ -67,13 +67,15 @@ const rowActions: ActionMenuItem<unknown>[] = [
 
 <template>
   <section class="proof-page">
-    <YdPageHeader title="我的参与" class="mb-0">
+    <YdPageMain>
+      <YdTablePageLayout title="我的参与" :show-search="false">
+    <template #actions>
       <YdButton variant="outline" :loading="loading" @click="model.load">
         <YdIcon name="i-ri:refresh-line" />刷新
       </YdButton>
-    </YdPageHeader>
-    <YdPageMain>
-      <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+    </template>
+    <template #table>
+<YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
           :actions="rowActions"
         
         
@@ -110,14 +112,19 @@ const rowActions: ActionMenuItem<unknown>[] = [
         <template #cell-verifyNote="{ row }">{{ row.original.verifyNote || '-' }}</template>
         <template #cell-joinedAt="{ row }">{{ formatTime(row.original.joinedAt) }}</template>
 </YdResponsiveEnhancedTable></YdLoadingOverlay>
+    </template>
+    <template #footer>
       <YdPagination
         v-model:page="pager.page"
         v-model:size="pager.size"
         :total="pager.total"
-        class="mt-3"
         @page-change="model.load"
         @size-change="model.load"
       />
+    </template>
+  </YdTablePageLayout>
+
+
     </YdPageMain>
   </section>
 </template>

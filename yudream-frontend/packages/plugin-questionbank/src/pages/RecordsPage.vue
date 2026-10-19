@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, YdTablePageLayout } from '@yudream/components'
 import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { QuestionBankPluginModel } from '../composables/useQuestionBankPlugin'
 import type { SessionSummary } from '../types'
@@ -70,14 +70,16 @@ const rowActions: ActionMenuItem<unknown>[] = [
 </script>
 
 <template>
-  <YdPageHeader title="成绩记录" description="我的练习历史，进行中的练习可以继续作答">
-    <YdButton variant="outline" @click="router.push('/platform/plugins/questionbank/papers')">
+  <YdPageMain>
+    <YdTablePageLayout title="成绩记录" :show-search="false">
+    <template #actions>
+      <YdButton variant="outline" @click="router.push('/platform/plugins/questionbank/papers')">
       <YdIcon name="i-ri:file-paper-2-line" />题单作答
     </YdButton>
     <YdButton @click="router.push('/platform/plugins/questionbank')"><YdIcon name="i-ri:play-line" />去练习</YdButton>
-  </YdPageHeader>
-  <YdPageMain>
-    <YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable
+    </template>
+    <template #table>
+<YdLoadingOverlay :loading="model.loading"><YdResponsiveEnhancedTable
         :actions="rowActions"
 
       
@@ -100,13 +102,18 @@ const rowActions: ActionMenuItem<unknown>[] = [
       </template>
       <template #cell-submittedAt="{ row }">{{ row.original.status === 'FINISHED' ? formatTime(row.original.submittedAt) : '-' }}</template>
 </YdResponsiveEnhancedTable></YdLoadingOverlay>
-    <YdPagination
+    </template>
+    <template #footer>
+      <YdPagination
       v-model:page="model.myRecordsPager.page"
       v-model:size="model.myRecordsPager.size"
       :total="model.myRecordsPager.total"
-      class="mt-3"
       @page-change="model.loadMyRecords"
       @size-change="model.loadMyRecords"
     />
+    </template>
+  </YdTablePageLayout>
+
+
   </YdPageMain>
 </template>

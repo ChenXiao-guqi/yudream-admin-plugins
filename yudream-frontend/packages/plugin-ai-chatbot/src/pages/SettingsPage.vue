@@ -2,7 +2,7 @@
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { AiAgent, AiProviderOption, GroupPolicy, Option } from '../types'
 import {computed, onMounted, reactive, ref } from 'vue'
-import { YdAction, YdButton, YdInput, YdNumberField, YdPageHeader, YdPageMain, YdSelect, YdSwitch, YdTextarea, YdMultiSelect } from '@yudream/components'
+import { YdAction, YdButton, YdInput, YdNumberField, YdPageHeader, YdSelect, YdSwitch, YdTextarea, YdMultiSelect, YdSettingsLayout, YdSettingsSection } from '@yudream/components'
 import { createAiChatbotApi } from '../api/ai-chatbot-api'
 import { resolveGroupAgentCode, toGroupAgentOptions } from '../config/group-agent-options'
 
@@ -55,13 +55,34 @@ function addExtraGroup() {
 async function loadOptions() { const [connectionValues, agentValues, providerValues] = await Promise.all([api.connections(), api.agents(), api.aiProviders()]); connections.value = connectionValues; agents.value = agentValues; aiProviders.value = providerValues; form.agentCode = resolveGroupAgentCode(agentOptions.value, form.agentCode) }
 async function save() { saving.value = true; message.value = ''; try { const policy = { ...form, quietHoursStart: form.quietHoursStart || null, quietHoursEnd: form.quietHoursEnd || null }; if (connectionIds.value.length && channelIds.value.length) await api.saveBatch(connectionIds.value, channelIds.value, policy); else apply(await api.save(policy)); await loadPolicies(); message.value = '已保存，下一条群消息立即按新策略处理。' } catch (error) { message.value = error instanceof Error ? error.message : '保存失败' } finally { saving.value = false } }
 onMounted(async () => { await Promise.all([loadPolicies(), loadOptions()]) })
+/** 设置页分区：单分区页保持统一骨架 */
+const activeSection = ref('main')
+const sectionList: { icon?: string, label: string, value: string }[] = [
+  { label: "群聊策略", value: 'main' },
+]
 </script>
 
 <template>
   <YdPageHeader title="AI 群聊机器人配置" class="mb-0">
     <YdButton variant="outline" :loading="loading" @click="loadPolicies">刷新</YdButton>
   </YdPageHeader>
-  <YdPageMain>
+  <div class="ai-chatbot-settings-shell">
+<YdPageHeader title="AI 群聊机器人配置" class="mb-0">
+    <YdButton variant="outline" :loading="loading" @click="loadPolicies">刷新</YdButton>
+  </YdPageHeader>
+  <YdSettingsLayout
+    v-model="activeSection"
+    :list="sectionList"
+    surface
+    scroll
+    width-class="max-w-[880px]"
+  >
+    <template #main>
+      <YdSettingsSection
+        title="群聊策略"
+        description="连接选择、回复策略与 AI 模型配置。"
+      >
+
     <div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_280px]">
       <form class="grid max-w-4xl gap-4" @submit.prevent="save">
         <p v-if="message" class="rounded border px-3 py-2 text-sm">{{ message }}</p>
@@ -89,5 +110,9 @@ onMounted(async () => { await Promise.all([loadPolicies(), loadOptions()]) })
       </form>
       <aside class="grid content-start gap-2 rounded border p-4"><h3>已配置群聊</h3><YdAction v-for="item in policies" :key="`${item.connectionId}:${item.channelId}`" type="button" class="rounded border px-3 py-2 text-left" @click="apply(item)">{{ item.connectionId }} / {{ item.channelId }}<br><small>{{ item.enabled ? '已启用' : '已停用' }}，随机 {{ item.randomProbability }}</small></YdAction><span v-if="!policies.length" class="text-sm text-muted-foreground">尚未保存任何群配置。</span></aside>
     </div>
-  </YdPageMain>
+      </YdSettingsSection>
+    </template>
+  </YdSettingsLayout>
+</div>
+
 </template>

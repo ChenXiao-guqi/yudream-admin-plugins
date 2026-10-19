@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
-import { YdButton, YdIcon, YdInput, YdModal, YdPageHeader, YdPageMain, YdResponsiveEnhancedTable, YdTag, useYdModal, useYdToast, type ActionMenuItem } from '@yudream/components'
+import { YdButton, YdIcon, YdInput, YdModal, YdPageMain, YdResponsiveEnhancedTable, YdTag, useYdModal, useYdToast, type ActionMenuItem, YdTablePageLayout } from '@yudream/components'
 import { onMounted, ref } from 'vue'
 import { createForumApi } from '../api/forum-api'
 import type { Category } from '../api/forum-api'
@@ -112,13 +112,18 @@ onMounted(load)
 
 <template>
   <div class="forum-page">
-    <YdPageHeader title="分类管理" description="基础分类和每个分类的动态查看/发帖权限">
-      <YdButton @click="openCreate"><YdIcon name="i-ri:add-line" />新增分类</YdButton>
-    </YdPageHeader>
     <YdPageMain>
-      <YdResponsiveEnhancedTable row-key="id" :columns="columns" :data="rows" border stripe column-visibility :actions="rowActions" table-root-class="rounded-lg overflow-hidden" table-class="min-w-[920px]" empty-text="暂无分类">
+      <YdTablePageLayout title="分类管理" :show-search="false">
+    <template #actions>
+      <YdButton @click="openCreate"><YdIcon name="i-ri:add-line" />新增分类</YdButton>
+    </template>
+    <template #table>
+<YdResponsiveEnhancedTable row-key="id" :columns="columns" :data="rows" border stripe column-visibility :actions="rowActions" table-root-class="rounded-lg overflow-hidden" table-class="min-w-[920px]" empty-text="暂无分类">
         <template #cell-moderation="{ row }"><YdTag variant="outline">{{ row.original.moderation }}</YdTag></template>
       </YdResponsiveEnhancedTable>
+    </template>
+  </YdTablePageLayout>
+
       <YdModal v-model="editOpen" :title="editTarget ? '编辑分类' : '新增分类'" :confirm-button-loading="saving" @confirm="save">
         <div class="forum-editor">
           <label>分类名称<YdInput v-model="editName" placeholder="例如：服务器技术" maxlength="40" /></label>

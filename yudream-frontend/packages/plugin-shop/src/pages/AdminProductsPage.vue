@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, YdTablePageLayout } from '@yudream/components'
 import type { ShopProductDetail, ShopProductSummary } from '../types'
 import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
@@ -179,7 +179,9 @@ const rowActions: ActionMenuItem<unknown>[] = [
 
 <template>
   <section class="shop-page">
-    <YdPageHeader title="商品管理" class="mb-0">
+    <YdPageMain>
+      <YdTablePageLayout title="商品管理" :show-search="false">
+    <template #actions>
       <div class="flex flex-wrap justify-end gap-2">
         <YdButton @click="openCreate">
           <YdIcon name="i-ri:add-line" />
@@ -190,9 +192,9 @@ const rowActions: ActionMenuItem<unknown>[] = [
           刷新
         </YdButton>
       </div>
-    </YdPageHeader>
-    <YdPageMain>
-      <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+    </template>
+    <template #table>
+<YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
         :actions="rowActions"
 
         
@@ -271,15 +273,20 @@ const rowActions: ActionMenuItem<unknown>[] = [
           <span class="text-xs text-muted-foreground">{{ Number(row.original.sortOrder) || 0 }}</span>
         </template>
 </YdResponsiveEnhancedTable></YdLoadingOverlay>
-
+    </template>
+    <template #footer>
       <YdPagination
         v-model:page="pager.page"
         v-model:size="pager.size"
         :total="pager.total"
-        class="mt-3"
         @page-change="load"
         @size-change="applyFilters"
       />
+    </template>
+  </YdTablePageLayout>
+
+
+
 
       <YdModal v-model="detailOpen" title="商品详情" :show-confirm-button="false">
         <YdLoadingOverlay :loading="detailLoading"><div  class="grid max-h-[70vh] gap-3 overflow-y-auto">

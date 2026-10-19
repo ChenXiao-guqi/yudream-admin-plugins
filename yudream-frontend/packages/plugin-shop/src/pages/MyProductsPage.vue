@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, YdTablePageLayout } from '@yudream/components'
 import type { PublishQualification, ShopProductSummary } from '../types'
 import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
@@ -138,19 +138,21 @@ const rowActions: ActionMenuItem<unknown>[] = [
 
 <template>
   <section class="shop-page">
-    <YdPageHeader title="我的商品" class="mb-0">
-      <YdButton :disabled="publishBlocked" @click="openCreate">
-        <YdIcon name="i-ri:add-line" />
-        上架商品
-      </YdButton>
-    </YdPageHeader>
     <YdPageMain>
       <YdAlert v-if="publishBlocked" title="当前无法上架商品" class="mb-4">
         <template #description>
           {{ qualification?.reason || '管理员已关闭用户上架功能、积分门槛不足，或当前账号是管理员（只能投放官方积分商品）。' }}
         </template>
       </YdAlert>
-      <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+      <YdTablePageLayout title="我的商品" :show-search="false">
+    <template #actions>
+      <YdButton :disabled="publishBlocked" @click="openCreate">
+        <YdIcon name="i-ri:add-line" />
+        上架商品
+      </YdButton>
+    </template>
+    <template #table>
+<YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
         :actions="rowActions"
 
         
@@ -217,15 +219,20 @@ const rowActions: ActionMenuItem<unknown>[] = [
           {{ formatTime(row.original.updatedAt) }}
         </template>
 </YdResponsiveEnhancedTable></YdLoadingOverlay>
-
+    </template>
+    <template #footer>
       <YdPagination
         v-model:page="pager.page"
         v-model:size="pager.size"
         :total="pager.total"
-        class="mt-3"
         @page-change="load"
         @size-change="applyFilters"
       />
+    </template>
+  </YdTablePageLayout>
+
+
+
     </YdPageMain>
   </section>
 </template>

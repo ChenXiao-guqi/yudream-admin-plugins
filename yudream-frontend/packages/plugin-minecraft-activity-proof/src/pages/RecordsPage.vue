@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, YdTablePageLayout } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { ActivityProofExportRecord } from '../types'
-import { YdButton, YdFileUpload, YdIcon, YdModal, YdPageHeader, YdPageMain, YdPagination, YdResponsiveEnhancedTable } from '@yudream/components'
+import { YdButton, YdFileUpload, YdIcon, YdModal, YdPageMain, YdPagination, YdResponsiveEnhancedTable } from '@yudream/components'
 import { onMounted, ref } from 'vue'
 import { useProofRecords } from '../composables/useProofRecords'
 import { formatFileSize, formatTime } from '../composables/utils'
@@ -61,13 +61,15 @@ const rowActions: ActionMenuItem<unknown>[] = [
 
 <template>
   <section class="proof-page">
-    <YdPageHeader title="活动证明记录">
+    <YdPageMain>
+      <YdTablePageLayout title="活动证明记录" :show-search="false">
+    <template #actions>
       <YdButton variant="outline" :loading="loading" @click="model.load">
         <YdIcon name="i-ri:refresh-line" />刷新
       </YdButton>
-    </YdPageHeader>
-    <YdPageMain>
-      <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+    </template>
+    <template #table>
+<YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
           :actions="rowActions"
         
         
@@ -93,14 +95,19 @@ const rowActions: ActionMenuItem<unknown>[] = [
         </template>
         <template #cell-generatedAt="{ row }">{{ formatTime(row.original.generatedAt) }}</template>
 </YdResponsiveEnhancedTable></YdLoadingOverlay>
+    </template>
+    <template #footer>
       <YdPagination
         v-model:page="pager.page"
         v-model:size="pager.size"
         :total="pager.total"
-        class="mt-3"
         @page-change="model.load"
         @size-change="model.load"
       />
+    </template>
+  </YdTablePageLayout>
+
+
       <YdModal
         v-model="uploadVisible"
         title="上传盖章 PDF"

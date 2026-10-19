@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, YdTablePageLayout } from '@yudream/components'
 import type { ShopOrder } from '../types'
 import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
@@ -96,14 +96,16 @@ const rowActions: ActionMenuItem<unknown>[] = [
 
 <template>
   <section class="shop-page">
-    <YdPageHeader title="我的购买" class="mb-0">
+    <YdPageMain>
+      <YdTablePageLayout title="我的购买" :show-search="false">
+    <template #actions>
       <YdButton variant="outline" :loading="loading" @click="load">
         <YdIcon name="i-ri:refresh-line" />
         刷新
       </YdButton>
-    </YdPageHeader>
-    <YdPageMain>
-      <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+    </template>
+    <template #table>
+<YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
         :actions="rowActions"
 
         
@@ -153,15 +155,20 @@ const rowActions: ActionMenuItem<unknown>[] = [
           {{ formatTime(row.original.createdAt) }}
         </template>
 </YdResponsiveEnhancedTable></YdLoadingOverlay>
-
+    </template>
+    <template #footer>
       <YdPagination
         v-model:page="pager.page"
         v-model:size="pager.size"
         :total="pager.total"
-        class="mt-3"
         @page-change="load"
         @size-change="() => { pager.page = 1; void load() }"
       />
+    </template>
+  </YdTablePageLayout>
+
+
+
 
       <OrderDetailModal
         v-model:open="detailOpen"

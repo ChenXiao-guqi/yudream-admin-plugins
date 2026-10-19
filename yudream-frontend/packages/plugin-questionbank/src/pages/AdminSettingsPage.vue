@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { QuestionBankPluginModel } from '../composables/useQuestionBankPlugin'
 import type { QqCommandWindow, QqQuizGroup } from '../types'
-import { YdButton, YdCard, YdIcon, YdInput, YdPageHeader, YdPageMain, YdSelect, YdSwitch, YdTag, YdTimePicker, useYdToast } from '@yudream/components'
+import { YdButton, YdCard, YdIcon, YdInput, YdPageHeader, YdPageMain, YdSelect, YdSwitch, YdTag, YdTimePicker, useYdToast, YdSettingsLayout, YdSettingsSection } from '@yudream/components'
 import { computed, onMounted, ref } from 'vue'
 import CategorySelect from '../components/CategorySelect.vue'
 import MultiSelect from '../components/MultiSelect.vue'
@@ -169,11 +169,30 @@ function save() {
     qqCommandWindows: normalizeWindows(qqCommandWindowRows.value),
   })
 }
+/** 设置页分区：单分区页保持统一骨架 */
+const activeSection = ref('main')
+const sectionList: { icon?: string, label: string, value: string }[] = [
+  { label: "题库设置", value: 'main' },
+]
 </script>
 
 <template>
-  <YdPageHeader title="题库设置" description="控制题库对普通用户开放的功能范围与 AI 判分配置" />
-  <YdPageMain>
+  <YdPageHeader title="题库设置" class="mb-0"></YdPageHeader>
+  <div class="questionbank-settings-shell">
+<YdPageHeader title="题库设置" class="mb-0"></YdPageHeader>
+  <YdSettingsLayout
+    v-model="activeSection"
+    :list="sectionList"
+    surface
+    scroll
+    width-class="max-w-[880px]"
+  >
+    <template #main>
+      <YdSettingsSection
+        title="题库设置"
+        description="答题与题库管理的基础配置。"
+      >
+
     <div class="qb-form">
       <YdCard title="自由刷题" description="关闭后，用户端「抽题练习」入口不可用；已发布题单的作答不受影响">
         <div class="qb-form">
@@ -304,5 +323,9 @@ function save() {
         </div>
       </YdCard>
     </div>
-  </YdPageMain>
+      </YdSettingsSection>
+    </template>
+  </YdSettingsLayout>
+</div>
+
 </template>

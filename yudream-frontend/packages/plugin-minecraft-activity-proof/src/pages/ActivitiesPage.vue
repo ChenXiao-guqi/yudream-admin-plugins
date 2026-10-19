@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { YdLoadingOverlay } from '@yudream/components'
+import { YdLoadingOverlay, YdTablePageLayout } from '@yudream/components'
 import type { TableColumn, ActionMenuItem } from '@yudream/components'
 import type { Activity } from '../types'
 import type { YuDreamPluginSdk } from '@yudream/plugin-sdk'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
-import { YdButton, YdIcon, YdInput, YdPageHeader, YdPageMain, YdPagination, YdSearchBar, YdSelect, YdTag, YdResponsiveEnhancedTable } from '@yudream/components'
+import { YdButton, YdIcon, YdInput, YdPageMain, YdPagination, YdSearchBar, YdSelect, YdTag, YdResponsiveEnhancedTable } from '@yudream/components'
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAdminActivities } from '../composables/useAdminActivities'
@@ -85,13 +85,15 @@ const rowActions: ActionMenuItem<unknown>[] = [
 
 <template>
   <section class="proof-page">
-    <YdPageHeader title="活动管理" class="mb-0">
+    <YdPageMain>
+      <YdTablePageLayout title="活动管理" :show-search="false">
+    <template #actions>
       <YdButton @click="openEdit()">
         <YdIcon name="i-ri:add-line" />发布活动
       </YdButton>
-    </YdPageHeader>
-    <YdPageMain>
-      <YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
+    </template>
+    <template #table>
+<YdLoadingOverlay :loading="loading"><YdResponsiveEnhancedTable
           :actions="rowActions"
         
         
@@ -136,14 +138,19 @@ const rowActions: ActionMenuItem<unknown>[] = [
         <template #cell-participants="{ row }">{{ row.original.participantCount }} / {{ row.original.verifiedCount }}</template>
         <template #cell-createdAt="{ row }">{{ formatTime(row.original.createdAt) }}</template>
 </YdResponsiveEnhancedTable></YdLoadingOverlay>
+    </template>
+    <template #footer>
       <YdPagination
         v-model:page="pager.page"
         v-model:size="pager.size"
         :total="pager.total"
-        class="mt-3"
         @page-change="model.load"
         @size-change="model.load"
       />
+    </template>
+  </YdTablePageLayout>
+
+
     </YdPageMain>
   </section>
 </template>
