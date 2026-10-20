@@ -799,7 +799,7 @@ const rowActions: ActionMenuItem<{ index: number }>[] = [
 ]
 
 /** 设置页分区：单分区保持统一骨架 */
-const activeSection = ref('main')
+const activeSection = ref('sec1')
 const sectionList: { icon?: string, label: string, value: string }[] = [
   { label: "注入下载源（authlib-injector / 时长统计）", value: "sec1" },
   { label: "下载与导入", value: "sec2" },

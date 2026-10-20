@@ -170,7 +170,7 @@ function save() {
   })
 }
 /** 设置页分区：单分区页保持统一骨架 */
-const activeSection = ref('main')
+const activeSection = ref('sec1')
 const sectionList: { icon?: string, label: string, value: string }[] = [
   { label: "自由刷题", value: "sec1" },
   { label: "AI 能力", value: "sec2" },

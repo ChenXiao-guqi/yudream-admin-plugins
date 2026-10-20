@@ -330,7 +330,7 @@ onMounted(() => {
   })
 })
 
-const activeSection = ref('main')
+const activeSection = ref('sec1')
 const sectionList: { icon?: string, label: string, value: string }[] = [
   { label: "基础与启动", value: "sec1" },
   { label: "事件触发型任务", value: "sec2" },
